@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/appColor"
+    android:orientation="vertical">
+
+    <include
+        layout="@layout/custom_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/score_board_primary_background"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/server"
+                        android:textSize="20sp"
+                        android:layout_marginBottom="10dp"
+                        android:textColor="@color/secondary_dark"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/stream_url"
+                            android:textColor="@color/appColor"
+                            android:textStyle="bold" />
+
+                        <Spinner
+                            android:id="@+id/spin_rtmp_url"
+                            android:layout_marginBottom="10dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:spinnerMode="dialog" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/stream_key"
+                            android:textColor="@color/appColor"
+                            android:textStyle="bold" />
+
+                        <Spinner
+                            android:id="@+id/spin_rtmp_key"
+                            android:layout_marginBottom="10dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:spinnerMode="dialog" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/score_board_primary_background"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/match"
+                        android:textSize="20sp"
+                        android:layout_marginBottom="10dp"
+                        android:textColor="@color/secondary_dark"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/home_team"
+                                android:textColor="@color/appColor"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:weightSum="20">
+
+                                <ImageView
+                                    android:id="@+id/home_color"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="3"
+                                    android:gravity="start"
+                                    android:src="@drawable/shirt_stroke" />
+
+                                <EditText
+                                    android:id="@+id/et_home_team"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="17"
+                                    android:autofillHints="teamName"
+                                    android:gravity="center"
+                                    android:inputType="textCapCharacters"
+                                    android:maxLength="3"
+                                    android:text="@string/hint_home_team"
+                                    android:textColor="@color/appColor" />
+                            </LinearLayout>
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/away_team"
+                                android:textColor="@color/appColor"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:weightSum="20">
+
+                                <EditText
+                                    android:id="@+id/et_away_team"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="17"
+                                    android:autofillHints="teamName"
+                                    android:gravity="center"
+                                    android:inputType="textCapCharacters"
+                                    android:maxLength="3"
+                                    android:text="@string/hint_away_team"
+                                    android:textColor="@color/appColor" />
+
+                                <ImageView
+                                    android:id="@+id/away_color"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="3"
+                                    android:gravity="start"
+                                    android:src="@drawable/shirt" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+
+            <!--
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:background="@drawable/score_board_primary_background"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="5">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="4"
+                        android:layout_height="wrap_content"
+                        android:text="@string/_config_auto_zoom"
+                        android:textSize="20sp"
+                        android:layout_marginBottom="10dp"
+                        android:textColor="@color/secondary_dark"
+                        android:textStyle="bold" />
+
+                    <Switch
+                        android:id="@+id/switch_zoom"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="4">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/left_degree"
+                        android:textColor="@color/appColor"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/right_degree"
+                        android:textColor="@color/appColor"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="4">
+
+                    <EditText
+                        android:id="@+id/et_left_degree"
+                        android:layout_width="0dp"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+                        android:autofillHints="teamName"
+                        android:gravity="center"
+                        android:inputType="number"
+                        android:imeOptions="actionDone"
+                        android:maxLength="3"
+                        android:text="@string/hint_degree"
+                        android:textColor="@color/appColor" />
+
+                    <EditText
+                        android:id="@+id/et_right_degree"
+                        android:layout_width="0dp"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+                        android:autofillHints="teamName"
+                        android:gravity="center"
+                        android:inputType="number"
+                        android:imeOptions="actionDone"
+                        android:maxLength="3"
+                        android:text="@string/hint_degree"
+                        android:textColor="@color/appColor" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+            -->
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Footer -->
+
+    <Button
+        android:id="@+id/activity_Live"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:background="@drawable/score_board_secondary_background"
+        android:padding="5dp"
+        android:text="procedi"
+        android:textColor="@color/primary"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tv_version"
+        android:layout_width="match_parent"
+        android:gravity="center_horizontal"
+        android:textColor="@color/white"
+        android:textSize="10dp"
+        android:textStyle="bold"
+        android:text="@string/version"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

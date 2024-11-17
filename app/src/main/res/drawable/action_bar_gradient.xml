@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="@color/secondary_dark"
+                android:endColor="@color/secondary"
+                android:angle="90"/>
+        </shape>
+    </item>
+    <!--item>
+        <inset
+            android:drawable="@drawable/shirt"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"/>
+    </item-->
+</layer-list>
