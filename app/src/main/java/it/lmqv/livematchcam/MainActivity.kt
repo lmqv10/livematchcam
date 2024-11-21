@@ -8,17 +8,16 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
-import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -32,7 +31,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import it.lmqv.livematchcam.utils.KeyValue
-import it.lmqv.livematchcam.utils.toast
+import it.lmqv.livematchcam.extensions.setShirtByColor
+import it.lmqv.livematchcam.extensions.toast
 
 
 class MainActivity : AppCompatActivity() {
@@ -51,7 +51,8 @@ class MainActivity : AppCompatActivity() {
     //private lateinit var swAutoZoomEnable : Switch
     //private lateinit var etLeftZoomDegree : EditText
     //private lateinit var etRightZoomDegree : EditText
-
+    private lateinit var homeColorImageView : ImageView
+    private lateinit var awayColorImageView : ImageView
 
     private lateinit var list: GridView
     //private val activities: MutableList<ActivityLink> = mutableListOf()
@@ -67,9 +68,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        // Story Milky
-        // Grobold
 
         // Set up the custom toolbar as the ActionBar
         val toolbar: Toolbar = findViewById(R.id.toolbar)
@@ -148,6 +146,8 @@ class MainActivity : AppCompatActivity() {
             etRightZoomDegree.isEnabled = isChecked
         })*/
 
+        var etServerUrl = this.findViewById<EditText>(R.id.et_server_url)
+
         val spinnerRtmpUrl : Spinner = this.findViewById(R.id.spin_rtmp_url)
         val optionsServer = listOf(
             KeyValue("rtmp://a.rtmp.youtube.com/live2", "YouTube")
@@ -165,17 +165,35 @@ class MainActivity : AppCompatActivity() {
         }*/
         GlobalDataManager.server = optionsServer.get(0).key
         spinnerRtmpUrl.setSelection(0)
-
         spinnerRtmpUrl.adapter = adapterServer
         spinnerRtmpUrl.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position) as KeyValue<String>
                 GlobalDataManager.server = selectedItem.key
                 GlobalDataManager.setServerURI(GlobalDataManager.server, GlobalDataManager.key)
-                toast("ServerURL: ${GlobalDataManager.getServerURI()}")
+                etServerUrl.text = Editable.Factory.getInstance().newEditable(GlobalDataManager.server)
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
+
+
+        var etRtmpKey = this.findViewById<EditText>(R.id.et_rtmp_key)
+        etRtmpKey.nextFocusForwardId = View.NO_ID
+        etRtmpKey.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                etRtmpKey.post(Runnable { etRtmpKey.selectAll() })
+            }
+        }
+        etRtmpKey.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                val newKey = s.toString()
+                GlobalDataManager.key = newKey
+                GlobalDataManager.setServerURI(GlobalDataManager.server, GlobalDataManager.key)
+                //toast("ServerURL: ${GlobalDataManager.getServerURI()}")
+            }
+            override fun afterTextChanged(p0: Editable?) { }
+        })
 
         val spinnerRtmpKey : Spinner = this.findViewById(R.id.spin_rtmp_key)
         val optionsKeys = listOf(
@@ -195,14 +213,13 @@ class MainActivity : AppCompatActivity() {
         }*/
         GlobalDataManager.key = optionsKeys[0].key
         spinnerRtmpKey.setSelection(0)
-
         spinnerRtmpKey.adapter = adapter
         spinnerRtmpKey.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position) as KeyValue<String>
                 GlobalDataManager.key = selectedItem.key
-                GlobalDataManager.setServerURI(GlobalDataManager.server, GlobalDataManager.key)
-                toast("ServerURL: ${GlobalDataManager.getServerURI()}")
+                //GlobalDataManager.setServerURI(GlobalDataManager.server, GlobalDataManager.key)
+                etRtmpKey.text = Editable.Factory.getInstance().newEditable(GlobalDataManager.key)
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
@@ -231,15 +248,20 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, LiveStreamActivity::class.java))
         }
 
-        val homeColorImageView = this.findViewById<ImageView>(R.id.home_color)
-        homeColorImageView.setOnClickListener {
-            showColorPickerDialog(homeColorImageView, GlobalDataManager.homeTeam)
+        this.homeColorImageView = this.findViewById<ImageView>(R.id.home_color)
+        this.homeColorImageView.setOnClickListener {
+            showColorPickerDialog(this.homeColorImageView, GlobalDataManager.homeTeam)
         }
+        GlobalDataManager.homeTeam.color = Color.WHITE
+        this.homeColorImageView.setShirtByColor(GlobalDataManager.homeTeam.color)
 
-        val awayColorImageView = this.findViewById<ImageView>(R.id.away_color)
-        awayColorImageView.setOnClickListener {
-            showColorPickerDialog(awayColorImageView, GlobalDataManager.awayTeam)
+        this.awayColorImageView = this.findViewById<ImageView>(R.id.away_color)
+        this.awayColorImageView.setOnClickListener {
+            showColorPickerDialog(this.awayColorImageView, GlobalDataManager.awayTeam)
         }
+        GlobalDataManager.awayTeam.color = Color.BLACK
+        this.awayColorImageView.setShirtByColor(GlobalDataManager.awayTeam.color)
+
         requestPermissions()
     }
 
@@ -405,73 +427,73 @@ class MainActivity : AppCompatActivity() {
 
         dialogView.findViewById<View>(R.id.tShirtBlack).setOnClickListener {
             team.color = Color.BLACK
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtWhite).setOnClickListener {
-            team.color = Color.LTGRAY
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            team.color = Color.WHITE
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtGreen).setOnClickListener {
             team.color = ContextCompat.getColor(this, R.color.GREEN)
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtRed).setOnClickListener {
             team.color = Color.RED
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtBlue).setOnClickListener {
             team.color = Color.BLUE
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtOrange).setOnClickListener {
             team.color = ContextCompat.getColor(this, R.color.ORANGE)
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
 
         dialogView.findViewById<View>(R.id.tShirtCornFlowerBlue).setOnClickListener {
             team.color = ContextCompat.getColor(this, R.color.CORNFLOWERBLUE)
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtDarkBlue).setOnClickListener {
             team.color = ContextCompat.getColor(this, R.color.DARKBLUE)
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtYellow).setOnClickListener {
             team.color = ContextCompat.getColor(this, R.color.YELLOW)
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtPink).setOnClickListener {
             team.color = ContextCompat.getColor(this, R.color.PINK)
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtViolet).setOnClickListener {
             team.color = ContextCompat.getColor(this, R.color.VIOLET)
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialogView.findViewById<View>(R.id.tShirtSlateBlue).setOnClickListener {
             team.color = ContextCompat.getColor(this, R.color.SLATEBLUE)
-            shirtImage.setImageDrawable(getLayerMask(team.color))
+            shirtImage.setShirtByColor(team.color)
             dialog.dismiss()
         }
         dialog.show()
 
     }
 
-    private fun getLayerMask(color: Int) : Drawable {
-        val layeredDrawable = ContextCompat.getDrawable(this, R.drawable.layered_mask) as LayerDrawable
+    /*private fun getLayerMask(color: Int) : Drawable {
+        val layeredDrawable = ContextCompat.getDrawable(this, R.drawable.shirt_layers) as LayerDrawable
         val maskLayer = layeredDrawable.findDrawableByLayerId(R.id.mask_layer)
         maskLayer.setTint(color)
-        return maskLayer
-    }
+        return layeredDrawable
+    }*/
 }

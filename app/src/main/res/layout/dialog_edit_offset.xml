@@ -3,10 +3,11 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:weightSum="4">
+    android:padding="10dp"
+    android:weightSum="2">
 
     <TextView
-        android:id="@+id/edit_left_degree_title"
+        android:id="@+id/edit_title"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="match_parent"
@@ -17,28 +18,10 @@
         android:textColor="@color/secondary" />
 
     <NumberPicker
-        android:id="@+id/edit_left_degree_picker"
+        android:id="@+id/edit_offset"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
         android:layout_marginRight="2dp"/>
-
-    <NumberPicker
-        android:id="@+id/edit_right_degree_picker"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="2dp"/>
-
-    <TextView
-        android:id="@+id/edit_right_degree_title"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:paddingHorizontal="5dp"
-        android:gravity="center"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:textColor="@color/secondary" />
 
 </LinearLayout>

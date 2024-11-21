@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/mask_layer" android:drawable="@drawable/shirt_mask_layer" />
+    <item android:id="@+id/border_layer" android:drawable="@drawable/shirt_stroke_layer" />
+</layer-list>

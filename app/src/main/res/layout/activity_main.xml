@@ -57,6 +57,16 @@
                             android:layout_height="wrap_content"
                             android:spinnerMode="dialog" />
 
+                        <EditText
+                            android:id="@+id/et_server_url"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:autofillHints="rtmpkey"
+                            android:hint="@string/hint_protocol"
+                            android:gravity="center"
+                            android:enabled="false"
+                            android:textColor="@color/appColor" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -71,6 +81,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:spinnerMode="dialog" />
+
+                        <EditText
+                            android:id="@+id/et_rtmp_key"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:autofillHints="rtmpkey"
+                            android:hint="@string/hint_key"
+                            android:gravity="center"
+                            android:textColor="@color/appColor" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -125,7 +144,7 @@
                                     android:layout_height="match_parent"
                                     android:layout_weight="3"
                                     android:gravity="start"
-                                    android:src="@drawable/shirt_stroke" />
+                                    android:src="@drawable/shirt_layers" />
 
                                 <EditText
                                     android:id="@+id/et_home_team"
@@ -181,7 +200,7 @@
                                     android:layout_height="match_parent"
                                     android:layout_weight="3"
                                     android:gravity="start"
-                                    android:src="@drawable/shirt" />
+                                    android:src="@drawable/shirt_layers" />
                             </LinearLayout>
                         </LinearLayout>
 

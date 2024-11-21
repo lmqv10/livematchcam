@@ -8,11 +8,15 @@ import android.view.SurfaceView
 class SwipeSurfaceView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
     : SurfaceView(context, attrs, defStyleAttr), GestureDetector.OnGestureListener {
 
-    public interface OnSwipeGesture {
+     interface OnSwipeGesture {
         fun swipeUp()
         fun swipeDown()
         fun swipeLeft()
         fun swipeRight()
+    }
+
+    init {
+        // Additional initialization if needed
     }
 
     private var gestureCallback : OnSwipeGesture? = null
@@ -20,9 +24,6 @@ class SwipeSurfaceView @JvmOverloads constructor(context: Context, attrs: Attrib
 
     fun setCallbackListener(callback: OnSwipeGesture) {
         this.gestureCallback = callback
-    }
-    init {
-        // Additional initialization if needed
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

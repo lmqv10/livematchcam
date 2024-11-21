@@ -11,8 +11,8 @@
     <string name="tv_select">Select your streamer</string>
     <string name="hint_home_team">AAA</string>
     <string name="hint_away_team">BBB</string>
-    <string name="hint_protocol">protocol://yourendpoint/streamname</string>
-    <string name="hint_key">xxxx-xxxx-xxxx-xxxx-xxx</string>
+    <string name="hint_protocol">rtmp://yourendpoint/stream</string>
+    <string name="hint_key">xxxx-xxxx-xxxx-xxxx-xxxx</string>
     <string name="left_degree">Left zoom at</string>
     <string name="right_degree">Right zoom at</string>
     <string name="hint_degree">0°</string>

@@ -50,6 +50,7 @@
         android:layout_gravity="center_vertical"
         android:background="@drawable/alpha_background"
         android:src="@drawable/time_reset"
+        app:tint="@color/image_tint_secondary_selector"
         tools:ignore="ContentDescription" />
 
     <ImageView
@@ -75,7 +76,18 @@
   </LinearLayout>
 
 
+  <FrameLayout
+      android:id="@+id/status_container"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="5dp"
+      android:layout_marginEnd="70dp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      />
+
   <LinearLayout
+      android:visibility="gone"
       android:id="@+id/control_top"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"

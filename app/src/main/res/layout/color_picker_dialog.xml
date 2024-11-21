@@ -12,34 +12,34 @@
         android:id="@+id/tShirtWhite"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt_stroke" />
+        android:src="@drawable/shirt_white" />
 
     <ImageView
         android:id="@+id/tShirtBlack"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/black"/>
 
     <ImageView
         android:id="@+id/tShirtGreen"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/GREEN"/>
 
     <ImageView
         android:id="@+id/tShirtCornFlowerBlue"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/CORNFLOWERBLUE"/>
 
     <ImageView
         android:id="@+id/tShirtBlue"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/BLUE"/>
 
 
@@ -47,49 +47,49 @@
         android:id="@+id/tShirtDarkBlue"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/DARKBLUE"/>
 
     <ImageView
         android:id="@+id/tShirtYellow"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/YELLOW"/>
 
     <ImageView
         android:id="@+id/tShirtOrange"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/ORANGE"/>
 
     <ImageView
         android:id="@+id/tShirtRed"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/RED"/>
 
     <ImageView
         android:id="@+id/tShirtPink"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/PINK"/>
 
     <ImageView
         android:id="@+id/tShirtViolet"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/VIOLET"/>
 
     <ImageView
         android:id="@+id/tShirtSlateBlue"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/shirt"
+        android:src="@drawable/shirt_mask_layer"
         app:tint="@color/SLATEBLUE"/>
     <!--
     <ImageView

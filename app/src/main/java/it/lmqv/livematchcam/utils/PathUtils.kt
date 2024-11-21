@@ -3,6 +3,7 @@ package it.lmqv.livematchcam.utils
 import android.content.Context
 import android.media.MediaScannerConnection
 import android.os.Environment
+import it.lmqv.livematchcam.extensions.toast
 import java.io.File
 
 object PathUtils {

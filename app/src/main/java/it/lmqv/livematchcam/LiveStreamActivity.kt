@@ -14,12 +14,14 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.pedro.encoder.input.sources.video.Camera1Source
 import it.lmqv.livematchcam.utils.FilterMenu
-import it.lmqv.livematchcam.utils.toast
-import it.lmqv.livematchcam.utils.updateMenuColor
+import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.extensions.updateMenuColor
 
-class LiveStreamActivity : AppCompatActivity(), OnTouchListener {
+class LiveStreamActivity : AppCompatActivity(),
+    OnTouchListener {
 
     private val cameraFragment = CameraFragment.getInstance()
+
     private val filterMenu: FilterMenu by lazy { FilterMenu(this) }
     private var currentVideoSource: MenuItem? = null
     private var currentAudioSource: MenuItem? = null
@@ -29,7 +31,12 @@ class LiveStreamActivity : AppCompatActivity(), OnTouchListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.live_stream_activity)
-        supportFragmentManager.beginTransaction().add(R.id.container, cameraFragment).commit()
+
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.container, cameraFragment)
+            .commit()
+
         supportActionBar?.hide()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -115,6 +122,7 @@ class LiveStreamActivity : AppCompatActivity(), OnTouchListener {
         }
         return super.onOptionsItemSelected(item)
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {

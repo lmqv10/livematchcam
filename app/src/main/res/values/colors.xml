@@ -13,6 +13,7 @@
     <color name="primary">#FFFFFFFF</color>
     <color name="secondary">#FF9800</color>
     <color name="secondary_dark">#C87900</color>
+    <color name="secondary_darker">#724501</color>
     <color name="primary_50">#AAFFFFFF</color>
 
     <color name="purple_200">#FFBB86FC</color>
@@ -50,6 +51,7 @@
     <color name="DARKBLUE">#ff00008b</color>
     <color name="DARKCYAN">#ff008b8b</color>
     <color name="DARKGOLDENROD">#ffb8860b</color>
+    <color name="DARKER_GRAY">#FF444444</color>
     <color name="DARKGRAY">#ffa9a9a9</color>
     <color name="DARKGREEN">#ff006400</color>
     <color name="DARKKHAKI">#ffbdb76b</color>
@@ -173,4 +175,8 @@
     <color name="WHITE">#ffffffff</color>
     <color name="WHITESMOKE">#fff5f5f5</color>
     <color name="YELLOW">#ffffff00</color>
+    <color name="light_blue_400">#FF29B6F6</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="gray_400">#FFBDBDBD</color>
+    <color name="gray_600">#FF757575</color>
 </resources>
