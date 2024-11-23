@@ -20,6 +20,7 @@ fragmentKtx = "1.5.6"
 reciclerview = "1.3.1"
 datastore-preferences = "1.1.1"
 rootEncoder = "2.5.2"
+gson="2.8.9"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +50,7 @@ androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview"
 androidx-datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-preferences" }
 rootencoder-library = { group = "com.github.pedroSG94.RootEncoder", name = "library", version.ref = "rootEncoder" }
 rootencoder-extra-sources = { group = "com.github.pedroSG94.RootEncoder", name = "extra-sources", version.ref = "rootEncoder" }
+com-google-code-gson = { group = "com.google.code.gson", name = "gson", version.ref="gson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

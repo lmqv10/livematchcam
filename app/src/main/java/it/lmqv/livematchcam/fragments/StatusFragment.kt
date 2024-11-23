@@ -50,7 +50,36 @@ class StatusFragment : Fragment(),
 
         _binding = FragmentStatusBinding.inflate(inflater, container, false)
 
-        this.handleCollect()
+        this.launchOnStarted {
+            settingsRepository.autoZoomEnabled.collect { isEnabled ->
+                binding.autoZoomSwitch.isChecked = isEnabled
+
+                binding.angleDegree.isEnabled = isEnabled
+                binding.zoomLevel.isEnabled = isEnabled
+                binding.resetRotation.isEnabled = isEnabled
+                binding.zoomOffset.isEnabled = isEnabled
+
+                binding.leftDegree.isEnabled = isEnabled
+                binding.rightDegree.isEnabled = isEnabled
+            }
+        }
+
+        this.launchOnStarted {
+            settingsRepository.leftDegree.collect { degree ->
+                binding.leftDegree.text = degreeFormat("L", degree)
+            }
+        }
+
+        this.launchOnStarted {
+            settingsRepository.rightDegree.collect { degree -> binding.rightDegree.text = degreeFormat("R", degree) }
+        }
+
+        this.launchOnStarted {
+            settingsRepository.initialZoom.collect { zoom ->
+                binding.initialZoom.text = singleDecimalFormat(zoom)
+                rotationSensorService.invalidate()
+            }
+        }
 
         return binding.root
     }
@@ -69,6 +98,12 @@ class StatusFragment : Fragment(),
         statusViewModel.zoomLevel.observe(viewLifecycleOwner, Observer { data ->
             binding.zoomLevel.text = singleDecimalFormat(data)
         })
+
+        binding.autoZoomSwitch.setOnCheckedChangeListener { _, isChecked ->
+            lifecycleScope.launch {
+                settingsRepository.setAutoZoom(isChecked)
+            }
+        }
 
         binding.resetRotation.setOnClickListener {
             this.rotationSensorService.initialize()
@@ -108,45 +143,6 @@ class StatusFragment : Fragment(),
 
     override fun onError(e: Exception) {
         binding.angleDegree.text = "ERR"
-    }
-
-    private fun handleCollect() {
-        this.launchOnStarted {
-            settingsRepository.autoZoomEnabled.collect { isEnabled ->
-                binding.autoZoomSwitch.isChecked = isEnabled
-
-                binding.angleDegree.isEnabled = isEnabled
-                binding.zoomLevel.isEnabled = isEnabled
-                binding.resetRotation.isEnabled = isEnabled
-                binding.zoomOffset.isEnabled = isEnabled
-
-                binding.leftDegree.isEnabled = isEnabled
-                binding.rightDegree.isEnabled = isEnabled
-            }
-        }
-
-        binding.autoZoomSwitch.setOnCheckedChangeListener { _, isChecked ->
-            lifecycleScope.launch {
-                settingsRepository.setAutoZoom(isChecked)
-            }
-        }
-
-        this.launchOnStarted {
-            settingsRepository.leftDegree.collect { degree ->
-                binding.leftDegree.text = degreeFormat("L", degree)
-            }
-        }
-
-        this.launchOnStarted {
-            settingsRepository.rightDegree.collect { degree -> binding.rightDegree.text = degreeFormat("R", degree) }
-        }
-
-        this.launchOnStarted {
-            settingsRepository.initialZoom.collect { zoom ->
-                binding.initialZoom.text = singleDecimalFormat(zoom)
-                rotationSensorService.invalidate()
-            }
-        }
     }
 
     // TODO : Improve

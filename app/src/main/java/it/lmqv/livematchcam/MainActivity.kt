@@ -30,9 +30,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import it.lmqv.livematchcam.utils.KeyValue
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.fragments.ServersFragment
 
 
 class MainActivity : AppCompatActivity() {
@@ -51,6 +54,9 @@ class MainActivity : AppCompatActivity() {
     //private lateinit var swAutoZoomEnable : Switch
     //private lateinit var etLeftZoomDegree : EditText
     //private lateinit var etRightZoomDegree : EditText
+
+    //private val serverFragment = ServersFragment.newInstance()
+
     private lateinit var homeColorImageView : ImageView
     private lateinit var awayColorImageView : ImageView
 
@@ -68,6 +74,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        /*supportFragmentManager
+            .beginTransaction()
+            .add(R.id.serversContainer, serverFragment)
+            .commit()*/
 
         // Set up the custom toolbar as the ActionBar
         val toolbar: Toolbar = findViewById(R.id.toolbar)
@@ -90,68 +101,18 @@ class MainActivity : AppCompatActivity() {
         //createList()
         //setListAdapter(activities)
 
-        /*xTextView = findViewById(R.id.accelerometer_x)
-        xDegreeTextView = findViewById(R.id.x_degree)
-        statusTextView = findViewById(R.id.status)
-
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
-
-        var resetBtn = findViewById<Button>(R.id.reset_btn)
-        resetBtn.setOnClickListener {
-            this.x = 0f
-        }*/
-
-        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
-        /*etLeftZoomDegree = this.findViewById<EditText>(R.id.et_left_degree)
-        etLeftZoomDegree.nextFocusForwardId = View.NO_ID
-        etLeftZoomDegree.text = Editable.Factory.getInstance().newEditable(GlobalDataManager.leftZoomDegreeTrigger.toString())
-        etLeftZoomDegree.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                etLeftZoomDegree.post(Runnable { etLeftZoomDegree.selectAll() })
-            }
-        }
-        etLeftZoomDegree.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                val degree = s.toString().toInt()
-                GlobalDataManager.leftZoomDegreeTrigger = degree
-            }
-            override fun afterTextChanged(p0: Editable?) { }
-        })*/
-
-        /*etRightZoomDegree = this.findViewById<EditText>(R.id.et_right_degree)
-        etRightZoomDegree.nextFocusForwardId = View.NO_ID
-        etRightZoomDegree.text = Editable.Factory.getInstance().newEditable(GlobalDataManager.rightZoomDegreeTrigger.toString())
-        etRightZoomDegree.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                etRightZoomDegree.post(Runnable { etRightZoomDegree.selectAll() })
-            }
-        }
-        etRightZoomDegree.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                val degree = s.toString().toInt()
-                GlobalDataManager.rightZoomDegreeTrigger = degree
-            }
-            override fun afterTextChanged(p0: Editable?) { }
-        })*/
-
-        /*var switch = this.findViewById<Switch>(R.id.switch_zoom)
-        switch.isChecked = GlobalDataManager.autoZoomEnabled
-        switch.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
-            GlobalDataManager.autoZoomEnabled = isChecked
-            etLeftZoomDegree.isEnabled = isChecked
-            etRightZoomDegree.isEnabled = isChecked
-        })*/
-
         var etServerUrl = this.findViewById<EditText>(R.id.et_server_url)
 
         val spinnerRtmpUrl : Spinner = this.findViewById(R.id.spin_rtmp_url)
+
         val optionsServer = listOf(
             KeyValue("rtmp://a.rtmp.youtube.com/live2", "YouTube")
         )
+
+        var gson = Gson()
+        var jsonString = gson.toJson(optionsServer).toString()
+        val listType = object : TypeToken<List<KeyValue<String>>>() {}.type
+        val objc = gson.fromJson<List<KeyValue<String>>>(jsonString, listType)
 
         val adapterServer = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsServer)
         adapterServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -200,6 +161,8 @@ class MainActivity : AppCompatActivity() {
             KeyValue("yyx0-at5u-b330-4avg-4kx6", "Default"),
             KeyValue("fmjw-uqav-y4ua-xd4d-3zaw", "One-Shot")
         )
+
+        var yy = gson.toJson(optionsKeys);
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsKeys)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
