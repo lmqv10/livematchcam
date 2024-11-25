@@ -16,12 +16,10 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnFocusChangeListener
-import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.GridView
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
@@ -55,12 +53,12 @@ class MainActivity : AppCompatActivity() {
     //private lateinit var etLeftZoomDegree : EditText
     //private lateinit var etRightZoomDegree : EditText
 
-    //private val serverFragment = ServersFragment.newInstance()
+    private val serverFragment = ServersFragment.newInstance()
 
     private lateinit var homeColorImageView : ImageView
     private lateinit var awayColorImageView : ImageView
 
-    private lateinit var list: GridView
+    //private lateinit var list: GridView
     //private val activities: MutableList<ActivityLink> = mutableListOf()
 
     private val permissions = mutableListOf(
@@ -74,25 +72,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-        /*supportFragmentManager
-            .beginTransaction()
-            .add(R.id.serversContainer, serverFragment)
-            .commit()*/
-
-        // Set up the custom toolbar as the ActionBar
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-
-        // Optional: Set the title programmatically
         if (supportActionBar != null) {
             supportActionBar!!.setDisplayShowTitleEnabled(false) // Hide default title if needed
         }
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-/*
-        val gradientDrawable = resources.getDrawable(R.drawable.shirt_stroke, theme)
-        supportActionBar?.setBackgroundDrawable(gradientDrawable)
-*/
+
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.serversContainer, serverFragment)
+            .commit()
+
         transitionAnim(true)
         val tvVersion = findViewById<TextView>(R.id.tv_version)
         tvVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
@@ -101,18 +93,13 @@ class MainActivity : AppCompatActivity() {
         //createList()
         //setListAdapter(activities)
 
-        var etServerUrl = this.findViewById<EditText>(R.id.et_server_url)
+        val etServerUrl = this.findViewById<EditText>(R.id.et_server_url)
 
         val spinnerRtmpUrl : Spinner = this.findViewById(R.id.spin_rtmp_url)
 
         val optionsServer = listOf(
             KeyValue("rtmp://a.rtmp.youtube.com/live2", "YouTube")
         )
-
-        var gson = Gson()
-        var jsonString = gson.toJson(optionsServer).toString()
-        val listType = object : TypeToken<List<KeyValue<String>>>() {}.type
-        val objc = gson.fromJson<List<KeyValue<String>>>(jsonString, listType)
 
         val adapterServer = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsServer)
         adapterServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -162,8 +149,6 @@ class MainActivity : AppCompatActivity() {
             KeyValue("fmjw-uqav-y4ua-xd4d-3zaw", "One-Shot")
         )
 
-        var yy = gson.toJson(optionsKeys);
-
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsKeys)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
@@ -179,6 +164,7 @@ class MainActivity : AppCompatActivity() {
         spinnerRtmpKey.adapter = adapter
         spinnerRtmpKey.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+
                 val selectedItem = parent.getItemAtPosition(position) as KeyValue<String>
                 GlobalDataManager.key = selectedItem.key
                 //GlobalDataManager.setServerURI(GlobalDataManager.server, GlobalDataManager.key)
@@ -369,24 +355,24 @@ class MainActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
 
-       /* val colorsMap = mapOf(
-            R.id.tShirtBlack to Color.BLACK,
-            R.id.tShirtWhite to Color.WHITE,
-            R.id.tShirtGreen to android.R.color.holo_green_light,
-            R.id.tShirtRed to android.R.color.holo_red_light,
-        )
+        /* val colorsMap = mapOf(
+             R.id.tShirtBlack to Color.BLACK,
+             R.id.tShirtWhite to Color.WHITE,
+             R.id.tShirtGreen to android.R.color.holo_green_light,
+             R.id.tShirtRed to android.R.color.holo_red_light,
+         )
 
-        colorsMap.forEach { (key, value) ->
-            //var xx = ColorImageView(
-            dialogView.findViewById<View>(key).setOnClickListener {
-                val layeredDrawable = ContextCompat.getDrawable(this, R.drawable.layered_mask) as LayerDrawable
-                val maskLayer = layeredDrawable.findDrawableByLayerId(R.id.mask_layer)
-                maskLayer.setTint(value)
-                shirtImage.setImageDrawable(layeredDrawable)
-                team.color = value
-                dialog.dismiss()
-            }
-        }*/
+         colorsMap.forEach { (key, value) ->
+             //var xx = ColorImageView(
+             dialogView.findViewById<View>(key).setOnClickListener {
+                 val layeredDrawable = ContextCompat.getDrawable(this, R.drawable.layered_mask) as LayerDrawable
+                 val maskLayer = layeredDrawable.findDrawableByLayerId(R.id.mask_layer)
+                 maskLayer.setTint(value)
+                 shirtImage.setImageDrawable(layeredDrawable)
+                 team.color = value
+                 dialog.dismiss()
+             }
+         }*/
 
         dialogView.findViewById<View>(R.id.tShirtBlack).setOnClickListener {
             team.color = Color.BLACK

@@ -7,20 +7,15 @@ import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import it.lmqv.livematchcam.GlobalDataManager
-import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentServersBinding
-import it.lmqv.livematchcam.databinding.FragmentStatusBinding
-import it.lmqv.livematchcam.extensions.bitrateFormat
-import it.lmqv.livematchcam.extensions.launchOnStarted
-import it.lmqv.livematchcam.settings.SettingsRepository
-import it.lmqv.livematchcam.settings.StreamSettingsRepository
 import it.lmqv.livematchcam.utils.KeyValue
+import it.lmqv.livematchcam.utils.getItemPositionByKey
+import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import kotlinx.coroutines.launch
 
 class ServersFragment : Fragment() {
@@ -29,9 +24,7 @@ class ServersFragment : Fragment() {
         fun newInstance() = ServersFragment()
     }
 
-    private lateinit var streamSettingsRepository: StreamSettingsRepository
-
-    private val serversViewModel: ServersViewModel by viewModels()
+    private val streamersViewModel: StreamersViewModel by viewModels()
     private var _binding: FragmentServersBinding? = null
     private val binding get() = _binding!!
 
@@ -39,61 +32,49 @@ class ServersFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        this.streamSettingsRepository = StreamSettingsRepository(requireContext())
-
         _binding = FragmentServersBinding.inflate(inflater, container, false)
-
-        this.launchOnStarted {
-            streamSettingsRepository.getServers.collect { servers ->
-                serversViewModel.setServers(servers)
-            }
-        }
-
-        this.launchOnStarted {
-            streamSettingsRepository.getKeys.collect { keys ->
-                serversViewModel.setKeys(keys)
-            }
-        }
-
-        this.launchOnStarted {
-            streamSettingsRepository.getCurrentServer.collect { server ->
-                //if (binding.edittextServer.text.toString() != server) {
-                    binding.edittextServer.text = Editable.Factory.getInstance().newEditable(server)
-                //}
-            }
-        }
-
-        this.launchOnStarted {
-            streamSettingsRepository.getCurrentKey.collect { key ->
-                //if (binding.edittextKey.text.toString() != key) {
-                    binding.edittextKey.text = Editable.Factory.getInstance().newEditable(key)
-                //}
-            }
-        }
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-       super.onViewCreated(view, savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
-        serversViewModel.servers.observe(viewLifecycleOwner, Observer { servers ->
-            val adapterServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, servers)
-            adapterServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.spinnerServers.adapter = adapterServer
-        })
+        lifecycleScope.launch {
+            streamersViewModel.servers.collect { servers ->
+                val adapterServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, servers)
+                adapterServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                binding.spinnerServers.adapter = adapterServer
+                binding.spinnerServers.setSelection(0)
 
-        serversViewModel.keys.observe(viewLifecycleOwner, Observer { keys ->
-            val adapterServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, keys)
-            adapterServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.spinnerKeys.adapter = adapterServer
-        })
+                val currentServer = streamersViewModel.getCurrentServer()
+                binding.edittextServer.text = Editable.Factory.getInstance().newEditable(currentServer)
+            }
+        }
 
+        lifecycleScope.launch {
+            streamersViewModel.keys.collect { keys ->
+                val adapterServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, keys)
+                adapterServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                binding.spinnerKeys.adapter = adapterServer
+            }
+        }
+
+        lifecycleScope.launch {
+            streamersViewModel.currentKey.collect { currentKey ->
+                val selectedPosition = binding.spinnerKeys.adapter.getItemPositionByKey(currentKey)
+                binding.spinnerKeys.setSelection(selectedPosition)
+                if (binding.edittextKey.text.toString() != currentKey) {
+                    binding.edittextKey.text = Editable.Factory.getInstance().newEditable(currentKey)
+                }
+            }
+        }
+
+        binding.spinnerServers.isEnabled = false
         binding.spinnerServers.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 lifecycleScope.launch {
-                    val selectedServer = parent.getItemAtPosition(position) as KeyValue<String>
-                    streamSettingsRepository.setCurrentServer(selectedServer.key)
+                    //val selectedServer = (parent.getItemAtPosition(position) as KeyValue<String>).key
+                    //streamersViewModel.setCurrentServer(selectedServer)
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
@@ -102,30 +83,27 @@ class ServersFragment : Fragment() {
         binding.spinnerKeys.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 lifecycleScope.launch {
-                    val selectedKey = parent.getItemAtPosition(position) as KeyValue<String>
-                    streamSettingsRepository.setCurrentKey(selectedKey.key)
+                    val selectedKey = (parent.getItemAtPosition(position) as KeyValue<String>).key
+                    if (position > 0) {
+                        streamersViewModel.setCurrentKey(selectedKey)
+                        binding.edittextKey.text = Editable.Factory.getInstance().newEditable(selectedKey)
+                    }
+                    binding.edittextKey.isEnabled = position == 0
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
 
-        binding.edittextServer.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                lifecycleScope.launch {
-                    val newServer = s.toString()
-                    streamSettingsRepository.setCurrentServer(newServer)
-                }
+        binding.edittextKey.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.edittextKey.post { binding.edittextKey.selectAll() }
             }
-            override fun afterTextChanged(p0: Editable?) { }
-        })
-
+        }
         binding.edittextKey.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+            override fun onTextChanged(newKey: CharSequence, start: Int, before: Int, count: Int) {
                 lifecycleScope.launch {
-                    val newKey = s.toString()
-                    streamSettingsRepository.setCurrentKey(newKey)
+                    streamersViewModel.setCurrentKey(newKey.toString())
                 }
             }
             override fun afterTextChanged(p0: Editable?) { }
