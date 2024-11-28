@@ -47,7 +47,7 @@ class StreamersViewModel(application: Application) : AndroidViewModel(applicatio
         return _servers.value.firstOrNull()?.key ?: ""
     }
 
-    fun getServerUrl() : String {
+    fun getServerURI() : String {
         return "${getCurrentServer()}/${currentKey.value}"
     }
 

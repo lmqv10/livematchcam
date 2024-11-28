@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.handlers
+package it.lmqv.livematchcam.handlers.offset
 
 import android.content.Context
 import it.lmqv.livematchcam.settings.SettingsRepository
@@ -15,14 +15,14 @@ interface IOffsetDegreeHandler {
     fun getOffsetByDegree(degree: Int) : Float
 }
 
-class OffsetDegreeHandler(context: Context) : IOffsetDegreeHandler {
+abstract class BaseOffsetDegreeHandler(context: Context) : IOffsetDegreeHandler {
     //private val updateDebouncer = Debouncer(500)
     //private val degreesOffset: MutableMap<Int, Float> = mutableMapOf()
 
-    private var offset: Float = 0.0f
-    private var leftDegree: Int = 0
-    private var rightDegree: Int = 0
-    private var degreeOffset: Float = 0.0f
+    protected var offset: Float = 0.0f
+    protected var leftDegree: Int = 0
+    protected var rightDegree: Int = 0
+    protected var degreeOffset: Float = 0.0f
 
     //addOffsetAtDegree(0.2f, 20)
     private var settingsRepository: SettingsRepository = SettingsRepository(context)

@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.pedro.common.ConnectChecker
@@ -26,12 +27,16 @@ import it.lmqv.livematchcam.fragments.StatusFragment
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.settings.SettingsRepository
 import it.lmqv.livematchcam.utils.ScreenUtils
-import it.lmqv.livematchcam.handlers.OffsetDegreeHandler
-import it.lmqv.livematchcam.handlers.ZoomLevelHandler
+import it.lmqv.livematchcam.handlers.zoom.ZoomLevelHandler
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.fragments.ScoreBoardFragment
+import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
+import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
+import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
+import it.lmqv.livematchcam.handlers.zoom.ProgressiveZoomLevelHandler
 import it.lmqv.livematchcam.viewmodels.AwayScoreBoardViewModel
 import it.lmqv.livematchcam.viewmodels.HomeScoreBoardViewModel
+import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import kotlinx.coroutines.launch
 
 class CameraFragment: Fragment(), ConnectChecker,
@@ -42,10 +47,11 @@ class CameraFragment: Fragment(), ConnectChecker,
         fun getInstance(): CameraFragment = CameraFragment()
     }
 
+    private val streamersViewModel: StreamersViewModel by viewModels()
     private lateinit var settingsRepository: SettingsRepository
 
-    private lateinit var zoomLevelHandler: ZoomLevelHandler
-    private lateinit var offsetDegreeHandler: OffsetDegreeHandler
+    private lateinit var zoomLevelHandler: IZoomLevelHandler
+    private lateinit var offsetDegreeHandler: IOffsetDegreeHandler
 
     private val statusFragment = StatusFragment.newInstance()
     private val statusViewModel: StatusViewModel by activityViewModels()
@@ -101,8 +107,8 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         videoSource = genericStream.videoSource
 
-        this.zoomLevelHandler = ZoomLevelHandler(requireContext(), videoSource)
-        this.offsetDegreeHandler = OffsetDegreeHandler(requireContext())
+        this.zoomLevelHandler = ProgressiveZoomLevelHandler(requireContext(), videoSource)
+        this.offsetDegreeHandler = ProgressiveOffsetDegreeHandler(requireContext())
 
         statusViewModel.angleDegree.observe(viewLifecycleOwner, Observer { degree ->
             var offset = this.offsetDegreeHandler.getOffsetByDegree(degree)
@@ -140,15 +146,16 @@ class CameraFragment: Fragment(), ConnectChecker,
         })
 
         bStartStop.setOnClickListener {
-            val serverUri = GlobalDataManager.getServerURI() // "rtmp://a.rtmp.youtube.com/live2/fmjw-uqav-y4ua-xd4d-3zaw"
-
-            if (!genericStream.isStreaming) {
+            val serverUri = streamersViewModel.getServerURI()
+                // GlobalDataManager.getServerURI() // "rtmp://a.rtmp.youtube.com/live2/fmjw-uqav-y4ua-xd4d-3zaw"
+            toast(serverUri)
+            /*if (!genericStream.isStreaming) {
                 genericStream.startStream(serverUri)
                 bStartStop.setImageResource(R.drawable.stream_stop_icon)
             } else {
                 genericStream.stopStream()
                 bStartStop.setImageResource(R.drawable.stream_icon)
-            }
+            }*/
         }
         /*bRecord.setOnClickListener {
             if (!genericStream.isRecording) {
@@ -166,13 +173,6 @@ class CameraFragment: Fragment(), ConnectChecker,
                 genericStream.stopRecord()
                 bRecord.setImageResource(R.drawable.record_icon)
                 PathUtils.updateGallery(requireContext(), recordPath)
-            }
-        }*/
-        /*bSwitchCamera.setOnClickListener {
-            when (val source = genericStream.videoSource) {
-                is Camera1Source -> source.switchCamera()
-                is Camera2Source -> source.switchCamera()
-                is CameraXSource -> source.switchCamera()
             }
         }*/
 
@@ -212,6 +212,8 @@ class CameraFragment: Fragment(), ConnectChecker,
             genericStream.changeAudioSource(microphoneSource)
             //genericStream.getStreamClient().setOnlyVideo(true)
             //genericStream.getStreamClient().setOnlyAudio(false)
+
+            toast(streamersViewModel.getServerURI())
         }
 
         val bHomeScoreMinus = view.findViewById<ImageView>(R.id.home_score_minus)
@@ -261,6 +263,11 @@ class CameraFragment: Fragment(), ConnectChecker,
             //this.updateScoreBoard()
         }
 
+        lifecycleScope.launch {
+            streamersViewModel.currentKey.collect { _ ->
+                bStartStop.isClickable = true
+            }
+        }
         return view
     }
 

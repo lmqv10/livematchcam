@@ -254,6 +254,7 @@
         android:layout_height="90dp"
         android:background="@drawable/alpha_background"
         android:id="@+id/b_start_stop"
+        android:clickable="false"
         tools:ignore="ContentDescription"/>
   </LinearLayout>
 

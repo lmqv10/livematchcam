@@ -1,7 +1,6 @@
-package it.lmqv.livematchcam.handlers
+package it.lmqv.livematchcam.handlers.zoom
 
 import android.content.Context
-import android.util.Log
 import com.pedro.encoder.input.sources.video.Camera1Source
 import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.VideoSource
@@ -9,37 +8,34 @@ import it.lmqv.livematchcam.settings.SettingsRepository
 import it.lmqv.livematchcam.utils.Debouncer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.round
-import kotlin.math.sign
 
 interface IZoomLevelHandler {
+    fun lower()
+    fun upper()
+    fun increase()
+    fun decrease()
     fun withOffset(offset: Float, delegate: (value: Float) -> Unit)
 }
 
-class ZoomLevelHandler(
+abstract class ZoomLevelHandler(
     context: Context,
-    private val videoSource: VideoSource) : IZoomLevelHandler {
+    videoSource: VideoSource) : IZoomLevelHandler {
 
     private val debounceMs = 300L
     private val updateDebounce = Debouncer(debounceMs)
 
-    private var offset = 0.1f
+    protected var offset = 0.1f
     private var lower = 0f
-    private var upper = 0f
-    private var current = 0f
-    private var zoomOffset = 0f
+    protected var upper = 0f
+    protected var current = 0f
+    protected var zoomOffset = 0f
 
     private var settingsRepository: SettingsRepository
 
-    private var currentCameraZoom: Float = 0f
-    private val scope = CoroutineScope(Dispatchers.Default)
-    private var job: Job? = null
+    protected var currentCameraZoom: Float = 0f
 
     init {
         when (videoSource) {
@@ -68,10 +64,10 @@ class ZoomLevelHandler(
         }
     }
 
-    fun lower() { setCurrentZoom(lower) }
-    fun upper() { setCurrentZoom(upper) }
-    fun increase() { setCurrentZoom(this.current + this.offset) }
-    fun decrease() { setCurrentZoom(this.current - this.offset) }
+    override fun lower() { setCurrentZoom(lower) }
+    override fun upper() { setCurrentZoom(upper) }
+    override fun increase() { setCurrentZoom(this.current + this.offset) }
+    override fun decrease() { setCurrentZoom(this.current - this.offset) }
 
     override fun withOffset(offset: Float, delegate: (value: Float) -> Unit) {
         updateDebounce.submit {
@@ -91,7 +87,9 @@ class ZoomLevelHandler(
         }
     }
 
-    private fun applyZoom() : Float {
+    abstract fun applyZoom() : Float
+
+    /*private fun applyZoom() : Float {
         val targetZoomLevel = min(this.upper, this.current + this.zoomOffset)
         val stepOffset = targetZoomLevel - this.currentCameraZoom
 
@@ -116,7 +114,7 @@ class ZoomLevelHandler(
             }
         }
         return this.currentCameraZoom
-    }
+    }*/
 
     /*private fun applyZoom() : Float {
         val value = min(this.upper, this.current + this.zoomOffset)

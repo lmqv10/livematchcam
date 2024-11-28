@@ -18,7 +18,11 @@ import it.lmqv.livematchcam.utils.getItemPositionByKey
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import kotlinx.coroutines.launch
 
-class ServersFragment : Fragment() {
+interface IServersFragment {
+    fun getServerURI() : String
+}
+
+class ServersFragment : Fragment(), IServersFragment {
 
     companion object {
         fun newInstance() = ServersFragment()
@@ -27,6 +31,10 @@ class ServersFragment : Fragment() {
     private val streamersViewModel: StreamersViewModel by viewModels()
     private var _binding: FragmentServersBinding? = null
     private val binding get() = _binding!!
+
+    override fun getServerURI() : String {
+        return streamersViewModel.getServerURI()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
