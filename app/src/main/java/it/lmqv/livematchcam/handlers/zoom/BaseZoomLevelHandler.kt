@@ -88,40 +88,4 @@ abstract class ZoomLevelHandler(
     }
 
     abstract fun applyZoom() : Float
-
-    /*private fun applyZoom() : Float {
-        val targetZoomLevel = min(this.upper, this.current + this.zoomOffset)
-        val stepOffset = targetZoomLevel - this.currentCameraZoom
-
-        if (stepOffset != 0f) {
-            var startZoomLevel = this.currentCameraZoom
-            this.currentCameraZoom = targetZoomLevel
-            var signOffset = stepOffset.sign
-            var start = 0f
-            var end = (round( abs(stepOffset) * 10) / 10)
-
-            job?.cancel()
-            job = scope.launch {
-                while (start < end && startZoomLevel < upper) {
-                    start += offset
-                    startZoomLevel += (offset * signOffset)
-                    when (videoSource) {
-                        is Camera1Source -> { videoSource.setZoom(startZoomLevel.toInt()) }
-                        is Camera2Source -> { videoSource.setZoom(startZoomLevel) }
-                    }
-                    delay(50)
-                }
-            }
-        }
-        return this.currentCameraZoom
-    }*/
-
-    /*private fun applyZoom() : Float {
-        val value = min(this.upper, this.current + this.zoomOffset)
-        when (videoSource) {
-            is Camera1Source -> { videoSource.setZoom(value.toInt()) }
-            is Camera2Source -> { videoSource.setZoom(value) }
-        }
-        return value
-    }*/
 }

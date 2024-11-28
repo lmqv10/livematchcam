@@ -18,8 +18,8 @@ class StreamersViewModel(application: Application) : AndroidViewModel(applicatio
     val servers: StateFlow<List<KeyValue<String>>> = _servers
     private val _keys = MutableStateFlow<List<KeyValue<String>>>(emptyList())
     val keys: StateFlow<List<KeyValue<String>>> = _keys
-    private val _currentKey = MutableStateFlow("")
-    val currentKey: StateFlow<String> = _currentKey
+    private val _currentKey = MutableStateFlow<String?>(null)
+    val currentKey: StateFlow<String?> = _currentKey
 
     /*fun setServers(updatedServers: List<KeyValue<String>>) {
         updateData(_servers, streamersSettingsRepository::setServers, updatedServers)
@@ -29,9 +29,7 @@ class StreamersViewModel(application: Application) : AndroidViewModel(applicatio
     }*/
     fun setCurrentKey(currentKey: String) {
         viewModelScope.launch {
-            if (_currentKey.value != currentKey) {
-                streamersSettingsRepository.setCurrentKey(currentKey)
-            }
+            streamersSettingsRepository.setCurrentKey(currentKey)
         }
     }
 

@@ -14,7 +14,7 @@ import kotlin.math.min
 import kotlin.math.round
 import kotlin.math.sign
 
-class AnimatedZoomLevelHandler(
+class SmoothZoomLevelHandler(
     context: Context,
     private val videoSource: VideoSource) : ZoomLevelHandler(context, videoSource),
     IZoomLevelHandler {

@@ -23,20 +23,25 @@ import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
+import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.fragments.StatusFragment
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.settings.SettingsRepository
 import it.lmqv.livematchcam.utils.ScreenUtils
-import it.lmqv.livematchcam.handlers.zoom.ZoomLevelHandler
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.fragments.ScoreBoardFragment
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.ProgressiveZoomLevelHandler
+import it.lmqv.livematchcam.handlers.zoom.NoDebounceZoomLevelHandler
 import it.lmqv.livematchcam.viewmodels.AwayScoreBoardViewModel
 import it.lmqv.livematchcam.viewmodels.HomeScoreBoardViewModel
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class CameraFragment: Fragment(), ConnectChecker,
@@ -74,6 +79,7 @@ class CameraFragment: Fragment(), ConnectChecker,
     private lateinit var homeScore : TextView
     private lateinit var awayTeam : TextView
     private lateinit var awayScore : TextView
+    private lateinit var txStreamingTime : TextView
 
     private lateinit var surfaceView: SwipeSurfaceView
     private lateinit var bStartStop: ImageView
@@ -87,6 +93,10 @@ class CameraFragment: Fragment(), ConnectChecker,
     private val isStereo = true
     private val aBitrate = 128 * 1000
     //private var recordPath = ""
+
+    private var timeElapsedInSeconds = 0
+    private var job: Job? = null
+
     //Bitrate adapter used to change the bitrate on fly depend of the bandwidth.
     private val bitrateAdapter = BitrateAdapter {
         genericStream.setVideoBitrateOnFly(it)
@@ -107,15 +117,15 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         videoSource = genericStream.videoSource
 
-        this.zoomLevelHandler = ProgressiveZoomLevelHandler(requireContext(), videoSource)
+        this.zoomLevelHandler = NoDebounceZoomLevelHandler(requireContext(), videoSource)
         this.offsetDegreeHandler = ProgressiveOffsetDegreeHandler(requireContext())
 
-        statusViewModel.angleDegree.observe(viewLifecycleOwner, Observer { degree ->
+        statusViewModel.angleDegree.observe(viewLifecycleOwner) { degree ->
             var offset = this.offsetDegreeHandler.getOffsetByDegree(degree)
             zoomLevelHandler.withOffset(offset) { zoomLevel ->
                 statusViewModel.setZoomLevel(zoomLevel)
             }
-        })
+        }
 
         val audioManager = requireActivity().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         this.isMute = audioManager.isMicrophoneMute
@@ -126,6 +136,8 @@ class CameraFragment: Fragment(), ConnectChecker,
             bSwitchMicrophone.setImageResource(R.drawable.microphone_on)
         }
         this.bStartStop = view.findViewById(R.id.b_start_stop)
+
+        this.txStreamingTime = view.findViewById(R.id.streaming_time)
 
         surfaceView = view.findViewById(R.id.surfaceView)
         surfaceView.setCallbackListener(this)
@@ -147,15 +159,14 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         bStartStop.setOnClickListener {
             val serverUri = streamersViewModel.getServerURI()
-                // GlobalDataManager.getServerURI() // "rtmp://a.rtmp.youtube.com/live2/fmjw-uqav-y4ua-xd4d-3zaw"
-            toast(serverUri)
-            /*if (!genericStream.isStreaming) {
+            if (!genericStream.isStreaming) {
                 genericStream.startStream(serverUri)
                 bStartStop.setImageResource(R.drawable.stream_stop_icon)
             } else {
                 genericStream.stopStream()
                 bStartStop.setImageResource(R.drawable.stream_icon)
-            }*/
+            }
+            toast(serverUri)
         }
         /*bRecord.setOnClickListener {
             if (!genericStream.isRecording) {
@@ -248,7 +259,6 @@ class CameraFragment: Fragment(), ConnectChecker,
             if (scoreBoardFragment.isInPause()) {
                 bStartTime.setImageResource(R.drawable.time_pause)
                 scoreBoardFragment.startTime()
-
             } else {
                 bStartTime.setImageResource(R.drawable.time_start)
                 scoreBoardFragment.pauseTime()
@@ -290,7 +300,6 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         this.updateScoreBoard()
     }
-
 
     private fun prepare() {
         val prepared = try {
@@ -342,6 +351,8 @@ class CameraFragment: Fragment(), ConnectChecker,
     }
 
     override fun onConnectionStarted(url: String) {
+        toast("Streaming Started")
+        this.startTimer()
     }
 
     override fun onConnectionSuccess() {
@@ -365,6 +376,7 @@ class CameraFragment: Fragment(), ConnectChecker,
 
     override fun onDisconnect() {
         statusViewModel.setBitrate(0f)
+        this.stopTimer()
         toast("Disconnected")
     }
 
@@ -429,5 +441,23 @@ class CameraFragment: Fragment(), ConnectChecker,
         lifecycleScope.launch {
             zoomLevelHandler.upper()
         }
+    }
+
+    private fun startTimer() {
+        if (job == null || job?.isActive == false) {
+            job = CoroutineScope(Dispatchers.Main).launch {
+                while (isActive) {
+                    this@CameraFragment.txStreamingTime.text = formatHourTime(timeElapsedInSeconds)
+                    delay(1000)
+                    timeElapsedInSeconds++
+                }
+            }
+        }
+    }
+
+    private fun stopTimer() {
+        job?.cancel()
+        job = null
+        timeElapsedInSeconds = 0
     }
 }

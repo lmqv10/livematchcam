@@ -74,6 +74,7 @@
                 android:singleLine="true"
                 android:hint="@string/hint_key"
                 android:gravity="center"
+                android:imeOptions="actionDone"
                 android:textColor="@color/appColor" />
 
         </LinearLayout>

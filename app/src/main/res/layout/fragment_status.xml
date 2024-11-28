@@ -26,8 +26,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/primary"
                 android:textStyle="bold"
-                android:padding="5dp"
-                android:gravity="center"
+                android:padding="3dp"
+                android:gravity="right"
                 android:layout_gravity="center_vertical"
                 android:textSize="10sp"
                 android:text="@string/bitrate_placeholder" />
@@ -56,9 +56,10 @@
                 android:layout_gravity="center"
                 android:paddingLeft="4dp"
                 android:paddingVertical="2dp"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:minWidth="40dp"
                 android:textColor="@color/text_color_secondary_selector"
+                android:background="@color/WHITESMOKE"
                 android:textStyle="bold"
                 android:text="@string/degree_placeholder" />
             <TextView
@@ -70,9 +71,10 @@
                 android:layout_gravity="center"
                 android:paddingLeft="4dp"
                 android:paddingVertical="2dp"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:minWidth="40dp"
                 android:textColor="@color/text_color_secondary_selector"
+                android:background="@color/WHITESMOKE"
                 android:textStyle="bold"
                 android:text="@string/degree_placeholder" />
         </LinearLayout>

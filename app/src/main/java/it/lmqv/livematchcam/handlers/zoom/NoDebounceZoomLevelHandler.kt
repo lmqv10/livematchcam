@@ -6,10 +6,16 @@ import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.VideoSource
 import kotlin.math.min
 
-class DirectZoomLevelHandler(
-    context: Context,
-    private val videoSource: VideoSource) : ZoomLevelHandler(context, videoSource),
-    IZoomLevelHandler {
+class NoDebounceZoomLevelHandler(
+    context: Context, private val videoSource: VideoSource) : ZoomLevelHandler(context, videoSource), IZoomLevelHandler {
+
+    override fun withOffset(offset: Float, delegate: (value: Float) -> Unit) {
+        if (this.zoomOffset != offset) {
+            this.zoomOffset = offset
+            val zoomLevel = this.applyZoom()
+            delegate(zoomLevel)
+        }
+    }
 
     override fun applyZoom() : Float {
         val value = min(super.upper, this.current + this.zoomOffset)

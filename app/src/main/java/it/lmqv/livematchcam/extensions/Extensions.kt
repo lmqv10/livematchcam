@@ -79,5 +79,14 @@ fun bitrateFormat(value:Float) : String {
 }
 
 fun formatTime(seconds: Int = 0): String {
-    return String.format("%02d:%02d", seconds / 60, seconds % 60)
+    var formattedTime : String
+    if (seconds > 3600) {
+        formattedTime = formatHourTime(seconds)
+    }  else {
+        formattedTime = String.format("%02d:%02d", seconds / 60, seconds % 60)
+    }
+    return formattedTime
+}
+fun formatHourTime(seconds: Int = 0): String {
+    return String.format("%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60)
 }

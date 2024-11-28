@@ -28,6 +28,7 @@
 
     <string name="home_team">Team 1</string>
     <string name="away_team">Team 2</string>
+    <string name="streamin_time">00:00:00</string>
 
     <!--filters-->
     <string name="grey_scale">Grey scale</string>
