@@ -99,4 +99,10 @@
     <string name="degree_placeholder">0°</string>
     <string name="bitrate_placeholder">0 mb/s</string>
     <string name="zoom_placeholder">0.0</string>
+    <string name="set_placeholder">Set</string>
+    <string name="set_1_placeholder">1 Set</string>
+    <string name="set_2_placeholder">2 Set</string>
+    <string name="set_3_placeholder">3 Set</string>
+    <string name="set_4_placeholder">4 Set</string>
+    <string name="set_5_placeholder">5 Set</string>
 </resources>

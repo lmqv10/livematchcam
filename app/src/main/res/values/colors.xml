@@ -16,6 +16,11 @@
     <color name="secondary_darker">#724501</color>
     <color name="primary_50">#AAFFFFFF</color>
 
+    <color name="score_background_start">#ff676767</color>
+    <color name="score_background_center">#ff565656</color>
+    <color name="score_background_end">#ffDDDDDD</color>
+    <color name="score_border">#ff444444</color>
+
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>

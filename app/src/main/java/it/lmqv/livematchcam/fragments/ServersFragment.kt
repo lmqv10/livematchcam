@@ -1,6 +1,5 @@
 package it.lmqv.livematchcam.fragments
 
-import android.content.Context
 import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.text.Editable
@@ -10,13 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.databinding.FragmentServersBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.utils.KeyValue
 import it.lmqv.livematchcam.utils.getItemPositionByKey
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
@@ -117,7 +113,7 @@ class ServersFragment : Fragment(), IServersFragment {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
             override fun onTextChanged(newKey: CharSequence, start: Int, before: Int, count: Int) {
                 lifecycleScope.launch {
-                    var updatedKey = newKey.toString()
+                    val updatedKey = newKey.toString()
                     streamersViewModel.setCurrentKey(updatedKey)
                 }
             }

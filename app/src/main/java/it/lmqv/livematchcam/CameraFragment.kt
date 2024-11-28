@@ -2,8 +2,6 @@ package it.lmqv.livematchcam
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,7 +13,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
@@ -23,13 +20,15 @@ import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.fragments.StatusFragment
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.settings.SettingsRepository
-import it.lmqv.livematchcam.utils.ScreenUtils
 import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.fragments.ScoreBoardFragment
+import it.lmqv.livematchcam.fragments.IScoreBoardFragment
+import it.lmqv.livematchcam.fragments.SoccerScoreBoardFragment
+import it.lmqv.livematchcam.fragments.VolleyScoreBoardFragment
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
@@ -45,7 +44,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class CameraFragment: Fragment(), ConnectChecker,
-    ScoreBoardFragment.OnUpdateCallback,
+    IScoreBoardFragment.OnUpdateCallback,
     SwipeSurfaceView.OnSwipeGesture {
 
     companion object {
@@ -61,7 +60,9 @@ class CameraFragment: Fragment(), ConnectChecker,
     private val statusFragment = StatusFragment.newInstance()
     private val statusViewModel: StatusViewModel by activityViewModels()
 
-    private var scoreBoardFragment = ScoreBoardFragment.newInstance()
+    private var scoreBoardFragment: IScoreBoardFragment = SoccerScoreBoardFragment.newInstance()
+    //private var scoreBoardFragment: IScoreBoardFragment = VolleyScoreBoardFragment.newInstance()
+
     private val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
     private val awayTeamViewModel: AwayScoreBoardViewModel by activityViewModels()
 
@@ -121,7 +122,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         this.offsetDegreeHandler = ProgressiveOffsetDegreeHandler(requireContext())
 
         statusViewModel.angleDegree.observe(viewLifecycleOwner) { degree ->
-            var offset = this.offsetDegreeHandler.getOffsetByDegree(degree)
+            val offset = this.offsetDegreeHandler.getOffsetByDegree(degree)
             zoomLevelHandler.withOffset(offset) { zoomLevel ->
                 statusViewModel.setZoomLevel(zoomLevel)
             }
@@ -188,26 +189,26 @@ class CameraFragment: Fragment(), ConnectChecker,
         }*/
 
         homeTeam = view.findViewById(R.id.home_team)
-        homeTeamViewModel.name.observe(viewLifecycleOwner, Observer { team ->
+        homeTeamViewModel.name.observe(viewLifecycleOwner) { team ->
             homeTeam.text = team
-        })
+        }
         homeScore = view.findViewById(R.id.home_score)
-        homeTeamViewModel.score.observe(viewLifecycleOwner, Observer { score ->
+        homeTeamViewModel.score.observe(viewLifecycleOwner) { score ->
             homeScore.text = score.toString()
-        })
+        }
 
         awayTeam = view.findViewById(R.id.away_team)
-        awayTeamViewModel.name.observe(viewLifecycleOwner, Observer { team ->
+        awayTeamViewModel.name.observe(viewLifecycleOwner) { team ->
             awayTeam.text = team
-        })
+        }
 
         awayScore = view.findViewById(R.id.away_score)
-        awayTeamViewModel.score.observe(viewLifecycleOwner, Observer { score ->
+        awayTeamViewModel.score.observe(viewLifecycleOwner) { score ->
             awayScore.text = score.toString()
-        })
+        }
 
         childFragmentManager.beginTransaction()
-            .replace(R.id.score_board_placeholder, scoreBoardFragment, "ScoreBoardFragmentTag")
+            .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
             .commit()
 
         bSwitchMicrophone.setOnClickListener {
@@ -391,33 +392,20 @@ class CameraFragment: Fragment(), ConnectChecker,
     }
 
     private fun updateScoreBoard() {
-        val view = this.scoreBoardFragment.view
-        view?.post {
-            val width = view.width
-            val height = view.height
-            var factorFragment = width.toDouble() / height.toDouble()
+        this.scoreBoardFragment.getBitmapView { scoreBoardBitmap ->
+            val maxFactor = 25f
+            val defaultScaleX = (scoreBoardBitmap.width * 100 / width).toFloat()
+            val defaultScaleY = (scoreBoardBitmap.height * 100 / height).toFloat()
 
-            val screenWidth = ScreenUtils.getScreenWidth(requireContext())
-            val screenHeight = ScreenUtils.getScreenHeight(requireContext())
-            var factor = screenWidth.toDouble() / screenHeight.toDouble()
+            val factorX = maxFactor / defaultScaleX
+            val scaleX = factorX * defaultScaleX
+            val scaleY = factorX * defaultScaleY
 
-            //var factorHeight = 720
-            //var factorWidth =  factorHeight * factor
-
-            var scaleX = 15f //(scaleY * factor).toFloat();
-            var scaleY = 15f
-
-            if (width > 0 && height > 0) {
-                val scoreBoardBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-                val canvas = Canvas(scoreBoardBitmap)
-                view.draw(canvas)
-
-                val imageFilter = ImageObjectFilterRender()
-                imageFilter.setImage(scoreBoardBitmap)
-                imageFilter.setPosition(0f, 0f)
-                imageFilter.setScale(scaleX, scaleY)
-                genericStream.getGlInterface().setFilter(imageFilter)
-            }
+            val imageFilter = ImageObjectFilterRender()
+            imageFilter.setImage(scoreBoardBitmap)
+            imageFilter.setPosition(0.15f, 0.15f)
+            imageFilter.setScale(scaleX, scaleY)
+            genericStream.getGlInterface().setFilter(imageFilter)
         }
     }
 
