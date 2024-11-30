@@ -8,8 +8,12 @@ import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -20,19 +24,23 @@ import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.formatHourTime
+import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.fragments.StatusFragment
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.settings.SettingsRepository
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.fragments.IScoreBoardFragment
 import it.lmqv.livematchcam.fragments.SoccerScoreBoardFragment
-import it.lmqv.livematchcam.fragments.VolleyScoreBoardFragment
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
+import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
+import it.lmqv.livematchcam.handlers.zoom.NoDebounceSmoothZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.NoDebounceZoomLevelHandler
+import it.lmqv.livematchcam.handlers.zoom.SingleZoomLevelHandler
+import it.lmqv.livematchcam.handlers.zoom.SmoothZoomLevelHandler
+import it.lmqv.livematchcam.utils.KeyValue
 import it.lmqv.livematchcam.viewmodels.AwayScoreBoardViewModel
 import it.lmqv.livematchcam.viewmodels.HomeScoreBoardViewModel
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
@@ -42,6 +50,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.reflect.KClass
 
 class CameraFragment: Fragment(), ConnectChecker,
     IScoreBoardFragment.OnUpdateCallback,
@@ -253,6 +262,11 @@ class CameraFragment: Fragment(), ConnectChecker,
             scoreBoardFragment.togglePeriod()
         }
 
+        val bRotationStrategy = view.findViewById<ImageView>(R.id.change_rotation_strategy)
+        bRotationStrategy.setOnClickListener {
+            this.ChangeZoomStrategyDialog()
+        }
+
         val bStartTime = view.findViewById<ImageView>(R.id.start_time)
         val bResetTime = view.findViewById<ImageView>(R.id.reset_time)
 
@@ -447,5 +461,73 @@ class CameraFragment: Fragment(), ConnectChecker,
         job?.cancel()
         job = null
         timeElapsedInSeconds = 0
+    }
+
+    private fun ChangeZoomStrategyDialog() {
+        val inflater = LayoutInflater.from(requireContext())
+        val dialogView = inflater.inflate(R.layout.dialog_change_settings, null)
+
+        val spinnerZoomStrategies = dialogView.findViewById<Spinner>(R.id.zoom_strategies)
+        val optionsZoomStrategies = listOf(
+            KeyValue<KClass<*>>(SingleZoomLevelHandler::class, "At Degree with Debounce"),
+            KeyValue<KClass<*>>(NoDebounceZoomLevelHandler::class, "At Degree No Debounce"),
+            KeyValue<KClass<*>>(SmoothZoomLevelHandler::class, "At Degree With progressive zoom with Debounce"),
+            KeyValue<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "At Degree With progressive zoom No Debounce")
+        )
+
+        val adapterZoomServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsZoomStrategies)
+        adapterZoomServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerZoomStrategies.adapter = adapterZoomServer
+        spinnerZoomStrategies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
+                val selectedZoomHandler = selectedItem.key.constructors.first()?.call(requireContext(), videoSource)
+                if (selectedZoomHandler != null)
+                {
+                    this@CameraFragment.zoomLevelHandler = selectedZoomHandler as IZoomLevelHandler
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+        val defaultPositionStrategy = optionsZoomStrategies.indexOfFirst { it.key == zoomLevelHandler::class }
+        spinnerZoomStrategies.setSelection(defaultPositionStrategy)
+
+        val spinnerOffsetStrategies = dialogView.findViewById<Spinner>(R.id.offset_strategies)
+        val optionsOffsetStrategies = listOf(
+            KeyValue<KClass<*>>(ProgressiveOffsetDegreeHandler::class, "Progressive Left/Right Degree multiplier"),
+            KeyValue<KClass<*>>(LeftRightOffsetDegreeHandler::class, "Fixed Left/Right Degree")
+        )
+
+        val adapterOffsetServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsOffsetStrategies)
+        adapterOffsetServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerOffsetStrategies.adapter = adapterOffsetServer
+        spinnerOffsetStrategies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
+                val selectedOffsetHandler = selectedItem.key.constructors.first()?.call(requireContext())
+                if (selectedOffsetHandler != null)
+                {
+                    this@CameraFragment.offsetDegreeHandler = selectedOffsetHandler as IOffsetDegreeHandler
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+        val defaultPositionOffset = optionsOffsetStrategies.indexOfFirst { it.key == offsetDegreeHandler::class }
+        spinnerOffsetStrategies.setSelection(defaultPositionOffset)
+
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                requireActivity().hideSystemUI()
+            }
+            .create()
+
+        dialog.setOnShowListener {
+            requireActivity().hideSystemUI()
+        }
+
+        dialog.show()
     }
 }

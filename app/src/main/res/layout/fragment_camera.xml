@@ -40,7 +40,7 @@
         android:layout_gravity="center_vertical"
         android:background="@drawable/alpha_background"
         android:src="@drawable/change_period"
-        android:layout_marginRight="60dp"
+        android:layout_marginRight="40dp"
         tools:ignore="ContentDescription" />
 
     <ImageView
@@ -60,7 +60,7 @@
         android:layout_gravity="center_vertical"
         android:background="@drawable/alpha_background"
         android:layout_marginLeft="5dp"
-        android:layout_marginRight="60dp"
+        android:layout_marginRight="30dp"
         android:src="@drawable/time_start"
         tools:ignore="ContentDescription" />
 
@@ -73,6 +73,17 @@
         android:background="@drawable/alpha_background"
         android:src="@drawable/microphone_on"
         tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/change_rotation_strategy"
+        android:layout_marginLeft="30dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/alpha_background"
+        android:src="@drawable/settings"
+        tools:ignore="ContentDescription" />
+
   </LinearLayout>
 
 

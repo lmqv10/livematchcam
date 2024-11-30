@@ -25,6 +25,8 @@
     <string name="_config_auto_zoom">Auto Zoom</string>
     <string name="stream_url">Stream URL</string>
     <string name="stream_key">Stream Key</string>
+    <string name="zoom_strategy">Zoom Strategy</string>
+    <string name="offset_strategy">Offset Strategy</string>
 
     <string name="home_team">Team 1</string>
     <string name="away_team">Team 2</string>
