@@ -168,15 +168,38 @@ class CameraFragment: Fragment(), ConnectChecker,
         })
 
         bStartStop.setOnClickListener {
-            val serverUri = streamersViewModel.getServerURI()
-            if (!genericStream.isStreaming) {
-                genericStream.startStream(serverUri)
-                bStartStop.setImageResource(R.drawable.stream_stop_icon)
+            val dialogView = inflater.inflate(R.layout.dialog_start_stop_stream, null)
+            val title = dialogView.findViewById<TextView>(R.id.dialog_message)
+            if (genericStream.isStreaming) {
+                title.text = getString(R.string.confirm_stop_message)
             } else {
-                genericStream.stopStream()
-                bStartStop.setImageResource(R.drawable.stream_icon)
+                title.text = getString(R.string.confirm_start_message)
             }
-            toast(serverUri)
+
+            val dialog = AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setPositiveButton("OK") { dialog, _ ->
+                    val serverUri = streamersViewModel.getServerURI()
+                    if (!genericStream.isStreaming) {
+                        genericStream.startStream(serverUri)
+                        bStartStop.setImageResource(R.drawable.stream_stop_icon)
+                    } else {
+                        genericStream.stopStream()
+                        bStartStop.setImageResource(R.drawable.stream_icon)
+                    }
+                    dialog.dismiss()
+                    requireActivity().hideSystemUI()
+                    toast(serverUri)
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                    requireActivity().hideSystemUI()
+                }
+                .create()
+            dialog.setOnShowListener {
+                requireActivity().hideSystemUI()
+            }
+            dialog.show()
         }
         /*bRecord.setOnClickListener {
             if (!genericStream.isRecording) {
