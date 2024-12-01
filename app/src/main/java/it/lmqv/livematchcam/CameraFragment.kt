@@ -35,7 +35,9 @@ import it.lmqv.livematchcam.fragments.SoccerScoreBoardFragment
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
+import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeWithCapHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
+import it.lmqv.livematchcam.handlers.zoom.NoDebounceExtraSmoothZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.NoDebounceSmoothZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.NoDebounceZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.SingleZoomLevelHandler
@@ -127,8 +129,8 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         videoSource = genericStream.videoSource
 
-        this.zoomLevelHandler = NoDebounceZoomLevelHandler(requireContext(), videoSource)
-        this.offsetDegreeHandler = ProgressiveOffsetDegreeHandler(requireContext())
+        this.zoomLevelHandler = NoDebounceExtraSmoothZoomLevelHandler(requireContext(), videoSource)
+        this.offsetDegreeHandler = ProgressiveOffsetDegreeWithCapHandler(requireContext())
 
         statusViewModel.angleDegree.observe(viewLifecycleOwner) { degree ->
             val offset = this.offsetDegreeHandler.getOffsetByDegree(degree)
@@ -492,10 +494,11 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerZoomStrategies = dialogView.findViewById<Spinner>(R.id.zoom_strategies)
         val optionsZoomStrategies = listOf(
-            KeyValue<KClass<*>>(SingleZoomLevelHandler::class, "At Degree with Debounce"),
-            KeyValue<KClass<*>>(NoDebounceZoomLevelHandler::class, "At Degree No Debounce"),
-            KeyValue<KClass<*>>(SmoothZoomLevelHandler::class, "At Degree With progressive zoom with Debounce"),
-            KeyValue<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "At Degree With progressive zoom No Debounce")
+            KeyValue<KClass<*>>(NoDebounceZoomLevelHandler::class, "No Debounce"),
+            KeyValue<KClass<*>>(SingleZoomLevelHandler::class, "Debounce"),
+            KeyValue<KClass<*>>(SmoothZoomLevelHandler::class, "progressive zoom with Debounce"),
+            KeyValue<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "progressive zoom No Debounce"),
+            KeyValue<KClass<*>>(NoDebounceExtraSmoothZoomLevelHandler::class, "smooth progressive zoom No Debounce")
         )
 
         val adapterZoomServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsZoomStrategies)
@@ -518,6 +521,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         val spinnerOffsetStrategies = dialogView.findViewById<Spinner>(R.id.offset_strategies)
         val optionsOffsetStrategies = listOf(
             KeyValue<KClass<*>>(ProgressiveOffsetDegreeHandler::class, "Progressive Left/Right Degree multiplier"),
+            KeyValue<KClass<*>>(ProgressiveOffsetDegreeWithCapHandler::class, "Progressive Left/Right Degree multiplier with cap (3x)"),
             KeyValue<KClass<*>>(LeftRightOffsetDegreeHandler::class, "Fixed Left/Right Degree")
         )
 
