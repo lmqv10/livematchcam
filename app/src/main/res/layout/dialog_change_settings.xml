@@ -30,7 +30,7 @@
         android:textColor="@color/appColor"
         android:textStyle="bold" />
 
-    z<Spinner
+    <Spinner
         android:id="@+id/offset_strategies"
         android:layout_marginBottom="10dp"
         android:layout_width="match_parent"

@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.settings
+package it.lmqv.livematchcam.repositories
 
 import android.content.Context
 import androidx.datastore.core.DataStore

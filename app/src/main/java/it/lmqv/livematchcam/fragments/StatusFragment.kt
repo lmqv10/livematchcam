@@ -14,7 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentStatusBinding
 import it.lmqv.livematchcam.services.RotationSensorService
-import it.lmqv.livematchcam.settings.SettingsRepository
+import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.utils.KeyValue
 import it.lmqv.livematchcam.extensions.bitrateFormat
 import it.lmqv.livematchcam.extensions.degreeFormat

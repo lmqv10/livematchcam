@@ -1,6 +1,7 @@
 package it.lmqv.livematchcam
 
 import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
@@ -16,6 +17,7 @@ import com.pedro.encoder.input.sources.video.Camera1Source
 import it.lmqv.livematchcam.utils.FilterMenu
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.extensions.updateMenuColor
+import it.lmqv.livematchcam.fragments.CameraFragment
 
 class LiveStreamActivity : AppCompatActivity(),
     OnTouchListener {
@@ -31,6 +33,7 @@ class LiveStreamActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.live_stream_activity)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         supportFragmentManager
             .beginTransaction()

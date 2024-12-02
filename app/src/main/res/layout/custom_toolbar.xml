@@ -3,14 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
+    android:layout_height="40dp"
     android:background="@drawable/action_bar_gradient"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     <ImageView
         android:id="@+id/toolbar_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:src="@mipmap/ic_launcher_adaptive_fore"
         android:contentDescription=""
         android:layout_gravity="center_vertical" />
@@ -21,6 +21,6 @@
         android:layout_height="wrap_content"
         android:text="@string/app_name"
         android:textColor="@android:color/white"
-        android:textSize="24sp"
+        android:textSize="20sp"
         android:fontFamily="@font/capture_it"/>
 </androidx.appcompat.widget.Toolbar>

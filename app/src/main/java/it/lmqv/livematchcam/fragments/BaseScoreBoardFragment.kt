@@ -6,7 +6,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.viewmodels.AwayScoreBoardViewModel
 import it.lmqv.livematchcam.viewmodels.HomeScoreBoardViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +24,8 @@ interface IScoreBoardFragment {
     fun startTime()
     fun pauseTime()
     fun resetTime()
-    fun isInPause() : Boolean
+    fun isStarted() : Boolean
+    fun onTickTimer(timeElapsedInSeconds: Int)
     fun togglePeriod()
 }
 
@@ -41,28 +41,13 @@ abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment {
 
     private var timeElapsedInSeconds = 0
     private var job: Job? = null
-    private var isInPause = false
+    private var isInPause = true
 
     override fun getBitmapView(callback: (Bitmap) -> Unit) {
         val view = this.view
         view?.post {
             val width = view.width
             val height = view.height
-            var aspectRatio = width.toDouble() / height.toDouble()
-            /*
-
-            val screenWidth = ScreenUtils.getScreenWidth(requireContext())
-            val screenHeight = ScreenUtils.getScreenHeight(requireContext())
-            var factor = screenWidth.toDouble() / screenHeight.toDouble()
-
-            //var factorHeight = 720
-            //var factorWidth =  factorHeight * factor
-
-            var scaleX = 15f //(scaleY * factor).toFloat();
-            var scaleY = 15f
-            */
-            var resolutionAspectRatio = 1280 / 720
-            Logd("${width}x${height} - ${aspectRatio} vs ${resolutionAspectRatio}")
             val scoreBoardBitmap : Bitmap
             if (width > 0 && height > 0) {
                 scoreBoardBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
@@ -75,7 +60,6 @@ abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment {
 
             callback(scoreBoardBitmap)
         }
-
     }
 
     override fun startTime() {
@@ -83,7 +67,7 @@ abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment {
         if (job == null || job?.isActive == false) {
             job = CoroutineScope(Dispatchers.Main).launch {
                 while (isActive) {
-                    //binding.matchTime.text = formatTime(timeElapsedInSeconds)
+                    onTickTimer(timeElapsedInSeconds)
                     delay(1000)
                     if (!isInPause) {
                         timeElapsedInSeconds++
@@ -102,13 +86,16 @@ abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment {
         job?.cancel()
         job = null
         timeElapsedInSeconds = 0
-        isInPause = false
+        isInPause = true
+        onTickTimer(timeElapsedInSeconds)
         onUpdateCallback?.refresh()
     }
 
-    override fun isInPause() : Boolean {
-        return this.isInPause
+    override fun isStarted() : Boolean {
+        return !this.isInPause
     }
+
+    override fun onTickTimer(timeElapsedInSeconds: Int) { }
 
     override fun togglePeriod() {
         onUpdateCallback?.refresh()

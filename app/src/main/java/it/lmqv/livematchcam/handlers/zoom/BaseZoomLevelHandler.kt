@@ -4,7 +4,7 @@ import android.content.Context
 import com.pedro.encoder.input.sources.video.Camera1Source
 import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.VideoSource
-import it.lmqv.livematchcam.settings.SettingsRepository
+import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.utils.Debouncer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

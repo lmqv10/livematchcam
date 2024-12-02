@@ -5,6 +5,24 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import kotlin.math.max
 
+/*class TeamsScoreBoardViewModel : ViewModel() {
+    private val _homeTeam = MutableLiveData("")
+    val homeTeam: LiveData<String> = _homeTeam
+    fun setHomeTeam(updatedTeam: String) { _homeTeam.value = updatedTeam }
+
+    private val _awayTeam = MutableLiveData("")
+    val awayTeam: LiveData<String> = _awayTeam
+    fun setAwayTeam(updatedTeam: String) { _awayTeam.value = updatedTeam }
+
+    private val _homeLogo = MutableLiveData<Int>(null)
+    val homeLogo: LiveData<Int> = _homeLogo
+    fun setHomeLogo(updatedLogo: Int) { _homeLogo.value = updatedLogo }
+
+    private val _awayLogo = MutableLiveData<Int>(null)
+    val awayLogo: LiveData<Int> = _awayLogo
+    fun setAwayLogo(updatedLogo: Int) { _awayLogo.value = updatedLogo }
+}*/
+
 class HomeScoreBoardViewModel : ViewModel() {
     private val _name = MutableLiveData("")
     val name: LiveData<String> = _name

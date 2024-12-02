@@ -3,7 +3,7 @@ package it.lmqv.livematchcam.viewmodels
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import it.lmqv.livematchcam.settings.StreamersSettingsRepository
+import it.lmqv.livematchcam.repositories.StreamersSettingsRepository
 import it.lmqv.livematchcam.utils.KeyValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

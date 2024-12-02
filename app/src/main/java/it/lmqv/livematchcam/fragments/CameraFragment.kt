@@ -1,7 +1,8 @@
-package it.lmqv.livematchcam
+package it.lmqv.livematchcam.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -24,14 +24,16 @@ import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
+import it.lmqv.livematchcam.LiveStreamActivity
+import it.lmqv.livematchcam.R
+import it.lmqv.livematchcam.views.SwipeSurfaceView
+import it.lmqv.livematchcam.databinding.FragmentCameraBinding
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
-import it.lmqv.livematchcam.fragments.StatusFragment
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
-import it.lmqv.livematchcam.settings.SettingsRepository
+import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.fragments.IScoreBoardFragment
-import it.lmqv.livematchcam.fragments.SoccerScoreBoardFragment
+import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
@@ -71,11 +73,15 @@ class CameraFragment: Fragment(), ConnectChecker,
     private val statusFragment = StatusFragment.newInstance()
     private val statusViewModel: StatusViewModel by activityViewModels()
 
-    private var scoreBoardFragment: IScoreBoardFragment = SoccerScoreBoardFragment.newInstance()
-    //private var scoreBoardFragment: IScoreBoardFragment = VolleyScoreBoardFragment.newInstance()
+    private lateinit var controlBarFragment: IControlBarFragment
+    private lateinit var scoreBoardFragment: IScoreBoardFragment
+    private var sportsFactory = SportsFactory
 
     private val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
     private val awayTeamViewModel: AwayScoreBoardViewModel by activityViewModels()
+
+    private var _binding: FragmentCameraBinding? = null
+    private val binding get() = _binding!!
 
     val genericStream: GenericStream by lazy {
         GenericStream(requireContext(), this).apply {
@@ -86,15 +92,6 @@ class CameraFragment: Fragment(), ConnectChecker,
     private lateinit var videoSource: VideoSource
 
     private var isMute : Boolean = false
-
-    private lateinit var homeTeam : TextView
-    private lateinit var homeScore : TextView
-    private lateinit var awayTeam : TextView
-    private lateinit var awayScore : TextView
-    private lateinit var txStreamingTime : TextView
-
-    private lateinit var surfaceView: SwipeSurfaceView
-    private lateinit var bStartStop: ImageView
 
     private val width = 1280
     private val height = 720
@@ -120,17 +117,35 @@ class CameraFragment: Fragment(), ConnectChecker,
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        settingsRepository = SettingsRepository(requireContext())
+        _binding = FragmentCameraBinding.inflate(inflater, container, false)
 
-        val view = inflater.inflate(R.layout.fragment_camera, container, false)
+        settingsRepository = SettingsRepository(requireContext())
 
         childFragmentManager.beginTransaction()
             .add(R.id.status_container, statusFragment).commit()
 
-        videoSource = genericStream.videoSource
+        var sportFragmentFactory = sportsFactory.get()
+        this.controlBarFragment = sportFragmentFactory.getControlBar()
+        this.scoreBoardFragment = sportFragmentFactory.getScoreBoard()
+
+        childFragmentManager.beginTransaction()
+            .replace(R.id.control_bar_container, this.controlBarFragment as Fragment, "ControlBarFragmentTag")
+            .commit()
+
+        childFragmentManager.beginTransaction()
+            .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
+            .commit()
+
+        this.videoSource = genericStream.videoSource
 
         this.zoomLevelHandler = NoDebounceExtraSmoothZoomLevelHandler(requireContext(), videoSource)
         this.offsetDegreeHandler = ProgressiveOffsetDegreeWithCapHandler(requireContext())
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         statusViewModel.angleDegree.observe(viewLifecycleOwner) { degree ->
             val offset = this.offsetDegreeHandler.getOffsetByDegree(degree)
@@ -141,25 +156,22 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         val audioManager = requireActivity().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         this.isMute = audioManager.isMicrophoneMute
-        val bSwitchMicrophone = view.findViewById<ImageView>(R.id.microphone)
+
         if (this.isMute) {
-            bSwitchMicrophone.setImageResource(R.drawable.microphone_off)
+            binding.microphone.setImageResource(R.drawable.microphone_off)
         } else {
-            bSwitchMicrophone.setImageResource(R.drawable.microphone_on)
+            binding.microphone.setImageResource(R.drawable.microphone_on)
         }
-        this.bStartStop = view.findViewById(R.id.b_start_stop)
 
-        this.txStreamingTime = view.findViewById(R.id.streaming_time)
-
-        surfaceView = view.findViewById(R.id.surfaceView)
-        surfaceView.setCallbackListener(this)
+        binding.surfaceView.setCallbackListener(this)
 
         (activity as? LiveStreamActivity)?.let {
-            surfaceView.setOnTouchListener(it)
+            binding.surfaceView.setOnTouchListener(it)
         }
-        surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
+
+        binding.surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                if (!genericStream.isOnPreview) genericStream.startPreview(surfaceView)
+                if (!genericStream.isOnPreview) genericStream.startPreview(binding.surfaceView)
             }
             override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
                 genericStream.getGlInterface().setPreviewResolution(width, height)
@@ -169,8 +181,8 @@ class CameraFragment: Fragment(), ConnectChecker,
             }
         })
 
-        bStartStop.setOnClickListener {
-            val dialogView = inflater.inflate(R.layout.dialog_start_stop_stream, null)
+        binding.bStartStop.setOnClickListener {
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
             val title = dialogView.findViewById<TextView>(R.id.dialog_message)
             if (genericStream.isStreaming) {
                 title.text = getString(R.string.confirm_stop_message)
@@ -184,10 +196,10 @@ class CameraFragment: Fragment(), ConnectChecker,
                     val serverUri = streamersViewModel.getServerURI()
                     if (!genericStream.isStreaming) {
                         genericStream.startStream(serverUri)
-                        bStartStop.setImageResource(R.drawable.stream_stop_icon)
+                        binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
                     } else {
                         genericStream.stopStream()
-                        bStartStop.setImageResource(R.drawable.stream_icon)
+                        binding.bStartStop.setImageResource(R.drawable.stream_icon)
                     }
                     dialog.dismiss()
                     requireActivity().hideSystemUI()
@@ -222,103 +234,31 @@ class CameraFragment: Fragment(), ConnectChecker,
             }
         }*/
 
-        homeTeam = view.findViewById(R.id.home_team)
-        homeTeamViewModel.name.observe(viewLifecycleOwner) { team ->
-            homeTeam.text = team
-        }
-        homeScore = view.findViewById(R.id.home_score)
-        homeTeamViewModel.score.observe(viewLifecycleOwner) { score ->
-            homeScore.text = score.toString()
-        }
-
-        awayTeam = view.findViewById(R.id.away_team)
-        awayTeamViewModel.name.observe(viewLifecycleOwner) { team ->
-            awayTeam.text = team
-        }
-
-        awayScore = view.findViewById(R.id.away_score)
-        awayTeamViewModel.score.observe(viewLifecycleOwner) { score ->
-            awayScore.text = score.toString()
-        }
-
-        childFragmentManager.beginTransaction()
-            .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
-            .commit()
-
-        bSwitchMicrophone.setOnClickListener {
+        binding.microphone.setOnClickListener {
             val microphoneSource = MicrophoneSource()
             this.isMute = !this.isMute
             if (this.isMute) {
                 microphoneSource.mute()
-                bSwitchMicrophone.setImageResource(R.drawable.microphone_off)
+                binding.microphone.setImageResource(R.drawable.microphone_off)
             } else {
                 microphoneSource.unMute()
-                bSwitchMicrophone.setImageResource(R.drawable.microphone_on)
+                binding.microphone.setImageResource(R.drawable.microphone_on)
             }
             genericStream.changeAudioSource(microphoneSource)
             //genericStream.getStreamClient().setOnlyVideo(true)
             //genericStream.getStreamClient().setOnlyAudio(false)
-
-            toast(streamersViewModel.getServerURI())
         }
 
-        val bHomeScoreMinus = view.findViewById<ImageView>(R.id.home_score_minus)
-        bHomeScoreMinus.setOnClickListener {
-            homeTeamViewModel.incrementScore(-1)
-        }
 
-        val bHomeScoreAdd = view.findViewById<ImageView>(R.id.home_score_add)
-        bHomeScoreAdd.setOnClickListener {
-            homeTeamViewModel.incrementScore()
-        }
-
-        val bAwayScoreMinus = view.findViewById<ImageView>(R.id.away_score_minus)
-        bAwayScoreMinus.setOnClickListener {
-            awayTeamViewModel.incrementScore(-1)
-        }
-
-        val bAwayScoreAdd = view.findViewById<ImageView>(R.id.away_score_add)
-        bAwayScoreAdd.setOnClickListener {
-            awayTeamViewModel.incrementScore()
-        }
-
-        val bChangePeriod = view.findViewById<ImageView>(R.id.change_period)
-        bChangePeriod.setOnClickListener {
-            scoreBoardFragment.togglePeriod()
-        }
-
-        val bRotationStrategy = view.findViewById<ImageView>(R.id.change_rotation_strategy)
-        bRotationStrategy.setOnClickListener {
-            this.ChangeZoomStrategyDialog()
-        }
-
-        val bStartTime = view.findViewById<ImageView>(R.id.start_time)
-        val bResetTime = view.findViewById<ImageView>(R.id.reset_time)
-
-        bStartTime.setOnClickListener {
-            if (scoreBoardFragment.isInPause()) {
-                bStartTime.setImageResource(R.drawable.time_pause)
-                scoreBoardFragment.startTime()
-            } else {
-                bStartTime.setImageResource(R.drawable.time_start)
-                scoreBoardFragment.pauseTime()
-            }
-            bResetTime.isEnabled = scoreBoardFragment.isInPause()
-            this.updateScoreBoard()
-        }
-
-        bResetTime.setOnClickListener {
-            bStartTime.setImageResource(R.drawable.time_start)
-            scoreBoardFragment.resetTime()
-            //this.updateScoreBoard()
+        binding.changeRotationStrategy.setOnClickListener {
+            this.changeZoomStrategyDialog()
         }
 
         lifecycleScope.launch {
             streamersViewModel.currentKey.collect { _ ->
-                bStartStop.isClickable = true
+                binding.bStartStop.isClickable = true
             }
         }
-        return view
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -332,13 +272,13 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         this.scoreBoardFragment.setOnUpdate(this)
 
-        homeTeamViewModel.setLogo(GlobalDataManager.homeTeam.color)
-        awayTeamViewModel.setLogo(GlobalDataManager.awayTeam.color)
+        homeTeamViewModel.setLogo(Color.WHITE)
+        awayTeamViewModel.setLogo(Color.BLACK)
 
-        homeTeamViewModel.setName(GlobalDataManager.homeTeam.name)
-        awayTeamViewModel.setName(GlobalDataManager.awayTeam.name)
+        homeTeamViewModel.setName(getString(R.string.hint_home_team))
+        awayTeamViewModel.setName(getString(R.string.hint_away_team))
 
-        this.updateScoreBoard()
+        refresh()
     }
 
     private fun prepare() {
@@ -392,11 +332,11 @@ class CameraFragment: Fragment(), ConnectChecker,
 
     override fun onConnectionStarted(url: String) {
         toast("Streaming Started")
-        this.startTimer()
+        this.startStreamingTimer()
     }
 
     override fun onConnectionSuccess() {
-        toast("Connected")
+        toast("Connected on ${streamersViewModel.getServerURI()}")
     }
 
     override fun onConnectionFailed(reason: String) {
@@ -404,7 +344,7 @@ class CameraFragment: Fragment(), ConnectChecker,
             toast("Retry")
         } else {
             genericStream.stopStream()
-            bStartStop.setImageResource(R.drawable.stream_icon)
+            binding.bStartStop.setImageResource(R.drawable.stream_icon)
             toast("Failed: $reason")
         }
     }
@@ -416,13 +356,13 @@ class CameraFragment: Fragment(), ConnectChecker,
 
     override fun onDisconnect() {
         statusViewModel.setBitrate(0f)
-        this.stopTimer()
+        this.stopStreamingTimer()
         toast("Disconnected")
     }
 
     override fun onAuthError() {
         genericStream.stopStream()
-        bStartStop.setImageResource(R.drawable.stream_icon)
+        binding.bStartStop.setImageResource(R.drawable.stream_icon)
         toast("Auth error")
     }
 
@@ -430,7 +370,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         toast("Auth success")
     }
 
-    private fun updateScoreBoard() {
+    override fun refresh() {
         this.scoreBoardFragment.getBitmapView { scoreBoardBitmap ->
             val maxFactor = 25f
             val defaultScaleX = (scoreBoardBitmap.width * 100 / width).toFloat()
@@ -448,10 +388,6 @@ class CameraFragment: Fragment(), ConnectChecker,
         }
     }
 
-    override fun refresh() {
-        this.updateScoreBoard()
-    }
-
     override fun swipeUp() {
         zoomLevelHandler.increase()
     }
@@ -465,16 +401,14 @@ class CameraFragment: Fragment(), ConnectChecker,
     }
 
     override fun swipeRight() {
-        lifecycleScope.launch {
-            zoomLevelHandler.upper()
-        }
+        zoomLevelHandler.upper()
     }
 
-    private fun startTimer() {
+    private fun startStreamingTimer() {
         if (job == null || job?.isActive == false) {
             job = CoroutineScope(Dispatchers.Main).launch {
                 while (isActive) {
-                    this@CameraFragment.txStreamingTime.text = formatHourTime(timeElapsedInSeconds)
+                    binding.streamingTime.text = formatHourTime(timeElapsedInSeconds)
                     delay(1000)
                     timeElapsedInSeconds++
                 }
@@ -482,13 +416,13 @@ class CameraFragment: Fragment(), ConnectChecker,
         }
     }
 
-    private fun stopTimer() {
+    private fun stopStreamingTimer() {
         job?.cancel()
         job = null
         timeElapsedInSeconds = 0
     }
 
-    private fun ChangeZoomStrategyDialog() {
+    private fun changeZoomStrategyDialog() {
         val inflater = LayoutInflater.from(requireContext())
         val dialogView = inflater.inflate(R.layout.dialog_change_settings, null)
 

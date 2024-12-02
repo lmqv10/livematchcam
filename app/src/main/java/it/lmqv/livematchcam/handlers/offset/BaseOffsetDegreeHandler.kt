@@ -1,7 +1,7 @@
 package it.lmqv.livematchcam.handlers.offset
 
 import android.content.Context
-import it.lmqv.livematchcam.settings.SettingsRepository
+import it.lmqv.livematchcam.repositories.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

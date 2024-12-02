@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam
+package it.lmqv.livematchcam.views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.GestureDetector

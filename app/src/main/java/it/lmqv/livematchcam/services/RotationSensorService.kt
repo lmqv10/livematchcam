@@ -4,15 +4,12 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity.SENSOR_SERVICE
 import androidx.fragment.app.FragmentActivity
-import it.lmqv.livematchcam.settings.SettingsRepository
+import it.lmqv.livematchcam.repositories.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.math.abs
-import kotlin.math.log
 
 class RotationSensorService(private val activity: FragmentActivity) : SensorEventListener {
 
