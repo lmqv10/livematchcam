@@ -27,6 +27,7 @@ class StreamersViewModel(application: Application) : AndroidViewModel(applicatio
     fun setKeys(updatedKeys: List<KeyValue<String>>) {
         updateData(_keys, streamersSettingsRepository::setKeys, updatedKeys)
     }*/
+
     fun setCurrentKey(currentKey: String) {
         viewModelScope.launch {
             streamersSettingsRepository.setCurrentKey(currentKey)

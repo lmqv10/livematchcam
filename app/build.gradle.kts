@@ -1,4 +1,4 @@
-    plugins {
+plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
@@ -12,7 +12,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.003"
+        versionName = "1.1.000"
     }
 
     buildTypes {
@@ -34,12 +34,18 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
@@ -72,6 +78,16 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.com.google.code.gson)
     implementation(libs.org.jetbrains.kotlin.reflect)
+    implementation(libs.google.api.client.android)
+    implementation(libs.google.api.services.youtube)
+    implementation(libs.play.services.base)
+    implementation(libs.play.services.auth)
+    implementation(libs.com.squareup.okhttp3)
+    implementation(libs.google.http.client.android)
+    implementation(libs.google.http.client.gson)
+    implementation(libs.coil.kt)
+    implementation(libs.com.google.zxing.core)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

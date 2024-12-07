@@ -24,7 +24,6 @@ import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
-import it.lmqv.livematchcam.LiveStreamActivity
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.views.SwipeSurfaceView
 import it.lmqv.livematchcam.databinding.FragmentCameraBinding
@@ -36,6 +35,7 @@ import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
+import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetGapDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeWithCapHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
@@ -64,7 +64,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         fun getInstance(): CameraFragment = CameraFragment()
     }
 
-    private val streamersViewModel: StreamersViewModel by viewModels()
+    private val streamersViewModel: StreamersViewModel by activityViewModels()
     private lateinit var settingsRepository: SettingsRepository
 
     private lateinit var zoomLevelHandler: IZoomLevelHandler
@@ -139,7 +139,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         this.videoSource = genericStream.videoSource
 
         this.zoomLevelHandler = NoDebounceExtraSmoothZoomLevelHandler(requireContext(), videoSource)
-        this.offsetDegreeHandler = ProgressiveOffsetDegreeWithCapHandler(requireContext())
+        this.offsetDegreeHandler = LeftRightOffsetGapDegreeHandler(requireContext())
 
         return binding.root
     }
@@ -164,11 +164,6 @@ class CameraFragment: Fragment(), ConnectChecker,
         }
 
         binding.surfaceView.setCallbackListener(this)
-
-        (activity as? LiveStreamActivity)?.let {
-            binding.surfaceView.setOnTouchListener(it)
-        }
-
         binding.surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 if (!genericStream.isOnPreview) genericStream.startPreview(binding.surfaceView)
@@ -182,6 +177,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         })
 
         binding.bStartStop.setOnClickListener {
+            toast("${streamersViewModel.getServerURI()}")
             val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
             val title = dialogView.findViewById<TextView>(R.id.dialog_message)
             if (genericStream.isStreaming) {
@@ -428,11 +424,11 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerZoomStrategies = dialogView.findViewById<Spinner>(R.id.zoom_strategies)
         val optionsZoomStrategies = listOf(
+            KeyValue<KClass<*>>(NoDebounceExtraSmoothZoomLevelHandler::class, "smooth progressive zoom No Debounce (*)"),
+            KeyValue<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "progressive zoom No Debounce"),
+            KeyValue<KClass<*>>(SmoothZoomLevelHandler::class, "progressive zoom with Debounce"),
             KeyValue<KClass<*>>(NoDebounceZoomLevelHandler::class, "No Debounce"),
             KeyValue<KClass<*>>(SingleZoomLevelHandler::class, "Debounce"),
-            KeyValue<KClass<*>>(SmoothZoomLevelHandler::class, "progressive zoom with Debounce"),
-            KeyValue<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "progressive zoom No Debounce"),
-            KeyValue<KClass<*>>(NoDebounceExtraSmoothZoomLevelHandler::class, "smooth progressive zoom No Debounce")
         )
 
         val adapterZoomServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsZoomStrategies)
@@ -454,6 +450,7 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerOffsetStrategies = dialogView.findViewById<Spinner>(R.id.offset_strategies)
         val optionsOffsetStrategies = listOf(
+            KeyValue<KClass<*>>(LeftRightOffsetGapDegreeHandler::class, "Fixed Left/Right with Gap Degree (*)"),
             KeyValue<KClass<*>>(ProgressiveOffsetDegreeHandler::class, "Progressive Left/Right Degree multiplier"),
             KeyValue<KClass<*>>(ProgressiveOffsetDegreeWithCapHandler::class, "Progressive Left/Right Degree multiplier with cap (3x)"),
             KeyValue<KClass<*>>(LeftRightOffsetDegreeHandler::class, "Fixed Left/Right Degree")

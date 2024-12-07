@@ -34,15 +34,14 @@ class StreamersSettingsRepository(private val context: Context) {
             gson.fromJson(jsonString, listType)
         }
     }
-    suspend fun setServers(servers: List<KeyValue<String>>) {
+    /*suspend fun setServers(servers: List<KeyValue<String>>) {
         context.streamersSettingsDatastore.edit { preferences -> preferences[SERVERS] = gson.toJson(servers) }
-    }
+    }*/
 
     val getKeys: Flow<List<KeyValue<String>>> = context.streamersSettingsDatastore.data.map { preferences ->
         val jsonString = preferences[KEYS] ?: ("[" +
                 "{\"description\":\"Custom\",\"key\":\"\"}," +
-                "{\"description\":\"LeccoU15 Scheduled\",\"key\":\"yyx0-at5u-b330-4avg-4kx6\"}," +
-                "{\"description\":\"LeccoU15 One-Shot\",\"key\":\"fmjw-uqav-y4ua-xd4d-3zaw\"}," +
+                "{\"description\":\"LeccoU15\",\"key\":\"yyx0-at5u-b330-4avg-4kx6\"}," +
                 "{\"description\":\"Picco Scheduled\",\"key\":\"9vqy-cskt-f154-qxux-ep5v\"}" +
                 "]")
         if (jsonString == "") {

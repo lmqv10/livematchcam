@@ -2,6 +2,7 @@ package it.lmqv.livematchcam.extensions
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.text.Editable
 import android.text.InputFilter
@@ -10,9 +11,12 @@ import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.WindowManager
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
 import it.lmqv.livematchcam.R
 
 
@@ -112,5 +116,35 @@ fun Context.showEditStringDialog(@StringRes
         etTextValue.requestFocus()
     }
     dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+    dialog.show()
+}
+
+fun Context.showQRCode(content: String) {
+    var context = this
+    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_qrcode, null)
+    val dialog = AlertDialog.Builder(context, R.style.AppDialogTheme)
+        .setView(dialogView)
+        .setPositiveButton("Close") { dialog, _ ->
+            dialog.dismiss()
+        }
+        .create()
+
+    val qrCodeImageView = dialogView.findViewById<ImageView>(R.id.qr_code)
+    try {
+        val qrCodeWriter = QRCodeWriter()
+        val bitMatrix = qrCodeWriter.encode(content, BarcodeFormat.QR_CODE, 500, 500)
+        val width = bitMatrix.width
+        val height = bitMatrix.height
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+
+        for (x in 0 until width) {
+            for (y in 0 until height) {
+                bitmap.setPixel(x, y, if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
+            }
+        }
+        qrCodeImageView.setImageBitmap(bitmap)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
     dialog.show()
 }

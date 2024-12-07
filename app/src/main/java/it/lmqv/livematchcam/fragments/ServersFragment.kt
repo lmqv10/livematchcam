@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.fragments
 
+import android.content.Context
 import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.text.Editable
@@ -11,16 +12,17 @@ import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.databinding.FragmentServersBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.utils.KeyValue
 import it.lmqv.livematchcam.utils.getItemPositionByKey
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 interface IServersFragment {
-    fun getServerURI() : String
+    //fun getServerURI() : String
 }
 
 class ServersFragment : Fragment(), IServersFragment {
@@ -29,13 +31,13 @@ class ServersFragment : Fragment(), IServersFragment {
         fun newInstance() = ServersFragment()
     }
 
-    private val streamersViewModel: StreamersViewModel by viewModels()
+    private val streamersViewModel: StreamersViewModel by activityViewModels()
     private var _binding: FragmentServersBinding? = null
     private val binding get() = _binding!!
 
-    override fun getServerURI() : String {
+    /*fun getServerURI() : String {
         return streamersViewModel.getServerURI()
-    }
+    }*/
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,15 +74,15 @@ class ServersFragment : Fragment(), IServersFragment {
             streamersViewModel.currentKey.collect { currentKey ->
                 if (currentKey != null) {
                     val selectedPosition = binding.spinnerKeys.adapter.getItemPositionByKey(currentKey)
+                    binding.spinnerKeys
                     binding.spinnerKeys.setSelection(selectedPosition)
                     binding.edittextKey.text = Editable.Factory.getInstance().newEditable(currentKey)
-                    this.cancel()
                 }
             }
         }
 
         binding.spinnerServers.isEnabled = false
-        binding.spinnerServers.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        /*binding.spinnerServers.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 lifecycleScope.launch {
                     //val selectedServer = (parent.getItemAtPosition(position) as KeyValue<String>).key
@@ -88,7 +90,7 @@ class ServersFragment : Fragment(), IServersFragment {
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
-        }
+        }*/
 
         binding.spinnerKeys.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {

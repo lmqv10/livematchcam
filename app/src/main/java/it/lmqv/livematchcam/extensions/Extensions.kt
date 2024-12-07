@@ -16,8 +16,11 @@ import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import com.google.api.client.util.DateTime
 import it.lmqv.livematchcam.R
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 fun Service.toast(message: String, duration: Int = Toast.LENGTH_SHORT) {
@@ -89,4 +92,20 @@ fun formatTime(seconds: Int = 0): String {
 }
 fun formatHourTime(seconds: Int = 0): String {
     return String.format("%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60)
+}
+
+fun formatDate(dateTime: DateTime?, format: String = "EEEE dd MMMM yyyy HH:mm"): String {
+    var dateFormat = "-"
+    if (dateTime != null) {
+        val date = Date(dateTime.value)
+        val sdf = SimpleDateFormat(format, Locale.getDefault())
+        dateFormat = sdf.format(date)
+    }
+    return dateFormat
+}
+
+fun formatDateFromString(dateString: String, format: String = "ddd dd/MM/yyyy HH:mm"): String {
+    val sdf = SimpleDateFormat(format, Locale.getDefault())
+    val dateTime = DateTime.parseRfc3339(dateString)
+    return sdf.format(dateTime)
 }

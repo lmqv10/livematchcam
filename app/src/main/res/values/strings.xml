@@ -12,7 +12,8 @@
     <string name="hint_match_league">Serie C - Girone A</string>
     <string name="hint_home_team">AAA</string>
     <string name="hint_away_team">BBB</string>
-    <string name="hint_protocol">rtmp://yourendpoint/stream</string>
+    <string name="hint_protocol">rtmp://yourendpoint/streamname</string>
+    <string name="hint_live">https://youtube.com/live/xxxxxxxxxxx</string>
     <string name="hint_key">xxxx-xxxx-xxxx-xxxx-xxxx</string>
     <string name="left_degree">Left zoom at</string>
     <string name="right_degree">Right zoom at</string>
@@ -21,7 +22,10 @@
     <string name="zoom_offset">Zoom offset</string>
 
     <string name="auto_zoom">auto zoom</string>
+    <string name="streaming_url">Streaming URL</string>
+    <string name="live_url">Live URL</string>
     <string name="server">Server Configuration</string>
+    <string name="broadcasts">Broadcasts</string>
     <string name="match">Teams Configuration</string>
     <string name="_config_auto_zoom">Auto Zoom</string>
     <string name="sport">Sport</string>
@@ -100,6 +104,8 @@
     <string name="bitmap">Bitmap</string>
 
     <string name="description_placeholder">U15-Gir.A</string>
+    <string name="title_placeholder">Event Title</string>
+    <string name="date_placeholder">01/01/2025 10:00</string>
     <string name="time_placeholder">00:00</string>
     <string name="period_placeholder">1T</string>
     <string name="score_placeholder">0</string>
@@ -117,4 +123,10 @@
     <string name="confirm_start_message">Start streaming.\n Confirm?</string>
 
     <string name="reset_match_data_message">Reset match data.\n Confirm?</string>
+    <string name="title_activity_you_tube">YouTubeActivity</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+
+    <string name="google_sign_in">Google Sign in</string>
+    <string name="sign_out">Sign out</string>
 </resources>
