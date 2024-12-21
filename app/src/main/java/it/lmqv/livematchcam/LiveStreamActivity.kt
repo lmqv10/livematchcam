@@ -3,12 +3,14 @@ package it.lmqv.livematchcam
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import it.lmqv.livematchcam.fragments.CameraFragment
+import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
 
 class LiveStreamActivity : AppCompatActivity() {
 
@@ -47,5 +49,37 @@ class LiveStreamActivity : AppCompatActivity() {
         }
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                cameraFragment.updateZoom(ManualZoomLevel.None)
+                return true
+            }
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                cameraFragment.updateZoom(ManualZoomLevel.None)
+                return true
+            }
+        }
+        return super.onKeyUp(keyCode, event)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_HEADSETHOOK -> {
+                cameraFragment.updateZoom(ManualZoomLevel.None)
+                return true
+            }
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                cameraFragment.updateZoom(ManualZoomLevel.In)
+                return true
+            }
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                cameraFragment.updateZoom(ManualZoomLevel.Out)
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }

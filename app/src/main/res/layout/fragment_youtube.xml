@@ -149,6 +149,7 @@
                     android:layout_weight="8"
                     android:gravity="center"
                     android:textIsSelectable="true"
+                    android:autoLink="web"
                     android:padding="5dp"
                     android:textSize="12dp"
                     android:hint="@string/hint_live"

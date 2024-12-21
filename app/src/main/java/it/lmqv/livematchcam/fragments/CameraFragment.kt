@@ -16,7 +16,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
@@ -33,9 +32,14 @@ import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
+import it.lmqv.livematchcam.handlers.offset.LeftRightWithManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetGapDegreeHandler
+import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetGapNoCornerHandler
+import it.lmqv.livematchcam.handlers.offset.LeftRightWithAutoDepthZoomLevelHandler
+import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
+import it.lmqv.livematchcam.handlers.offset.ManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeWithCapHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
@@ -139,7 +143,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         this.videoSource = genericStream.videoSource
 
         this.zoomLevelHandler = NoDebounceExtraSmoothZoomLevelHandler(requireContext(), videoSource)
-        this.offsetDegreeHandler = LeftRightOffsetGapDegreeHandler(requireContext())
+        this.offsetDegreeHandler = LeftRightWithManualZoomLevelHandler(requireContext())
 
         return binding.root
     }
@@ -147,11 +151,9 @@ class CameraFragment: Fragment(), ConnectChecker,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        statusViewModel.angleDegree.observe(viewLifecycleOwner) { degree ->
-            val offset = this.offsetDegreeHandler.getOffsetByDegree(degree)
-            zoomLevelHandler.withOffset(offset) { zoomLevel ->
-                statusViewModel.setZoomLevel(zoomLevel)
-            }
+        statusViewModel.angleDegrees.observe(viewLifecycleOwner) { degrees ->
+            val offset = this.offsetDegreeHandler.getOffsetByDegrees(degrees)
+            onChangeZoom(offset)
         }
 
         val audioManager = requireActivity().getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -244,7 +246,6 @@ class CameraFragment: Fragment(), ConnectChecker,
             //genericStream.getStreamClient().setOnlyVideo(true)
             //genericStream.getStreamClient().setOnlyAudio(false)
         }
-
 
         binding.changeRotationStrategy.setOnClickListener {
             this.changeZoomStrategyDialog()
@@ -400,6 +401,20 @@ class CameraFragment: Fragment(), ConnectChecker,
         zoomLevelHandler.upper()
     }
 
+    fun updateZoom(zoomLevel: ManualZoomLevel) {
+        this.offsetDegreeHandler.manualZoomLevel(zoomLevel)
+        statusViewModel.angleDegrees.value?.let {
+            val offset = this.offsetDegreeHandler.getOffsetByDegrees(it)
+            onChangeZoom(offset)
+        }
+    }
+
+    private fun onChangeZoom(offset: Float) {
+        zoomLevelHandler.withOffset(offset) { zoomLevel ->
+            statusViewModel.setZoomLevel(zoomLevel)
+        }
+    }
+
     private fun startStreamingTimer() {
         if (job == null || job?.isActive == false) {
             job = CoroutineScope(Dispatchers.Main).launch {
@@ -424,11 +439,11 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerZoomStrategies = dialogView.findViewById<Spinner>(R.id.zoom_strategies)
         val optionsZoomStrategies = listOf(
-            KeyValue<KClass<*>>(NoDebounceExtraSmoothZoomLevelHandler::class, "smooth progressive zoom No Debounce (*)"),
-            KeyValue<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "progressive zoom No Debounce"),
-            KeyValue<KClass<*>>(SmoothZoomLevelHandler::class, "progressive zoom with Debounce"),
-            KeyValue<KClass<*>>(NoDebounceZoomLevelHandler::class, "No Debounce"),
-            KeyValue<KClass<*>>(SingleZoomLevelHandler::class, "Debounce"),
+            KeyValue<KClass<*>>(NoDebounceExtraSmoothZoomLevelHandler::class, "1. smooth progressive zoom No Debounce"),
+            KeyValue<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "2. progressive zoom No Debounce"),
+            KeyValue<KClass<*>>(SmoothZoomLevelHandler::class, "3. progressive zoom with Debounce"),
+            KeyValue<KClass<*>>(NoDebounceZoomLevelHandler::class, "4. No Debounce"),
+            KeyValue<KClass<*>>(SingleZoomLevelHandler::class, "5. Debounce"),
         )
 
         val adapterZoomServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsZoomStrategies)
@@ -450,10 +465,14 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerOffsetStrategies = dialogView.findViewById<Spinner>(R.id.offset_strategies)
         val optionsOffsetStrategies = listOf(
-            KeyValue<KClass<*>>(LeftRightOffsetGapDegreeHandler::class, "Fixed Left/Right with Gap Degree (*)"),
-            KeyValue<KClass<*>>(ProgressiveOffsetDegreeHandler::class, "Progressive Left/Right Degree multiplier"),
-            KeyValue<KClass<*>>(ProgressiveOffsetDegreeWithCapHandler::class, "Progressive Left/Right Degree multiplier with cap (3x)"),
-            KeyValue<KClass<*>>(LeftRightOffsetDegreeHandler::class, "Fixed Left/Right Degree")
+            KeyValue<KClass<*>>(LeftRightOffsetGapDegreeHandler::class, "1. Fixed Left/Right with Gap Degree"),
+            KeyValue<KClass<*>>(ManualZoomLevelHandler::class, "2. Manual Zoom In/Out (vol +/-)"),
+            KeyValue<KClass<*>>(LeftRightWithManualZoomLevelHandler::class, "3. Field Zone Left/Right Manual Depth In/Out (vol +/-)"),
+            KeyValue<KClass<*>>(LeftRightWithAutoDepthZoomLevelHandler::class, "4. Field Zone Left/Right Auto Up Down"),
+            KeyValue<KClass<*>>(LeftRightOffsetGapNoCornerHandler::class, "5. Fixed Left/Right with Gap Degree No Corner (2x angle)"),
+            KeyValue<KClass<*>>(ProgressiveOffsetDegreeHandler::class, "6. Progressive Left/Right Degree multiplier"),
+            KeyValue<KClass<*>>(ProgressiveOffsetDegreeWithCapHandler::class, "7. Progressive Left/Right Degree multiplier with cap (3x)"),
+            KeyValue<KClass<*>>(LeftRightOffsetDegreeHandler::class, "8. Fixed Left/Right Degree")
         )
 
         val adapterOffsetServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsOffsetStrategies)
@@ -462,11 +481,9 @@ class CameraFragment: Fragment(), ConnectChecker,
         spinnerOffsetStrategies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
-                val selectedOffsetHandler = selectedItem.key.constructors.first()?.call(requireContext())
-                if (selectedOffsetHandler != null)
-                {
-                    this@CameraFragment.offsetDegreeHandler = selectedOffsetHandler as IOffsetDegreeHandler
-                }
+                this@CameraFragment.offsetDegreeHandler.destroy()
+                val selectedOffsetHandler = selectedItem.key.constructors.first().call(requireContext())
+                this@CameraFragment.offsetDegreeHandler = selectedOffsetHandler as IOffsetDegreeHandler
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
@@ -488,4 +505,5 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         dialog.show()
     }
+
 }

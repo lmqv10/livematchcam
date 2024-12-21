@@ -1,7 +1,5 @@
 package it.lmqv.livematchcam.fragments
 
-import android.content.Context
-import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -15,7 +13,7 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.databinding.FragmentServersBinding
-import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.utils.KeyValue
 import it.lmqv.livematchcam.utils.getItemPositionByKey
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
@@ -49,20 +47,15 @@ class ServersFragment : Fragment(), IServersFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launch {
-            streamersViewModel.servers.collect { servers ->
-                val adapterServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, servers)
-                adapterServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding.spinnerServers.adapter = adapterServer
-                binding.spinnerServers.setSelection(0)
-
-                val currentServer = streamersViewModel.getCurrentServer()
-                binding.edittextServer.text = Editable.Factory.getInstance().newEditable(currentServer)
+        launchOnStarted {
+            streamersViewModel.currentServer.collect { currentServer ->
+                if (currentServer != null && binding.edittextServer.text.toString() != currentServer) {
+                    binding.edittextServer.text = Editable.Factory.getInstance().newEditable(currentServer)
+                }
             }
         }
 
-        lifecycleScope.launch {
+        launchOnStarted {
             streamersViewModel.keys.collect { keys ->
                 val adapterServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, keys)
                 adapterServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -70,18 +63,17 @@ class ServersFragment : Fragment(), IServersFragment {
             }
         }
 
-        lifecycleScope.launch {
+        launchOnStarted {
             streamersViewModel.currentKey.collect { currentKey ->
-                if (currentKey != null) {
+                if (currentKey != null && binding.edittextKey.text.toString() != currentKey) {
                     val selectedPosition = binding.spinnerKeys.adapter.getItemPositionByKey(currentKey)
-                    binding.spinnerKeys
                     binding.spinnerKeys.setSelection(selectedPosition)
                     binding.edittextKey.text = Editable.Factory.getInstance().newEditable(currentKey)
                 }
             }
         }
 
-        binding.spinnerServers.isEnabled = false
+        //binding.spinnerServers.isEnabled = false
         /*binding.spinnerServers.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 lifecycleScope.launch {
@@ -92,13 +84,29 @@ class ServersFragment : Fragment(), IServersFragment {
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }*/
 
+        binding.edittextServer.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.edittextServer.post { binding.edittextServer.selectAll() }
+            }
+        }
+        binding.edittextServer.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
+            override fun onTextChanged(newServer: CharSequence, start: Int, before: Int, count: Int) {
+                lifecycleScope.launch {
+                    val updatedServer = newServer.toString()
+                    streamersViewModel.setCurrentServer(updatedServer)
+                }
+            }
+            override fun afterTextChanged(p0: Editable?) { }
+        })
+
         binding.spinnerKeys.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 lifecycleScope.launch {
                     val selectedKey = (parent.getItemAtPosition(position) as KeyValue<String>).key
                     if (position > 0) {
                         streamersViewModel.setCurrentKey(selectedKey)
-                        binding.edittextKey.text = Editable.Factory.getInstance().newEditable(selectedKey)
+                        //binding.edittextKey.text = Editable.Factory.getInstance().newEditable(selectedKey)
                     }
                     binding.edittextKey.isEnabled = position == 0
                 }
@@ -116,7 +124,9 @@ class ServersFragment : Fragment(), IServersFragment {
             override fun onTextChanged(newKey: CharSequence, start: Int, before: Int, count: Int) {
                 lifecycleScope.launch {
                     val updatedKey = newKey.toString()
-                    streamersViewModel.setCurrentKey(updatedKey)
+                    if (binding.edittextKey.text.toString() != updatedKey) {
+                        streamersViewModel.setCurrentKey(updatedKey)
+                    }
                 }
             }
             override fun afterTextChanged(p0: Editable?) { }

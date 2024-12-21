@@ -8,10 +8,15 @@ class ProgressiveOffsetDegreeWithCapHandler(context: Context) :
     BaseOffsetDegreeHandler(context),
     IOffsetDegreeHandler {
 
+    override fun initialize() { }
+    override fun destroy() { }
+    override fun manualZoomLevel(zoomLevel: ManualZoomLevel) { }
+
     val cap: Float = 3.0f
 
-    override fun getOffsetByDegree(degree: Int) : Float {
+    override fun getOffsetByDegrees(degrees: IntArray) : Float {
         var offset : Float
+        var degree = degrees[0]
 
         if (degree < this.leftDegree) {
             offset = floor(degree.toDouble() / this.leftDegree).toFloat()

@@ -9,9 +9,9 @@ class StatusViewModel : ViewModel() {
     val bitrate: LiveData<Float> = _bitrate
     fun setBitrate(updatedBitrate: Float) { _bitrate.value = updatedBitrate }
 
-    private val _angleDegree = MutableLiveData(0)
-    val angleDegree: LiveData<Int> = _angleDegree
-    fun setAngleDegree(updatedAngle: Int) { _angleDegree.value = updatedAngle }
+    private val _angleDegrees = MutableLiveData(IntArray(3))
+    val angleDegrees: LiveData<IntArray> = _angleDegrees
+    fun setAngleDegrees(updatedDegrees: IntArray) { _angleDegrees.value = updatedDegrees }
 
     private val _zoomLevel = MutableLiveData(0.0f)
     val zoomLevel: LiveData<Float> = _zoomLevel

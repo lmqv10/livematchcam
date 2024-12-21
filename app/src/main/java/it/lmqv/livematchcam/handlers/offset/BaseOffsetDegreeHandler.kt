@@ -6,16 +6,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+enum class ManualZoomLevel {
+    In,
+    None,
+    Out
+}
+
 interface IOffsetDegreeHandler {
     //fun addOffsetAtDegree(offset: Float, degree: Int)
     //fun removeOffset(degree: Int)
     //fun clear()
     //fun getWithZoom(zoomLevel: Float) : Float
     //fun apply(degree: Int, delegate: (value: Float) -> Unit)
-    fun getOffsetByDegree(degree: Int) : Float
+
+    fun getOffsetByDegrees(degrees: IntArray) : Float
+    fun initialize()
+    fun destroy()
+    fun manualZoomLevel(zoomLevel: ManualZoomLevel)
 }
 
-abstract class BaseOffsetDegreeHandler(context: Context) : IOffsetDegreeHandler {
+abstract class BaseOffsetDegreeHandler(protected val context: Context) : IOffsetDegreeHandler {
     //private val updateDebouncer = Debouncer(500)
     //private val degreesOffset: MutableMap<Int, Float> = mutableMapOf()
 
@@ -43,6 +53,7 @@ abstract class BaseOffsetDegreeHandler(context: Context) : IOffsetDegreeHandler 
                 rightDegree = degree
             }
         }
+        initialize()
     }
 
     /*override fun addOffsetAtDegree(offset: Float, degree: Int) {
@@ -68,10 +79,13 @@ abstract class BaseOffsetDegreeHandler(context: Context) : IOffsetDegreeHandler 
             delegate(value)
         }
     }*/
+    abstract override fun initialize()
+    abstract override fun destroy()
+    abstract override fun manualZoomLevel(zoomLevel: ManualZoomLevel)
 
-    override fun getOffsetByDegree(degree: Int) : Float {
-        //val absDegree = abs(degree)
+    override fun getOffsetByDegrees(degrees: IntArray) : Float {
         var offset = 0.0f
+        var degree = degrees[0]
 
         if (degree < this.leftDegree || degree > this.rightDegree) {
             offset += this.offset

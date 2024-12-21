@@ -4,6 +4,7 @@ import android.content.Context
 import com.pedro.encoder.input.sources.video.Camera1Source
 import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.VideoSource
+import it.lmqv.livematchcam.extensions.Logd
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,27 +35,36 @@ class NoDebounceExtraSmoothZoomLevelHandler(
         val targetZoomLevel = min(this.upper, this.current + this.zoomOffset)
         val stepOffset = targetZoomLevel - this.currentCameraZoom
 
-        if (stepOffset != 0f) {
+        if (stepOffset != 0f && this.job == null || job?.isCompleted == true) {
             var startZoomLevel = this.currentCameraZoom
             this.currentCameraZoom = targetZoomLevel
             var signOffset = stepOffset.sign
             var start = 0f
             var end = (round( abs(stepOffset) * 10) / 10)
+            //Logd("Job:: start:${startZoomLevel} end:${targetZoomLevel}")
+            if (this.job == null || job?.isCompleted == true) {
+                val smoothOffset = offset / 10
+                job = scope.launch {
+                    //Logd("Job:: Start")
+                    while (start < end && startZoomLevel < upper) {
+                        start += smoothOffset
+                        startZoomLevel += (smoothOffset * signOffset)
+                        when (videoSource) {
+                            is Camera1Source -> {
+                                videoSource.setZoom(startZoomLevel.toInt())
+                            }
 
-            job?.cancel()
-            val smoothOffset = offset / 10
-            job = scope.launch {
-                while (start < end && startZoomLevel < upper) {
-                    start += smoothOffset
-                    startZoomLevel += (smoothOffset * signOffset)
-                    when (videoSource) {
-                        is Camera1Source -> { videoSource.setZoom(startZoomLevel.toInt()) }
-                        is Camera2Source -> { videoSource.setZoom(startZoomLevel) }
+                            is Camera2Source -> {
+                                videoSource.setZoom(startZoomLevel)
+                            }
+                        }
+                        ///delay(0)
                     }
-                    delay(0)
+                    //Logd("Job:: Stop")
                 }
             }
         }
+        //Logd("Current:: ${currentCameraZoom}")
         return this.currentCameraZoom
     }
 }

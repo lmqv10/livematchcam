@@ -7,8 +7,13 @@ class ProgressiveOffsetDegreeHandler(context: Context) :
     BaseOffsetDegreeHandler(context),
     IOffsetDegreeHandler {
 
-    override fun getOffsetByDegree(degree: Int) : Float {
+    override fun initialize() { }
+    override fun destroy() { }
+    override fun manualZoomLevel(zoomLevel: ManualZoomLevel) { }
+
+    override fun getOffsetByDegrees(degrees: IntArray) : Float {
         var offset : Float
+        var degree = degrees[0]
 
         if (degree < this.leftDegree) {
             offset = floor(degree.toDouble() / this.leftDegree).toFloat()

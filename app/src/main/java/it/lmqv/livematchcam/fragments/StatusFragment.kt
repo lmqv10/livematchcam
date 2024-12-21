@@ -1,6 +1,7 @@
 package it.lmqv.livematchcam.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import android.view.LayoutInflater
@@ -54,7 +55,8 @@ class StatusFragment : Fragment(),
             settingsRepository.autoZoomEnabled.collect { isEnabled ->
                 binding.autoZoomSwitch.isChecked = isEnabled
 
-                binding.angleDegree.isEnabled = isEnabled
+                binding.angleDegreeX.isEnabled = isEnabled
+                binding.angleDegreeZ.isEnabled = isEnabled
                 binding.zoomLevel.isEnabled = isEnabled
                 binding.resetRotation.isEnabled = isEnabled
                 binding.zoomOffset.isEnabled = isEnabled
@@ -66,18 +68,18 @@ class StatusFragment : Fragment(),
 
         this.launchOnStarted {
             settingsRepository.leftDegree.collect { degree ->
-                binding.leftDegree.text = degreeFormat("L", degree)
+                binding.leftDegree.text = degreeFormat(degree)
             }
         }
 
         this.launchOnStarted {
-            settingsRepository.rightDegree.collect { degree -> binding.rightDegree.text = degreeFormat("R", degree) }
+            settingsRepository.rightDegree.collect { degree -> binding.rightDegree.text = degreeFormat(degree) }
         }
 
         this.launchOnStarted {
             settingsRepository.initialZoom.collect { zoom ->
                 binding.initialZoom.text = singleDecimalFormat(zoom)
-                rotationSensorService.invalidate()
+                rotationSensorService.initialize()
             }
         }
 
@@ -91,8 +93,9 @@ class StatusFragment : Fragment(),
             binding.bitrate.text = bitrateFormat(data)
         })
 
-        statusViewModel.angleDegree.observe(viewLifecycleOwner, Observer { degree ->
-            binding.angleDegree.text = degreeFormat(abs(degree))
+        statusViewModel.angleDegrees.observe(viewLifecycleOwner, Observer { degrees ->
+            binding.angleDegreeX.text = degreeFormat(degrees[0])
+            binding.angleDegreeZ.text = degreeFormat(degrees[2])
         })
 
         statusViewModel.zoomLevel.observe(viewLifecycleOwner, Observer { data ->
@@ -112,8 +115,14 @@ class StatusFragment : Fragment(),
         binding.leftDegree.setOnClickListener {
             this.editDegrees()
         }
+        binding.arrowLeftDegree.setOnClickListener {
+            this.editDegrees()
+        }
 
         binding.rightDegree.setOnClickListener {
+            this.editDegrees()
+        }
+        binding.arrowRightDegree.setOnClickListener {
             this.editDegrees()
         }
 
@@ -137,12 +146,13 @@ class StatusFragment : Fragment(),
         this.rotationSensorService.unregister()
     }
 
-    override fun onDegreeChanged(degree: Int) {
-        statusViewModel.setAngleDegree(degree)
+    override fun onDegreesChanged(degrees: IntArray) {
+        statusViewModel.setAngleDegrees(degrees)
     }
 
     override fun onError(e: Exception) {
-        binding.angleDegree.text = "ERR"
+        binding.angleDegreeX.text = "ERR"
+        binding.angleDegreeZ.text = "ERR"
     }
 
     // TODO : Improve

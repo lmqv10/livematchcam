@@ -34,12 +34,12 @@
                 android:textColor="@color/appColor"
                 android:textStyle="bold" />
 
-            <Spinner
+            <!--Spinner
                 android:id="@+id/spinner_servers"
                 android:layout_marginBottom="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:spinnerMode="dialog" />
+                android:spinnerMode="dialog" /-->
 
             <EditText
                 android:id="@+id/edittext_server"
@@ -48,8 +48,8 @@
                 android:autofillHints="rtmpkey"
                 android:hint="@string/hint_protocol"
                 android:gravity="center"
-                android:enabled="false"
-                android:textColor="@color/appColor" />
+                android:imeOptions="actionDone"
+                android:textColor="@color/text_color_black_selector" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -75,7 +75,7 @@
                 android:hint="@string/hint_key"
                 android:gravity="center"
                 android:imeOptions="actionDone"
-                android:textColor="@color/appColor" />
+                android:textColor="@color/text_color_black_selector" />
 
         </LinearLayout>
     </LinearLayout>
