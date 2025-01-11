@@ -19,8 +19,8 @@ object SportsFactory : ISportsFactory {
 
     override fun get() : ISportsComponentsFactory {
         return when (_Sport) {
-            Sports.SOCCER -> SoccerFragmentsFactory
-            Sports.VOLLEY -> VolleyFragmentsFactory
+            Sports.SOCCER -> SoccerFragmentsFactory.newInstance()
+            Sports.VOLLEY -> VolleyFragmentsFactory.newInstance()
         }
     }
 }

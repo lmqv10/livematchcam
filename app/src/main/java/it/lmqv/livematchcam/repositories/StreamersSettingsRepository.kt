@@ -65,8 +65,8 @@ class StreamersSettingsRepository(private val context: Context) {
     val getCurrentServer: Flow<String?> = context.streamersSettingsDatastore.data.map {
             preferences -> preferences[CURRENT_SERVER]
     }
-    suspend fun setCurrentServer(currentServer: String) {
-        context.streamersSettingsDatastore.edit { preferences -> preferences[CURRENT_SERVER] = currentServer }
+    suspend fun setCurrentServer(currentServer: String?) {
+        context.streamersSettingsDatastore.edit { preferences -> preferences[CURRENT_SERVER] = currentServer ?: ""}
     }
 
     val getSport: Flow<Sports> = context.streamersSettingsDatastore.data.map { preferences ->

@@ -14,7 +14,8 @@ data class BroadcastItem(val imageURL: String,
                          val text: String,
                          val dateFormat: String,
                          val id: String,
-                         val boundStreamId: String)
+                         val boundStreamId: String,
+                         val lifeCycleStatus: String)
 
 class BroadcastsAdapter(
         private val context: Context,

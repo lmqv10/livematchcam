@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "54641307189",
+    "firebase_url": "https://livematchcam-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "livematchcam",
+    "storage_bucket": "livematchcam.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:54641307189:android:877bdbaaab5f1e5cf8cb7c",
+        "android_client_info": {
+          "package_name": "it.lmqv.livematchcam"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "54641307189-hefllsku4339v8p25oqdi5shshguvnj6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.lmqv.livematchcam",
+            "certificate_hash": "3f4c8e4c0ff71d186bc3702aad5479b81f59e7d3"
+          }
+        },
+        {
+          "client_id": "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhAWetgCNR2XMzwsMVBCUny4B7piZSvBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,12 +2,16 @@ package it.lmqv.livematchcam.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.api.services.youtube.model.LiveBroadcast
 import com.google.api.services.youtube.model.LiveStream
 import it.lmqv.livematchcam.adapters.BroadcastItem
+import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.repositories.StreamersSettingsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class YoutubeViewModel(application: Application) : AndroidViewModel(application) {
     private var streamersSettingsRepository = StreamersSettingsRepository(application)
@@ -25,7 +29,9 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
         val ingestionAddress = ingestionInfo?.ingestionAddress
         val streamName = ingestionInfo?.streamName!!
 
+        streamersSettingsRepository.setCurrentServer(ingestionAddress)
         streamersSettingsRepository.setCurrentKey(streamName)
+
         _streamURL.value = "${ingestionAddress}/${streamName}"
     }
     private val _liveURL = MutableStateFlow<String?>(null)
@@ -36,7 +42,9 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
 
     private val _liveBroadcasts = MutableStateFlow<List<LiveBroadcast>>(mutableListOf())
     val liveBroadcasts: StateFlow<List<LiveBroadcast>> = _liveBroadcasts
-    fun setLiveBroadcasts(liveBroadcasts: List<LiveBroadcast>) { _liveBroadcasts.value = liveBroadcasts }
+    fun setLiveBroadcasts(liveBroadcasts: List<LiveBroadcast>) {
+        _liveBroadcasts.value = liveBroadcasts
+    }
 
     private val _currentBroadcast = MutableStateFlow<BroadcastItem?>(null)
     val currentBroadcast: StateFlow<BroadcastItem?> = _currentBroadcast
@@ -47,5 +55,25 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
 
     private val _liveStreams = MutableStateFlow<List<LiveStream>>(mutableListOf())
     //val liveStreams: StateFlow<List<LiveStream>> = _liveStreams
-    fun setLiveStreams(liveStreams: List<LiveStream>) { _liveStreams.value = liveStreams }
+    fun setLiveStreams(liveStreams: List<LiveStream>) {
+        _liveStreams.value = liveStreams
+    }
+
+    private val _sport = MutableStateFlow(Sports.SOCCER)
+    val sport: StateFlow<Sports> = _sport
+    fun setSport(selectedSport: Sports) {
+        viewModelScope.launch(Dispatchers.IO) {
+            streamersSettingsRepository.setSport(selectedSport)
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            streamersSettingsRepository.getSport.collect {
+                if (_sport.value != it) {
+                    _sport.value = it
+                }
+            }
+        }
+    }
 }

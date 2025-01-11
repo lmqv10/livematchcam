@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.fragments.volley
 
+import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyControlBarBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
@@ -41,11 +43,11 @@ class VolleyControlBarFragment(scoreBoardFragment: VolleyScoreBoardFragment) : B
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        homeTeamViewModel.name.observe(viewLifecycleOwner) { team ->
-            binding.homeTeam.text = team
+        matchViewModel.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
+            binding.homeTeam.text = homeTeam
         }
-        awayTeamViewModel.name.observe(viewLifecycleOwner) { team ->
-            binding.awayTeam.text = team
+        matchViewModel.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
+            binding.awayTeam.text = guestTeam
         }
 
         scoreViewModel.matchLeague.observe(viewLifecycleOwner) { currentDescription ->
@@ -66,11 +68,12 @@ class VolleyControlBarFragment(scoreBoardFragment: VolleyScoreBoardFragment) : B
                 Set.SET5 -> binding.radioSet5.isChecked = true
             }
         }
-        homeTeamViewModel.logo.observe(viewLifecycleOwner) { color ->
-            binding.homeColor.setShirtByColor(color)
+        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
         }
-        awayTeamViewModel.logo.observe(viewLifecycleOwner) { color ->
-            binding.awayColor.setShirtByColor(color)
+        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
+            Logd("SportsFragment::homeColorHex: $guestColorHex")
+            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
         }
 
         binding.resetMatch.setOnClickListener {
@@ -112,27 +115,28 @@ class VolleyControlBarFragment(scoreBoardFragment: VolleyScoreBoardFragment) : B
 
         binding.homeColor.setOnClickListener {
             requireContext().showColorPickerDialog { color ->
-                homeTeamViewModel.setLogo(color)
+                matchViewModel.setHomeColorHex(color)
             }
         }
+
         binding.awayColor.setOnClickListener {
             requireContext().showColorPickerDialog { color ->
-                awayTeamViewModel.setLogo(color)
+                matchViewModel.setGuestColorHex(color)
             }
         }
 
         binding.homeTeam.setOnClickListener {
-            val teamName = binding.homeTeam.text.toString()
+            var teamName = binding.homeTeam.text.toString()
             requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                homeTeamViewModel.setName(updatedTeamName)
+                matchViewModel.setHomeTeam(updatedTeamName)
                 requireActivity().hideSystemUI()
             }
         }
 
         binding.awayTeam.setOnClickListener {
-            val teamName = binding.awayTeam.text.toString()
+            var teamName = binding.awayTeam.text.toString()
             requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                awayTeamViewModel.setName(updatedTeamName)
+                matchViewModel.setGuestTeam(updatedTeamName)
                 requireActivity().hideSystemUI()
             }
         }

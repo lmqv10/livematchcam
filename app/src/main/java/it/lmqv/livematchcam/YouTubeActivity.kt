@@ -1,22 +1,40 @@
 package it.lmqv.livematchcam
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.Scope
+import com.google.android.gms.nearby.Nearby
+import com.google.android.gms.nearby.connection.AdvertisingOptions
+import com.google.android.gms.nearby.connection.ConnectionInfo
+import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback
+import com.google.android.gms.nearby.connection.ConnectionResolution
+import com.google.android.gms.nearby.connection.ConnectionsClient
+import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
+import com.google.android.gms.nearby.connection.DiscoveryOptions
+import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback
+import com.google.android.gms.nearby.connection.Payload
+import com.google.android.gms.nearby.connection.PayloadCallback
+import com.google.android.gms.nearby.connection.PayloadTransferUpdate
+import com.google.android.gms.nearby.connection.Strategy
 import com.google.android.gms.tasks.Task
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
@@ -42,11 +60,23 @@ import org.json.JSONObject
 
 class YouTubeActivity : AppCompatActivity() {
 
+    private val SERVICE_ID: String = "cam.livematch.nearby"
+    private val TAG: String = "LMCamNearbyConnections"
+    private val STRATEGY: Strategy = Strategy.P2P_STAR
+    private lateinit var connectionsClient: ConnectionsClient
+
+    companion object {
+        private const val REQUEST_CODE_LOCATION_PERMISSION = 1
+        private const val REQUEST_CODE_BLUETOOTH_PERMISSION = 2
+        private const val REQUEST_CODE_PERMISSION = 3
+    }
+    private var connectedEndpointId: String = ""
+
     private lateinit var binding: ActivityYouTubeBinding
     private val RC_SIGN_IN = 9991
 
-    private var _AccessToken : String = ""
-    private var _AccountName : String = ""
+    private var accessToken : String = ""
+    private var accountName : String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +91,7 @@ class YouTubeActivity : AppCompatActivity() {
 
         binding.fab2.setOnClickListener { view ->
             CoroutineScope(Dispatchers.IO).launch {
-                getUserChannelInfo(_AccessToken)
+                getUserChannelInfo(accessToken)
             }
         }
         binding.fab3.setOnClickListener { view ->
@@ -70,6 +100,112 @@ class YouTubeActivity : AppCompatActivity() {
                 //streamsListYouTube()
                 //broadcastListYouTube()
             }
+        }
+
+        connectionsClient = Nearby.getConnectionsClient(this)
+
+        // Set OnClickListeners for buttons
+        binding.buttonDiscovery.setOnClickListener {
+            startDiscovery()
+        }
+
+        binding.buttonAdvertise.setOnClickListener {
+            startAdvertising()
+        }
+
+        binding.buttonSend.setOnClickListener {
+            // Example: sending a message to a connected device (replace endpointId with actual ID)
+            //val endpointId = "YourEndpointIdHere"
+            sendMessage("Hello from me!")
+        }
+
+        checkPermissions()
+    }
+
+    private fun checkPermissions() {
+        /*ActivityCompat.requestPermissions(this,
+            arrayOf(Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN),
+            REQUEST_CODE_BLUETOOTH_PERMISSION)
+        */
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val permissions = arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            )
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSION)
+        /*} else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN),
+                REQUEST_CODE_LOCATION_PERMISSION
+            )
+        }*/
+
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Verifica i permessi di Posizione
+            /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+                // Richiedi il permesso di Posizione
+                ActivityCompat.requestPermissions(this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                    REQUEST_CODE_LOCATION_PERMISSION)
+            }*/
+
+            // Verifica i permessi per il Bluetooth
+            /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN)
+                != PackageManager.PERMISSION_GRANTED) {
+                // Richiedi i permessi di Bluetooth
+                ActivityCompat.requestPermissions(this,
+                    arrayOf(Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN),
+                    REQUEST_CODE_BLUETOOTH_PERMISSION)
+            }*/
+        //}
+    }
+
+    // Gestisci la risposta dell'utente quando si richiedono i permessi
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            REQUEST_CODE_PERMISSION -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permessi concessi", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Permessi negati", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            /*REQUEST_CODE_LOCATION_PERMISSION -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permesso di Posizione concesso
+                    Toast.makeText(this, "Posizione concessa", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Permesso di Posizione negato
+                    Toast.makeText(this, "Permesso di posizione negato", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            REQUEST_CODE_BLUETOOTH_PERMISSION -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permessi di Bluetooth concessi
+                    Toast.makeText(this, "Bluetooth concessa", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Permessi di Bluetooth negati
+                    Toast.makeText(this, "Permessi di Bluetooth negati", Toast.LENGTH_SHORT).show()
+                }
+            }*/
         }
     }
 
@@ -80,15 +216,15 @@ class YouTubeActivity : AppCompatActivity() {
             // User is already signed in
             val email = account.email
             val displayName = account.displayName
-            _AccountName = account.account?.name ?: ""
+            accountName = account.account?.name ?: ""
             //val idToken = account.serverAuthCode
             CoroutineScope(Dispatchers.IO).launch {
-                _AccessToken = getAccessToken(account, this@YouTubeActivity).toString()
+                accessToken = getAccessToken(account, this@YouTubeActivity).toString()
                 streamsListYouTube()
                 broadcastListYouTube()
             }
         } else {
-            toast("User is not signed in")
+            //toast("User is not signed in")
         }
 
         return super.onCreateView(name, context, attrs)
@@ -102,7 +238,7 @@ class YouTubeActivity : AppCompatActivity() {
             val credential = GoogleAccountCredential.usingOAuth2(
                 applicationContext, listOf("https://www.googleapis.com/auth/youtube")
             )
-            credential.selectedAccountName = _AccountName /* Set the authenticated user's account name */
+            credential.selectedAccountName = accountName /* Set the authenticated user's account name */
 
             val youtubeService = YouTube.Builder(transport, jsonFactory, credential)
                 .setApplicationName("LiveMatchCam")
@@ -135,7 +271,7 @@ class YouTubeActivity : AppCompatActivity() {
             val credential = GoogleAccountCredential.usingOAuth2(
                 applicationContext, listOf("https://www.googleapis.com/auth/youtube")
             )
-            credential.selectedAccountName = _AccountName /* Set the authenticated user's account name */
+            credential.selectedAccountName = accountName /* Set the authenticated user's account name */
 
             val youtubeService = YouTube.Builder(transport, jsonFactory, credential)
                 .setApplicationName("LiveMatchCam")
@@ -168,7 +304,7 @@ class YouTubeActivity : AppCompatActivity() {
             val credential = GoogleAccountCredential.usingOAuth2(
                 applicationContext, listOf("https://www.googleapis.com/auth/youtube")
             )
-            credential.selectedAccountName = _AccountName /* Set the authenticated user's account name */
+            credential.selectedAccountName = accountName /* Set the authenticated user's account name */
 
             val youtubeService = YouTube.Builder(transport, jsonFactory, credential)
                 .setApplicationName("LiveMatchCam")
@@ -264,9 +400,9 @@ class YouTubeActivity : AppCompatActivity() {
         if (task.isSuccessful) {
             val account = task.result
             CoroutineScope(Dispatchers.IO).launch {
-                _AccessToken = getAccessToken(account, this@YouTubeActivity).toString()
-                toast("accessToken::" + _AccessToken)
-                Logd("TOKEN::" + _AccessToken)
+                accessToken = getAccessToken(account, this@YouTubeActivity).toString()
+                toast("accessToken::" + accessToken)
+                Logd("TOKEN::" + accessToken)
             }
             //_AccessToken = account.idToken!!
             val tes = account.email
@@ -325,7 +461,7 @@ class YouTubeActivity : AppCompatActivity() {
 
     }
 
-    fun getAccessToken(account: GoogleSignInAccount, context: Context): String? {
+    private fun getAccessToken(account: GoogleSignInAccount, context: Context): String? {
         return try {
             account.account?.let {
                 GoogleAuthUtil.getToken(
@@ -343,4 +479,91 @@ class YouTubeActivity : AppCompatActivity() {
             null
         }
     }
+
+    /* NEARBY */
+    private fun startAdvertising() {
+        val advertisingOptions = AdvertisingOptions.Builder().setStrategy(STRATEGY).build()
+
+        toast("Advertising starting")
+        connectionsClient.startAdvertising(
+            "DeviceName",
+            SERVICE_ID,
+            connectionLifecycleCallback,
+            advertisingOptions
+        ).addOnSuccessListener {
+            toast("Advertising started")
+        }.addOnFailureListener { e ->
+            toast("Failed to start advertising ${e.message}")
+        }
+    }
+
+    private fun startDiscovery() {
+        val discoveryOptions = DiscoveryOptions.Builder().setStrategy(STRATEGY).build()
+
+        toast( "Discovery starting")
+        connectionsClient.startDiscovery(
+            SERVICE_ID,
+            endpointDiscoveryCallback,
+            discoveryOptions
+        ).addOnSuccessListener {
+            toast("Discovery started")
+        }.addOnFailureListener { e ->
+            toast("Failed to start discovery ${e.message}")
+        }
+    }
+
+    private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
+        override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
+            toast("Connection initiated with ${connectionInfo.endpointName}")
+            connectionsClient.acceptConnection(endpointId, payloadCallback)
+        }
+
+        override fun onConnectionResult(endpointId: String, resolution: ConnectionResolution) {
+            if (resolution.status.isSuccess) {
+                toast("Connected to $endpointId")
+            } else {
+                toast( "Connection failed")
+            }
+        }
+
+        override fun onDisconnected(endpointId: String) {
+            toast( "Disconnected from $endpointId")
+        }
+    }
+
+    private val endpointDiscoveryCallback = object : EndpointDiscoveryCallback() {
+        override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
+            toast("Endpoint found: $endpointId")
+            connectedEndpointId = endpointId
+            connectionsClient.requestConnection("DeviceName", endpointId, connectionLifecycleCallback)
+        }
+
+        override fun onEndpointLost(endpointId: String) {
+            toast("Endpoint lost: $endpointId")
+        }
+    }
+
+    private val payloadCallback = object : PayloadCallback() {
+        override fun onPayloadReceived(endpointId: String, payload: Payload) {
+            if (payload.type == Payload.Type.BYTES) {
+                val byteArray = payload.asBytes()
+                val receivedMessage = byteArray?.let {
+                    String(it)
+                } ?: "Received message is null"
+
+                toast("Message received: $receivedMessage from $endpointId")
+                //Toast.makeText(this@YouTubeActivity, "Received: $receivedMessage", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
+            // Optional: Handle progress updates for large file transfers.
+        }
+    }
+
+    fun sendMessage(message: String) {
+        val payload = Payload.fromBytes(message.toByteArray())
+        connectionsClient.sendPayload(connectedEndpointId, payload)
+    }
+    /* NEARBY */
 }

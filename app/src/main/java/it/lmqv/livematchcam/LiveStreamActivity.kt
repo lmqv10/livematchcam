@@ -21,10 +21,7 @@ class LiveStreamActivity : AppCompatActivity() {
         setContentView(R.layout.activity_live_stream)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
-        supportFragmentManager
-            .beginTransaction()
-            .add(R.id.container, cameraFragment)
-            .commit()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         supportActionBar?.hide()
 
@@ -48,7 +45,15 @@ class LiveStreamActivity : AppCompatActivity() {
             )
         }
 
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.container, cameraFragment)
+            .commit()
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
@@ -82,4 +87,12 @@ class LiveStreamActivity : AppCompatActivity() {
         }
         return super.onKeyDown(keyCode, event)
     }
+
+    /*override fun onBackPressed() {
+        AlertDialog.Builder(this)
+            .setMessage("Are you sure you want to exit?")
+            .setPositiveButton("Yes") { _, _ -> finish() }
+            .setNegativeButton("No", null)
+            .show()
+    }*/
 }

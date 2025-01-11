@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.google.services)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
@@ -12,7 +13,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.2.000"
+        versionName = "1.3.001"
     }
 
     buildTypes {
@@ -87,6 +88,9 @@ dependencies {
     implementation(libs.google.http.client.gson)
     implementation(libs.coil.kt)
     implementation(libs.com.google.zxing.core)
+    implementation(libs.com.google.android.gms)
+    implementation(libs.com.google.firebase.bom)
+    implementation(libs.com.google.firebase.database.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

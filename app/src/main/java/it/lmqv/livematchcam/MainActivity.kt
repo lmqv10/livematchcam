@@ -1,7 +1,6 @@
 package it.lmqv.livematchcam
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -9,13 +8,13 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.util.AttributeSet
 import android.view.Menu
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -23,8 +22,6 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.Scope
 import it.lmqv.livematchcam.databinding.ActivityMainBinding
 import it.lmqv.livematchcam.fragments.IServersFragment
 import it.lmqv.livematchcam.fragments.ServersFragment
@@ -37,10 +34,11 @@ class MainActivity : AppCompatActivity() {
 
     private val serverFragment : IServersFragment = ServersFragment.newInstance()
     private val youtubeFragment : IServersFragment = YoutubeFragment.newInstance()
-    private val sportsFragment : SportsFragment = SportsFragment.newInstance()
+    //private val sportsFragment : SportsFragment = SportsFragment.newInstance()
 
     private lateinit var binding: ActivityMainBinding
     private val googleViewModel: GoogleViewModel by viewModels()
+    //private val youtubeViewModel: YoutubeViewModel by viewModels()
 
     private val permissions = mutableListOf(
         Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA,
@@ -50,40 +48,33 @@ class MainActivity : AppCompatActivity() {
         }
     }.toTypedArray()
 
-    private val GOOGLE_APIS_AUTH_YOUTUBE : String = "https://www.googleapis.com/auth/youtube"
-    private val CLIENT_ID : String = "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com"
-
-    private val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestEmail()
-        .requestScopes(Scope(GOOGLE_APIS_AUTH_YOUTUBE))
-        .requestServerAuthCode(CLIENT_ID, true)
-        .build()
-
-    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            if (task.isSuccessful) {
-                val account = task.result
-                googleViewModel.setAccount(account.account)
-                //toast("sign in as ${account.account?.name}")
-            } else {
-                // Handle sign-in failure.
-                //toast(task.exception?.message.toString())
-            }
-            invalidateOptionsMenu()
-        } else {
-            //toast("googleSignInLauncher::failed::${result.resultCode}")
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            window.insetsController?.let { controller ->
+                controller.hide(WindowInsets.Type.systemBars())
+                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else {
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+            )
+
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            )
+        }
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -91,29 +82,79 @@ class MainActivity : AppCompatActivity() {
             supportActionBar!!.setDisplayShowTitleEnabled(false) // Hide default title if needed
         }
 
-        supportFragmentManager.beginTransaction()
-            .add(R.id.sportsContainer, sportsFragment).commit()
-
         transitionAnim(true)
         binding.tvVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
 
         binding.activityLive.setOnClickListener {
+            //Logd("MainActivity::startActivity::LiveStreamActivity")
+            //FirebaseDataManager.getInstance().removeMatchValueEventListener()
             startActivity(Intent(this, LiveStreamActivity::class.java))
         }
-        binding.activityYoutube.setOnClickListener {
-            startActivity(Intent(this, YouTubeActivity::class.java))
-        }
 
-        val account = GoogleSignIn.getLastSignedInAccount(this)
-        if (account != null) {
-            googleViewModel.setAccount(account.account)
-            //toast("sign in as ${account.account?.name}")
-        }
+        /*binding.activityYoutube.setOnClickListener {
+            startActivity(Intent(this, YouTubeActivity::class.java))
+        }*/
+
+        initializeData()
 
         requestPermissions()
+
+        /*val database = FirebaseDatabase.getInstance()
+        val ref = database.getReference("teams")
+        ref.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (userSnapshot in snapshot.children) {
+                    val team = userSnapshot.getValue(Team::class.java)
+                    Logd("team:" + team!!.name)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Logd("Failed to read data" + error.toException())
+            }
+        })
+
+        val firebaseApp = FirebaseApp.getInstance()
+        val options: FirebaseOptions = firebaseApp.options
+
+        val apiKey = options.apiKey
+        val appId = options.applicationId
+        val projectId = options.projectId
+        val databaseUrl = options.databaseUrl
+        */
+
+        /*FirebaseDataManager.getInstance()
+            .fetchAccountById("846af82686b3429a85e9a2d9a14ed79a") { account ->
+            //.fetchAccountById("99261ce7d8b94fc395301f57d9e61ffd") { account ->
+                if (account != null) {
+                    Log.d("Firebase", "Account Name: ${account.name}")
+                    Log.d("Firebase", "Admin: ${account.admin}")
+                    Log.d("Firebase", "Channels: ${account.channels?.joinToString()}")
+
+                    for (match in account.matches) {
+                        var score = match.value.score
+                        when (score) {
+                            is FootballScore -> Log.d("Firebase", "Match: ${score.home}-${score.away} | ${score.period} | ${score.currentPeriodStartTimestamp}")
+                            is VolleyScore -> {
+                                var sets = score.sets
+                                Log.d("Firebase", "CurrentSet: ${score.currentSet} - ${score.sets}")
+                            }
+
+                        }
+                    }
+                } else {
+                    Log.e("Firebase", "Failed to fetch account.")
+                }
+            }
+        */
+
     }
 
-    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+    override fun onStart() {
+        super.onStart()
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.sportsContainer, SportsFragment.newInstance()).commit()
+
         lifecycleScope.launch {
             googleViewModel.account.collect { account ->
                 if (account != null) {
@@ -125,13 +166,42 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        return super.onCreateView(name, context, attrs)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
 
-        val signInItem = menu.findItem(R.id.menu_sign_in)
+        val accountItem = menu.findItem(R.id.menu_account)
+        val accountActionView = layoutInflater.inflate(R.layout.menu_item, null)
+        accountItem?.setActionView(accountActionView)
+
+        val accountItemText = accountActionView.findViewById<TextView>(R.id.menu_text);
+        //accountItemText.text = getString(R.string.google_sign_in)
+        accountItemText.setOnClickListener { _ ->
+            startActivity(Intent(this@MainActivity, AccountActivity::class.java))
+        }
+
+        val accountItemIcon = accountActionView.findViewById<ImageView>(R.id.menu_icon)
+        accountItemIcon.setImageResource(R.drawable.user_account)
+        accountItemIcon.setOnClickListener { _ ->
+            startActivity(Intent(this@MainActivity, AccountActivity::class.java))
+        }
+
+        val nearbyItem = menu.findItem(R.id.menu_nearby)
+        val nearbyActionView = layoutInflater.inflate(R.layout.menu_item, null)
+        nearbyItem?.setActionView(nearbyActionView)
+
+        nearbyActionView
+            .findViewById<TextView>(R.id.menu_text)
+            .text = getString(R.string.google_nearby)
+
+        val nearbyItemIcon = nearbyActionView.findViewById<ImageView>(R.id.menu_icon)
+        nearbyItemIcon.setImageResource(R.drawable.google_nearby)
+        nearbyItemIcon.setOnClickListener { _ ->
+            startActivity(Intent(this@MainActivity, YouTubeActivity::class.java))
+        }
+
+        /*val signInItem = menu.findItem(R.id.menu_sign_in)
         val signInActionView = layoutInflater.inflate(R.layout.menu_item, null)
         signInItem?.isVisible = false
         signInItem?.setActionView(signInActionView)
@@ -166,22 +236,36 @@ class MainActivity : AppCompatActivity() {
                 googleViewModel.setAccount(null)
                 invalidateOptionsMenu()
             }
-        }
+        }*/
+
         return true
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val account = googleViewModel.account.value
-        val isLoggedIn = account != null
-
-        menu?.findItem(R.id.menu_sign_in)?.isVisible = !isLoggedIn
-        menu?.findItem(R.id.menu_sign_out)?.isVisible = isLoggedIn
-        menu?.findItem(R.id.menu_sign_out)
+        menu?.findItem(R.id.menu_account)
             ?.actionView?.findViewById<TextView>(R.id.menu_text)
-            ?.text = account?.name ?: ""
+            ?.text = account?.name ?: getString(R.string.google_sign_in)
 
         return super.onPrepareOptionsMenu(menu)
     }
+
+    override fun onResume() {
+        super.onResume()
+        initializeData()
+        invalidateOptionsMenu()
+    }
+
+    private fun initializeData() {
+        val account = GoogleSignIn.getLastSignedInAccount(this)
+        if (account != null) {
+            googleViewModel.setAccount(account.account)
+            //toast("sign in as ${account.account?.name}")
+        } else {
+            googleViewModel.setAccount(null)
+        }
+    }
+
 
     @Suppress("DEPRECATION")
     private fun transitionAnim(isOpen: Boolean) {

@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.fragments.soccer
 
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.view.LayoutInflater
@@ -7,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentSoccerControlBarBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
@@ -32,60 +34,60 @@ class SoccerControlBarFragment(private val scoreBoardFragment: SoccerScoreBoardF
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        homeTeamViewModel.name.observe(viewLifecycleOwner) { team ->
-            binding.homeTeam.text = Editable.Factory.getInstance().newEditable(team);
+        matchViewModel.homeTeam.observe(viewLifecycleOwner) { team ->
+            binding.homeTeam.text = team
         }
-        homeTeamViewModel.score.observe(viewLifecycleOwner) { score ->
-            binding.homeScore.text = score.toString()
-        }
-
-        awayTeamViewModel.name.observe(viewLifecycleOwner) { team ->
+        matchViewModel.guestTeam.observe(viewLifecycleOwner) { team ->
             binding.awayTeam.text = team
         }
 
-        awayTeamViewModel.score.observe(viewLifecycleOwner) { score ->
+        matchViewModel.homeScore.observe(viewLifecycleOwner) { score ->
+            binding.homeScore.text = score.toString()
+        }
+        matchViewModel.guestScore.observe(viewLifecycleOwner) { score ->
             binding.awayScore.text = score.toString()
         }
 
-        homeTeamViewModel.logo.observe(viewLifecycleOwner) { color ->
-            binding.homeColor.setShirtByColor(color)
+        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
         }
-        awayTeamViewModel.logo.observe(viewLifecycleOwner) { color ->
-            binding.awayColor.setShirtByColor(color)
+        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
+            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
         }
 
+        //Logd("SoccerControlBarFragment::matchViewModelID: ${matchViewModel.instanceId}")
         binding.homeScoreMinus.setOnClickListener {
-            homeTeamViewModel.incrementScore(-1)
+            matchViewModel.incrementHomeScore(-1)
         }
 
         binding.homeScoreAdd.setOnClickListener {
-            homeTeamViewModel.incrementScore()
+            matchViewModel.incrementHomeScore()
         }
 
         binding.awayScoreMinus.setOnClickListener {
-            awayTeamViewModel.incrementScore(-1)
+            matchViewModel.incrementGuestScore(-1)
         }
 
         binding.awayScoreAdd.setOnClickListener {
-            awayTeamViewModel.incrementScore()
+            matchViewModel.incrementGuestScore()
         }
 
         binding.homeColor.setOnClickListener {
             requireContext().showColorPickerDialog { color ->
-                homeTeamViewModel.setLogo(color)
+                matchViewModel.setHomeColorHex(color)
             }
         }
 
         binding.awayColor.setOnClickListener {
             requireContext().showColorPickerDialog { color ->
-                awayTeamViewModel.setLogo(color)
+                matchViewModel.setGuestColorHex(color)
             }
         }
 
         binding.homeTeam.setOnClickListener {
             var teamName = binding.homeTeam.text.toString()
             requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                homeTeamViewModel.setName(updatedTeamName)
+                matchViewModel.setHomeTeam(updatedTeamName)
                 requireActivity().hideSystemUI()
             }
         }
@@ -93,7 +95,7 @@ class SoccerControlBarFragment(private val scoreBoardFragment: SoccerScoreBoardF
         binding.awayTeam.setOnClickListener {
             var teamName = binding.awayTeam.text.toString()
             requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                awayTeamViewModel.setName(updatedTeamName)
+                matchViewModel.setGuestTeam(updatedTeamName)
                 requireActivity().hideSystemUI()
             }
         }

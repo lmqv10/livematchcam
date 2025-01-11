@@ -59,6 +59,9 @@ fun Drawable.setColorFilter(@ColorInt color: Int) {
     }
 }
 
+fun Int.toArgbHex(): String {
+    return String.format("#%08X", this)
+}
 
 
 fun singleDecimalFormat(value:Float) : String {

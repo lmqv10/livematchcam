@@ -20,12 +20,15 @@ import androidx.lifecycle.lifecycleScope
 import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
+import com.pedro.encoder.input.sources.video.Camera1Source
+import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.views.SwipeSurfaceView
 import it.lmqv.livematchcam.databinding.FragmentCameraBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
@@ -49,8 +52,7 @@ import it.lmqv.livematchcam.handlers.zoom.NoDebounceZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.SingleZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.SmoothZoomLevelHandler
 import it.lmqv.livematchcam.utils.KeyValue
-import it.lmqv.livematchcam.viewmodels.AwayScoreBoardViewModel
-import it.lmqv.livematchcam.viewmodels.HomeScoreBoardViewModel
+import it.lmqv.livematchcam.viewmodels.MatchViewModel
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -81,8 +83,8 @@ class CameraFragment: Fragment(), ConnectChecker,
     private lateinit var scoreBoardFragment: IScoreBoardFragment
     private var sportsFactory = SportsFactory
 
-    private val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
-    private val awayTeamViewModel: AwayScoreBoardViewModel by activityViewModels()
+    //private val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
+    //private val awayTeamViewModel: AwayScoreBoardViewModel by activityViewModels()
 
     private var _binding: FragmentCameraBinding? = null
     private val binding get() = _binding!!
@@ -120,7 +122,7 @@ class CameraFragment: Fragment(), ConnectChecker,
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
 
         settingsRepository = SettingsRepository(requireContext())
@@ -142,8 +144,18 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         this.videoSource = genericStream.videoSource
 
+        when ( this.videoSource) {
+            is Camera1Source -> {
+                (this.videoSource as Camera1Source).enableVideoStabilization()
+            }
+            is Camera2Source -> {
+                (this.videoSource as Camera2Source).enableVideoStabilization()
+                (this.videoSource as Camera2Source).enableOpticalVideoStabilization()
+            }
+        }
+
         this.zoomLevelHandler = NoDebounceExtraSmoothZoomLevelHandler(requireContext(), videoSource)
-        this.offsetDegreeHandler = LeftRightWithManualZoomLevelHandler(requireContext())
+        this.offsetDegreeHandler = ManualZoomLevelHandler(requireContext())
 
         return binding.root
     }
@@ -269,11 +281,10 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         this.scoreBoardFragment.setOnUpdate(this)
 
-        homeTeamViewModel.setLogo(Color.WHITE)
+        /*homeTeamViewModel.setLogo(Color.WHITE)
         awayTeamViewModel.setLogo(Color.BLACK)
-
         homeTeamViewModel.setName(getString(R.string.hint_home_team))
-        awayTeamViewModel.setName(getString(R.string.hint_away_team))
+        awayTeamViewModel.setName(getString(R.string.hint_away_team))*/
 
         refresh()
     }

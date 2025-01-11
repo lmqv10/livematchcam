@@ -6,8 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.viewmodels.AwayScoreBoardViewModel
-import it.lmqv.livematchcam.viewmodels.HomeScoreBoardViewModel
+import it.lmqv.livematchcam.viewmodels.MatchViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,8 +35,9 @@ abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment {
         this.onUpdateCallback = callback
     }
 
-    protected val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
-    protected val awayTeamViewModel: AwayScoreBoardViewModel by activityViewModels()
+    protected val matchViewModel: MatchViewModel by activityViewModels()
+    //protected val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
+    //protected val awayTeamViewModel: AwayScoreBoardViewModel by activityViewModels()
 
     private var timeElapsedInSeconds = 0
     private var job: Job? = null

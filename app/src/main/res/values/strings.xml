@@ -26,14 +26,21 @@
     <string name="live_url">Live URL</string>
     <string name="server">Server Configuration</string>
     <string name="broadcasts">Broadcasts</string>
+    <string name="account">Account</string>
+    <string name="account_key">Account Key</string>
     <string name="match">Teams Configuration</string>
     <string name="_config_auto_zoom">Auto Zoom</string>
     <string name="sport">Sport</string>
+    <string name="match_info">Match info</string>
     <string name="stream_url">Stream URL</string>
     <string name="stream_key">Stream Key</string>
     <string name="zoom_strategy">Zoom Strategy</string>
     <string name="offset_strategy">Offset Strategy</string>
     <string name="choose_color">Choose shirt color</string>
+    <string name="handle_streamers">Streamers</string>
+    <string name="add_remove">Add/Remove</string>
+    <string name="stream">Stream</string>
+    <string name="remote_score">Remote Score</string>
 
     <string name="match_league">Match Description</string>
     <string name="team_name">Team Name</string>
@@ -127,6 +134,8 @@
     <string name="tab_text_1">Tab 1</string>
     <string name="tab_text_2">Tab 2</string>
 
+    <string name="google_nearby">Near By</string>
     <string name="google_sign_in">Google Sign in</string>
+    <string name="account_key_placeholder">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</string>
     <string name="sign_out">Sign out</string>
 </resources>

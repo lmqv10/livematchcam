@@ -32,6 +32,9 @@ googleHttpClientAndroid="1.45.2"
 googleHttpClientGson="1.45.2"
 coil="2.7.0"
 zxing="3.5.2"
+nearby="19.3.0"
+firebase-bom="33.8.0"
+database-ktx="21.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -72,6 +75,9 @@ google-http-client-android = { group ="com.google.http-client", name = "google-h
 google-http-client-gson = { group ="com.google.http-client", name = "google-http-client-gson", version.ref="googleHttpClientGson" }
 coil-kt = { group ="io.coil-kt", name = "coil", version.ref="coil" }
 com-google-zxing-core = { group ="com.google.zxing", name = "core", version.ref="zxing" }
+com-google-android-gms = { group ="com.google.android.gms", name = "play-services-nearby", version.ref="nearby" }
+com-google-firebase-bom = { group ="com.google.firebase", name = "firebase-bom", version.ref="firebase-bom" }
+com-google-firebase-database-ktx = { group ="com.google.firebase", name = "firebase-database-ktx", version.ref="database-ktx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

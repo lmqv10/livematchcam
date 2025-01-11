@@ -3,19 +3,23 @@ package it.lmqv.livematchcam.factories
 import it.lmqv.livematchcam.fragments.volley.VolleyControlBarFragment
 import it.lmqv.livematchcam.fragments.volley.VolleyScoreBoardFragment
 
-object VolleyFragmentsFactory : ISportsComponentsFactory {
+class VolleyFragmentsFactory : ISportsComponentsFactory {
 
-    private val _ControlBar: VolleyControlBarFragment by lazy {
-        VolleyControlBarFragment.newInstance(_ScoreBoard)
+    companion object {
+        fun newInstance() = VolleyFragmentsFactory()
+    }
+
+    private val _controlBar: VolleyControlBarFragment by lazy {
+        VolleyControlBarFragment.newInstance(_scoreBoard)
     }
     override fun getControlBar() : VolleyControlBarFragment {
-        return _ControlBar
+        return _controlBar
     }
 
-    private val _ScoreBoard: VolleyScoreBoardFragment by lazy {
+    private val _scoreBoard: VolleyScoreBoardFragment by lazy {
         VolleyScoreBoardFragment.newInstance()
     }
     override fun getScoreBoard(): VolleyScoreBoardFragment {
-        return _ScoreBoard
+        return _scoreBoard
     }
 }

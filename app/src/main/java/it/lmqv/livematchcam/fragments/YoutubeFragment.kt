@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import android.widget.AdapterView
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -34,10 +36,14 @@ import it.lmqv.livematchcam.extensions.formatDate
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showQRCode
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.firebase.FirebaseDataManager
 import it.lmqv.livematchcam.viewmodels.GoogleViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlin.math.max
 
@@ -101,22 +107,67 @@ class YoutubeFragment : Fragment(), IServersFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        /*launchOnStarted {
-            googleViewModel.accountName.collect { accountName ->
-                binding.signInInfo.text = accountName
-            }
-        }*/
 
         launchOnStarted {
-            googleViewModel.account.collect { account ->
+            /*combine(
+                googleViewModel.account,
+                youtubeViewModel.liveBroadcasts,
+                googleViewModel.firebaseAccountKey)
+            { account, liveBroadcasts, firebaseAccountKey -> Triple(account, liveBroadcasts, firebaseAccountKey) }
+            .distinctUntilChanged()
+            .collect { (account, liveBroadcasts, firebaseAccountKey) ->
+            */
+
+            youtubeViewModel.liveBroadcasts
+            .collect { liveBroadcasts ->
+                var liveBroadcastItems = liveBroadcasts.map { x ->
+                    BroadcastItem(
+                        x.snippet.thumbnails.standard.url,
+                        "${x.snippet.title}", //"${x.snippet.title} - ${x.contentDetails.boundStreamId}",
+                        formatDate(x.snippet.scheduledStartTime),
+                        x.id,
+                        x.contentDetails.boundStreamId,
+                        x.status.lifeCycleStatus)
+                }
+
+                val adapterServer = BroadcastsAdapter(requireActivity(), liveBroadcastItems)
+                binding.spinnerBroadcast.adapter = adapterServer
+
+                /*val accountName = account?.name
+
+                if (!accountName.isNullOrEmpty() &&
+                    !firebaseAccountKey.isNullOrEmpty() &&
+                    !liveBroadcastItems.isNullOrEmpty()) {
+                    //Logd("YouTubeFragment: googleViewModel.firebaseAccount.connect!")
+
+                    FirebaseDataManager.getInstance()
+                        .authenticateAccount(accountName, firebaseAccountKey, { account ->
+                            //Logd("RealtimeDB Account Name: ${account.name}")
+                            //Logd("RealtimeDB Admin: ${account.admin}")
+                            toast("Connected as ${account.name}")
+                            var validMatches = account.matches.filter {
+                                liveBroadcastItems.any { item -> item.id == it.key }
+                            }
+                        },{
+                            //toast("Failed to fetch account.")
+                        })
+                }*/
+            }
+        }
+
+        launchOnStarted {
+            googleViewModel.account.collectLatest { account ->
+                //Logd("YouTubeFragment. Google Account Name :${account}");
                 if (account != null) {
                     handleSignIn(account)
                 }
             }
         }
 
-        launchOnStarted {
+        /*launchOnStarted {
             youtubeViewModel.liveBroadcasts.collect { liveBroadcasts ->
+                Logd("YouTubeFragment: youtubeViewModel.liveBroadcasts.collect")
+
                 var liveBroadcastItems = liveBroadcasts.map { x ->
                     BroadcastItem(
                         x.snippet.thumbnails.standard.url,
@@ -128,7 +179,7 @@ class YoutubeFragment : Fragment(), IServersFragment {
                 val adapterServer = BroadcastsAdapter(requireActivity(), liveBroadcastItems)
                 binding.spinnerBroadcast.adapter = adapterServer
             }
-        }
+        }*/
 
         launchOnStarted {
             youtubeViewModel.liveURL.collect { liveURL ->
@@ -136,6 +187,24 @@ class YoutubeFragment : Fragment(), IServersFragment {
             }
         }
 
+        /*launchOnStarted {
+            googleViewModel.firebaseAccount.collect { firebaseAccount ->
+                val accountName = firebaseAccount.accountName
+                val accountKey = firebaseAccount.accountKey
+
+                if (!accountName.isNullOrEmpty() && !accountKey.isNullOrEmpty()) {
+                    Logd("YouTubeFragment: googleViewModel.firebaseAccount.collect")
+
+                    FirebaseDataManager.getInstance()
+                        .authenticateAccount(accountName, accountKey, { account ->
+                            Logd("Account Name: ${account.name}")
+                            Logd("Admin: ${account.admin}")
+                        },{
+                            Log.e("Firebase", "Failed to fetch account.")
+                        })
+                }
+            }
+        }*/
         /*lifecycleScope.launch {
             youtubeViewModel.liveStreams.collect { liveStreams ->
                 var liveStreamItems = liveStreams.map { x -> KeyValue<String>(x.id, "L:${x.snippet.title} - ${x.cdn.ingestionInfo.streamName}") }
@@ -153,7 +222,8 @@ class YoutubeFragment : Fragment(), IServersFragment {
                     }
                     val selectedPosition = max(0, itemsList.indexOfFirst { it.id == currentBroadcast.id })
                     binding.spinnerBroadcast.setSelection(selectedPosition)
-                    youtubeViewModel.setCurrentBoundStreamId(currentBroadcast.boundStreamId)
+                    var boundStreamId = currentBroadcast.boundStreamId
+                    youtubeViewModel.setCurrentBoundStreamId(boundStreamId)
                 }
             }
         }

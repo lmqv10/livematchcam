@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.fragments.volley
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,12 +37,12 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        homeTeamViewModel.name.observe(viewLifecycleOwner) { team ->
+        matchViewModel.homeTeam.observe(viewLifecycleOwner) { team ->
             binding.homeTeam.text = team
             onUpdateCallback?.refresh()
         }
 
-        awayTeamViewModel.name.observe(viewLifecycleOwner) { team ->
+        matchViewModel.guestTeam.observe(viewLifecycleOwner) { team ->
             binding.awayTeam.text = team
             onUpdateCallback?.refresh()
         }
@@ -91,12 +92,12 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
             onUpdateCallback?.refresh()
         }
 
-        homeTeamViewModel.logo.observe(viewLifecycleOwner) { color ->
-            binding.homeLogo.setShirtByColor(color)
+        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+            binding.homeLogo.setShirtByColor(Color.parseColor(homeColorHex))
             onUpdateCallback?.refresh()
         }
-        awayTeamViewModel.logo.observe(viewLifecycleOwner) { color ->
-            binding.awayLogo.setShirtByColor(color)
+        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
+            binding.awayLogo.setShirtByColor(Color.parseColor(guestColorHex))
             onUpdateCallback?.refresh()
         }
     }

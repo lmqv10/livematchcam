@@ -24,6 +24,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:spinnerMode="dialog" />
+
+        <Button
+            android:id="@+id/button_discovery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Discovery" />
+
+        <Button
+            android:id="@+id/button_advertise"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Advertising" />
+
+        <Button
+            android:id="@+id/button_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send Message" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -52,4 +70,6 @@
         android:layout_marginStart="16dp"
         android:layout_marginBottom="80dp"
         app:srcCompat="@android:drawable/stat_sys_upload" />
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
