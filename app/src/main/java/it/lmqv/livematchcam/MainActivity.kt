@@ -25,7 +25,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import it.lmqv.livematchcam.databinding.ActivityMainBinding
 import it.lmqv.livematchcam.fragments.IServersFragment
 import it.lmqv.livematchcam.fragments.ServersFragment
-import it.lmqv.livematchcam.fragments.SportsFragment
+import it.lmqv.livematchcam.fragments.MatchInfoFragment
 import it.lmqv.livematchcam.fragments.YoutubeFragment
 import it.lmqv.livematchcam.viewmodels.GoogleViewModel
 import kotlinx.coroutines.launch
@@ -153,7 +153,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.sportsContainer, SportsFragment.newInstance()).commit()
+            .replace(R.id.sportsContainer, MatchInfoFragment.newInstance()).commit()
 
         lifecycleScope.launch {
             googleViewModel.account.collect { account ->

@@ -355,8 +355,8 @@ class YouTubeActivity : AppCompatActivity() {
             val streamKey = ingestionInfo.streamName  // This is your RTMP stream key
             val ingestionUrl = ingestionInfo.ingestionAddress  // RTMP server URL
 
-            Logd("streamKey:: $streamKey")
-            Logd("ingestionUrl:: $ingestionUrl")
+            //Logd("streamKey:: $streamKey")
+            //Logd("ingestionUrl:: $ingestionUrl")
 
     // Bind the broadcast to the stream:
             val bindRequest = youtubeService.liveBroadcasts()
@@ -402,7 +402,7 @@ class YouTubeActivity : AppCompatActivity() {
             CoroutineScope(Dispatchers.IO).launch {
                 accessToken = getAccessToken(account, this@YouTubeActivity).toString()
                 toast("accessToken::" + accessToken)
-                Logd("TOKEN::" + accessToken)
+                //Logd("TOKEN::" + accessToken)
             }
             //_AccessToken = account.idToken!!
             val tes = account.email
@@ -448,9 +448,9 @@ class YouTubeActivity : AppCompatActivity() {
                     val description = snippet.getString("description")
                     val subscriberCount = statistics.getString("subscriberCount")
 
-                    Logd("Channel Title: $title" + " -Description: $description" + " -Subscribers: $subscriberCount")
+                    //Logd("Channel Title: $title" + " -Description: $description" + " -Subscribers: $subscriberCount")
                 } else {
-                    Logd("No channel information found.")
+                    //Logd("No channel information found.")
                 }
             } else {
                 Logd("Error: ${response.code} - ${response.message}")

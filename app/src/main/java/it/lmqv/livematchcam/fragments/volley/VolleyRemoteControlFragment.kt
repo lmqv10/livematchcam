@@ -11,18 +11,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyControlBarBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
-import it.lmqv.livematchcam.fragments.BaseControlBarFragment
+import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
 import it.lmqv.livematchcam.viewmodels.Set
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 
-class VolleyControlBarFragment() : BaseControlBarFragment() {
+class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
     companion object {
-        fun newInstance() = VolleyControlBarFragment()
+        fun newInstance() = VolleyRemoteControlFragment()
     }
 
     private val scoreViewModel: VolleyScoreViewModel by activityViewModels()

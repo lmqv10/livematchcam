@@ -22,6 +22,8 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 
 fun Service.toast(message: String, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(this, message, duration).show()
@@ -58,6 +60,19 @@ fun Drawable.setColorFilter(@ColorInt color: Int) {
         setColorFilter(color, PorterDuff.Mode.SRC_IN)
     }
 }
+
+inline fun <reified T : Any> mapToClass(map: Map<String, Any?>?): T? {
+    val constructor = T::class.primaryConstructor ?: return null
+    val parameters = constructor.parameters.associateWith { map?.get(it.name) }
+    return constructor.callBy(parameters)
+}
+
+inline fun <reified T : Any> T.toMap(): Map<String, Any?> {
+    return T::class.memberProperties.associate { prop ->
+        prop.name to prop.get(this)
+    }
+}
+
 
 fun Int.toArgbHex(): String {
     return String.format("#%08X", this)

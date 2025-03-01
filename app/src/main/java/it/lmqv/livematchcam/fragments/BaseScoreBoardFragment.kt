@@ -6,26 +6,19 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import it.lmqv.livematchcam.R
+import it.lmqv.livematchcam.utils.TimerHandler
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 interface IScoreBoardFragment {
     interface OnUpdateCallback {
         fun refresh()
     }
     fun setOnUpdate(callback: OnUpdateCallback)
+
     fun getBitmapView(callback: (Bitmap) -> Unit)
-    fun startTime()
-    fun pauseTime()
-    fun resetTime()
-    fun isStarted() : Boolean
+
     fun onTickTimer(timeElapsedInSeconds: Int)
-    fun togglePeriod()
+    fun nextPeriod()
 }
 
 abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment {
@@ -36,12 +29,11 @@ abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment {
     }
 
     protected val matchViewModel: MatchViewModel by activityViewModels()
-    //protected val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
-    //protected val awayTeamViewModel: AwayScoreBoardViewModel by activityViewModels()
 
-    private var timeElapsedInSeconds = 0
-    private var job: Job? = null
-    private var isInPause = true
+    private val timerHandler: TimerHandler = TimerHandler.newInstance { timeElapsedInSeconds ->
+        this.onTickTimer(timeElapsedInSeconds)
+        onUpdateCallback?.refresh()
+    }
 
     override fun getBitmapView(callback: (Bitmap) -> Unit) {
         val view = this.view
@@ -62,42 +54,26 @@ abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment {
         }
     }
 
-    override fun startTime() {
-        this.isInPause = false
-        if (job == null || job?.isActive == false) {
-            job = CoroutineScope(Dispatchers.Main).launch {
-                while (isActive) {
-                    onTickTimer(timeElapsedInSeconds)
-                    delay(1000)
-                    if (!isInPause) {
-                        timeElapsedInSeconds++
-                        onUpdateCallback?.refresh()
-                    }
-                }
-            }
-        }
+    protected fun startTime() {
+        timerHandler.startTime()
     }
 
-    override fun pauseTime() {
-        isInPause = true
+    protected fun pauseTime() {
+        timerHandler.pauseTime()
     }
 
-    override fun resetTime() {
-        job?.cancel()
-        job = null
-        timeElapsedInSeconds = 0
-        isInPause = true
-        onTickTimer(timeElapsedInSeconds)
+    protected fun resetTime() {
+        timerHandler.resetTime()
         onUpdateCallback?.refresh()
     }
 
-    override fun isStarted() : Boolean {
-        return !this.isInPause
+    protected fun isStarted() : Boolean {
+        return timerHandler.isStarted()
     }
 
     override fun onTickTimer(timeElapsedInSeconds: Int) { }
 
-    override fun togglePeriod() {
+    override fun nextPeriod() {
         onUpdateCallback?.refresh()
     }
 }

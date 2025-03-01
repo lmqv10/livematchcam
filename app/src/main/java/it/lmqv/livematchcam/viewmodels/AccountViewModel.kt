@@ -19,8 +19,11 @@ class GoogleViewModel(application: Application) : AndroidViewModel(application) 
     private val _account = MutableStateFlow<Account?>(null)
     val account: StateFlow<Account?> = _account.asStateFlow()
     fun setAccount(account: Account?) {
-        if (_account.value != account) {
-            _account.value = account
+        viewModelScope.launch(Dispatchers.IO) {
+            if (_account.value != account) {
+                _account.value = account
+                firebaseAccountRepository.setAccountGoogle(account?.name)
+            }
         }
     }
 

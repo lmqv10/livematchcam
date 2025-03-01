@@ -13,7 +13,15 @@ val Context.accountDataStore: DataStore<Preferences> by preferencesDataStore(nam
 
 class AccountRepository(private val context: Context) {
 
+    private val ACCOUNT_GOOGLE =  stringPreferencesKey("GoogleAccount")
     private val ACCOUNT_KEY =  stringPreferencesKey("AccountKey")
+
+    val accountGoogle: Flow<String> = context.accountDataStore
+        .data.map { preferences -> preferences[ACCOUNT_GOOGLE] ?: "" }
+
+    suspend fun setAccountGoogle(account: String?) {
+        context.accountDataStore.edit { preferences -> preferences[ACCOUNT_GOOGLE] = account ?: "" }
+    }
 
     val accountKey: Flow<String> = context.accountDataStore
         .data.map { preferences -> preferences[ACCOUNT_KEY] ?: "" }

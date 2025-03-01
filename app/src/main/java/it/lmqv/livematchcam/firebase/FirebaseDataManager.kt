@@ -6,17 +6,20 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.factories.Sports
 
-// Firebase Data Manager
 class FirebaseDataManager {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
 
-    //private var accountsKeyRef: DatabaseReference? = null
     private var matchKeyRef: DatabaseReference? = null
     private var matchValueEventListener: ValueEventListener? = null
 
-    //private var accountKey: String? = null
-    //private var initialized: Boolean = false
+    private var isAdministrator: Boolean = false
+    private var isAuthorizedUser: Boolean = false
+    private var currentAccountKey: String = ""
+    private val isValidAccount: Boolean get() =
+        (isAdministrator || isAuthorizedUser)
+        && currentAccountKey.isNotEmpty()
 
     companion object {
         @Volatile
@@ -26,6 +29,91 @@ class FirebaseDataManager {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: FirebaseDataManager().also { INSTANCE = it }
             }
+        }
+    }
+
+
+    fun authenticateAccount(accountGoogle: String,
+                            accountKey: String,
+                            successCallback: (Account) -> Unit,
+                            failureCallback: () -> Unit) {
+        if (accountKey.isNotEmpty()) {
+            //Logd("authenticateAccount:: $accountKey")
+            database.getReference("accounts/$accountKey")
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val account = snapshot.getValue(Account::class.java)
+
+                        if (account != null) {
+                            //Logd("account:: $account")
+                            isAdministrator = account.admin == accountGoogle
+                            isAuthorizedUser = account.users.contains(accountGoogle)
+
+                            //Logd("isAdministrator $isAdministrator")
+                            //Logd("isAuthorizedUser $isAuthorizedUser")
+
+                            if (isAdministrator || isAuthorizedUser) {
+                                currentAccountKey = accountKey
+                                successCallback(account)
+                            } else {
+                                currentAccountKey = ""
+                                failureCallback()
+                            }
+                        } else {
+                            currentAccountKey = ""
+                            failureCallback()
+                        }
+                    }
+                    override fun onCancelled(error: DatabaseError) {
+                        currentAccountKey = ""
+                        failureCallback()
+                    }
+                })
+        } else {
+            currentAccountKey = ""
+            failureCallback()
+        }
+    }
+
+    fun attachMatchValueEventListener(currentKey: String?,
+                                      sport: Sports,
+                                      onChangeCallback: (Match, IScore) -> Unit) {
+        val isValidKey = !currentKey.isNullOrEmpty()
+        //Logd("attachMatchValueEventListener $isValidKey")
+        if (isValidKey) {
+            this.matchKeyRef = database.getReference("accounts/$currentAccountKey/matches/$currentKey")
+
+            if (this.matchValueEventListener != null) {
+                this.matchKeyRef?.removeEventListener(this.matchValueEventListener!!)
+            }
+
+            this.matchValueEventListener = matchKeyRef?.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val match = snapshot.getValue(Match::class.java)
+                        if (match != null) {
+                            val score = ScoreFactory.getInstance().buildByType(match.type, snapshot)
+                            onChangeCallback(match, score)
+                        }
+                    } else {
+                        updateMatchValue(Match(type = sport.name))
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {
+                }
+            })
+        }
+    }
+
+    fun updateMatchValue(match: Match?) {
+        if (this.isValidAccount) {
+            this.matchKeyRef?.setValue(match)
+        }
+    }
+
+    fun updateScoreValue(score: Map<String, Any?>?) {
+        if (this.isValidAccount) {
+            this.matchKeyRef?.child("score")?.setValue(score)
         }
     }
 
@@ -52,87 +140,6 @@ class FirebaseDataManager {
         })
     }*/
 
-    /*fun authenticateAccount(accountId: String,
-                            accountName: String,
-                            successCallback: (Account) -> Unit,
-                            failureCallback: () -> Unit) {
-        //if (this.initialized) {
-            accountsKeyRef
-                ?.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val account = snapshot.getValue(Account::class.java)
-
-                    if (account != null) {
-                        val isAdmin = account.admin == accountName
-                        val isAuthorizedUser = account.users.contains(accountName)
-
-                        if (isAdmin || isAuthorizedUser) {
-                            for (match in account.matches) {
-                                var scoreSnapshot = snapshot.child("matches").child(match.key);
-                                match.value.score = ScoreFactory.getInstance()
-                                    .buildByType(match.value.type, scoreSnapshot)
-                            }
-                        }
-                        successCallback(account)
-                    } else {
-                        failureCallback()
-                    }
-
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    failureCallback()
-                }
-            })
-        /*} else {
-            failureCallback()
-        }*/
-    }*/
-
-    fun attachMatchValueEventListener(accountKey: String, currentKey: String, onChangeCallback: (Match) -> Unit) {
-        //if (this.initialized && this.matchValueEventListener == null) {
-            //Logd("FirebaseDataManager::addMatchValueEventListener")
-            this.matchKeyRef = database.getReference("accounts/$accountKey/matches/$currentKey")
-
-            if (this.matchValueEventListener != null) {
-                this.matchKeyRef?.removeEventListener(this.matchValueEventListener!!)
-            }
-
-            this.matchValueEventListener = matchKeyRef?.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val match = snapshot.getValue(Match::class.java)
-                    if (match != null) {
-                        onChangeCallback(match)
-                    }
-                }
-                override fun onCancelled(error: DatabaseError) {
-                }
-            })
-        //}
-    }
-
-    fun updateMatchValue(match: Match?) {
-        //if (this.initialized && this.matchKeyRef != null) {
-        if (this.matchKeyRef != null) {
-            //!currentKey.isNullOrEmpty() && match != null) {
-            //Logd("FirebaseDataManager::updateMatchValue")
-            /*accountsKeyRef
-                ?.child("/matches/$currentKey")
-                ?.setValue(match)*/
-            this.matchKeyRef?.setValue(match)
-        }
-    }
-
-    /*fun removeMatchValueEventListener() {
-        //if (this.initialized && this.matchValueEventListener != null && this.matchKeyRef != null) {
-        if (this.matchValueEventListener != null && this.matchKeyRef != null) {
-            Logd("FirebaseDataManager::removeMatchValueEventListener")
-            this.matchKeyRef?.removeEventListener(this.matchValueEventListener!!)
-            this.matchKeyRef = null
-            this.matchValueEventListener = null
-            //this.initialized = false
-        }
-    }*/
 
     /*fun saveAccount(accountId: String, account: Account, callback: (Boolean) -> Unit) {
         accountsRef.child(accountId).setValue(account)

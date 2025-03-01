@@ -97,15 +97,26 @@
             android:src="@drawable/change_period"
             tools:ignore="ContentDescription" />
 
-        <ImageView
-            android:id="@+id/start_time"
+        <FrameLayout
             android:layout_width="75dp"
             android:layout_height="75dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginHorizontal="50dp"
-            android:background="@drawable/alpha_background"
-            android:src="@drawable/time_start"
-            tools:ignore="ContentDescription" />
+            android:layout_marginHorizontal="50dp">
+            <ImageView
+                android:id="@+id/stop_time"
+                android:visibility="gone"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/time_pause"
+                tools:ignore="ContentDescription" />
+            <ImageView
+                android:id="@+id/start_time"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/time_start"
+                tools:ignore="ContentDescription" />
+        </FrameLayout>
 
         <ImageView
             android:id="@+id/reset_time"

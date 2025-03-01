@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.fragments
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -9,98 +10,72 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.databinding.FragmentSportsBinding
-import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.RemoteScoreActivity
+import it.lmqv.livematchcam.YouTubeActivity
+import it.lmqv.livematchcam.databinding.FragmentMatchInfoBinding
 import it.lmqv.livematchcam.extensions.hideSystemUI
-import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.factories.Sports
-import it.lmqv.livematchcam.factories.SportsFactory
+import it.lmqv.livematchcam.viewmodels.GoogleViewModel
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
-import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class SportsFragment : Fragment() {
+class MatchInfoFragment : Fragment() {
 
     companion object {
-        fun newInstance() = SportsFragment()
+        fun newInstance() = MatchInfoFragment()
     }
 
-    //private val youtubeViewModel: YoutubeViewModel by activityViewModels()
-    //private val googleViewModel: GoogleViewModel by activityViewModels()
-    //private val streamersViewModel: StreamersViewModel by activityViewModels()
-
-    //private val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
-    //private val awayTeamViewModel: AwayScoreBoardViewModel by activityViewModels()
+    private val googleViewModel: GoogleViewModel by viewModels()
     private val matchViewModel: MatchViewModel by viewModels()
-
-    //private val firebaseDataManager = FirebaseDataManager.getInstance()
 
     private val cardItems = listOf(
         CardItem(sport = Sports.SOCCER, description = "Soccer", icon = R.drawable.sport_soccer),
         CardItem(sport = Sports.VOLLEY, description = "Volley", icon = R.drawable.sport_volley)
     )
 
-    private var _binding: FragmentSportsBinding? = null
+    private var _binding: FragmentMatchInfoBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSportsBinding.inflate(inflater, container, false)
+        _binding = FragmentMatchInfoBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         //Logd("SportsFragment::matchViewModelID: ${matchViewModel.instanceId}")
-        /*homeTeamViewModel.name.observe(viewLifecycleOwner) { team ->
-            binding.homeTeam.text = team
-        }
-        awayTeamViewModel.name.observe(viewLifecycleOwner) { team ->
-            binding.awayTeam.text = team
-        }
 
-        homeTeamViewModel.logo.observe(viewLifecycleOwner) { color ->
-            if (color != null) {
-                binding.homeColor.setShirtByColor(color)
+        matchViewModel.isRealtimeDatabaseAvailable.observe(viewLifecycleOwner) { isAvailable ->
+            if (isAvailable) {
+                binding.matchInfo.visibility = View.VISIBLE
+            } else  {
+                binding.matchInfo.visibility = View.GONE
             }
         }
-        awayTeamViewModel.logo.observe(viewLifecycleOwner) { color ->
-            if (color != null) {
-                binding.awayColor.setShirtByColor(color)
-            }
-        }*/
 
         matchViewModel.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
-            //Logd("SportsFragment::homeTeam: $homeTeam")
             binding.homeTeam.text = homeTeam
         }
         matchViewModel.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
-            //Logd("SportsFragment::guestTeam: $guestTeam")
             binding.guestTeam.text = guestTeam
         }
         matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            //Logd("SportsFragment::homeColorHex: $homeColorHex")
             binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
         }
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            //Logd("SportsFragment::homeColorHex: $guestColorHex")
             binding.guestColor.setShirtByColor(Color.parseColor(guestColorHex))
         }
-
 
         matchViewModel.type.observe(viewLifecycleOwner) { type ->
             cardItems.forEach { item -> item.isSelected = item.sport.name == type }
@@ -113,13 +88,16 @@ class SportsFragment : Fragment() {
             binding.sportsGrid.adapter = adapter
         }
 
-
-        /*matchViewModel.match.observe(viewLifecycleOwner) { match ->
-            binding.homeTeam.text = match.homeTeam
-            binding.homeTeam.text = match.homeTeam
-            binding.awayTeam.text = match.guestTeam
-            binding.homeColor.setShirtByColor(Color.parseColor(match.homeColorHex))
-            binding.awayColor.setShirtByColor(Color.parseColor(match.guestColorHex))
+        /*lifecycleScope.launch {
+            combine(
+                googleViewModel.account,
+                googleViewModel.firebaseAccountKey)
+            { account, accountKey -> Pair(account, accountKey) }
+                .collect { (account, accountKey) ->
+                    val isLogged = account != null;
+                    var accountName = account?.name
+                    val isConnected = !accountName.isNullOrEmpty() && !accountKey.isNullOrEmpty()
+                }
         }*/
 
         binding.homeColor.setOnClickListener {
@@ -152,77 +130,14 @@ class SportsFragment : Fragment() {
             }
         }
 
-        /*launchOnStarted {
-            youtubeViewModel.sport.collectLatest {
-                sportsFactory.set(it)
-                cardItems.forEach { item -> item.isSelected = item.sport == it }
-
-                val adapter = CardAdapter(cardItems) { selectedItem ->
-                    lifecycleScope.launch {
-                        youtubeViewModel.setSport(selectedItem.sport)
-                        matchViewModel.setType(selectedItem.sport.toString())
-                    }
-                }
-                binding.sportsGrid.adapter = adapter
-            }
-        }*/
-
-        /*
-        launchOnStarted {
-            combine(
-                googleViewModel.account,
-                googleViewModel.firebaseAccountKey,
-                streamersViewModel.currentKey
-            ) { account, firebaseAccountKey, currentKey -> Triple(account, firebaseAccountKey, currentKey) }
-            .distinctUntilChanged()
-            .collect { (account, firebaseAccountKey, currentKey) ->
-                val accountName = account?.name
-                Logd("SportFragment: $accountName $firebaseAccountKey $currentKey")
-                if (!accountName.isNullOrEmpty() &&
-                    !firebaseAccountKey.isNullOrEmpty() &&
-                    !currentKey.isNullOrEmpty()) {
-                    //Logd("MATCH INITIALIZE $firebaseAccountKey $currentKey")
-                    //matchViewModel.initialize(firebaseAccountKey)
-
-                    /-*
-                    firebaseDataManager
-                        .initialize(firebaseAccountKey)
-                        .authenticateAccount(accountName, { account ->
-                            //Logd("RealtimeDB Account Name: ${account.name}")
-                            //Logd("RealtimeDB Admin: ${account.admin}")
-                            var selectedMatch = account.matches.firstNotNullOf {
-                                if (currentKey == it.key) it.value else Match()
-                            }
-                            //homeTeamViewModel.setName(selectedMatch.homeTeam)
-                            //awayTeamViewModel.setName(selectedMatch.guestTeam)
-
-                            //homeTeamViewModel.setLogo(Color.parseColor(selectedMatch.homeColorHex))
-                            //awayTeamViewModel.setLogo(Color.parseColor(selectedMatch.guestColorHex))
-                        },{
-                            //toast("Failed to fetch account.")
-                        })
-                     *-/
-                }
-            }
-        }*/
+        binding.remoteScore.setOnClickListener {
+            startActivity(Intent(requireActivity(), RemoteScoreActivity::class.java))
+        }
     }
-
-    /*override fun onPause() {
-        super.onPause()
-        //Logd("MatchInfo::OnPause")
-        //matchViewModel.detach()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        //Logd("MatchInfo::OnResume")
-    }
-    */
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        //Logd("MatchInfo::onDestroyView")
     }
 }
 

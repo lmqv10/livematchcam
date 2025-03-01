@@ -35,6 +35,7 @@ import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
+import it.lmqv.livematchcam.firebase.SoccerScore
 import it.lmqv.livematchcam.handlers.offset.LeftRightWithManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
@@ -52,6 +53,7 @@ import it.lmqv.livematchcam.handlers.zoom.NoDebounceZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.SingleZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.SmoothZoomLevelHandler
 import it.lmqv.livematchcam.utils.KeyValue
+import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -71,6 +73,8 @@ class CameraFragment: Fragment(), ConnectChecker,
     }
 
     private val streamersViewModel: StreamersViewModel by activityViewModels()
+    protected val matchViewModel: MatchViewModel by activityViewModels()
+
     private lateinit var settingsRepository: SettingsRepository
 
     private lateinit var zoomLevelHandler: IZoomLevelHandler
@@ -130,7 +134,6 @@ class CameraFragment: Fragment(), ConnectChecker,
         childFragmentManager.beginTransaction()
             .add(R.id.status_container, statusFragment).commit()
 
-        //Logd("CameraFragment:: sportFragmentFactory build")
         var sportFragmentFactory = sportsFactory.get()
         this.controlBarFragment = sportFragmentFactory.getControlBar()
         this.scoreBoardFragment = sportFragmentFactory.getScoreBoard()
@@ -267,6 +270,19 @@ class CameraFragment: Fragment(), ConnectChecker,
         lifecycleScope.launch {
             streamersViewModel.currentKey.collect { _ ->
                 binding.bStartStop.isClickable = true
+            }
+        }
+
+        matchViewModel.score.observe(viewLifecycleOwner) { iScore ->
+            val command = iScore?.command
+            if (command == Command.ZOOM_IN.toString()) {
+                this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.In)
+            }
+            if (command == Command.ZOOM_DEFAULT.toString()) {
+                this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.None)
+            }
+            if (command == Command.ZOOM_OUT.toString()) {
+                this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.Out)
             }
         }
     }

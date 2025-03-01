@@ -14,13 +14,9 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
 
     private val _streamURL = MutableStateFlow<String?>(null)
     val streamURL: StateFlow<String?> = _streamURL
-    //fun setStreamURL(streamURL: String) { _streamURL.value = streamURL }
 
-    //private val _currentBoundStreamId = MutableStateFlow<String?>(null)
-    //val currentBoundStreamId: StateFlow<String?> = _currentBoundStreamId
     suspend fun setCurrentBoundStreamId(currentBoundStreamId: String?) {
-        //_currentBoundStreamId.value = currentBoundStreamId
-        val liveStream = _liveStreams.value.firstOrNull { x -> x.id == currentBoundStreamId }
+        val liveStream = _liveStreams.firstOrNull { x -> x.id == currentBoundStreamId }
         val ingestionInfo = liveStream?.cdn?.ingestionInfo
         val ingestionAddress = ingestionInfo?.ingestionAddress
         val streamName = ingestionInfo?.streamName!!
@@ -32,9 +28,6 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
     }
     private val _liveURL = MutableStateFlow<String?>(null)
     val liveURL: StateFlow<String?> = _liveURL
-    /*fun getLiveStreamByCurrentId() : LiveStream? {
-        return liveStreams.value.firstOrNull { x -> x.id == _currentBoundStreamId.value }
-    }*/
 
     private val _liveBroadcasts = MutableStateFlow<List<LiveBroadcast>>(mutableListOf())
     val liveBroadcasts: StateFlow<List<LiveBroadcast>> = _liveBroadcasts
@@ -49,27 +42,8 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
         _liveURL.value = "\thttps://youtube.com/live/" + updatedBroadcast.id
     }
 
-    private val _liveStreams = MutableStateFlow<List<LiveStream>>(mutableListOf())
-    //val liveStreams: StateFlow<List<LiveStream>> = _liveStreams
+    private var _liveStreams = listOf<LiveStream>()
     fun setLiveStreams(liveStreams: List<LiveStream>) {
-        _liveStreams.value = liveStreams
+        _liveStreams = liveStreams
     }
-
-    /*private val _sport = MutableStateFlow(Sports.SOCCER)
-    //val sport: StateFlow<Sports> = _sport
-    fun setSport(selectedSport: Sports) {
-        viewModelScope.launch(Dispatchers.IO) {
-            streamersSettingsRepository.setSport(selectedSport)
-        }
-    }*/
-
-    /*init {
-        viewModelScope.launch {
-            streamersSettingsRepository.getSport.collect {
-                if (_sport.value != it) {
-                    _sport.value = it
-                }
-            }
-        }
-    }*/
 }

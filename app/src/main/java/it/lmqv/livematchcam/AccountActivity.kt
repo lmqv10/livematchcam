@@ -115,7 +115,7 @@ class AccountActivity : AppCompatActivity() {
             googleViewModel.setAccountKey(null)
             binding.connect.isVisible = true
             binding.disconnect.isVisible = false
-            binding.accountKey.isEnabled = true
+            //binding.accountKey.isEnabled = true
         }
     }
 
@@ -125,8 +125,9 @@ class AccountActivity : AppCompatActivity() {
         lifecycleScope.launch {
             combine(
                 googleViewModel.account,
-                googleViewModel.firebaseAccountKey) { account, firebaseAccountKey -> Pair(account, firebaseAccountKey) }
-            .collect { (account, firebaseAccountKey) ->
+                googleViewModel.firebaseAccountKey)
+            { account, accountKey -> Pair(account, accountKey) }
+            .collect { (account, accountKey) ->
 
                 val isLogged = account != null;
                 var accountName = account?.name
@@ -135,12 +136,12 @@ class AccountActivity : AppCompatActivity() {
                 binding.googleSignOut.isVisible = isLogged
                 binding.authorizedAccount.isVisible = isLogged
 
-                binding.accountKey.text = Editable.Factory.getInstance().newEditable(firebaseAccountKey ?: "")
+                binding.accountKey.text = Editable.Factory.getInstance().newEditable(accountKey ?: "")
 
-                val isConnected = !accountName.isNullOrEmpty() && !firebaseAccountKey.isNullOrEmpty()
+                val isConnected = !accountName.isNullOrEmpty() && !accountKey.isNullOrEmpty()
                 binding.connect.isVisible = !isConnected
                 binding.disconnect.isVisible = isConnected
-                binding.accountKey.isEnabled = !isConnected
+                //binding.accountKey.isEnabled = !isConnected
             }
         }
 

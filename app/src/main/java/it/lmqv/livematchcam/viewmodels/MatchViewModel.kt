@@ -5,19 +5,19 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.toArgbHex
 import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.firebase.FirebaseDataManager
+import it.lmqv.livematchcam.firebase.IScore
 import it.lmqv.livematchcam.firebase.Match
+import it.lmqv.livematchcam.firebase.Quadruple
+import it.lmqv.livematchcam.firebase.ScoreFactory
 import it.lmqv.livematchcam.repositories.AccountRepository
 import it.lmqv.livematchcam.repositories.StreamersSettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import java.util.UUID
-import kotlin.math.max
 
 class MatchViewModel(application: Application) : AndroidViewModel(application) {
     //val instanceId: String? =  UUID.randomUUID().toString()
@@ -47,46 +47,106 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     fun setType(updatedType: String) {
         val sport: Sports = enumValues<Sports>().find { it.name == updatedType } ?: Sports.SOCCER
         val updatedMatch = currentMatch.copy(type = sport.name)
-        firebaseDataManager.updateMatchValue(updatedMatch)
+        applyMatchChanges(updatedMatch)
     }
 
-    /*private val _score = MutableLiveData(currentMatch.score)
-    val score: LiveData<Any?> = _score
-    fun setScore(updatedScore: Any) {
-        val updatedMatch = currentMatch.copy(score = updatedScore)
-        firebaseDataManager.updateMatchValue(updatedMatch)
-    }*/
+    private val _score = MutableLiveData<IScore?>(null)
+    val score: LiveData<IScore?> = _score
+    fun setScore(updatedScore: IScore?) {
+        if (updatedScore != null) {
+            applyScoreChanges(updatedScore)
+        }
+    }
 
     fun setHomeTeam(updatedTeam: String) {
         val updatedMatch = currentMatch.copy(homeTeam = updatedTeam)
-        firebaseDataManager.updateMatchValue(updatedMatch)
+        applyMatchChanges(updatedMatch)
     }
     fun setGuestTeam(updatedTeam: String) {
         val updatedMatch = currentMatch.copy(guestTeam = updatedTeam)
-        firebaseDataManager.updateMatchValue(updatedMatch)
+        applyMatchChanges(updatedMatch)
     }
     fun setHomeColorHex(updatedColorInt: Int) {
         val updatedMatch = currentMatch.copy(homeColorHex = updatedColorInt.toArgbHex())
-        firebaseDataManager.updateMatchValue(updatedMatch)
+        applyMatchChanges(updatedMatch)
     }
     fun setGuestColorHex(updatedColorInt: Int) {
         val updatedMatch = currentMatch.copy(guestColorHex = updatedColorInt.toArgbHex())
-        firebaseDataManager.updateMatchValue(updatedMatch)
+        applyMatchChanges(updatedMatch)
     }
 
-    private val _homeScore = MutableLiveData(0)
-    val homeScore: LiveData<Int> = _homeScore
-    fun incrementHomeScore(step: Int = 1) {
-        _homeScore.value = max((_homeScore.value ?: 0) + step, 0)
+    private val _isRealtimeDatabaseAvailable = MutableLiveData(false)
+    val isRealtimeDatabaseAvailable: LiveData<Boolean> = _isRealtimeDatabaseAvailable
+
+    init {
+        //Logd("MatchViewModel:: init")
+        /*viewModelScope.launch {
+            streamersSettingsRepository.getSport.collect {
+                _type.value = it.name
+                sportsFactory.set(it)
+            }
+        }*/
+
+        viewModelScope.launch {
+            combine(
+                streamersSettingsRepository.getSport,
+                firebaseAccountRepository.accountGoogle,
+                firebaseAccountRepository.accountKey,
+                streamersSettingsRepository.getCurrentKey)
+            { sport, accountGoogle, accountKey, currentKey -> Quadruple(sport, accountGoogle, accountKey, currentKey) }
+            .collect { (sport, accountGoogle, accountKey, currentKey) ->
+                //Logd("MatchViewModel:: $sport | $accountGoogle | $accountKey | $currentKey")
+
+                if (_type.value != sport.name) {
+                    sportsFactory.set(sport)
+                    _type.value = sport.name
+                }
+
+                firebaseDataManager.authenticateAccount(accountGoogle, accountKey, {
+                    _isRealtimeDatabaseAvailable.value = true
+                    firebaseDataManager.attachMatchValueEventListener(currentKey, sport) { match, score ->
+                        //Logd("MatchViewModel:: onDataChangeCallback")
+                        notifyMatchChanges(match)
+                        notifyScoreChanges(score)
+                    }
+                },
+                {
+                    _isRealtimeDatabaseAvailable.value = false
+                })
+
+            }
+        }
     }
 
-    private val _guestScore = MutableLiveData(0)
-    val guestScore: LiveData<Int> = _guestScore
-    fun incrementGuestScore(step: Int = 1) {
-        _guestScore.value = max((_guestScore.value ?: 0) + step, 0)
+    /*override fun onCleared() {
+        super.onCleared()
+        Logd("MatchViewModel:: onCleared")
+    }*/
+
+    private fun applyMatchChanges(updatedMatch: Match) {
+        if (_isRealtimeDatabaseAvailable.value == true) {
+            firebaseDataManager.updateMatchValue(updatedMatch)
+        } else {
+            notifyMatchChanges(updatedMatch)
+        }
     }
 
-    private fun notifyChanges(updatedMatch: Match) {
+    private fun applyScoreChanges(updatedScore: IScore) {
+        if (_isRealtimeDatabaseAvailable.value == true) {
+            val updatedScoreMap = ScoreFactory.getInstance().buildMap(updatedScore)
+            firebaseDataManager.updateScoreValue(updatedScoreMap)
+        } else {
+            notifyScoreChanges(updatedScore)
+        }
+    }
+
+    private fun notifyScoreChanges(score: IScore) {
+        if (_score.value != score) {
+            _score.value = score
+        }
+    }
+
+    private fun notifyMatchChanges(updatedMatch: Match) {
         currentMatch = updatedMatch
 
         if (_homeTeam.value != currentMatch.homeTeam) {
@@ -107,79 +167,5 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 streamersSettingsRepository.setSport(sport)
             }
         }
-        /*if (_score.value != currentMatch.score) {
-            _score.value = currentMatch.score
-        }*/
     }
-
-    init {
-        //Logd("MatchViewModel:: init")
-        viewModelScope.launch {
-            streamersSettingsRepository.getSport.collect {
-                _type.value = it.name
-                sportsFactory.set(it)
-            }
-        }
-
-        viewModelScope.launch {
-            combine(
-                firebaseAccountRepository.accountKey,
-                streamersSettingsRepository.getCurrentKey
-            ){ accountKey, currentKey -> Pair(accountKey, currentKey) }
-            .collect { (accountKey, currentKey) ->
-                //Logd("MatchViewModel:: $firebaseAccountKey $key")
-                if (!accountKey.isNullOrEmpty() && currentKey != null) {
-                    //Logd("MatchViewModel:: INITIALIZE $firebaseAccountKey $currentKey")
-                    firebaseDataManager
-                        //.initialize(firebaseAccountKey)
-                        .attachMatchValueEventListener(accountKey, currentKey!!) { match ->
-                            //Logd("MatchViewModel:: onDataChangeCallback")
-                            //_match.value = match
-                            notifyChanges(match)
-                        }
-                }
-            }
-        }
-
-    }
-
-    /*override fun onCleared() {
-        super.onCleared()
-        Logd("MatchViewModel:: onCleared")
-        //firebaseDataManager.removeMatchValueEventListener()
-    }*/
 }
-
-/*
-class HomeScoreBoardViewModel : ViewModel() {
-    private val _name = MutableLiveData("")
-    val name: LiveData<String> = _name
-    fun setName(updatedName: String) { _name.value = updatedName }
-
-    private val _score = MutableLiveData(0)
-    val score: LiveData<Int> = _score
-    fun incrementScore(step: Int = 1) {
-        _score.value = max((_score.value ?: 0) + step, 0)
-    }
-
-    private val _logo = MutableLiveData<Int>(null)
-    val logo: LiveData<Int> = _logo
-    fun setLogo(updatedLogo: Int) { _logo.value = updatedLogo }
-}
-
-class AwayScoreBoardViewModel : ViewModel() {
-    private val _name = MutableLiveData("")
-    val name: LiveData<String> = _name
-    fun setName(updatedName: String) { _name.value = updatedName }
-
-    private val _score = MutableLiveData(0)
-    val score: LiveData<Int> = _score
-    fun incrementScore(step: Int = 1) {
-        _score.value = max((_score.value ?: 0) + step, 0)
-    }
-
-    private val _logo = MutableLiveData<Int>(null)
-    val logo: LiveData<Int> = _logo
-    fun setLogo(updatedLogo: Int) { _logo.value = updatedLogo }
-}
-*/

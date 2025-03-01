@@ -73,6 +73,7 @@ class StreamersSettingsRepository(private val context: Context) {
         var sportName = preferences[SPORT] ?: Sports.SOCCER.name
         Sports.valueOf(sportName)
     }
+
     suspend fun setSport(currentSport: Sports) {
         context.streamersSettingsDatastore.edit { preferences -> preferences[SPORT] = currentSport.name }
     }

@@ -4,10 +4,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
 
-interface IControlBarFragment {
+interface IRemoteControlFragment {
 }
 
-abstract class BaseControlBarFragment : Fragment(), IControlBarFragment {
+abstract class BaseRemoteControlFragment : Fragment(), IRemoteControlFragment {
 
     protected val matchViewModel: MatchViewModel by activityViewModels()
 }

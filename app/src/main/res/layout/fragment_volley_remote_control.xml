@@ -12,6 +12,7 @@
         android:id="@+id/control_home"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/alpha_background"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
@@ -38,7 +39,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textStyle="bold"
-                android:textColor="@color/black"
+                android:textColor="@color/primary"
                 android:text="@string/home_team"/>
         </LinearLayout>
 
@@ -64,7 +65,7 @@
                 android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
-                android:textColor="@color/black"
+                android:textColor="@color/primary"
                 android:text= "@string/score_placeholder"/>
 
             <ImageView
@@ -159,6 +160,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
+                android:background="@drawable/alpha_background"
                 android:layout_marginBottom="5dp"
                 android:src="@drawable/edit_pen"
                 tools:ignore="ContentDescription" />
@@ -168,6 +170,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
+                android:background="@drawable/alpha_background"
                 android:src="@drawable/reset_match"
                 tools:ignore="ContentDescription" />
         </LinearLayout>
@@ -177,6 +180,7 @@
         android:id="@+id/control_away"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/alpha_background"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent">
@@ -195,7 +199,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textStyle="bold"
-                android:textColor="@color/black"
+                android:textColor="@color/primary"
                 android:text="@string/away_team"/>
 
             <ImageView
@@ -228,7 +232,7 @@
                 android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
-                android:textColor="@color/black"
+                android:textColor="@color/primary"
                 android:text= "@string/score_placeholder"/>
 
             <ImageView

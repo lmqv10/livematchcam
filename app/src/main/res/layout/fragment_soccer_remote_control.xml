@@ -4,9 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_vertical"
-    tools:context=".fragments.volley.VolleyControlBarFragment">
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context=".fragments.soccer.SoccerControlBarFragment">
 
     <LinearLayout
         android:id="@+id/control_home"
@@ -18,9 +18,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="5dp"
             android:weightSum="4">
 
             <ImageView
@@ -35,9 +34,10 @@
                 android:id="@+id/home_team"
                 android:layout_width="0dp"
                 android:layout_weight="3"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textStyle="bold"
+                android:textSize="25sp"
                 android:textColor="@color/black"
                 android:text="@string/home_team"/>
         </LinearLayout>
@@ -78,99 +78,87 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/controls_match"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:id="@+id/controls_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/TRANSPARENT"
+        android:gravity="center"
+        android:padding="4dp"
         android:orientation="horizontal"
-        app:layout_constraintEnd_toStartOf="@+id/control_away"
-        app:layout_constraintStart_toEndOf="@+id/control_home"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <RadioGroup
-            android:id="@+id/sets_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/alpha_background"
-            android:padding="5dp"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/radioSet1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
-                android:textStyle="bold"
-                android:padding="3dp"
-                android:text="1°" />
-
-            <RadioButton
-                android:id="@+id/radioSet2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
-                android:textStyle="bold"
-                android:padding="3dp"
-                android:text="2°" />
-
-            <RadioButton
-                android:id="@+id/radioSet3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
-                android:textStyle="bold"
-                android:padding="3dp"
-                android:text="3°" />
-
-            <RadioButton
-                android:id="@+id/radioSet4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
-                android:textStyle="bold"
-                android:padding="3dp"
-                android:text="4°" />
-
-            <RadioButton
-                android:id="@+id/radioSet5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
-                android:textStyle="bold"
-                android:padding="3dp"
-                android:text="5°" />
-        </RadioGroup>
-
+        tools:layout_editor_absoluteX="0dp">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:orientation="vertical">
+            android:layout_width="190dp"
+            android:layout_height="50dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/match_time"
+                android:layout_width="80dp"
+                android:layout_height="50dp"
+                android:paddingHorizontal="5dp"
+                android:layout_marginEnd="5dp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:minWidth="40dp"
+                android:textColor="@color/black"
+                android:text= "@string/time_placeholder"/>
+
+            <TextView
+                android:id="@+id/current_period"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:paddingHorizontal="5dp"
+                android:layout_marginEnd="5dp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:minWidth="40dp"
+                android:textColor="@color/black"
+                android:text= "@string/period_placeholder"/>
 
             <ImageView
-                android:id="@+id/match_league"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:id="@+id/change_period"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginBottom="5dp"
-                android:src="@drawable/edit_pen"
-                tools:ignore="ContentDescription" />
-
-            <ImageView
-                android:id="@+id/reset_match"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/reset_match"
+                android:src="@drawable/change_period"
                 tools:ignore="ContentDescription" />
         </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_marginHorizontal="50dp">
+            <ImageView
+                android:id="@+id/stop_time"
+                android:visibility="gone"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/time_pause"
+                tools:ignore="ContentDescription" />
+            <ImageView
+                android:id="@+id/start_time"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/time_start"
+                tools:ignore="ContentDescription" />
+
+        </FrameLayout>
+
+        <ImageView
+            android:id="@+id/reset_time"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/time_reset"
+            app:tint="@color/image_tint_secondary_selector"
+            tools:ignore="ContentDescription" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -183,18 +171,18 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="5dp"
             android:weightSum="4">
 
             <TextView
                 android:id="@+id/away_team"
                 android:layout_width="0dp"
                 android:layout_weight="3"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textStyle="bold"
+                android:textSize="25sp"
                 android:textColor="@color/black"
                 android:text="@string/away_team"/>
 
@@ -242,4 +230,65 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="50dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/controls_bar"
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginVertical="8dp"/>
+
+        <TextView
+            android:id="@+id/current_zoom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="5dp"
+            android:textStyle="bold"
+            android:textSize="30sp"
+            android:minWidth="40dp"
+            android:textColor="@color/secondary_darker"
+            android:text="---"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/zoom_out"
+                android:src="@drawable/minus"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription"
+                android:layout_marginEnd="30dp"/>
+
+            <ImageView
+                android:id="@+id/zoom_default"
+                android:src="@drawable/magnifer_zoom"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription"
+                android:layout_marginEnd="30dp"/>
+
+            <ImageView
+                android:id="@+id/zoom_in"
+                android:src="@drawable/add"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

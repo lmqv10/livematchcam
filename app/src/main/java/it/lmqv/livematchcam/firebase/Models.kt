@@ -1,5 +1,8 @@
 package it.lmqv.livematchcam.firebase
 
+import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.SportsFactory
+
 data class Accounts(
     val accounts: Map<String, Account>
 )
@@ -22,23 +25,32 @@ data class Match(
     val guestColorHex: String = "#000000",
     val guestLogo: String = "",
     val scheduledTimestamp: Long = 0,
-    val type: String = "",
-    var score: Any? = null
+    var type: String = "",
+    var score: Map<String, Any?>? = null
 )
 
-data class FootballScore(
-    val home: Int = 0,
-    val away: Int = 0,
+interface IScore {
+    val command: String
+}
+
+class UnknownScore(override val command: String) : IScore
+
+data class SoccerScore (
+    val home: Long = 0,
+    val away: Long = 0,
     val period: String = "",
-    val currentPeriodStartTimestamp: Long = 0
-)
+    override val command: String = ""
+) : IScore
 
 data class VolleyScore(
     val sets: List<SetScore> = listOf(),
-    val currentSet: Int = 1
-)
+    val currentSet: Long = 1,
+    override val command: String = ""
+) : IScore
 
 data class SetScore(
-    val home: Int = 0,
-    val guest: Int = 0
+    val home: Long = 0,
+    val guest: Long = 0
 )
+
+data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)

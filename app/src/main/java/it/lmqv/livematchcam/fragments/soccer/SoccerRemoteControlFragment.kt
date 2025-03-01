@@ -8,29 +8,37 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentSoccerControlBarBinding
+import it.lmqv.livematchcam.databinding.FragmentSoccerRemoteControlBinding
+import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.firebase.SoccerScore
 import it.lmqv.livematchcam.fragments.BaseControlBarFragment
+import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
+import it.lmqv.livematchcam.utils.TimerHandler
 import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.viewmodels.SoccerScoreViewModel
 
-class SoccerControlBarFragment() : BaseControlBarFragment() {
+class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
     companion object {
-        fun newInstance() = SoccerControlBarFragment()
+        fun newInstance() = SoccerRemoteControlFragment()
     }
     private val soccerScoreViewModel: SoccerScoreViewModel by activityViewModels()
 
-    private var _binding: FragmentSoccerControlBarBinding? = null
+    private var _binding: FragmentSoccerRemoteControlBinding? = null
     private val binding get() = _binding!!
 
+    private val timerHandler: TimerHandler = TimerHandler.newInstance { timeElapsedInSeconds ->
+        binding.matchTime.text = formatTime(timeElapsedInSeconds)
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSoccerControlBarBinding.inflate(inflater, container, false)
+        _binding = FragmentSoccerRemoteControlBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -50,17 +58,23 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
             soccerScoreViewModel.initScore(score)
             binding.homeScore.text = score.home.toString()
             binding.awayScore.text = score.away.toString()
+            binding.currentPeriod.text = score.period
 
             val command = score.command
             if (command == Command.START_TIME.toString()) {
+                timerHandler.startTime()
                 binding.startTime.visibility = View.GONE
                 binding.stopTime.visibility = View.VISIBLE
                 binding.resetTime.isEnabled = false
             }
             if (command == Command.PAUSE.toString()) {
+                timerHandler.pauseTime()
                 binding.startTime.visibility = View.VISIBLE
                 binding.stopTime.visibility = View.GONE
                 binding.resetTime.isEnabled = true
+            }
+            if (command == Command.RESET_TIME.toString()) {
+                timerHandler.resetTime()
             }
         }
 
@@ -73,7 +87,6 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
 
         soccerScoreViewModel.liveScore.observe(viewLifecycleOwner) { liveScore ->
             if (liveScore != null) {
-                //Logd("SoccerControlBar $liveScore")
                 matchViewModel.setScore(liveScore)
             }
         }
@@ -136,6 +149,19 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
 
         binding.resetTime.setOnClickListener {
             soccerScoreViewModel.setCommand(Command.RESET_TIME)
+        }
+
+        binding.zoomIn.setOnClickListener {
+            binding.currentZoom.text = "In"
+            soccerScoreViewModel.setCommand(Command.ZOOM_IN)
+        }
+        binding.zoomDefault.setOnClickListener {
+            binding.currentZoom.text = "None"
+            soccerScoreViewModel.setCommand(Command.ZOOM_DEFAULT)
+        }
+        binding.zoomOut.setOnClickListener {
+            binding.currentZoom.text = "Out"
+            soccerScoreViewModel.setCommand(Command.ZOOM_OUT)
         }
     }
 }

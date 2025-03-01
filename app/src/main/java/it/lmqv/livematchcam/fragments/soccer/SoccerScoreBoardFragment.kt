@@ -5,12 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import it.lmqv.livematchcam.databinding.FragmentSoccerScoreBoardBinding
 import it.lmqv.livematchcam.databinding.FragmentSoccerScoreBoardLightBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.setShirtByColor
+import it.lmqv.livematchcam.firebase.SoccerScore
 import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
+import it.lmqv.livematchcam.viewmodels.Command
 
 class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
@@ -20,8 +20,6 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
     private var _binding: FragmentSoccerScoreBoardLightBinding? = null
     private val binding get() = _binding!!
-
-    private var currentPeriod = "1T"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,20 +42,47 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
             onUpdateCallback?.refresh()
         }
 
+        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
+            try {
+                val score = scoreInstance as SoccerScore
+                binding.homeScore.text = score.home.toString()
+                binding.awayScore.text = score.away.toString()
+                binding.matchPeriod.text = score.period
+
+                val command = score.command
+                if (command == Command.START_TIME.toString()) {
+                    if (!isStarted()) {
+                        startTime()
+                    }
+                }
+                if (command == Command.PAUSE.toString()) {
+                    if (isStarted()) {
+                        pauseTime()
+                    }
+                }
+                if (command == Command.RESET_TIME.toString()) {
+                    if (!isStarted()) {
+                        resetTime()
+                    }
+                }
+            } catch (e: Exception) { }
+            onUpdateCallback?.refresh()
+        }
+
         /*matchViewModel.score.observe(viewLifecycleOwner) { score ->
             binding.homeScore.text = score.toString()
             binding.awayScore.text = score.toString()
             onUpdateCallback?.refresh()
         }*/
 
-        matchViewModel.homeScore.observe(viewLifecycleOwner) { score ->
+        /*matchViewModel.homeScore.observe(viewLifecycleOwner) { score ->
             binding.homeScore.text = score.toString()
             onUpdateCallback?.refresh()
         }
         matchViewModel.guestScore.observe(viewLifecycleOwner) { score ->
             binding.awayScore.text = score.toString()
             onUpdateCallback?.refresh()
-        }
+        }*/
 
         matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
             binding.homeLogo.setShirtByColor(Color.parseColor(homeColorHex))
@@ -72,11 +97,5 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
     override fun onTickTimer(timeElapsedInSeconds: Int) {
         binding.matchTime.text = formatTime(timeElapsedInSeconds)
-    }
-
-    override fun togglePeriod() {
-        currentPeriod = if (currentPeriod == "1T") "2T" else "1T"
-        binding.matchPeriod.text = currentPeriod
-        onUpdateCallback?.refresh()
     }
 }
