@@ -2,16 +2,12 @@ package it.lmqv.livematchcam.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.api.services.youtube.model.LiveBroadcast
 import com.google.api.services.youtube.model.LiveStream
 import it.lmqv.livematchcam.adapters.BroadcastItem
-import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.repositories.StreamersSettingsRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 class YoutubeViewModel(application: Application) : AndroidViewModel(application) {
     private var streamersSettingsRepository = StreamersSettingsRepository(application)
@@ -59,15 +55,15 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
         _liveStreams.value = liveStreams
     }
 
-    private val _sport = MutableStateFlow(Sports.SOCCER)
-    val sport: StateFlow<Sports> = _sport
+    /*private val _sport = MutableStateFlow(Sports.SOCCER)
+    //val sport: StateFlow<Sports> = _sport
     fun setSport(selectedSport: Sports) {
         viewModelScope.launch(Dispatchers.IO) {
             streamersSettingsRepository.setSport(selectedSport)
         }
-    }
+    }*/
 
-    init {
+    /*init {
         viewModelScope.launch {
             streamersSettingsRepository.getSport.collect {
                 if (_sport.value != it) {
@@ -75,5 +71,5 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
-    }
+    }*/
 }

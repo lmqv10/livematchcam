@@ -91,7 +91,7 @@ class FirebaseDataManager {
 
     fun attachMatchValueEventListener(accountKey: String, currentKey: String, onChangeCallback: (Match) -> Unit) {
         //if (this.initialized && this.matchValueEventListener == null) {
-            Logd("FirebaseDataManager::addMatchValueEventListener")
+            //Logd("FirebaseDataManager::addMatchValueEventListener")
             this.matchKeyRef = database.getReference("accounts/$accountKey/matches/$currentKey")
 
             if (this.matchValueEventListener != null) {
@@ -115,7 +115,7 @@ class FirebaseDataManager {
         //if (this.initialized && this.matchKeyRef != null) {
         if (this.matchKeyRef != null) {
             //!currentKey.isNullOrEmpty() && match != null) {
-            Logd("FirebaseDataManager::updateMatchValue")
+            //Logd("FirebaseDataManager::updateMatchValue")
             /*accountsKeyRef
                 ?.child("/matches/$currentKey")
                 ?.setValue(match)*/

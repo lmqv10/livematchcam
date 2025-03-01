@@ -40,6 +40,7 @@
     <string name="handle_streamers">Streamers</string>
     <string name="add_remove">Add/Remove</string>
     <string name="stream">Stream</string>
+    <string name="go_live">Go Live</string>
     <string name="remote_score">Remote Score</string>
 
     <string name="match_league">Match Description</string>

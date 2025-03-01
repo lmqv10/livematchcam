@@ -7,22 +7,27 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.toArgbHex
+import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.firebase.FirebaseDataManager
 import it.lmqv.livematchcam.firebase.Match
 import it.lmqv.livematchcam.repositories.AccountRepository
 import it.lmqv.livematchcam.repositories.StreamersSettingsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.math.max
 
 class MatchViewModel(application: Application) : AndroidViewModel(application) {
+    //val instanceId: String? =  UUID.randomUUID().toString()
+
+    //private var currentKey: String? = null
     private val firebaseDataManager = FirebaseDataManager.getInstance()
     private var streamersSettingsRepository = StreamersSettingsRepository(application)
-    private var firebaseAccountRepository: AccountRepository = AccountRepository(application)
+    private var sportsFactory = SportsFactory
 
-    val instanceId: String? =  UUID.randomUUID().toString()
-    private var currentKey: String? = null
+    private var firebaseAccountRepository: AccountRepository = AccountRepository(application)
     private var currentMatch = Match()
 
     private val _homeTeam = MutableLiveData(currentMatch.homeTeam)
@@ -39,9 +44,18 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _type = MutableLiveData(currentMatch.type)
     val type: LiveData<String> = _type
+    fun setType(updatedType: String) {
+        val sport: Sports = enumValues<Sports>().find { it.name == updatedType } ?: Sports.SOCCER
+        val updatedMatch = currentMatch.copy(type = sport.name)
+        firebaseDataManager.updateMatchValue(updatedMatch)
+    }
 
-    //private val _score = MutableLiveData(currentMatch.score)
-    //val score: LiveData<Any?> = _score
+    /*private val _score = MutableLiveData(currentMatch.score)
+    val score: LiveData<Any?> = _score
+    fun setScore(updatedScore: Any) {
+        val updatedMatch = currentMatch.copy(score = updatedScore)
+        firebaseDataManager.updateMatchValue(updatedMatch)
+    }*/
 
     fun setHomeTeam(updatedTeam: String) {
         val updatedMatch = currentMatch.copy(homeTeam = updatedTeam)
@@ -88,43 +102,41 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             _guestColorHex.value = currentMatch.guestColorHex
         }
         if (_type.value != currentMatch.type) {
-            _type.value = currentMatch.type
+            val sport: Sports = enumValues<Sports>().find { it.name == currentMatch.type } ?: Sports.SOCCER
+            viewModelScope.launch(Dispatchers.IO) {
+                streamersSettingsRepository.setSport(sport)
+            }
         }
         /*if (_score.value != currentMatch.score) {
             _score.value = currentMatch.score
         }*/
     }
 
-    /*fun detach() {
-        Logd("MatchViewModel::detach")
-        //firebaseDataManager.removeMatchValueEventListener()
-    }*/
-
     init {
-        Logd("MatchViewModel:: init")
+        //Logd("MatchViewModel:: init")
+        viewModelScope.launch {
+            streamersSettingsRepository.getSport.collect {
+                _type.value = it.name
+                sportsFactory.set(it)
+            }
+        }
+
         viewModelScope.launch {
             combine(
                 firebaseAccountRepository.accountKey,
                 streamersSettingsRepository.getCurrentKey
-            ){ accountKey, key -> Pair(accountKey, key) }
-            .collect { (firebaseAccountKey, key) ->
+            ){ accountKey, currentKey -> Pair(accountKey, currentKey) }
+            .collect { (accountKey, currentKey) ->
                 //Logd("MatchViewModel:: $firebaseAccountKey $key")
-                if (currentKey != key) {
-                    currentKey = key
-
-                    if (!firebaseAccountKey.isNullOrEmpty() && currentKey != null) {
-                        //Logd("MatchViewModel:: INITIALIZE $firebaseAccountKey $currentKey")
-                        firebaseDataManager
-                            //.initialize(firebaseAccountKey)
-                            .attachMatchValueEventListener(firebaseAccountKey, currentKey!!) { match ->
-                                Logd("MatchViewModel:: onDataChangeCallback")
-                                //_match.value = match
-                                notifyChanges(match)
-                            }
-                    } else {
-                        Logd("MatchViewModel:: Called??")
-                        //firebaseDataManager.removeMatchValueEventListener()
-                    }
+                if (!accountKey.isNullOrEmpty() && currentKey != null) {
+                    //Logd("MatchViewModel:: INITIALIZE $firebaseAccountKey $currentKey")
+                    firebaseDataManager
+                        //.initialize(firebaseAccountKey)
+                        .attachMatchValueEventListener(accountKey, currentKey!!) { match ->
+                            //Logd("MatchViewModel:: onDataChangeCallback")
+                            //_match.value = match
+                            notifyChanges(match)
+                        }
                 }
             }
         }

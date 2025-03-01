@@ -72,7 +72,6 @@ class VolleyControlBarFragment(scoreBoardFragment: VolleyScoreBoardFragment) : B
             binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
         }
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            Logd("SportsFragment::homeColorHex: $guestColorHex")
             binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
         }
 

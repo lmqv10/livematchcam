@@ -36,7 +36,7 @@ class SportsFragment : Fragment() {
         fun newInstance() = SportsFragment()
     }
 
-    private val youtubeViewModel: YoutubeViewModel by activityViewModels()
+    //private val youtubeViewModel: YoutubeViewModel by activityViewModels()
     //private val googleViewModel: GoogleViewModel by activityViewModels()
     //private val streamersViewModel: StreamersViewModel by activityViewModels()
 
@@ -50,8 +50,6 @@ class SportsFragment : Fragment() {
         CardItem(sport = Sports.SOCCER, description = "Soccer", icon = R.drawable.sport_soccer),
         CardItem(sport = Sports.VOLLEY, description = "Volley", icon = R.drawable.sport_volley)
     )
-
-    private var sportsFactory = SportsFactory
 
     private var _binding: FragmentSportsBinding? = null
     private val binding get() = _binding!!
@@ -67,7 +65,7 @@ class SportsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        ////Logd("SportsFragment::matchViewModelID: ${matchViewModel.instanceId}")
+        //Logd("SportsFragment::matchViewModelID: ${matchViewModel.instanceId}")
         /*homeTeamViewModel.name.observe(viewLifecycleOwner) { team ->
             binding.homeTeam.text = team
         }
@@ -102,6 +100,19 @@ class SportsFragment : Fragment() {
             //Logd("SportsFragment::homeColorHex: $guestColorHex")
             binding.guestColor.setShirtByColor(Color.parseColor(guestColorHex))
         }
+
+
+        matchViewModel.type.observe(viewLifecycleOwner) { type ->
+            cardItems.forEach { item -> item.isSelected = item.sport.name == type }
+
+            val adapter = CardAdapter(cardItems) { selectedItem ->
+                lifecycleScope.launch {
+                    matchViewModel.setType(selectedItem.sport.name)
+                }
+            }
+            binding.sportsGrid.adapter = adapter
+        }
+
 
         /*matchViewModel.match.observe(viewLifecycleOwner) { match ->
             binding.homeTeam.text = match.homeTeam
@@ -141,7 +152,7 @@ class SportsFragment : Fragment() {
             }
         }
 
-        launchOnStarted {
+        /*launchOnStarted {
             youtubeViewModel.sport.collectLatest {
                 sportsFactory.set(it)
                 cardItems.forEach { item -> item.isSelected = item.sport == it }
@@ -149,11 +160,12 @@ class SportsFragment : Fragment() {
                 val adapter = CardAdapter(cardItems) { selectedItem ->
                     lifecycleScope.launch {
                         youtubeViewModel.setSport(selectedItem.sport)
+                        matchViewModel.setType(selectedItem.sport.toString())
                     }
                 }
                 binding.sportsGrid.adapter = adapter
             }
-        }
+        }*/
 
         /*
         launchOnStarted {

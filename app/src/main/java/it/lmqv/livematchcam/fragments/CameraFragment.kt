@@ -130,6 +130,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         childFragmentManager.beginTransaction()
             .add(R.id.status_container, statusFragment).commit()
 
+        //Logd("CameraFragment:: sportFragmentFactory build")
         var sportFragmentFactory = sportsFactory.get()
         this.controlBarFragment = sportFragmentFactory.getControlBar()
         this.scoreBoardFragment = sportFragmentFactory.getScoreBoard()
