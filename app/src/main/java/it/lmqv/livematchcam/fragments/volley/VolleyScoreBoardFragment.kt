@@ -5,13 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
-import com.pedro.srt.utils.toInt
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyScoreBoardBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.setShirtByColor
+import it.lmqv.livematchcam.firebase.SetScore
+import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
-import it.lmqv.livematchcam.viewmodels.Set
-import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 
 class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
@@ -19,12 +21,10 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
         fun newInstance() = VolleyScoreBoardFragment()
     }
 
-    private val scoreViewModel: VolleyScoreViewModel by activityViewModels()
+    private var setsControls: List<Pair<TextView, TextView>> = mutableListOf();
 
     private var _binding: FragmentVolleyScoreBoardBinding? = null
     private val binding get() = _binding!!
-
-    //private var currentSet = Set.SET1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,6 +37,14 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        this.setsControls = mutableListOf(
+            Pair(binding.homeScore1set, binding.awayScore1set),
+            Pair(binding.homeScore2set, binding.awayScore2set),
+            Pair(binding.homeScore3set, binding.awayScore3set),
+            Pair(binding.homeScore4set, binding.awayScore4set),
+            Pair(binding.homeScore5set, binding.awayScore5set),
+        )
+
         matchViewModel.homeTeam.observe(viewLifecycleOwner) { team ->
             binding.homeTeam.text = team
             onUpdateCallback?.refresh()
@@ -47,12 +55,35 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
             onUpdateCallback?.refresh()
         }
 
+        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+            binding.homeLogo.setShirtByColor(Color.parseColor(homeColorHex))
+            onUpdateCallback?.refresh()
+        }
+        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
+            binding.awayLogo.setShirtByColor(Color.parseColor(guestColorHex))
+            onUpdateCallback?.refresh()
+        }
+
+        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
+            try {
+                //Logd("VolleyScoreBoard::score.observe")
+                val score = scoreInstance as VolleyScore
+                //Logd("VolleyScoreBoard::score $score")
+                updateScore(score.sets)
+                //updateSetsScore(score.sets)
+                updateLeagueDescription(score.league)
+            } catch (e: Exception) {
+                //Logd("ScoreBoard::Exception ${e.message}")
+            }
+            onUpdateCallback?.refresh()
+        }
+
         /*scoreViewModel.currentSet.observe(viewLifecycleOwner) { currentSet ->
             this.currentSet = currentSet
             onUpdateCallback?.refresh()
         }*/
 
-        scoreViewModel.matchLeague.observe(viewLifecycleOwner) { currentDescription ->
+        /*scoreViewModel.matchLeague.observe(viewLifecycleOwner) { currentDescription ->
             if (currentDescription == "") {
                 binding.matchDescription.visibility = View.GONE
             } else {
@@ -61,9 +92,9 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
             binding.matchDescription.text = currentDescription
             onUpdateCallback?.refresh()
-        }
+        }*/
 
-        scoreViewModel.score.observe(viewLifecycleOwner) { score ->
+        /*scoreViewModel.score.observe(viewLifecycleOwner) { score ->
             binding.homeScore1set.text = score[Set.SET1]?.homePoints.toString()
             binding.awayScore1set.text = score[Set.SET1]?.awayPoints.toString()
 
@@ -90,15 +121,56 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
             binding.homeScoreSets.text = sets.first.toString()
             binding.awayScoreSets.text = sets.second.toString()
             onUpdateCallback?.refresh()
-        }
+        }*/
 
-        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            binding.homeLogo.setShirtByColor(Color.parseColor(homeColorHex))
-            onUpdateCallback?.refresh()
+    }
+
+    private fun updateScore(sets: List<SetScore>) {
+        val setsSize = sets.size
+
+        setsControls.forEachIndexed { index, controls ->
+            if (index < setsSize) {
+                var score = sets[index]
+                controls.first.text = score.home.toString()
+                controls.second.text = score.guest.toString()
+
+                controls.first.visibility = View.VISIBLE
+                controls.second.visibility = View.VISIBLE
+
+                if (index < setsSize - 1) {
+                    val winColor = ContextCompat.getColor(requireContext(), R.color.secondary_dark)
+                    if (score.home > score.guest) {
+                        controls.first.setTextColor(winColor)
+                    } else {
+                        controls.second.setTextColor(winColor)
+                    }
+                }
+            } else {
+                controls.first.visibility = View.GONE
+                controls.second.visibility = View.GONE
+            }
+
         }
-        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            binding.awayLogo.setShirtByColor(Color.parseColor(guestColorHex))
-            onUpdateCallback?.refresh()
+    }
+
+    /*private fun updateSetsScore(setsScore: List<SetScore>) {
+        val sets = setsScore
+            .map { x ->
+                Pair((x.home > x.guest).toInt(), (x.guest < x.home).toInt())
+            }
+            .reduce { sets, result ->
+                Pair(sets.first + result.first, sets.second + result.second)  }
+
+        binding.homeScoreSets.text = sets.first.toString()
+        binding.awayScoreSets.text = sets.second.toString()
+    }*/
+
+    private fun updateLeagueDescription(description: String) {
+        if (description == "") {
+            binding.matchDescription.visibility = View.GONE
+        } else {
+            binding.matchDescription.visibility = View.VISIBLE
         }
+        binding.matchDescription.text = description
     }
 }

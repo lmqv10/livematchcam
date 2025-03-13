@@ -22,20 +22,22 @@ class ScoreFactory {
         var score: Any = when (scoreType) {
             Sports.SOCCER.name -> {
                 SoccerScore(
-                    scoreSnapshot.child("home").getValue(Long::class.java) ?: 0,
-                    scoreSnapshot.child("away").getValue(Long::class.java) ?: 0,
-                    scoreSnapshot.child("period").getValue(String::class.java) ?: "",
-                    scoreSnapshot.child("command").getValue(String::class.java) ?: "")
+                    home = scoreSnapshot.child("home").getValue(Long::class.java) ?: 0,
+                    away = scoreSnapshot.child("away").getValue(Long::class.java) ?: 0,
+                    period = scoreSnapshot.child("period").getValue(String::class.java) ?: "",
+                    command = scoreSnapshot.child("command").getValue(String::class.java) ?: "")
             }
             Sports.VOLLEY.name -> {
                 VolleyScore(
                     sets = scoreSnapshot.child("sets").children.map {
-                        SetScore(
-                            home = it.child("home").getValue(Long::class.java) ?: 0,
-                            guest = it.child("guest").getValue(Long::class.java) ?: 0
-                        )
-                    },
-                    currentSet = scoreSnapshot.child("currentSet").getValue(Long::class.java) ?: 1
+                            SetScore(
+                                home = it.child("home").getValue(Long::class.java) ?: 0,
+                                guest = it.child("guest").getValue(Long::class.java) ?: 0
+                            )
+                        }.ifEmpty { mutableListOf(SetScore()) }
+                        .toMutableList(),
+                    league = scoreSnapshot.child("league").getValue(String::class.java) ?: "",
+                    command = scoreSnapshot.child("command").getValue(String::class.java) ?: ""
                 )
             }
             else -> {

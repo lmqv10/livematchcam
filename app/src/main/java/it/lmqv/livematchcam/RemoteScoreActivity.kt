@@ -13,16 +13,21 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import it.lmqv.livematchcam.databinding.ActivityAccountBinding
 import it.lmqv.livematchcam.databinding.ActivityRemoteScoreBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.fragments.CameraFragment
 import it.lmqv.livematchcam.fragments.IControlBarFragment
 import it.lmqv.livematchcam.fragments.IRemoteControlFragment
+import it.lmqv.livematchcam.fragments.IScoreBoardFragment
 import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
 
-class RemoteScoreActivity : AppCompatActivity() {
+class RemoteScoreActivity : AppCompatActivity(),
+    IScoreBoardFragment.OnUpdateCallback {
 
     private lateinit var binding: ActivityRemoteScoreBinding
     private lateinit var remoteControlFragment: IRemoteControlFragment
+    private lateinit var scoreBoardFragment: IScoreBoardFragment
+
     private var sportsFactory = SportsFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +74,13 @@ class RemoteScoreActivity : AppCompatActivity() {
 
         val sportFragmentFactory = sportsFactory.get()
         this.remoteControlFragment = sportFragmentFactory.getRemoteControl()
+        this.scoreBoardFragment = sportFragmentFactory.getScoreBoard()
+        this.scoreBoardFragment.setOnUpdate(this)
+
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
+            .commit()
 
         supportFragmentManager
             .beginTransaction()
@@ -80,4 +92,6 @@ class RemoteScoreActivity : AppCompatActivity() {
         finish()
         return true
     }
+
+    override fun refresh() { }
 }

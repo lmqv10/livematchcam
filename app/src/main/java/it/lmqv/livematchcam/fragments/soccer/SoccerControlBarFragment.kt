@@ -45,6 +45,13 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
             binding.awayTeam.text = team
         }
 
+        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
+        }
+        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
+            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
+        }
+
         matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
             val score = scoreInstance as? SoccerScore ?: SoccerScore()
             soccerScoreViewModel.initScore(score)
@@ -62,13 +69,6 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
                 binding.stopTime.visibility = View.GONE
                 binding.resetTime.isEnabled = true
             }
-        }
-
-        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
-        }
-        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
         }
 
         soccerScoreViewModel.liveScore.observe(viewLifecycleOwner) { liveScore ->

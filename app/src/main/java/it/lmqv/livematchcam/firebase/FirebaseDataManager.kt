@@ -93,6 +93,7 @@ class FirebaseDataManager {
                         val match = snapshot.getValue(Match::class.java)
                         if (match != null) {
                             val score = ScoreFactory.getInstance().buildByType(match.type, snapshot)
+                            //Logd("onDataChange::${score}")
                             onChangeCallback(match, score)
                         }
                     } else {

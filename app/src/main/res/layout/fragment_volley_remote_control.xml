@@ -12,7 +12,6 @@
         android:id="@+id/control_home"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/alpha_background"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
@@ -39,7 +38,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textStyle="bold"
-                android:textColor="@color/primary"
+                android:textColor="@color/black"
                 android:text="@string/home_team"/>
         </LinearLayout>
 
@@ -65,7 +64,7 @@
                 android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
-                android:textColor="@color/primary"
+                android:textColor="@color/black"
                 android:text= "@string/score_placeholder"/>
 
             <ImageView
@@ -88,66 +87,52 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <RadioGroup
-            android:id="@+id/sets_group"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:background="@drawable/alpha_background"
+            android:orientation="horizontal"
             android:padding="5dp"
-            android:orientation="horizontal">
+            android:background="@drawable/alpha_background">
 
-            <RadioButton
-                android:id="@+id/radioSet1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
+            <ImageView
+                android:id="@+id/remove_last_set"
+                android:src="@drawable/minus"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription"/>
+
+            <TextView
+                android:id="@+id/current_set"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="5dp"
+                android:gravity="center"
                 android:textStyle="bold"
-                android:padding="3dp"
-                android:text="1°" />
+                android:textSize="20sp"
+                android:minWidth="40dp"
+                android:textColor="@color/black"
+                android:text= "@string/first_set_placeholder"/>
 
-            <RadioButton
-                android:id="@+id/radioSet2"
+            <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="5dp"
+                android:gravity="center"
                 android:textStyle="bold"
-                android:padding="3dp"
-                android:text="2°" />
-
-            <RadioButton
-                android:id="@+id/radioSet3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
-                android:textStyle="bold"
-                android:padding="3dp"
-                android:text="3°" />
-
-            <RadioButton
-                android:id="@+id/radioSet4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
-                android:textStyle="bold"
-                android:padding="3dp"
-                android:text="4°" />
-
-            <RadioButton
-                android:id="@+id/radioSet5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:buttonTint="@color/white"
-                android:textStyle="bold"
-                android:padding="3dp"
-                android:text="5°" />
-        </RadioGroup>
-
+                android:textSize="20sp"
+                android:minWidth="40dp"
+                android:textColor="@color/black"
+                android:text= "@string/set_placeholder"/>
+            <ImageView
+                android:id="@+id/add_new_set"
+                android:src="@drawable/add"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription"/>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -160,7 +145,6 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/alpha_background"
                 android:layout_marginBottom="5dp"
                 android:src="@drawable/edit_pen"
                 tools:ignore="ContentDescription" />
@@ -170,7 +154,6 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/alpha_background"
                 android:src="@drawable/reset_match"
                 tools:ignore="ContentDescription" />
         </LinearLayout>
@@ -180,7 +163,6 @@
         android:id="@+id/control_away"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/alpha_background"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent">
@@ -199,7 +181,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textStyle="bold"
-                android:textColor="@color/primary"
+                android:textColor="@color/black"
                 android:text="@string/away_team"/>
 
             <ImageView
@@ -232,7 +214,7 @@
                 android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
-                android:textColor="@color/primary"
+                android:textColor="@color/black"
                 android:text= "@string/score_placeholder"/>
 
             <ImageView

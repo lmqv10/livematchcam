@@ -1,8 +1,5 @@
 package it.lmqv.livematchcam.firebase
 
-import it.lmqv.livematchcam.factories.Sports
-import it.lmqv.livematchcam.factories.SportsFactory
-
 data class Accounts(
     val accounts: Map<String, Account>
 )
@@ -43,8 +40,8 @@ data class SoccerScore (
 ) : IScore
 
 data class VolleyScore(
-    val sets: List<SetScore> = listOf(),
-    val currentSet: Long = 1,
+    val sets: MutableList<SetScore> = mutableListOf(SetScore()),
+    val league: String = "",
     override val command: String = ""
 ) : IScore
 

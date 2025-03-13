@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.toArgbHex
 import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.factories.SportsFactory
@@ -132,6 +133,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun applyScoreChanges(updatedScore: IScore) {
+        //Logd("applyScoreChanges::${updatedScore}")
         if (_isRealtimeDatabaseAvailable.value == true) {
             val updatedScoreMap = ScoreFactory.getInstance().buildMap(updatedScore)
             firebaseDataManager.updateScoreValue(updatedScoreMap)
@@ -141,9 +143,14 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun notifyScoreChanges(score: IScore) {
-        if (_score.value != score) {
+        //Logd("MatchViewModel:: notifyScoreChanges Source=${_score.value}")
+        //Logd("MatchViewModel:: notifyScoreChanges Update=$score")
+        //if (_score.value != score) {
+            //Logd("MatchViewModel:: notifyScoreChanges:: changed!")
             _score.value = score
-        }
+        //} else {
+        //    Logd("MatchViewModel:: notifyScoreChanges:: no changes")
+        //}
     }
 
     private fun notifyMatchChanges(updatedMatch: Match) {

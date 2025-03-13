@@ -11,12 +11,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyControlBarBinding
+import it.lmqv.livematchcam.databinding.FragmentVolleyRemoteControlBinding
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
+import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
-import it.lmqv.livematchcam.viewmodels.Set
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 
 class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
@@ -24,9 +25,9 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         fun newInstance() = VolleyRemoteControlFragment()
     }
 
-    private val scoreViewModel: VolleyScoreViewModel by activityViewModels()
+    private val volleyScoreViewModel: VolleyScoreViewModel by activityViewModels()
 
-    private var _binding: FragmentVolleyControlBarBinding? = null
+    private var _binding: FragmentVolleyRemoteControlBinding? = null
     private val binding get() = _binding!!
 
     private var currentDescription = ""
@@ -35,7 +36,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentVolleyControlBarBinding.inflate(inflater, container, false)
+        _binding = FragmentVolleyRemoteControlBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -49,7 +50,47 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             binding.awayTeam.text = guestTeam
         }
 
-        scoreViewModel.matchLeague.observe(viewLifecycleOwner) { currentDescription ->
+        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
+        }
+        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
+            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
+        }
+
+        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
+            try {
+                //Logd("VolleyRemoteControl::score.observe")
+                val score = scoreInstance as? VolleyScore ?: VolleyScore()
+                volleyScoreViewModel.initScore(score)
+                //Logd("VolleyRemoteControl::score $score")
+
+                binding.homeScore.text = score.sets.last().home.toString()
+                binding.awayScore.text = score.sets.last().guest.toString()
+
+                binding.removeLastSet.isEnabled = score.sets.size > 1
+                binding.addNewSet.isEnabled = score.sets.size < 5
+
+                binding.currentSet.text = score.sets.size.toString()
+            } catch (e: Exception) {
+                //Logd("VolleyRemoteControl Exception  $e.message")
+            }
+        }
+
+        volleyScoreViewModel.liveScore.observe(viewLifecycleOwner) { liveScore ->
+            if (liveScore != null) {
+                matchViewModel.setScore(liveScore)
+            }
+        }
+
+        binding.addNewSet.setOnClickListener {
+            volleyScoreViewModel.addNewSet()
+        }
+
+        binding.removeLastSet.setOnClickListener {
+            volleyScoreViewModel.removeLastSet()
+        }
+
+        /*scoreViewModel.matchLeague.observe(viewLifecycleOwner) { currentDescription ->
             this.currentDescription = currentDescription
         }
 
@@ -66,13 +107,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                 Set.SET4 -> binding.radioSet4.isChecked = true
                 Set.SET5 -> binding.radioSet5.isChecked = true
             }
-        }
-        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
-        }
-        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
-        }
+        }*/
 
         binding.resetMatch.setOnClickListener {
             val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
@@ -82,7 +117,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             val dialog = AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .setPositiveButton("OK") { dialog, _ ->
-                    scoreViewModel.resetMatch()
+                    volleyScoreViewModel.resetMatch()
                     dialog.dismiss()
                     requireActivity().hideSystemUI()
                 }
@@ -98,17 +133,17 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         }
 
         binding.homeScoreMinus.setOnClickListener {
-            scoreViewModel.decrementHomeScore()
+            volleyScoreViewModel.decrementHomeScore()
         }
         binding.homeScoreAdd.setOnClickListener {
-            scoreViewModel.incrementHomeScore()
+            volleyScoreViewModel.incrementHomeScore()
         }
 
         binding.awayScoreMinus.setOnClickListener {
-            scoreViewModel.decrementAwayScore()
+            volleyScoreViewModel.decrementAwayScore()
         }
         binding.awayScoreAdd.setOnClickListener {
-            scoreViewModel.incrementAwayScore()
+            volleyScoreViewModel.incrementAwayScore()
         }
 
         binding.homeColor.setOnClickListener {
@@ -142,13 +177,13 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         binding.matchLeague.setOnClickListener {
             requireContext().showEditStringDialog(R.string.match_league, this.currentDescription, filters = arrayOf<InputFilter>()) { updatedMatchLeague ->
                 this.currentDescription = updatedMatchLeague
-                scoreViewModel.setMatchLeague(this.currentDescription)
+                volleyScoreViewModel.setMatchLeague(this.currentDescription)
                 requireActivity().hideSystemUI()
             }
         }
 
 
-        binding.setsGroup.setOnCheckedChangeListener { _, checkedId ->
+        /*binding.setsGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 binding.radioSet1.id -> {
                     scoreViewModel.setCurrentSet(Set.SET1)
@@ -166,6 +201,6 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                     scoreViewModel.setCurrentSet(Set.SET5)
                 }
             }
-        }
+        }*/
     }
 }

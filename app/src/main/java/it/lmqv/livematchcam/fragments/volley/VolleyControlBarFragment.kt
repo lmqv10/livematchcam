@@ -16,8 +16,8 @@ import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
+import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseControlBarFragment
-import it.lmqv.livematchcam.viewmodels.Set
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 
 class VolleyControlBarFragment() : BaseControlBarFragment() {
@@ -25,7 +25,7 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
         fun newInstance() = VolleyControlBarFragment()
     }
 
-    private val scoreViewModel: VolleyScoreViewModel by activityViewModels()
+    private val volleyScoreViewModel: VolleyScoreViewModel by activityViewModels()
 
     private var _binding: FragmentVolleyControlBarBinding? = null
     private val binding get() = _binding!!
@@ -50,29 +50,44 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
             binding.awayTeam.text = guestTeam
         }
 
-        scoreViewModel.matchLeague.observe(viewLifecycleOwner) { currentDescription ->
-            this.currentDescription = currentDescription
-        }
-
-        scoreViewModel.currentScore.observe(viewLifecycleOwner) { score ->
-            binding.homeScore.text = score.homePoints.toString()
-            binding.awayScore.text = score.awayPoints.toString()
-        }
-
-        scoreViewModel.currentSet.observe(viewLifecycleOwner) { currentSet ->
-            when (currentSet) {
-                Set.SET1 -> binding.radioSet1.isChecked = true
-                Set.SET2 -> binding.radioSet2.isChecked = true
-                Set.SET3 -> binding.radioSet3.isChecked = true
-                Set.SET4 -> binding.radioSet4.isChecked = true
-                Set.SET5 -> binding.radioSet5.isChecked = true
-            }
-        }
         matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
             binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
         }
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
             binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
+        }
+
+        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
+            try {
+                //Logd("VolleyControlBar::score.observe")
+                val score = scoreInstance as? VolleyScore ?: VolleyScore()
+                volleyScoreViewModel.initScore(score)
+                //Logd("VolleyControlBar::score $score")
+
+                binding.homeScore.text = score.sets.last().home.toString()
+                binding.awayScore.text = score.sets.last().guest.toString()
+
+                binding.removeLastSet.isEnabled = score.sets.size > 1
+                binding.addNewSet.isEnabled = score.sets.size < 5
+
+                binding.currentSet.text = score.sets.size.toString()
+            } catch (e: Exception) {
+                //Logd("VolleyControlBar Exception  $e.message")
+            }
+        }
+
+        volleyScoreViewModel.liveScore.observe(viewLifecycleOwner) { liveScore ->
+            if (liveScore != null) {
+                matchViewModel.setScore(liveScore)
+            }
+        }
+
+        binding.addNewSet.setOnClickListener {
+            volleyScoreViewModel.addNewSet()
+        }
+
+        binding.removeLastSet.setOnClickListener {
+            volleyScoreViewModel.removeLastSet()
         }
 
         binding.resetMatch.setOnClickListener {
@@ -83,7 +98,7 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
             val dialog = AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .setPositiveButton("OK") { dialog, _ ->
-                    scoreViewModel.resetMatch()
+                    volleyScoreViewModel.resetMatch()
                     dialog.dismiss()
                     requireActivity().hideSystemUI()
                 }
@@ -99,17 +114,17 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
         }
 
         binding.homeScoreMinus.setOnClickListener {
-            scoreViewModel.decrementHomeScore()
+            volleyScoreViewModel.decrementHomeScore()
         }
         binding.homeScoreAdd.setOnClickListener {
-            scoreViewModel.incrementHomeScore()
+            volleyScoreViewModel.incrementHomeScore()
         }
 
         binding.awayScoreMinus.setOnClickListener {
-            scoreViewModel.decrementAwayScore()
+            volleyScoreViewModel.decrementAwayScore()
         }
         binding.awayScoreAdd.setOnClickListener {
-            scoreViewModel.incrementAwayScore()
+            volleyScoreViewModel.incrementAwayScore()
         }
 
         binding.homeColor.setOnClickListener {
@@ -140,32 +155,11 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
             }
         }
 
-        binding.matchLeague.setOnClickListener {
+        binding.matchLeagueDescription.setOnClickListener {
             requireContext().showEditStringDialog(R.string.match_league, this.currentDescription, filters = arrayOf<InputFilter>()) { updatedMatchLeague ->
                 this.currentDescription = updatedMatchLeague
-                scoreViewModel.setMatchLeague(this.currentDescription)
+                volleyScoreViewModel.setMatchLeague(this.currentDescription)
                 requireActivity().hideSystemUI()
-            }
-        }
-
-
-        binding.setsGroup.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                binding.radioSet1.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET1)
-                }
-                binding.radioSet2.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET2)
-                }
-                binding.radioSet3.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET3)
-                }
-                binding.radioSet4.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET4)
-                }
-                binding.radioSet5.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET5)
-                }
             }
         }
     }

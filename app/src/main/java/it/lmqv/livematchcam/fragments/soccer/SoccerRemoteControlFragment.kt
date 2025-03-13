@@ -31,9 +31,9 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
     private var _binding: FragmentSoccerRemoteControlBinding? = null
     private val binding get() = _binding!!
 
-    private val timerHandler: TimerHandler = TimerHandler.newInstance { timeElapsedInSeconds ->
+    /*private val timerHandler: TimerHandler = TimerHandler.newInstance { timeElapsedInSeconds ->
         binding.matchTime.text = formatTime(timeElapsedInSeconds)
-    }
+    }*/
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -53,36 +53,36 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
             binding.awayTeam.text = team
         }
 
-        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
-            val score = scoreInstance as? SoccerScore ?: SoccerScore()
-            soccerScoreViewModel.initScore(score)
-            binding.homeScore.text = score.home.toString()
-            binding.awayScore.text = score.away.toString()
-            binding.currentPeriod.text = score.period
-
-            val command = score.command
-            if (command == Command.START_TIME.toString()) {
-                timerHandler.startTime()
-                binding.startTime.visibility = View.GONE
-                binding.stopTime.visibility = View.VISIBLE
-                binding.resetTime.isEnabled = false
-            }
-            if (command == Command.PAUSE.toString()) {
-                timerHandler.pauseTime()
-                binding.startTime.visibility = View.VISIBLE
-                binding.stopTime.visibility = View.GONE
-                binding.resetTime.isEnabled = true
-            }
-            if (command == Command.RESET_TIME.toString()) {
-                timerHandler.resetTime()
-            }
-        }
-
         matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
             binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
         }
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
             binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
+        }
+
+        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
+            val score = scoreInstance as? SoccerScore ?: SoccerScore()
+            soccerScoreViewModel.initScore(score)
+            binding.homeScore.text = score.home.toString()
+            binding.awayScore.text = score.away.toString()
+            //binding.currentPeriod.text = score.period
+
+            val command = score.command
+            if (command == Command.START_TIME.toString()) {
+                //timerHandler.startTime()
+                binding.startTime.visibility = View.GONE
+                binding.stopTime.visibility = View.VISIBLE
+                binding.resetTime.isEnabled = false
+            }
+            if (command == Command.PAUSE.toString()) {
+                //timerHandler.pauseTime()
+                binding.startTime.visibility = View.VISIBLE
+                binding.stopTime.visibility = View.GONE
+                binding.resetTime.isEnabled = true
+            }
+            if (command == Command.RESET_TIME.toString()) {
+                //timerHandler.resetTime()
+            }
         }
 
         soccerScoreViewModel.liveScore.observe(viewLifecycleOwner) { liveScore ->

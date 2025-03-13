@@ -3,91 +3,94 @@ package it.lmqv.livematchcam.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-
-enum class Set {
-    SET1,
-    SET2,
-    SET3,
-    SET4,
-    SET5
-}
-
-class SetScore(var targetPoints: Int) {
-    var homePoints : Int = 0
-    var awayPoints : Int = 0
-}
+import it.lmqv.livematchcam.firebase.SetScore
+import it.lmqv.livematchcam.firebase.VolleyScore
+import kotlin.math.max
 
 class VolleyScoreViewModel: ViewModel() {
 
-    private val _currentSet = MutableLiveData(Set.SET1)
-    val currentSet: LiveData<Set> = _currentSet
-    fun setCurrentSet(updatedSet: Set) {
-        _currentSet.value = updatedSet
-        _currentScore.value = _score.value?.get(updatedSet)!!
+    private val _liveScore = MutableLiveData<VolleyScore?>(null)
+
+    val liveScore: LiveData<VolleyScore?> = _liveScore
+    fun initScore(currentScore: VolleyScore) {
+        if (_liveScore.value != currentScore) {
+            _liveScore.value = currentScore
+        }
     }
 
-    private val _matchLeague = MutableLiveData("")
-    val matchLeague: LiveData<String> = _matchLeague
-    fun setMatchLeague(updatedSet: String) {
-        _matchLeague.value = updatedSet
+    //private val _currentSet = MutableLiveData(Set.SET1)
+    //val currentSet: LiveData<Set> = _currentSet
+    /*fun startSet() {
+        //_currentSet.value = updatedSet
+        //_currentScore.value = _score.value?.get(updatedSet)!!
+        var currentSet = updatedSet.ordinal + 1
+        _liveScore.value = _liveScore.value?.copy(currentSet = currentSet)
+    }*/
+
+    //private val _matchLeague = MutableLiveData("")
+    //val matchLeague: LiveData<String> = _matchLeague
+    fun setMatchLeague(updatedLeague: String) {
+        //_matchLeague.value = updatedLeague
+        _liveScore.value = _liveScore.value?.copy(league = updatedLeague)
     }
 
-    private val _currentScore = MutableLiveData(SetScore(25))
-    val currentScore: LiveData<SetScore> = _currentScore
 
-    private val _score = MutableLiveData(mapOf(
+    //private val _currentScore = MutableLiveData(SetScore(25))
+    //val currentScore: LiveData<SetScore> = _currentScore
+    /*private val _score = MutableLiveData(mapOf(
         Set.SET1 to SetScore(25),
         Set.SET2 to SetScore(25),
         Set.SET3 to SetScore(25),
         Set.SET4 to SetScore(25),
         Set.SET5 to SetScore(15)
     ))
-    val score: LiveData<Map<Set, SetScore>> = _score
+    val score: LiveData<Map<Set, SetScore>> = _score*/
 
     fun incrementHomeScore() {
-        val currentScoreMap = _score.value ?: return
-        var setScore = currentScoreMap.get(_currentSet.value)!!
-        if (setScore.homePoints < setScore.targetPoints
-            || setScore.homePoints - setScore.awayPoints < 2) {
-            currentScoreMap.get(_currentSet.value)!!.homePoints++
-            _currentScore.value = currentScoreMap.get(_currentSet.value)!!
-            this._score.value = currentScoreMap
-        }
+        val currentScore = _liveScore.value?.sets?.last() ?: SetScore()
+        var updatedScore = currentScore.copy(home = currentScore.home.plus(1))
+        notifyUpdateScore(updatedScore)
     }
     fun decrementHomeScore() {
-        val currentScoreMap = _score.value ?: return
-        if (currentScoreMap.get(_currentSet.value)!!.homePoints > 0) {
-            currentScoreMap.get(_currentSet.value)!!.homePoints--
-            _currentScore.value = currentScoreMap.get(_currentSet.value)!!
-            this._score.value = currentScoreMap
-        }
+        val currentScore = _liveScore.value?.sets?.last() ?: SetScore()
+        var updatedScore = currentScore.copy(home = max(0, currentScore.home.minus(1)))
+        notifyUpdateScore(updatedScore)
     }
     fun incrementAwayScore() {
-        val currentScoreMap = _score.value ?: return
-        var setScore = currentScoreMap.get(_currentSet.value)!!
-        if (setScore.awayPoints < setScore.targetPoints
-            || setScore.awayPoints - setScore.homePoints < 2) {
-            currentScoreMap.get(_currentSet.value)!!.awayPoints++
-            _currentScore.value = currentScoreMap.get(_currentSet.value)!!
-            this._score.value = currentScoreMap
-        }
+        val currentScore = _liveScore.value?.sets?.last() ?: SetScore()
+        var updatedScore = currentScore.copy(guest = currentScore.guest.plus(1))
+        notifyUpdateScore(updatedScore)
     }
     fun decrementAwayScore() {
-        val currentScoreMap = _score.value ?: return
-        if (currentScoreMap.get(_currentSet.value)!!.awayPoints > 0) {
-            currentScoreMap.get(_currentSet.value)!!.awayPoints--
-            _currentScore.value = currentScoreMap.get(_currentSet.value)!!
-            this._score.value = currentScoreMap
-        }
+        val currentScore = _liveScore.value?.sets?.last() ?: SetScore()
+        var updatedScore = currentScore.copy(guest = max(0, currentScore.guest.minus(1)))
+        notifyUpdateScore(updatedScore)
+    }
+
+    fun addNewSet() {
+        var updatedSets = _liveScore.value?.sets
+        updatedSets?.add(SetScore())
+        _liveScore.value = updatedSets?.let { _liveScore.value?.copy(sets = it) }
+    }
+
+    fun removeLastSet() {
+        var updatedSets = _liveScore.value?.sets
+        updatedSets?.removeLast()
+        _liveScore.value = updatedSets?.let { _liveScore.value?.copy(sets = it) }
     }
 
     fun resetMatch() {
-        val currentScoreMap = _score.value ?: return
-        currentScoreMap.forEach { (_, value) ->
-            value.homePoints = 0
-            value.awayPoints = 0
+        _liveScore.value = VolleyScore()
+    }
+
+    private fun notifyUpdateScore(updatedScore: SetScore) {
+        _liveScore.value = _liveScore.value?.let { liveScore ->
+            val updatedSets = liveScore.sets.apply {
+                if (isNotEmpty()) {
+                    this[lastIndex] = updatedScore
+                }
+            }
+            liveScore.copy(sets = updatedSets)
         }
-        this._score.value = currentScoreMap
-        this.setCurrentSet(Set.SET1)
     }
 }

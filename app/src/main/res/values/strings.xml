@@ -121,6 +121,7 @@
     <string name="bitrate_placeholder">0 mb/s</string>
     <string name="zoom_placeholder">0.0</string>
     <string name="set_placeholder">Set</string>
+    <string name="first_set_placeholder">1</string>
     <string name="set_1_placeholder">1 Set</string>
     <string name="set_2_placeholder">2 Set</string>
     <string name="set_3_placeholder">3 Set</string>
