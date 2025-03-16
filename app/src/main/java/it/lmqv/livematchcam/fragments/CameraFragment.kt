@@ -14,15 +14,19 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import coil.Coil
+import coil.request.ImageRequest
 import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.Camera1Source
 import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.VideoSource
+import com.pedro.encoder.utils.gl.TranslateTo
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
 import it.lmqv.livematchcam.R
@@ -31,6 +35,7 @@ import it.lmqv.livematchcam.databinding.FragmentCameraBinding
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
+import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.extensions.toast
@@ -85,6 +90,8 @@ class CameraFragment: Fragment(), ConnectChecker,
 
     private lateinit var controlBarFragment: IControlBarFragment
     private lateinit var scoreBoardFragment: IScoreBoardFragment
+    private lateinit var scoreBoardFilter: ImageObjectFilterRender
+    private lateinit var spotBannerFilter: ImageObjectFilterRender
     private var sportsFactory = SportsFactory
 
     //private val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
@@ -285,6 +292,7 @@ class CameraFragment: Fragment(), ConnectChecker,
                 this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.Out)
             }
         }
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -298,10 +306,36 @@ class CameraFragment: Fragment(), ConnectChecker,
 
         this.scoreBoardFragment.setOnUpdate(this)
 
-        /*homeTeamViewModel.setLogo(Color.WHITE)
-        awayTeamViewModel.setLogo(Color.BLACK)
-        homeTeamViewModel.setName(getString(R.string.hint_home_team))
-        awayTeamViewModel.setName(getString(R.string.hint_away_team))*/
+        this.scoreBoardFilter = ImageObjectFilterRender()
+        this.spotBannerFilter = ImageObjectFilterRender()
+        genericStream.getGlInterface().clearFilters()
+        genericStream.getGlInterface().addFilter(0, this.scoreBoardFilter)
+
+
+        /*launchOnStarted {
+            val bitmap = Coil.imageLoader(requireContext()).execute(
+                ImageRequest.Builder(requireContext())
+                    .data("https://avisbiella.it/wp-content/uploads/2022/01/Logo_AVIS.png")
+                    .build()
+            ).drawable?.toBitmap()
+
+            bitmap.apply {
+                val maxFactor = 25f
+                val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
+                val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
+
+                val factorX = maxFactor / defaultScaleX
+                val scaleX = factorX * defaultScaleX
+                val scaleY = factorX * defaultScaleY
+
+                spotBannerFilter.apply {
+                    setImage(bitmap)
+                    setScale(scaleX, scaleY)
+                    setPosition(75f, 0f)
+                }
+                genericStream.getGlInterface().addFilter(1, spotBannerFilter)
+            }
+        }*/
 
         refresh()
     }
@@ -405,11 +439,17 @@ class CameraFragment: Fragment(), ConnectChecker,
             val scaleX = factorX * defaultScaleX
             val scaleY = factorX * defaultScaleY
 
-            val imageFilter = ImageObjectFilterRender()
+            this.scoreBoardFilter.apply {
+                setImage(scoreBoardBitmap)
+                setScale(scaleX, scaleY)
+                setPosition(0.15f, 0.15f)
+            }
+
+            /*val imageFilter = ImageObjectFilterRender()
             imageFilter.setImage(scoreBoardBitmap)
             imageFilter.setPosition(0.15f, 0.15f)
             imageFilter.setScale(scaleX, scaleY)
-            genericStream.getGlInterface().setFilter(imageFilter)
+            genericStream.getGlInterface().setFilter(imageFilter)*/
         }
     }
 
@@ -480,11 +520,8 @@ class CameraFragment: Fragment(), ConnectChecker,
         spinnerZoomStrategies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
-                val selectedZoomHandler = selectedItem.key.constructors.first()?.call(requireContext(), videoSource)
-                if (selectedZoomHandler != null)
-                {
-                    this@CameraFragment.zoomLevelHandler = selectedZoomHandler as IZoomLevelHandler
-                }
+                val selectedZoomHandler = selectedItem.key.constructors.first().call(requireContext(), videoSource)
+                this@CameraFragment.zoomLevelHandler = selectedZoomHandler as IZoomLevelHandler
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
