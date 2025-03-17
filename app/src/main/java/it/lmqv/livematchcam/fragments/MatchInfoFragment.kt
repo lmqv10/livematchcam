@@ -14,17 +14,20 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.RemoteScoreActivity
 import it.lmqv.livematchcam.YouTubeActivity
 import it.lmqv.livematchcam.databinding.FragmentMatchInfoBinding
 import it.lmqv.livematchcam.extensions.hideSystemUI
+import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.viewmodels.GoogleViewModel
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class MatchInfoFragment : Fragment() {
@@ -70,12 +73,51 @@ class MatchInfoFragment : Fragment() {
         matchViewModel.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
             binding.guestTeam.text = guestTeam
         }
-        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+
+        /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
             binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
         }
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
             binding.guestColor.setShirtByColor(Color.parseColor(guestColorHex))
+        }*/
+        launchOnStarted {
+            combine(
+                matchViewModel.homeColorHex,
+                matchViewModel.homeLogo) {
+                    color, logo -> Pair(color, logo)
+            }.collect { (colorHex, logoURL) ->
+                //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
+                if (!logoURL.isNullOrEmpty()) {
+                    binding.homeColor.load(logoURL) {
+                        placeholder(R.drawable.shirt_white)
+                        error(R.drawable.shirt_white)
+                        allowHardware(false)
+                    }
+                } else {
+                    binding.homeColor.setShirtByColor(Color.parseColor(colorHex))
+                }
+            }
         }
+
+        launchOnStarted {
+            combine(
+                matchViewModel.guestColorHex,
+                matchViewModel.guestLogo) {
+                    color, logo -> Pair(color, logo)
+            }.collect { (colorHex, logoURL) ->
+                //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
+                if (!logoURL.isNullOrEmpty()) {
+                    binding.guestColor.load(logoURL) {
+                        placeholder(R.drawable.shirt_white)
+                        error(R.drawable.shirt_white)
+                        allowHardware(false)
+                    }
+                } else {
+                    binding.guestColor.setShirtByColor(Color.parseColor(colorHex))
+                }
+            }
+        }
+
 
         matchViewModel.type.observe(viewLifecycleOwner) { type ->
             cardItems.forEach { item -> item.isSelected = item.sport.name == type }

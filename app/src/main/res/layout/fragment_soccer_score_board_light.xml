@@ -18,7 +18,7 @@
             android:background="@drawable/score_board_lightgray_background">
 
             <ImageView
-                android:id="@+id/home_logo"
+                android:id="@+id/home_shirt"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
@@ -35,7 +35,8 @@
                 android:text="@string/hint_home_team"
                 android:gravity="center" />
 
-            <Space android:layout_weight="1"
+            <androidx.legacy.widget.Space
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
 
             <TextView
@@ -49,7 +50,7 @@
                 android:gravity="center" />
 
             <ImageView
-                android:id="@+id/away_logo"
+                android:id="@+id/away_shirt"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
@@ -58,6 +59,48 @@
         </TableRow>
 
     </TableLayout>
+
+    <FrameLayout
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="5dp">
+
+        <LinearLayout
+            android:id="@+id/home_color_bar"
+            android:layout_width="100dp"
+            android:layout_height="8dp"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:background="@color/TRANSPARENT"
+            android:padding="2dp">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/away_color_bar"
+            android:layout_width="100dp"
+            android:layout_height="8dp"
+            android:orientation="vertical"
+            android:layout_gravity="end|bottom"
+            android:background="@color/TRANSPARENT"
+            android:padding="2dp">
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/home_logo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/shirt_layers"
+            android:gravity="start" />
+
+        <ImageView
+            android:id="@+id/away_logo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="right"
+            android:src="@drawable/shirt_layers"
+            android:gravity="start"/>
+    </FrameLayout>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -83,7 +126,7 @@
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:background="@drawable/score_board_lightgray_background"
-                android:textSize="10dp"
+                android:textSize="12dp"
                 android:layout_marginVertical="1dp"
                 android:gravity="center" />
 
@@ -122,7 +165,7 @@
                 android:text="@string/time_placeholder"
                 android:textStyle="bold"
                 android:textColor="@color/DARKER_GRAY"
-                android:textSize="10dp"
+                android:textSize="12dp"
                 android:gravity="center" />
 
         </LinearLayout>

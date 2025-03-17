@@ -9,16 +9,19 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
+import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyControlBarBinding
 import it.lmqv.livematchcam.databinding.FragmentVolleyRemoteControlBinding
 import it.lmqv.livematchcam.extensions.hideSystemUI
+import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
+import kotlinx.coroutines.flow.combine
 
 class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
     companion object {
@@ -50,11 +53,48 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             binding.awayTeam.text = guestTeam
         }
 
-        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+        /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
             binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
         }
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
             binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
+        }*/
+        launchOnStarted {
+            combine(
+                matchViewModel.homeColorHex,
+                matchViewModel.homeLogo) {
+                    color, logo -> Pair(color, logo)
+            }.collect { (colorHex, logoURL) ->
+                //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
+                if (!logoURL.isNullOrEmpty()) {
+                    binding.homeColor.load(logoURL) {
+                        placeholder(R.drawable.shirt_white)
+                        error(R.drawable.shirt_white)
+                        allowHardware(false)
+                    }
+                } else {
+                    binding.homeColor.setShirtByColor(Color.parseColor(colorHex))
+                }
+            }
+        }
+
+        launchOnStarted {
+            combine(
+                matchViewModel.guestColorHex,
+                matchViewModel.guestLogo) {
+                    color, logo -> Pair(color, logo)
+            }.collect { (colorHex, logoURL) ->
+                //binding.awayColor.isClickable = logoURL.isNullOrEmpty()
+                if (!logoURL.isNullOrEmpty()) {
+                    binding.awayColor.load(logoURL) {
+                        placeholder(R.drawable.shirt_white)
+                        error(R.drawable.shirt_white)
+                        allowHardware(false)
+                    }
+                } else {
+                    binding.awayColor.setShirtByColor(Color.parseColor(colorHex))
+                }
+            }
         }
 
         matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->

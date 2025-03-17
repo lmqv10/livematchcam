@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.toArgbHex
@@ -17,8 +19,10 @@ import it.lmqv.livematchcam.firebase.ScoreFactory
 import it.lmqv.livematchcam.repositories.AccountRepository
 import it.lmqv.livematchcam.repositories.StreamersSettingsRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.net.URL
 
 class MatchViewModel(application: Application) : AndroidViewModel(application) {
     //val instanceId: String? =  UUID.randomUUID().toString()
@@ -37,11 +41,18 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     private val _guestTeam = MutableLiveData(currentMatch.guestTeam)
     val guestTeam: LiveData<String> = _guestTeam
 
+    private val _homeLogo = MutableLiveData(currentMatch.homeLogo)
+    val homeLogo: Flow<String> = _homeLogo.asFlow()
+
+    private val _guestLogo = MutableLiveData(currentMatch.guestLogo)
+    val guestLogo: Flow<String> = _guestLogo.asFlow()
+
     private val _homeColorHex = MutableLiveData(currentMatch.homeColorHex)
-    val homeColorHex: LiveData<String> = _homeColorHex
+    val homeColorHex: Flow<String> = _homeColorHex.asFlow()
 
     private val _guestColorHex = MutableLiveData(currentMatch.guestColorHex)
-    val guestColorHex: LiveData<String> = _guestColorHex
+    val guestColorHex: Flow<String> = _guestColorHex.asFlow()
+
 
     private val _type = MutableLiveData(currentMatch.type)
     val type: LiveData<String> = _type
@@ -59,6 +70,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private val _spotBannerURL = MutableLiveData(currentMatch.spotBannerURL)
+    val spotBannerURL: LiveData<String> = _spotBannerURL
+
     fun setHomeTeam(updatedTeam: String) {
         val updatedMatch = currentMatch.copy(homeTeam = updatedTeam)
         applyMatchChanges(updatedMatch)
@@ -73,6 +87,10 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun setGuestColorHex(updatedColorInt: Int) {
         val updatedMatch = currentMatch.copy(guestColorHex = updatedColorInt.toArgbHex())
+        applyMatchChanges(updatedMatch)
+    }
+    fun setSpotBannerURL(spotBannerURL: String) {
+        val updatedMatch = currentMatch.copy(spotBannerURL = spotBannerURL)
         applyMatchChanges(updatedMatch)
     }
 
@@ -162,6 +180,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         if (_guestTeam.value != currentMatch.guestTeam) {
             _guestTeam.value = currentMatch.guestTeam
         }
+        if (_homeLogo.value != currentMatch.homeLogo) {
+            _homeLogo.value = currentMatch.homeLogo
+        }
+        if (_guestLogo.value != currentMatch.guestLogo) {
+            _guestLogo.value = currentMatch.guestLogo
+        }
         if (_homeColorHex.value != currentMatch.homeColorHex) {
             _homeColorHex.value = currentMatch.homeColorHex
         }
@@ -173,6 +197,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             viewModelScope.launch(Dispatchers.IO) {
                 streamersSettingsRepository.setSport(sport)
             }
+        }
+        if (_spotBannerURL.value != currentMatch.spotBannerURL) {
+            _spotBannerURL.value = currentMatch.spotBannerURL
         }
     }
 }

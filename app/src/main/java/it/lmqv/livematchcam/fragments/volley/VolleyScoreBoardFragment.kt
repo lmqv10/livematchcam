@@ -7,13 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyScoreBoardBinding
 import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.firebase.SetScore
 import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
+import kotlinx.coroutines.flow.combine
 
 class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
@@ -55,15 +58,52 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
             onUpdateCallback?.refresh()
         }
 
-        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+        /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
             binding.homeLogo.setShirtByColor(Color.parseColor(homeColorHex))
             onUpdateCallback?.refresh()
         }
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
             binding.awayLogo.setShirtByColor(Color.parseColor(guestColorHex))
             onUpdateCallback?.refresh()
+        }*/
+
+        launchOnStarted {
+            combine(
+                matchViewModel.homeColorHex,
+                matchViewModel.homeLogo) {
+                    color, logo -> Pair(color, logo)
+            }.collect { (colorHex, logoURL) ->
+                if (!logoURL.isNullOrEmpty()) {
+                    binding.homeLogo.load(logoURL) {
+                        placeholder(R.drawable.shirt_white)
+                        error(R.drawable.shirt_white)
+                        allowHardware(false)
+                    }
+                } else {
+                    binding.homeLogo.setShirtByColor(Color.parseColor(colorHex))
+                }
+                onUpdateCallback?.refresh()
+            }
         }
 
+        launchOnStarted {
+            combine(
+                matchViewModel.guestColorHex,
+                matchViewModel.guestLogo) {
+                    color, logo -> Pair(color, logo)
+            }.collect { (colorHex, logoURL) ->
+                if (!logoURL.isNullOrEmpty()) {
+                    binding.awayLogo.load(logoURL) {
+                        placeholder(R.drawable.shirt_white)
+                        error(R.drawable.shirt_white)
+                        allowHardware(false)
+                    }
+                } else {
+                    binding.awayLogo.setShirtByColor(Color.parseColor(colorHex))
+                }
+                onUpdateCallback?.refresh()
+            }
+        }
         matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
             try {
                 //Logd("VolleyScoreBoard::score.observe")

@@ -5,12 +5,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.liveData
+import coil.load
+import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentSoccerScoreBoardLightBinding
 import it.lmqv.livematchcam.extensions.formatTime
+import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
+import it.lmqv.livematchcam.firebase.Quadruple
 import it.lmqv.livematchcam.firebase.SoccerScore
 import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
 import it.lmqv.livematchcam.viewmodels.Command
+import kotlinx.coroutines.flow.combine
 
 class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
@@ -84,14 +90,70 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
             onUpdateCallback?.refresh()
         }*/
 
-        matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            binding.homeLogo.setShirtByColor(Color.parseColor(homeColorHex))
+        launchOnStarted {
+            combine(
+                matchViewModel.homeColorHex,
+                matchViewModel.homeLogo) {
+                    color, logo -> Pair(color, logo)
+            }.collect { (colorHex, logoURL) ->
+                binding.homeColorBar.setBackgroundColor(Color.parseColor(colorHex))
+
+                if (!logoURL.isNullOrEmpty()) {
+                    binding.homeLogo.visibility = View.VISIBLE
+                    binding.homeLogo.load(logoURL) {
+                        placeholder(R.drawable.shirt_white)
+                        error(R.drawable.shirt_white)
+                        allowHardware(false)
+                        listener(
+                            onSuccess = { _, _ ->
+                                onUpdateCallback?.refresh()
+                            }
+                        )
+                    }
+                } else {
+                    binding.homeLogo.visibility = View.GONE
+                    binding.homeShirt.setShirtByColor(Color.parseColor(colorHex))
+                    onUpdateCallback?.refresh()
+                }
+            }
+        }
+
+        launchOnStarted {
+            combine(
+                matchViewModel.guestColorHex,
+                matchViewModel.guestLogo) {
+                    color, logo -> Pair(color, logo)
+            }.collect { (colorHex, logoURL) ->
+                binding.awayColorBar.setBackgroundColor(Color.parseColor(colorHex))
+
+                if (!logoURL.isNullOrEmpty()) {
+                    binding.awayLogo.visibility = View.VISIBLE
+                    binding.awayLogo.load(logoURL) {
+                        placeholder(R.drawable.shirt_white)
+                        error(R.drawable.shirt_white)
+                        allowHardware(false)
+                        listener(
+                            onSuccess = { _, _ ->
+                                onUpdateCallback?.refresh()
+                            }
+                        )
+                    }
+                } else {
+                    binding.awayLogo.visibility = View.GONE
+                    binding.awayShirt.setShirtByColor(Color.parseColor(colorHex))
+                    onUpdateCallback?.refresh()
+                }
+            }
+        }
+        /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
+            binding.homeShirt.setShirtByColor(Color.parseColor(homeColorHex))
             onUpdateCallback?.refresh()
         }
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            binding.awayLogo.setShirtByColor(Color.parseColor(guestColorHex))
+            binding.awayShirt.setShirtByColor(Color.parseColor(guestColorHex))
             onUpdateCallback?.refresh()
-        }
+        }*/
+
         //Logd("SoccerScoreBoardFragment::matchViewModelID: ${matchViewModel.instanceId}")
     }
 

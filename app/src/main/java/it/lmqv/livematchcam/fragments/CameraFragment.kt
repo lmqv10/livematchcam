@@ -2,6 +2,7 @@ package it.lmqv.livematchcam.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.media.AudioManager
 import android.os.Bundle
@@ -91,7 +92,7 @@ class CameraFragment: Fragment(), ConnectChecker,
     private lateinit var controlBarFragment: IControlBarFragment
     private lateinit var scoreBoardFragment: IScoreBoardFragment
     private lateinit var scoreBoardFilter: ImageObjectFilterRender
-    private lateinit var spotBannerFilter: ImageObjectFilterRender
+    //private lateinit var spotBannerFilter: ImageObjectFilterRender
     private var sportsFactory = SportsFactory
 
     //private val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
@@ -280,6 +281,40 @@ class CameraFragment: Fragment(), ConnectChecker,
             }
         }
 
+        matchViewModel.spotBannerURL.observe(viewLifecycleOwner) { spotBannerURL ->
+            Logd("spotBannerURL : $spotBannerURL")
+            launchOnStarted {
+                val bitmap = Coil.imageLoader(requireContext()).execute(
+                    ImageRequest.Builder(requireContext())
+                        .data(spotBannerURL)
+                        .build()
+                ).drawable?.toBitmap()?.copy(Bitmap.Config.ARGB_8888, true)
+
+                bitmap.apply {
+                    val maxFactor = 20f
+                    val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
+                    val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
+
+                    val factorX = maxFactor / defaultScaleX
+                    val scaleX = factorX * defaultScaleX
+                    val scaleY = factorX * defaultScaleY
+
+                    var spotBannerFilter = ImageObjectFilterRender()
+                    spotBannerFilter.apply {
+                        setImage(bitmap)
+                        setScale(scaleX, scaleY)
+                        setAlpha(0.75f)
+                        setPosition(100f - maxFactor, 0f)
+                    }
+
+                    /*if (genericStream.getGlInterface().filtersCount() > 1) {
+                        genericStream.getGlInterface().removeFilter(1)
+                    }
+                    genericStream.getGlInterface().addFilter(1, spotBannerFilter)*/
+                    genericStream.getGlInterface().setFilter(1, spotBannerFilter)
+                }
+            }
+        }
         matchViewModel.score.observe(viewLifecycleOwner) { iScore ->
             val command = iScore?.command
             if (command == Command.ZOOM_IN.toString()) {
@@ -307,35 +342,12 @@ class CameraFragment: Fragment(), ConnectChecker,
         this.scoreBoardFragment.setOnUpdate(this)
 
         this.scoreBoardFilter = ImageObjectFilterRender()
-        this.spotBannerFilter = ImageObjectFilterRender()
+        //this.spotBannerFilter = ImageObjectFilterRender()
         genericStream.getGlInterface().clearFilters()
+
         genericStream.getGlInterface().addFilter(0, this.scoreBoardFilter)
-
-
-        /*launchOnStarted {
-            val bitmap = Coil.imageLoader(requireContext()).execute(
-                ImageRequest.Builder(requireContext())
-                    .data("https://avisbiella.it/wp-content/uploads/2022/01/Logo_AVIS.png")
-                    .build()
-            ).drawable?.toBitmap()
-
-            bitmap.apply {
-                val maxFactor = 25f
-                val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
-                val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
-
-                val factorX = maxFactor / defaultScaleX
-                val scaleX = factorX * defaultScaleX
-                val scaleY = factorX * defaultScaleY
-
-                spotBannerFilter.apply {
-                    setImage(bitmap)
-                    setScale(scaleX, scaleY)
-                    setPosition(75f, 0f)
-                }
-                genericStream.getGlInterface().addFilter(1, spotBannerFilter)
-            }
-        }*/
+        //genericStream.getGlInterface().addFilter(1, this.spotBannerFilter)
+        genericStream.getGlInterface().addFilter(1, ImageObjectFilterRender())
 
         refresh()
     }
