@@ -2,18 +2,19 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "it.lmqv.livematchcam"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "it.lmqv.livematchcam"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
-        versionName = "1.7.000"
+        versionName = "2.0.000"
     }
 
     buildTypes {
@@ -38,7 +39,7 @@ android {
         viewBinding = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
     packaging {
         resources {
@@ -91,6 +92,12 @@ dependencies {
     implementation(libs.com.google.android.gms)
     implementation(libs.com.google.firebase.bom)
     implementation(libs.com.google.firebase.database.ktx)
+
+    implementation(libs.compose.ui)
+    implementation(libs.compose.material)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.lifecycle.runtime.compose)
+    //implementation(libs.compose.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
