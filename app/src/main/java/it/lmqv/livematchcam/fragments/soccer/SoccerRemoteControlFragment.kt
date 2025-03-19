@@ -148,14 +148,16 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
         }
 
         binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
+            requireContext().showColorPickerDialog { color, logoUrl ->
                 matchViewModel.setHomeColorHex(color)
+                matchViewModel.setHomeLogo(logoUrl)
             }
         }
 
         binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
+            requireContext().showColorPickerDialog { color, logoUrl ->
                 matchViewModel.setGuestColorHex(color)
+                matchViewModel.setGuestLogo(logoUrl)
             }
         }
 

@@ -20,59 +20,61 @@ import com.google.zxing.qrcode.QRCodeWriter
 import it.lmqv.livematchcam.R
 
 
-fun Context.showColorPickerDialog(delegate: (color: Int) -> Unit) {
+fun Context.showColorPickerDialog(delegate: (color: Int, logoUrl: String) -> Unit) {
     var context = this
     val dialogView = LayoutInflater.from(context).inflate(R.layout.color_picker_dialog, null)
     val dialog = AlertDialog.Builder(context, R.style.AppDialogTheme)
         .setView(dialogView)
         .create()
 
+    var logoUrl = dialogView.findViewById<EditText>(R.id.logo_url)
+
     dialogView.findViewById<View>(R.id.tShirtBlack).setOnClickListener {
-        delegate(Color.BLACK)
+        delegate(Color.BLACK, logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtWhite).setOnClickListener {
-        delegate(Color.WHITE)
+        delegate(Color.WHITE, logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtGreen).setOnClickListener {
-        delegate(ContextCompat.getColor(context, R.color.GREEN))
+        delegate(ContextCompat.getColor(context, R.color.GREEN), logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtRed).setOnClickListener {
-        delegate(Color.RED)
+        delegate(Color.RED, logoUrl.text.toString())
         dialog.dismiss()
     }
-    dialogView.findViewById<View>(R.id.tShirtBlue).setOnClickListener {
-        delegate(Color.BLUE)
+    dialogView.findViewById<View>(R.id.tShirtGray).setOnClickListener {
+        delegate(Color.GRAY, logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtOrange).setOnClickListener {
-        delegate(ContextCompat.getColor(context, R.color.ORANGE))
+        delegate(ContextCompat.getColor(context, R.color.ORANGE), logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtCornFlowerBlue).setOnClickListener {
-        delegate(ContextCompat.getColor(context, R.color.CORNFLOWERBLUE))
+        delegate(ContextCompat.getColor(context, R.color.CORNFLOWERBLUE), logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtDarkBlue).setOnClickListener {
-        delegate(ContextCompat.getColor(context, R.color.DARKBLUE))
+        delegate(ContextCompat.getColor(context, R.color.DARKBLUE), logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtYellow).setOnClickListener {
-        delegate(ContextCompat.getColor(context, R.color.YELLOW))
+        delegate(ContextCompat.getColor(context, R.color.YELLOW), logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtPink).setOnClickListener {
-        delegate(ContextCompat.getColor(context, R.color.PINK))
+        delegate(ContextCompat.getColor(context, R.color.PINK), logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtViolet).setOnClickListener {
-        delegate(ContextCompat.getColor(context, R.color.VIOLET))
+        delegate(ContextCompat.getColor(context, R.color.VIOLET), logoUrl.text.toString())
         dialog.dismiss()
     }
     dialogView.findViewById<View>(R.id.tShirtSlateBlue).setOnClickListener {
-        delegate(ContextCompat.getColor(context, R.color.SLATEBLUE))
+        delegate(ContextCompat.getColor(context, R.color.SLATEBLUE), logoUrl.text.toString())
         dialog.dismiss()
     }
 

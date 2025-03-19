@@ -1,17 +1,20 @@
 package it.lmqv.livematchcam.fragments.volley
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import coil.load
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.databinding.FragmentVolleyControlBarBinding
 import it.lmqv.livematchcam.databinding.FragmentVolleyRemoteControlBinding
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
@@ -22,6 +25,8 @@ import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.launch
 
 class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
     companion object {
@@ -59,6 +64,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
             binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
         }*/
+
         launchOnStarted {
             combine(
                 matchViewModel.homeColorHex,
@@ -116,6 +122,142 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             }
         }
 
+        lifecycleScope.launch {
+            matchViewModel.spotBannerVisible.collect { isVisible ->
+                binding.spotBannerSwitch.isChecked = isVisible
+            }
+        }
+
+        lifecycleScope.launch {
+            matchViewModel.spotBannerURL.collect { spotBannerURL ->
+                if (!spotBannerURL.isNullOrEmpty()) {
+                    binding.spotBannerPreview.load(spotBannerURL) {
+                        placeholder(R.drawable.preview_missing)
+                        error(R.drawable.preview_missing)
+                        allowHardware(false)
+                        listener(
+                            onError = { _, error ->
+                                binding.spotBannerSwitch.isEnabled = false
+                                binding.spotBannerTrash.visibility = View.GONE
+                            },
+                            onSuccess = { _, result ->
+                                binding.spotBannerSwitch.isEnabled = true
+                                binding.spotBannerTrash.visibility = View.VISIBLE
+                            }
+                        )
+                    }
+                } else {
+                    binding.spotBannerSwitch.isEnabled = false
+                    binding.spotBannerTrash.visibility = View.GONE
+                    val drawable =
+                        ContextCompat.getDrawable(requireContext(), R.drawable.preview_missing)
+                    binding.spotBannerPreview.setImageDrawable(drawable)
+                }
+            }
+        }
+
+        binding.spotBannerTrash.setOnClickListener {
+            matchViewModel.setSpotBannerURL("")
+        }
+
+        binding.spotBannerSwitch.setOnCheckedChangeListener { _, isChecked ->
+            matchViewModel.setSpotBannerVisible(isChecked)
+        }
+
+        lifecycleScope.launch {
+            matchViewModel.mainBannerVisible.collect { isVisible ->
+                binding.mainBannerSwitch.isChecked = isVisible
+            }
+        }
+
+        lifecycleScope.launch {
+            matchViewModel.mainBannerURL.collect { spotBannerURL ->
+                if (!spotBannerURL.isNullOrEmpty()) {
+                    binding.mainBannerPreview.load(spotBannerURL) {
+                        placeholder(R.drawable.preview_missing)
+                        error(R.drawable.preview_missing)
+                        allowHardware(false)
+                        listener(
+                            onError = { _, error ->
+                                binding.mainBannerSwitch.isEnabled = false
+                                binding.mainBannerTrash.visibility = View.GONE
+                            },
+                            onSuccess = { _, result ->
+                                binding.mainBannerSwitch.isEnabled = true
+                                binding.mainBannerTrash.visibility = View.VISIBLE
+                            }
+                        )
+                    }
+                } else {
+                    binding.mainBannerSwitch.isEnabled = false
+                    binding.mainBannerTrash.visibility = View.GONE
+                    val drawable =
+                        ContextCompat.getDrawable(requireContext(), R.drawable.preview_missing)
+                    binding.mainBannerPreview.setImageDrawable(drawable)
+                }
+            }
+        }
+
+        binding.mainBannerTrash.setOnClickListener {
+            matchViewModel.setMainBannerURL("")
+        }
+
+        binding.mainBannerSwitch.setOnCheckedChangeListener { _, isChecked ->
+            matchViewModel.setMainBannerVisible(isChecked)
+        }
+
+        binding.spotBannerPreview.setOnClickListener {
+            lifecycleScope.launch {
+                requireContext().showEditStringDialog(
+                    R.string.spot_banner_placeholder,
+                    matchViewModel.spotBannerURL.last(),
+                    arrayOf()
+                ) { updatedText ->
+                    matchViewModel.setSpotBannerURL(updatedText)
+                    requireActivity().hideSystemUI()
+                }
+            }
+        }
+
+        binding.mainBannerPreview.setOnClickListener {
+            lifecycleScope.launch {
+                requireContext().showEditStringDialog(
+                    R.string.main_banner_placeholder,
+                    matchViewModel.mainBannerURL.last(),
+                    arrayOf()
+                ) { updatedText ->
+                    matchViewModel.setMainBannerURL(updatedText)
+                    requireActivity().hideSystemUI()
+                }
+            }
+        }
+
+        /*binding.spotBannerUrl.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+                override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                    return if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        val text = v?.text.toString()
+                        toast("Spot: $text")
+                        hideKeyboard()
+                        true
+                    } else {
+                        false
+                    }
+                }
+            })
+
+        binding.mainBannerUrl.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                return if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    val text = v?.text.toString()
+                    toast("Main: $text")
+                    hideKeyboard()
+                    true
+                } else {
+                    false
+                }
+            }
+        })*/
+
         volleyScoreViewModel.liveScore.observe(viewLifecycleOwner) { liveScore ->
             if (liveScore != null) {
                 matchViewModel.setScore(liveScore)
@@ -129,25 +271,6 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         binding.removeLastSet.setOnClickListener {
             volleyScoreViewModel.removeLastSet()
         }
-
-        /*scoreViewModel.matchLeague.observe(viewLifecycleOwner) { currentDescription ->
-            this.currentDescription = currentDescription
-        }
-
-        scoreViewModel.currentScore.observe(viewLifecycleOwner) { score ->
-            binding.homeScore.text = score.homePoints.toString()
-            binding.awayScore.text = score.awayPoints.toString()
-        }
-
-        scoreViewModel.currentSet.observe(viewLifecycleOwner) { currentSet ->
-            when (currentSet) {
-                Set.SET1 -> binding.radioSet1.isChecked = true
-                Set.SET2 -> binding.radioSet2.isChecked = true
-                Set.SET3 -> binding.radioSet3.isChecked = true
-                Set.SET4 -> binding.radioSet4.isChecked = true
-                Set.SET5 -> binding.radioSet5.isChecked = true
-            }
-        }*/
 
         binding.resetMatch.setOnClickListener {
             val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
@@ -187,14 +310,16 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         }
 
         binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
+            requireContext().showColorPickerDialog { color, logoUrl ->
                 matchViewModel.setHomeColorHex(color)
+                matchViewModel.setHomeLogo(logoUrl)
             }
         }
 
         binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
+            requireContext().showColorPickerDialog { color, logoUrl ->
                 matchViewModel.setGuestColorHex(color)
+                matchViewModel.setGuestLogo(logoUrl)
             }
         }
 
@@ -221,26 +346,14 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                 requireActivity().hideSystemUI()
             }
         }
+    }
 
-
-        /*binding.setsGroup.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                binding.radioSet1.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET1)
-                }
-                binding.radioSet2.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET2)
-                }
-                binding.radioSet3.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET3)
-                }
-                binding.radioSet4.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET4)
-                }
-                binding.radioSet5.id -> {
-                    scoreViewModel.setCurrentSet(Set.SET5)
-                }
-            }
-        }*/
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val view = requireActivity().currentFocus
+        if (view != null) {
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            view.clearFocus() // Rimuove il focus
+        }
     }
 }

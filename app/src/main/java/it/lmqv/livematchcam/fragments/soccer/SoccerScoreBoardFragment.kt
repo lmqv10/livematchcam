@@ -100,6 +100,7 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
                 if (!logoURL.isNullOrEmpty()) {
                     binding.homeLogo.visibility = View.VISIBLE
+                    binding.homeShirt.visibility = View.INVISIBLE
                     binding.homeLogo.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
@@ -112,6 +113,7 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
                     }
                 } else {
                     binding.homeLogo.visibility = View.GONE
+                    binding.homeShirt.visibility = View.VISIBLE
                     binding.homeShirt.setShirtByColor(Color.parseColor(colorHex))
                     onUpdateCallback?.refresh()
                 }
@@ -128,6 +130,7 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
                 if (!logoURL.isNullOrEmpty()) {
                     binding.awayLogo.visibility = View.VISIBLE
+                    binding.awayShirt.visibility = View.INVISIBLE
                     binding.awayLogo.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
@@ -140,11 +143,13 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
                     }
                 } else {
                     binding.awayLogo.visibility = View.GONE
+                    binding.awayShirt.visibility = View.VISIBLE
                     binding.awayShirt.setShirtByColor(Color.parseColor(colorHex))
                     onUpdateCallback?.refresh()
                 }
             }
         }
+
         /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
             binding.homeShirt.setShirtByColor(Color.parseColor(homeColorHex))
             onUpdateCallback?.refresh()

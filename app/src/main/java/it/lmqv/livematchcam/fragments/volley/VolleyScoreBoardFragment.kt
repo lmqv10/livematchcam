@@ -73,16 +73,27 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
                 matchViewModel.homeLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
+                binding.homeColorBar.setBackgroundColor(Color.parseColor(colorHex))
+
                 if (!logoURL.isNullOrEmpty()) {
+                    binding.homeLogo.visibility = View.VISIBLE
+                    binding.homeShirt.visibility = View.INVISIBLE
                     binding.homeLogo.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
                         allowHardware(false)
+                        listener(
+                            onSuccess = { _, _ ->
+                                onUpdateCallback?.refresh()
+                            }
+                        )
                     }
                 } else {
-                    binding.homeLogo.setShirtByColor(Color.parseColor(colorHex))
+                    binding.homeLogo.visibility = View.GONE
+                    binding.homeShirt.visibility = View.VISIBLE
+                    binding.homeShirt.setShirtByColor(Color.parseColor(colorHex))
+                    onUpdateCallback?.refresh()
                 }
-                onUpdateCallback?.refresh()
             }
         }
 
@@ -92,18 +103,30 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
                 matchViewModel.guestLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
+                binding.awayColorBar.setBackgroundColor(Color.parseColor(colorHex))
+
                 if (!logoURL.isNullOrEmpty()) {
+                    binding.awayLogo.visibility = View.VISIBLE
+                    binding.awayShirt.visibility = View.INVISIBLE
                     binding.awayLogo.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
                         allowHardware(false)
+                        listener(
+                            onSuccess = { _, _ ->
+                                onUpdateCallback?.refresh()
+                            }
+                        )
                     }
                 } else {
-                    binding.awayLogo.setShirtByColor(Color.parseColor(colorHex))
+                    binding.awayLogo.visibility = View.GONE
+                    binding.awayShirt.visibility = View.VISIBLE
+                    binding.awayShirt.setShirtByColor(Color.parseColor(colorHex))
+                    onUpdateCallback?.refresh()
                 }
-                onUpdateCallback?.refresh()
             }
         }
+
         matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
             try {
                 //Logd("VolleyScoreBoard::score.observe")

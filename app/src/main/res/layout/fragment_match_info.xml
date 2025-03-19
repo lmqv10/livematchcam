@@ -35,22 +35,22 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="6"
+                            android:layout_weight="9"
                             android:layout_gravity="center_vertical"
                             android:gravity="center_horizontal"
                             android:text="@string/match_info"
                             android:textColor="@color/appColor"
                             android:textStyle="bold" />
 
-                        <Button
+                        <ImageView
                             android:id="@+id/remote_score"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="4"
-                            android:background="@drawable/score_board_secondary_background"
-                            android:text="@string/remote_score"
-                            android:textColor="@color/primary"
-                            android:textStyle="bold"/>
+                            android:layout_weight="1"
+                            android:src="@drawable/remote_controller"
+                            app:tint="@color/primary"
+                            android:background="@drawable/score_board_secondary_background"/>
+
                     </LinearLayout>
 
                 <View

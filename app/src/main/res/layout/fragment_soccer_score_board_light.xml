@@ -90,7 +90,7 @@
             android:id="@+id/home_logo"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/shirt_layers"
+            android:src="@drawable/shield"
             android:gravity="start" />
 
         <ImageView
@@ -98,7 +98,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="right"
-            android:src="@drawable/shirt_layers"
+            android:src="@drawable/shield"
             android:gravity="start"/>
     </FrameLayout>
 

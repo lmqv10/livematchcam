@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.viewmodels
 
+import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -75,7 +76,12 @@ class VolleyScoreViewModel: ViewModel() {
 
     fun removeLastSet() {
         var updatedSets = _liveScore.value?.sets
-        updatedSets?.removeLast()
+
+        if (Build.VERSION.SDK_INT >= 35) {
+            updatedSets?.removeLast()
+        } else {
+            updatedSets?.removeAt(updatedSets.size - 1)
+        }
         _liveScore.value = updatedSets?.let { _liveScore.value?.copy(sets = it) }
     }
 

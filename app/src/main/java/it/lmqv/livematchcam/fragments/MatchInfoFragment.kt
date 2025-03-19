@@ -143,14 +143,16 @@ class MatchInfoFragment : Fragment() {
         }*/
 
         binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
+            requireContext().showColorPickerDialog { color, logoUrl ->
                 matchViewModel.setHomeColorHex(color)
+                matchViewModel.setHomeLogo(logoUrl)
             }
         }
 
         binding.guestColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
+            requireContext().showColorPickerDialog { color, logoUrl ->
                 matchViewModel.setGuestColorHex(color)
+                matchViewModel.setGuestLogo(logoUrl)
             }
         }
 

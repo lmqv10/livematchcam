@@ -9,7 +9,25 @@
     android:layout_gravity="start">
 
     <TextView
-        android:id="@+id/home_team"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_weight="3"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="@color/secondary_dark"
+        android:text="@string/choose_logo"/>
+
+    <EditText
+        android:visibility="gone"
+        android:id="@+id/logo_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/logo_url_placeholder"
+        android:autofillHints="url"
+        android:imeOptions="actionDone" />
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_weight="3"
         android:layout_height="wrap_content"
@@ -52,11 +70,11 @@
             app:tint="@color/CORNFLOWERBLUE"/>
 
         <ImageView
-            android:id="@+id/tShirtBlue"
+            android:id="@+id/tShirtGray"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/shirt_mask_layer"
-            app:tint="@color/BLUE"/>
+            app:tint="@color/GRAY"/>
 
         <ImageView
             android:id="@+id/tShirtDarkBlue"

@@ -37,6 +37,7 @@
     <string name="zoom_strategy">Zoom Strategy</string>
     <string name="offset_strategy">Offset Strategy</string>
     <string name="choose_color">Choose shirt color</string>
+    <string name="choose_logo">Insert logo URL</string>
     <string name="handle_streamers">Streamers</string>
     <string name="add_remove">Add/Remove</string>
     <string name="stream">Stream</string>
@@ -127,6 +128,11 @@
     <string name="set_3_placeholder">3 Set</string>
     <string name="set_4_placeholder">4 Set</string>
     <string name="set_5_placeholder">5 Set</string>
+    <string name="spot_banner_placeholder">URL spot banner</string>
+    <string name="main_banner_placeholder">URL main banner</string>
+    <string name="logo_url_placeholder">http://...</string>
+    <string name="spot_banner">Top-Right banner</string>
+    <string name="main_banner">Main banner</string>
 
     <string name="confirm_stop_message">Stop streaming.\n Confirm?</string>
     <string name="confirm_start_message">Start streaming.\n Confirm?</string>

@@ -5,9 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.toArgbHex
 import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.factories.SportsFactory
@@ -22,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import java.net.URL
 
 class MatchViewModel(application: Application) : AndroidViewModel(application) {
     //val instanceId: String? =  UUID.randomUUID().toString()
@@ -53,6 +50,17 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     private val _guestColorHex = MutableLiveData(currentMatch.guestColorHex)
     val guestColorHex: Flow<String> = _guestColorHex.asFlow()
 
+    private val _spotBannerURL = MutableLiveData(currentMatch.spotBannerURL)
+    val spotBannerURL: Flow<String> = _spotBannerURL.asFlow()
+
+    private val _spotBannerVisible = MutableLiveData(currentMatch.spotBannerVisible)
+    val spotBannerVisible: Flow<Boolean> = _spotBannerVisible.asFlow()
+
+    private val _mainBannerURL = MutableLiveData(currentMatch.mainBannerURL)
+    val mainBannerURL: Flow<String> = _mainBannerURL.asFlow()
+
+    private val _mainBannerVisible = MutableLiveData(currentMatch.mainBannerVisible)
+    val mainBannerVisible: Flow<Boolean> = _mainBannerVisible.asFlow()
 
     private val _type = MutableLiveData(currentMatch.type)
     val type: LiveData<String> = _type
@@ -70,12 +78,14 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private val _spotBannerURL = MutableLiveData(currentMatch.spotBannerURL)
-    val spotBannerURL: LiveData<String> = _spotBannerURL
-
-    private val _mainBannerURL = MutableLiveData(currentMatch.mainBannerURL)
-    val mainBannerURL: LiveData<String> = _mainBannerURL
-
+    fun setHomeLogo(updatedLogo: String) {
+        //val updatedLogo = currentMatch.copy(homeLogo = updatedLogo)
+        //applyMatchChanges(updatedLogo)
+    }
+    fun setGuestLogo(updatedLogo: String) {
+        //val updatedLogo = currentMatch.copy(guestLogo = updatedLogo)
+        //applyMatchChanges(updatedLogo)
+    }
     fun setHomeTeam(updatedTeam: String) {
         val updatedMatch = currentMatch.copy(homeTeam = updatedTeam)
         applyMatchChanges(updatedMatch)
@@ -92,8 +102,22 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         val updatedMatch = currentMatch.copy(guestColorHex = updatedColorInt.toArgbHex())
         applyMatchChanges(updatedMatch)
     }
+
     fun setSpotBannerURL(spotBannerURL: String) {
         val updatedMatch = currentMatch.copy(spotBannerURL = spotBannerURL)
+        applyMatchChanges(updatedMatch)
+    }
+    fun setMainBannerURL(mainBannerURL: String) {
+        val updatedMatch = currentMatch.copy(mainBannerURL = mainBannerURL)
+        applyMatchChanges(updatedMatch)
+    }
+
+    fun setSpotBannerVisible(spotBannerVisible: Boolean) {
+        val updatedMatch = currentMatch.copy(spotBannerVisible = spotBannerVisible)
+        applyMatchChanges(updatedMatch)
+    }
+    fun setMainBannerVisible(mainBannerVisible: Boolean) {
+        val updatedMatch = currentMatch.copy(mainBannerVisible = mainBannerVisible)
         applyMatchChanges(updatedMatch)
     }
 
@@ -204,8 +228,14 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         if (_spotBannerURL.value != currentMatch.spotBannerURL) {
             _spotBannerURL.value = currentMatch.spotBannerURL
         }
+        if (_spotBannerVisible.value != currentMatch.spotBannerVisible) {
+            _spotBannerVisible.value = currentMatch.spotBannerVisible
+        }
         if (_mainBannerURL.value != currentMatch.mainBannerURL) {
             _mainBannerURL.value = currentMatch.mainBannerURL
+        }
+        if (_mainBannerVisible.value != currentMatch.mainBannerVisible) {
+            _mainBannerVisible.value = currentMatch.mainBannerVisible
         }
     }
 }

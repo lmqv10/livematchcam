@@ -24,18 +24,38 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
+            <LinearLayout
+                android:id="@+id/home_color_bar"
+                android:layout_width="5dp"
+                android:layout_height="24dp"
+                android:orientation="vertical"
+                android:background="@color/TRANSPARENT"
+                android:layout_marginEnd="2dp"/>
+
             <GridLayout
                 android:layout_width="@dimen/volley_score_board_team"
                 android:layout_height="wrap_content"
                 android:columnCount="3">
 
-                <ImageView
-                    android:id="@+id/home_logo"
+                <FrameLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_columnWeight="1"
-                    android:src="@drawable/shirt_layers" />
+                    android:layout_columnWeight="1">
+
+                    <ImageView
+                        android:id="@+id/home_shirt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/shirt_layers" />
+
+                    <ImageView
+                        android:id="@+id/home_logo"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/shield" />
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/home_team"
@@ -140,17 +160,38 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
+            <LinearLayout
+                android:id="@+id/away_color_bar"
+                android:layout_width="5dp"
+                android:layout_height="24dp"
+                android:orientation="vertical"
+                android:background="@color/TRANSPARENT"
+                android:layout_marginEnd="2dp"/>
+
             <GridLayout
                 android:layout_width="@dimen/volley_score_board_team"
                 android:layout_height="wrap_content"
                 android:columnCount="3">
 
-                <ImageView
-                    android:id="@+id/away_logo"
+                <FrameLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:src="@drawable/shirt_layers" />
+                    android:layout_columnWeight="1">
+
+                    <ImageView
+                        android:id="@+id/away_shirt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/shirt_layers" />
+
+                    <ImageView
+                        android:id="@+id/away_logo"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/shield" />
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/away_team"
