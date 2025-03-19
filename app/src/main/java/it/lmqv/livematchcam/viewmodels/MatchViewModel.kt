@@ -73,6 +73,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     private val _spotBannerURL = MutableLiveData(currentMatch.spotBannerURL)
     val spotBannerURL: LiveData<String> = _spotBannerURL
 
+    private val _mainBannerURL = MutableLiveData(currentMatch.mainBannerURL)
+    val mainBannerURL: LiveData<String> = _mainBannerURL
+
     fun setHomeTeam(updatedTeam: String) {
         val updatedMatch = currentMatch.copy(homeTeam = updatedTeam)
         applyMatchChanges(updatedMatch)
@@ -200,6 +203,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         }
         if (_spotBannerURL.value != currentMatch.spotBannerURL) {
             _spotBannerURL.value = currentMatch.spotBannerURL
+        }
+        if (_mainBannerURL.value != currentMatch.mainBannerURL) {
+            _mainBannerURL.value = currentMatch.mainBannerURL
         }
     }
 }

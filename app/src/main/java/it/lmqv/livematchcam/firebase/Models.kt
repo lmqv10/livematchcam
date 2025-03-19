@@ -22,6 +22,7 @@ data class Match(
     val guestColorHex: String = "#000000",
     val guestLogo: String = "",
     val spotBannerURL: String = "",
+    val mainBannerURL: String = "",
     var type: String = "",
     var score: Map<String, Any?>? = null
 )

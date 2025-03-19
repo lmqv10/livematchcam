@@ -3,7 +3,6 @@ package it.lmqv.livematchcam.fragments
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -27,7 +26,6 @@ import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.Camera1Source
 import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.VideoSource
-import com.pedro.encoder.utils.gl.TranslateTo
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
 import it.lmqv.livematchcam.R
@@ -41,7 +39,6 @@ import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
-import it.lmqv.livematchcam.firebase.SoccerScore
 import it.lmqv.livematchcam.handlers.offset.LeftRightWithManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
@@ -68,6 +65,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.reflect.KClass
 
 class CameraFragment: Fragment(), ConnectChecker,
@@ -92,7 +90,8 @@ class CameraFragment: Fragment(), ConnectChecker,
     private lateinit var controlBarFragment: IControlBarFragment
     private lateinit var scoreBoardFragment: IScoreBoardFragment
     private lateinit var scoreBoardFilter: ImageObjectFilterRender
-    //private lateinit var spotBannerFilter: ImageObjectFilterRender
+    private lateinit var spotBannerFilter: ImageObjectFilterRender
+    private lateinit var mainBannerFilter: ImageObjectFilterRender
     private var sportsFactory = SportsFactory
 
     //private val homeTeamViewModel: HomeScoreBoardViewModel by activityViewModels()
@@ -282,39 +281,80 @@ class CameraFragment: Fragment(), ConnectChecker,
         }
 
         matchViewModel.spotBannerURL.observe(viewLifecycleOwner) { spotBannerURL ->
-            Logd("spotBannerURL : $spotBannerURL")
             launchOnStarted {
-                val bitmap = Coil.imageLoader(requireContext()).execute(
-                    ImageRequest.Builder(requireContext())
-                        .data(spotBannerURL)
-                        .build()
-                ).drawable?.toBitmap()?.copy(Bitmap.Config.ARGB_8888, true)
+                Logd("spotBannerURL : $spotBannerURL")
+                if (!spotBannerURL.isNullOrEmpty())
+                {
+                    val bitmap = Coil.imageLoader(requireContext()).execute(
+                        ImageRequest.Builder(requireContext())
+                            .data(spotBannerURL)
+                            .build()
+                    ).drawable?.toBitmap()?.copy(Bitmap.Config.ARGB_8888, true)
 
-                bitmap.apply {
-                    val maxFactor = 20f
-                    val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
-                    val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
+                    bitmap.apply {
+                        val maxFactor = 20f
+                        val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
+                        val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
 
-                    val factorX = maxFactor / defaultScaleX
-                    val scaleX = factorX * defaultScaleX
-                    val scaleY = factorX * defaultScaleY
+                        val factorX = maxFactor / defaultScaleX
+                        val scaleX = factorX * defaultScaleX
+                        val scaleY = factorX * defaultScaleY
 
-                    var spotBannerFilter = ImageObjectFilterRender()
-                    spotBannerFilter.apply {
-                        setImage(bitmap)
-                        setScale(scaleX, scaleY)
-                        setAlpha(0.75f)
-                        setPosition(100f - maxFactor, 0f)
+                        withContext(Dispatchers.Main) {
+                            spotBannerFilter.apply {
+                                setImage(bitmap)
+                                setScale(scaleX, scaleY)
+                                setAlpha(0.75f)
+                                setPosition(100f - scaleX, 0f)
+                            }
+                        }
+                        //genericStream.getGlInterface().setFilter(1, spotBannerFilter)
                     }
-
-                    /*if (genericStream.getGlInterface().filtersCount() > 1) {
-                        genericStream.getGlInterface().removeFilter(1)
-                    }
-                    genericStream.getGlInterface().addFilter(1, spotBannerFilter)*/
-                    genericStream.getGlInterface().setFilter(1, spotBannerFilter)
+                } else {
+                    this.spotBannerFilter = ImageObjectFilterRender()
+                    //genericStream.getGlInterface().setFilter(1, ImageObjectFilterRender())
                 }
             }
         }
+
+        matchViewModel.mainBannerURL.observe(viewLifecycleOwner) { mainBannerURL ->
+            launchOnStarted {
+                Logd("spotBannerURL : $mainBannerURL")
+                if (!mainBannerURL.isNullOrEmpty()) {
+                    val bitmap = Coil.imageLoader(requireContext()).execute(
+                        ImageRequest.Builder(requireContext())
+                            .data(mainBannerURL)
+                            .build()
+                    ).drawable?.toBitmap()?.copy(Bitmap.Config.ARGB_8888, true)
+
+                    bitmap.apply {
+                        val maxFactor = 80f
+                        val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
+                        val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
+
+                        val factorX = maxFactor / defaultScaleX
+                        val scaleX = factorX * defaultScaleX
+                        val scaleY = factorX * defaultScaleY
+
+                        //var mainBannerFilter = ImageObjectFilterRender()
+                        withContext(Dispatchers.Main) {
+                            mainBannerFilter.apply {
+                                setImage(bitmap)
+                                setScale(scaleX, scaleY)
+                                setAlpha(0.75f)
+                                setPosition((100f - scaleX) / 2, (100f - scaleY) / 2)
+                            }
+                        }
+
+                        //genericStream.getGlInterface().setFilter(2, mainBannerFilter)
+                    }
+                } else {
+                    this.mainBannerFilter = ImageObjectFilterRender()
+                    //genericStream.getGlInterface().setFilter(2, ImageObjectFilterRender())
+                }
+            }
+        }
+
         matchViewModel.score.observe(viewLifecycleOwner) { iScore ->
             val command = iScore?.command
             if (command == Command.ZOOM_IN.toString()) {
@@ -342,13 +382,13 @@ class CameraFragment: Fragment(), ConnectChecker,
         this.scoreBoardFragment.setOnUpdate(this)
 
         this.scoreBoardFilter = ImageObjectFilterRender()
-        //this.spotBannerFilter = ImageObjectFilterRender()
+        this.spotBannerFilter = ImageObjectFilterRender()
+        this.mainBannerFilter = ImageObjectFilterRender()
+
         genericStream.getGlInterface().clearFilters()
-
         genericStream.getGlInterface().addFilter(0, this.scoreBoardFilter)
-        //genericStream.getGlInterface().addFilter(1, this.spotBannerFilter)
-        genericStream.getGlInterface().addFilter(1, ImageObjectFilterRender())
-
+        genericStream.getGlInterface().addFilter(1, this.spotBannerFilter)
+        genericStream.getGlInterface().addFilter(2, this.mainBannerFilter)
         refresh()
     }
 
@@ -456,7 +496,6 @@ class CameraFragment: Fragment(), ConnectChecker,
                 setScale(scaleX, scaleY)
                 setPosition(0.15f, 0.15f)
             }
-
             /*val imageFilter = ImageObjectFilterRender()
             imageFilter.setImage(scoreBoardBitmap)
             imageFilter.setPosition(0.15f, 0.15f)

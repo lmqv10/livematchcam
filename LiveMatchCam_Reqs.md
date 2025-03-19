@@ -17,6 +17,11 @@ next step:
 -- remote configurations
 -- replay (slow motion)
 
+https://i-predict.it/assets/loghi-hd/Venezia.png
+https://i-predict.it/assets/loghi-hd/Roma.png
+https://avisbiella.it/wp-content/uploads/2022/01/Logo_AVIS.png
+https://i.pinimg.com/originals/d8/6d/81/d86d816c89cc355af1bd2ef96ca96d62.png
+https://logodix.com/logo/1746008.png
 
 Obiettivo: 
   Creare un'applicazione per organizzare, 
@@ -58,3 +63,42 @@ Start up
 --> Edit data in app (sync with firebase database and all connected devices
 
 License Key:
+
+
+
+val imageView = ImageView(requireContext())
+                    imageView.load(spotBannerURL) {
+                        allowHardware(false)
+                        listener(
+                            onError = { _, error ->
+                                Logd(error.throwable.message ?: "ERROR")
+                            },
+                            onSuccess = { _, result ->
+                                try {
+                                    val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
+                                    val maxFactor = 20f
+                                    val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
+                                    val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
+
+                                    Logd("spotBannerURL: width : ${bitmap?.width} x height : ${bitmap?.height}")
+
+                                    val factorX = maxFactor / defaultScaleX
+                                    val scaleX = factorX * defaultScaleX
+                                    val scaleY = factorX * defaultScaleY
+
+                                    Logd("spotBannerURL: scaleX : $scaleX - scaleY : $scaleY")
+
+                                    var spotBannerFilter = ImageObjectFilterRender()
+                                    spotBannerFilter.apply {
+                                        setImage(bitmap)
+                                        setScale(scaleX, scaleY)
+                                        setAlpha(0.75f)
+                                        setPosition(100f - scaleX, 0f)
+                                    }
+                                    genericStream.getGlInterface().setFilter(1, spotBannerFilter)
+                                } catch (e : Exception) {
+                                    Logd("spotBannerURL: scaleX : ${e.message}")
+                                }
+                            }
+                        )
+                    }
