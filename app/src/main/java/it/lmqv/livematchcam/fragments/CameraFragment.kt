@@ -25,8 +25,11 @@ import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRende
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.Camera1Source
 import com.pedro.encoder.input.sources.video.Camera2Source
+import com.pedro.encoder.input.sources.video.VideoFileSource
 import com.pedro.encoder.input.sources.video.VideoSource
+import com.pedro.extrasources.CameraUvcSource
 import com.pedro.library.generic.GenericStream
+import com.pedro.library.rtmp.RtmpCamera1
 import com.pedro.library.util.BitrateAdapter
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.views.SwipeSurfaceView
@@ -66,7 +69,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.reflect.KClass
 
 class CameraFragment: Fragment(), ConnectChecker,
@@ -190,6 +192,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         } else {
             binding.microphone.setImageResource(R.drawable.microphone_on)
         }
+        //this.genericStream.getStreamClient().setOnlyVideo(true)
 
         binding.surfaceView.setCallbackListener(this)
         binding.surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
@@ -205,7 +208,7 @@ class CameraFragment: Fragment(), ConnectChecker,
         })
 
         binding.bStartStop.setOnClickListener {
-            toast("${streamersViewModel.getServerURI()}")
+            toast(streamersViewModel.getServerURI())
             val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
             val title = dialogView.findViewById<TextView>(R.id.dialog_message)
             if (genericStream.isStreaming) {
@@ -292,7 +295,7 @@ class CameraFragment: Fragment(), ConnectChecker,
             }.collect { (url, visible) ->
                 launchOnStarted {
                     //Logd("spotBannerURL : $spotBannerURL")
-                    if (!url.isNullOrEmpty() && visible)
+                    if (url.isNotEmpty() && visible)
                     {
                         val bitmap = Coil.imageLoader(requireContext()).execute(
                             ImageRequest.Builder(requireContext())
@@ -315,11 +318,9 @@ class CameraFragment: Fragment(), ConnectChecker,
                                 setAlpha(0.75f)
                                 setPosition(100f - scaleX, 0f)
                             }
-                            //genericStream.getGlInterface().setFilter(1, spotBannerFilter)
                         }
                     } else {
                         spotBannerFilter.setAlpha(0.0f)
-                        //genericStream.getGlInterface().removeFilter(1)
                     }
                 }
             }
@@ -334,7 +335,7 @@ class CameraFragment: Fragment(), ConnectChecker,
             }.collect { (url, visible) ->
                 launchOnStarted {
                     //Logd("mainBannerURL : $mainBannerURL")
-                    if (!url.isNullOrEmpty() && visible) {
+                    if (url.isNotEmpty() && visible) {
                         val bitmap = Coil.imageLoader(requireContext()).execute(
                             ImageRequest.Builder(requireContext())
                                 .data(url)
@@ -356,86 +357,14 @@ class CameraFragment: Fragment(), ConnectChecker,
                                 setAlpha(0.75f)
                                 setPosition((100f - scaleX) / 2, (100f - scaleY) / 2)
                             }
-                            //genericStream.getGlInterface().setFilter(2, mainBannerFilter)
                         }
                     } else {
                         mainBannerFilter.setAlpha(0.0f)
-                        //genericStream.getGlInterface().removeFilter(2)
                     }
                 }
             }
         }
 
-/*
-        matchViewModel.spotBannerURL.observe(viewLifecycleOwner) { spotBannerURL ->
-            launchOnStarted {
-                //Logd("spotBannerURL : $spotBannerURL")
-                if (!spotBannerURL.isNullOrEmpty())
-                {
-                    val bitmap = Coil.imageLoader(requireContext()).execute(
-                        ImageRequest.Builder(requireContext())
-                            .data(spotBannerURL)
-                            .build()
-                    ).drawable?.toBitmap()?.copy(Bitmap.Config.ARGB_8888, true)
-
-                    bitmap.apply {
-                        val maxFactor = 20f
-                        val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
-                        val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
-
-                        val factorX = maxFactor / defaultScaleX
-                        val scaleX = factorX * defaultScaleX
-                        val scaleY = factorX * defaultScaleY
-
-                        spotBannerFilter.apply {
-                            setImage(bitmap)
-                            setScale(scaleX, scaleY)
-                            setAlpha(0.75f)
-                            setPosition(100f - scaleX, 0f)
-                        }
-                        //genericStream.getGlInterface().setFilter(1, spotBannerFilter)
-                    }
-                } else {
-                    spotBannerFilter.setAlpha(0.0f)
-                    //genericStream.getGlInterface().removeFilter(1)
-                }
-            }
-        }
-
-        matchViewModel.mainBannerURL.observe(viewLifecycleOwner) { mainBannerURL ->
-            launchOnStarted {
-                //Logd("mainBannerURL : $mainBannerURL")
-                if (!mainBannerURL.isNullOrEmpty()) {
-                    val bitmap = Coil.imageLoader(requireContext()).execute(
-                        ImageRequest.Builder(requireContext())
-                            .data(mainBannerURL)
-                            .build()
-                    ).drawable?.toBitmap()?.copy(Bitmap.Config.ARGB_8888, true)
-
-                    bitmap.apply {
-                        val maxFactor = 80f
-                        val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
-                        val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
-
-                        val factorX = maxFactor / defaultScaleX
-                        val scaleX = factorX * defaultScaleX
-                        val scaleY = factorX * defaultScaleY
-
-                        mainBannerFilter.apply {
-                            setImage(bitmap)
-                            setScale(scaleX, scaleY)
-                            setAlpha(0.75f)
-                            setPosition((100f - scaleX) / 2, (100f - scaleY) / 2)
-                        }
-                        //genericStream.getGlInterface().setFilter(2, mainBannerFilter)
-                    }
-                } else {
-                    mainBannerFilter.setAlpha(0.0f)
-                    //genericStream.getGlInterface().removeFilter(2)
-                }
-            }
-        }
-*/
         matchViewModel.score.observe(viewLifecycleOwner) { iScore ->
             val command = iScore?.command
             if (command == Command.ZOOM_IN.toString()) {
@@ -472,37 +401,11 @@ class CameraFragment: Fragment(), ConnectChecker,
 
     private fun prepare() {
         val prepared = try {
-            //val screenWidth = getScreenWidth(requireContext())
-            //val screenHeight = getScreenHeight(requireContext())
-
             val screenWidth = width
             val screenHeight = height
 
-            //var factor = screenWidth / screenHeight;
-            //var factorHeight = 720
-            //var factorWidth =  factorHeight * factor
-            //videoSource = genericStream.videoSource
-
-            //this.zoomLevelHandler = ZoomLevelHandler(requireContext(), videoSource)
-            //this.zoomDegreeHandler = ZoomDegreeHandler(zoomLevelHandler)
-
-
-            /*statusViewModel.angleDegree.observe(viewLifecycleOwner, Observer { degree ->
-                var offset = this.zoomDegreeHandler.getOffsetByDegree(degree)
-                this.zoomLevelHandler.withOffset(offset)
-            })*/
-
-
-            /*var resoutions : List<Size>
-            if (videoSource is Camera1Source) {
-                resoutions = (videoSource as Camera1Source).getCameraResolutions(CameraHelper.Facing.BACK)
-            } else if (videoSource is Camera2Source) {
-                resoutions = (videoSource as Camera2Source).getCameraResolutions(CameraHelper.Facing.BACK)
-            } else {
-            }*/
-
             genericStream.prepareVideo(screenWidth, screenHeight, vBitrate, rotation = rotation, fps = fps) &&
-            genericStream.prepareAudio(sampleRate, isStereo, aBitrate)
+                    genericStream.prepareAudio(sampleRate, isStereo, aBitrate)
             true
         } catch (e: IllegalArgumentException) {
             false
@@ -574,12 +477,6 @@ class CameraFragment: Fragment(), ConnectChecker,
                 setScale(scaleX, scaleY)
                 setPosition(0.15f, 0.15f)
             }
-            //genericStream.getGlInterface().setFilter(0, scoreBoardFilter)
-            /*val imageFilter = ImageObjectFilterRender()
-            imageFilter.setImage(scoreBoardBitmap)
-            imageFilter.setPosition(0.15f, 0.15f)
-            imageFilter.setScale(scaleX, scaleY)
-            genericStream.getGlInterface().setFilter(imageFilter)*/
         }
     }
 

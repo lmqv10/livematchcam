@@ -35,17 +35,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        tools:targetApi="31">
-        <activity
-            android:name=".AccountActivity"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".YouTubeActivity"
-            android:exported="false"
-            android:label="@string/title_activity_you_tube"
-            android:theme="@style/AppTheme.NoActionBar" />
+        android:theme="@style/AppTheme">
+
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -61,6 +52,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -75,9 +67,20 @@
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
-
         <activity
             android:name=".RemoteScoreActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
+            tools:ignore="DiscouragedApi" />
+        <activity
+            android:name=".AccountActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
+            tools:ignore="DiscouragedApi" />
+        <activity
+            android:name=".YouTubeActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
