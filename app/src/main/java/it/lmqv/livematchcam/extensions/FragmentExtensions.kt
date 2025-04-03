@@ -9,7 +9,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 
 fun Logd(message: String) {
-    Log.d("DEBUG", message)
+    Log.d("LMCAM", message)
 }
 
 fun Fragment.launchOnStarted(delegate: suspend () -> Unit) {

@@ -41,7 +41,10 @@ class MainActivity : AppCompatActivity() {
     //private val youtubeViewModel: YoutubeViewModel by viewModels()
 
     private val permissions = mutableListOf(
-        Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.CAMERA,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.READ_EXTERNAL_STORAGE
     ).apply {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
             this.add(Manifest.permission.POST_NOTIFICATIONS)
@@ -88,9 +91,12 @@ class MainActivity : AppCompatActivity() {
         binding.activityLive.setOnClickListener {
             //Logd("MainActivity::startActivity::LiveStreamActivity")
             //FirebaseDataManager.getInstance().removeMatchValueEventListener()
-            startActivity(Intent(this, LiveStreamActivity::class.java))
+            startActivity(Intent(this, StreamActivity::class.java))
         }
 
+        binding.activityUsb.setOnClickListener {
+            startActivity(Intent(this, UVCStreamActivity::class.java))
+        }
         /*binding.activityYoutube.setOnClickListener {
             startActivity(Intent(this, YouTubeActivity::class.java))
         }*/

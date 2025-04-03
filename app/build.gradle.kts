@@ -11,10 +11,11 @@ android {
 
     defaultConfig {
         applicationId = "it.lmqv.livematchcam"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = 26
+        //noinspection ExpiredTargetSdkVersion
+        targetSdk = 27
         versionCode = 1
-        versionName = "2.1.000"
+        versionName = "2.2.000"
     }
 
     buildTypes {
@@ -49,6 +50,20 @@ android {
             excludes += "META-INF/NOTICE"
             excludes += "META-INF/NOTICE.txt"
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    packagingOptions {
+        jniLibs {
+            pickFirsts += setOf(
+                "lib/x86/libUVCCamera.so",
+                "lib/x86/libuvc.so",
+                "lib/x86_64/libUVCCamera.so",
+                "lib/x86_64/libuvc.so",
+                "lib/armeabi-v7a/libUVCCamera.so",
+                "lib/armeabi-v7a/libuvc.so",
+                "lib/arm64-v8a/libUVCCamera.so",
+                "lib/arm64-v8a/libuvc.so"
+            )
         }
     }
     viewBinding {
@@ -92,6 +107,11 @@ dependencies {
     implementation(libs.com.google.android.gms)
     implementation(libs.com.google.firebase.bom)
     implementation(libs.com.google.firebase.database.ktx)
+    implementation(libs.com.jiangdongguo.libausbc)
+    //implementation(libs.com.jiangdongguo.libuvc)
+    //implementation(libs.com.jiangdongguo.libuvccommon)
+    //implementation(libs.com.jiangdongguo.libnative)
+    implementation(libs.com.herohan.uvcandroid)
 
     implementation(libs.compose.ui)
     implementation(libs.compose.material)

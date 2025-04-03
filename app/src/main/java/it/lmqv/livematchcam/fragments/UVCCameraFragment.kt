@@ -24,31 +24,21 @@ import coil.request.ImageRequest
 import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
-import com.pedro.encoder.input.sources.video.Camera1Source
-import com.pedro.encoder.input.sources.video.Camera2Source
-import com.pedro.encoder.input.sources.video.VideoFileSource
-import com.pedro.encoder.input.sources.video.VideoSource
-import com.pedro.extrasources.CameraUvcSource
 import com.pedro.library.generic.GenericStream
-import com.pedro.library.rtmp.RtmpCamera1
 import com.pedro.library.util.BitrateAdapter
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.views.SwipeSurfaceView
-import it.lmqv.livematchcam.databinding.FragmentCameraBinding
-import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.databinding.FragmentUvcCameraBinding
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
-import it.lmqv.livematchcam.viewmodels.StatusViewModel
-import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
-import it.lmqv.livematchcam.handlers.offset.LeftRightWithManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetGapDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetGapNoCornerHandler
 import it.lmqv.livematchcam.handlers.offset.LeftRightWithAutoDepthZoomLevelHandler
+import it.lmqv.livematchcam.handlers.offset.LeftRightWithManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
 import it.lmqv.livematchcam.handlers.offset.ManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
@@ -59,10 +49,14 @@ import it.lmqv.livematchcam.handlers.zoom.NoDebounceSmoothZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.NoDebounceZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.SingleZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.SmoothZoomLevelHandler
+import it.lmqv.livematchcam.repositories.SettingsRepository
+import it.lmqv.livematchcam.sources.UvcSonyCameraSource
 import it.lmqv.livematchcam.utils.KeyValue
 import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
+import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
+import it.lmqv.livematchcam.views.SwipeSurfaceView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -72,12 +66,12 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
-open class CameraFragment: Fragment(), ConnectChecker,
+class UVCCameraFragment: Fragment(), ConnectChecker,
     IScoreBoardFragment.OnUpdateCallback,
     SwipeSurfaceView.OnSwipeGesture {
 
     companion object {
-        fun getInstance(): CameraFragment = CameraFragment()
+        fun getInstance(): UVCCameraFragment = UVCCameraFragment()
     }
 
     private val streamersViewModel: StreamersViewModel by activityViewModels()
@@ -98,11 +92,13 @@ open class CameraFragment: Fragment(), ConnectChecker,
     private var mainBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
     private var sportsFactory = SportsFactory
 
-    private var _binding: FragmentCameraBinding? = null
+    private var _binding: FragmentUvcCameraBinding? = null
     private val binding get() = _binding!!
 
     val genericStream: GenericStream by lazy {
-        GenericStream(requireContext(), this).apply {
+        GenericStream(requireContext(), this,
+            UvcSonyCameraSource(),
+            MicrophoneSource()).apply {
             //getGlInterface().autoHandleOrientation = true
             getStreamClient().setBitrateExponentialFactor(0.5f)
         }
@@ -111,10 +107,10 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     private var isMute : Boolean = false
 
-    private val width = 1280
-    private val height = 720
+    private val width = 1920
+    private val height = 1080
     private val vBitrate = 8000 * 1000
-    private var fps = 25
+    private var fps = 20
     private var rotation = 0
     private val sampleRate = 32000
     private val isStereo = true
@@ -131,11 +127,34 @@ open class CameraFragment: Fragment(), ConnectChecker,
         setMaxBitrate(vBitrate + aBitrate)
     }
 
+    //private lateinit var usbManager: UsbManager
+    //private val ACTION_USB_PERMISSION = "it.lmqv.livematchcam.USB_PERMISSION."
+    //private lateinit var permissionIntent: PendingIntent
+
+    /*private val usbReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                ACTION_USB_PERMISSION -> {
+                    Toast.makeText(context, "ACTION_USB_PERMISSION", Toast.LENGTH_SHORT).show()
+                    val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                        device?.let {
+                            Toast.makeText(context, "USB Permission Granted!", Toast.LENGTH_SHORT).show()
+                            // You can now communicate with the USB device
+                        }
+                    } else {
+                        Toast.makeText(context, "USB Permission Denied!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }*/
+
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentCameraBinding.inflate(inflater, container, false)
+        _binding = FragmentUvcCameraBinding.inflate(inflater, container, false)
 
         settingsRepository = SettingsRepository(requireContext())
 
@@ -153,20 +172,6 @@ open class CameraFragment: Fragment(), ConnectChecker,
         childFragmentManager.beginTransaction()
             .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
             .commit()
-
-        when (genericStream.videoSource) {
-            is Camera1Source -> {
-                (genericStream.videoSource as Camera1Source).enableVideoStabilization()
-            }
-            is Camera2Source -> {
-                with (genericStream.videoSource as Camera2Source) {
-                    enableVideoStabilization()
-                    enableOpticalVideoStabilization()
-                    enableAutoFocus()
-                    enableAutoExposure()
-                }
-            }
-        }
 
         this.zoomLevelHandler = NoDebounceExtraSmoothZoomLevelHandler(requireContext(), genericStream.videoSource)
         this.offsetDegreeHandler = ManualZoomLevelHandler(requireContext())
@@ -195,12 +200,15 @@ open class CameraFragment: Fragment(), ConnectChecker,
         binding.surfaceView.setCallbackListener(this)
         binding.surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
+                //Logd("surfaceCreated")
                 if (!genericStream.isOnPreview) genericStream.startPreview(binding.surfaceView)
             }
             override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+                //Logd("surfaceChanged")
                 genericStream.getGlInterface().setPreviewResolution(width, height)
             }
             override fun surfaceDestroyed(holder: SurfaceHolder) {
+                //Logd("surfaceDestroyed")
                 if (genericStream.isOnPreview) genericStream.stopPreview()
             }
         })
@@ -375,7 +383,6 @@ open class CameraFragment: Fragment(), ConnectChecker,
                 this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.Out)
             }
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -383,6 +390,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
         prepare()
         genericStream.getStreamClient().setReTries(10)
 
+        // Create the callback
         callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (genericStream.isStreaming) {
@@ -448,6 +456,8 @@ open class CameraFragment: Fragment(), ConnectChecker,
             activity?.finish()
         }
     }
+
+
 
     override fun onConnectionStarted(url: String) {
         toast("Streaming Started")
@@ -575,7 +585,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
                 val selectedZoomHandler = selectedItem.key.constructors.first().call(requireContext(), genericStream.videoSource)
-                this@CameraFragment.zoomLevelHandler = selectedZoomHandler as IZoomLevelHandler
+                this@UVCCameraFragment.zoomLevelHandler = selectedZoomHandler as IZoomLevelHandler
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
@@ -600,9 +610,9 @@ open class CameraFragment: Fragment(), ConnectChecker,
         spinnerOffsetStrategies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
-                this@CameraFragment.offsetDegreeHandler.destroy()
+                this@UVCCameraFragment.offsetDegreeHandler.destroy()
                 val selectedOffsetHandler = selectedItem.key.constructors.first().call(requireContext())
-                this@CameraFragment.offsetDegreeHandler = selectedOffsetHandler as IOffsetDegreeHandler
+                this@UVCCameraFragment.offsetDegreeHandler = selectedOffsetHandler as IOffsetDegreeHandler
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }

@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import it.lmqv.livematchcam.fragments.CameraFragment
 import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
 
-class LiveStreamActivity : AppCompatActivity() {
+class StreamActivity : AppCompatActivity() {
 
     private val cameraFragment = CameraFragment.getInstance()
 
@@ -44,7 +44,6 @@ class LiveStreamActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             )
         }
-
     }
 
     override fun onStart() {
