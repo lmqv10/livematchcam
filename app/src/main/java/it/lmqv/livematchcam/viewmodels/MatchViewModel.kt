@@ -79,12 +79,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setHomeLogo(updatedLogo: String) {
-        //val updatedLogo = currentMatch.copy(homeLogo = updatedLogo)
-        //applyMatchChanges(updatedLogo)
+        val updatedMatch = currentMatch.copy(homeLogo = updatedLogo)
+        applyMatchChanges(updatedMatch)
     }
     fun setGuestLogo(updatedLogo: String) {
-        //val updatedLogo = currentMatch.copy(guestLogo = updatedLogo)
-        //applyMatchChanges(updatedLogo)
+        val updatedMatch = currentMatch.copy(guestLogo = updatedLogo)
+        applyMatchChanges(updatedMatch)
     }
     fun setHomeTeam(updatedTeam: String) {
         val updatedMatch = currentMatch.copy(homeTeam = updatedTeam)
@@ -122,7 +122,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private val _isRealtimeDatabaseAvailable = MutableLiveData(false)
-    val isRealtimeDatabaseAvailable: LiveData<Boolean> = _isRealtimeDatabaseAvailable
+    val isRealtimeDatabaseAvailable: Flow<Boolean> = _isRealtimeDatabaseAvailable.asFlow()
 
     init {
         //Logd("MatchViewModel:: init")

@@ -19,6 +19,7 @@ import it.lmqv.livematchcam.fragments.BaseControlBarFragment
 import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.viewmodels.SoccerScoreViewModel
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.last
 
 class SoccerControlBarFragment() : BaseControlBarFragment() {
     companion object {
@@ -135,16 +136,16 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
         }
 
         binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color, logoUrl ->
-                matchViewModel.setHomeColorHex(color)
-                matchViewModel.setHomeLogo(logoUrl)
+            launchOnStarted {
+                requireContext().showColorPickerDialog { color ->
+                    matchViewModel.setHomeColorHex(color)
+                }
             }
         }
 
         binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color, logoUrl ->
+            requireContext().showColorPickerDialog { color ->
                 matchViewModel.setGuestColorHex(color)
-                matchViewModel.setGuestLogo(logoUrl)
             }
         }
 

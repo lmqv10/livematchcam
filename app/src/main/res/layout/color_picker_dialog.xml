@@ -9,6 +9,7 @@
     android:layout_gravity="start">
 
     <TextView
+        android:id="@+id/logo_url_label"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_weight="3"
@@ -19,8 +20,8 @@
         android:text="@string/choose_logo"/>
 
     <EditText
-        android:visibility="gone"
         android:id="@+id/logo_url"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/logo_url_placeholder"

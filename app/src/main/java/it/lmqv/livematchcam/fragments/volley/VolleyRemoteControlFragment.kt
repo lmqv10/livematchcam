@@ -67,10 +67,11 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
         launchOnStarted {
             combine(
+                matchViewModel.isRealtimeDatabaseAvailable,
                 matchViewModel.homeColorHex,
                 matchViewModel.homeLogo) {
-                    color, logo -> Pair(color, logo)
-            }.collect { (colorHex, logoURL) ->
+                    available, color, logo -> Triple(available, color, logo)
+            }.collect { (isAvailable, colorHex, logoURL) ->
                 //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
                 if (!logoURL.isNullOrEmpty()) {
                     binding.homeColor.load(logoURL) {
@@ -81,24 +82,51 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                 } else {
                     binding.homeColor.setShirtByColor(Color.parseColor(colorHex))
                 }
+
+                binding.homeColor.setOnClickListener {
+                    if (isAvailable) {
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                            matchViewModel.setHomeLogo(updatedTeamLogo)
+                            requireActivity().hideSystemUI()
+                        }
+                    } else {
+                        requireContext().showColorPickerDialog { color ->
+                            matchViewModel.setHomeColorHex(color)
+                        }
+                    }
+                }
             }
         }
 
         launchOnStarted {
             combine(
+                matchViewModel.isRealtimeDatabaseAvailable,
                 matchViewModel.guestColorHex,
                 matchViewModel.guestLogo) {
-                    color, logo -> Pair(color, logo)
-            }.collect { (colorHex, logoURL) ->
-                //binding.awayColor.isClickable = logoURL.isNullOrEmpty()
+                    available, color, logo -> Triple(available, color, logo)
+            }.collect { (isAvailable, colorHex, logoURL) ->
+                //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
                 if (!logoURL.isNullOrEmpty()) {
-                    binding.awayColor.load(logoURL) {
+                    binding.guestColor.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
                         allowHardware(false)
                     }
                 } else {
-                    binding.awayColor.setShirtByColor(Color.parseColor(colorHex))
+                    binding.guestColor.setShirtByColor(Color.parseColor(colorHex))
+                }
+
+                binding.guestColor.setOnClickListener {
+                    if (isAvailable) {
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                            matchViewModel.setGuestLogo(updatedTeamLogo)
+                            requireActivity().hideSystemUI()
+                        }
+                    } else {
+                        requireContext().showColorPickerDialog { color ->
+                            matchViewModel.setGuestColorHex(color)
+                        }
+                    }
                 }
             }
         }
@@ -309,19 +337,17 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             volleyScoreViewModel.incrementAwayScore()
         }
 
-        binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color, logoUrl ->
+        /*binding.homeColor.setOnClickListener {
+            requireContext().showColorPickerDialog { color ->
                 matchViewModel.setHomeColorHex(color)
-                matchViewModel.setHomeLogo(logoUrl)
             }
         }
 
         binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color, logoUrl ->
+            requireContext().showColorPickerDialog { color ->
                 matchViewModel.setGuestColorHex(color)
-                matchViewModel.setGuestLogo(logoUrl)
             }
-        }
+        }*/
 
         binding.homeTeam.setOnClickListener {
             var teamName = binding.homeTeam.text.toString()

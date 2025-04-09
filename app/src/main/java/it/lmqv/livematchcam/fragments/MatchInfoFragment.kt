@@ -28,6 +28,7 @@ import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.viewmodels.GoogleViewModel
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 
 class MatchInfoFragment : Fragment() {
@@ -59,11 +60,13 @@ class MatchInfoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         //Logd("SportsFragment::matchViewModelID: ${matchViewModel.instanceId}")
 
-        matchViewModel.isRealtimeDatabaseAvailable.observe(viewLifecycleOwner) { isAvailable ->
-            if (isAvailable) {
-                binding.matchInfo.visibility = View.VISIBLE
-            } else  {
-                binding.matchInfo.visibility = View.GONE
+        launchOnStarted {
+            matchViewModel.isRealtimeDatabaseAvailable.collect { isAvailable ->
+                if (isAvailable) {
+                    binding.matchInfo.visibility = View.VISIBLE
+                } else {
+                    binding.matchInfo.visibility = View.GONE
+                }
             }
         }
 
@@ -80,12 +83,14 @@ class MatchInfoFragment : Fragment() {
         matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
             binding.guestColor.setShirtByColor(Color.parseColor(guestColorHex))
         }*/
+
         launchOnStarted {
             combine(
+                matchViewModel.isRealtimeDatabaseAvailable,
                 matchViewModel.homeColorHex,
                 matchViewModel.homeLogo) {
-                    color, logo -> Pair(color, logo)
-            }.collect { (colorHex, logoURL) ->
+                    available, color, logo -> Triple(available, color, logo)
+            }.collect { (isAvailable, colorHex, logoURL) ->
                 //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
                 if (!logoURL.isNullOrEmpty()) {
                     binding.homeColor.load(logoURL) {
@@ -96,15 +101,29 @@ class MatchInfoFragment : Fragment() {
                 } else {
                     binding.homeColor.setShirtByColor(Color.parseColor(colorHex))
                 }
+
+                binding.homeColor.setOnClickListener {
+                    if (isAvailable) {
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                            matchViewModel.setHomeLogo(updatedTeamLogo)
+                            requireActivity().hideSystemUI()
+                        }
+                    } else {
+                        requireContext().showColorPickerDialog { color ->
+                            matchViewModel.setHomeColorHex(color)
+                        }
+                    }
+                }
             }
         }
 
         launchOnStarted {
             combine(
+                matchViewModel.isRealtimeDatabaseAvailable,
                 matchViewModel.guestColorHex,
                 matchViewModel.guestLogo) {
-                    color, logo -> Pair(color, logo)
-            }.collect { (colorHex, logoURL) ->
+                    available, color, logo -> Triple(available, color, logo)
+            }.collect { (isAvailable, colorHex, logoURL) ->
                 //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
                 if (!logoURL.isNullOrEmpty()) {
                     binding.guestColor.load(logoURL) {
@@ -115,9 +134,21 @@ class MatchInfoFragment : Fragment() {
                 } else {
                     binding.guestColor.setShirtByColor(Color.parseColor(colorHex))
                 }
+
+                binding.guestColor.setOnClickListener {
+                    if (isAvailable) {
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                            matchViewModel.setGuestLogo(updatedTeamLogo)
+                            requireActivity().hideSystemUI()
+                        }
+                    } else {
+                        requireContext().showColorPickerDialog { color ->
+                            matchViewModel.setGuestColorHex(color)
+                        }
+                    }
+                }
             }
         }
-
 
         matchViewModel.type.observe(viewLifecycleOwner) { type ->
             cardItems.forEach { item -> item.isSelected = item.sport.name == type }
@@ -142,19 +173,25 @@ class MatchInfoFragment : Fragment() {
                 }
         }*/
 
-        binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color, logoUrl ->
-                matchViewModel.setHomeColorHex(color)
-                matchViewModel.setHomeLogo(logoUrl)
+        /*binding.homeColor.setOnClickListener {
+            launchOnStarted {
+                val isAvailable = matchViewModel.isRealtimeDatabaseAvailable.last()
+                requireContext().showColorPickerDialog(isAvailable) { color, logoUrl ->
+                    matchViewModel.setHomeColorHex(color)
+                    matchViewModel.setHomeLogo(logoUrl)
+                }
             }
         }
 
         binding.guestColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color, logoUrl ->
-                matchViewModel.setGuestColorHex(color)
-                matchViewModel.setGuestLogo(logoUrl)
+            launchOnStarted {
+                val isAvailable = matchViewModel.isRealtimeDatabaseAvailable.last()
+                requireContext().showColorPickerDialog(isAvailable) { color, logoUrl ->
+                    matchViewModel.setGuestColorHex(color)
+                    matchViewModel.setGuestLogo(logoUrl)
+                }
             }
-        }
+        }*/
 
         binding.homeTeam.setOnClickListener {
             val teamName = binding.homeTeam.text.toString()

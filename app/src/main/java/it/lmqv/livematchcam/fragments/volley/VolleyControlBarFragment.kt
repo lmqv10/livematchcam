@@ -168,16 +168,14 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
         }
 
         binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color, logoUrl ->
+            requireContext().showColorPickerDialog { color ->
                 matchViewModel.setHomeColorHex(color)
-                matchViewModel.setHomeLogo(logoUrl)
             }
         }
 
         binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color, logoUrl ->
+            requireContext().showColorPickerDialog { color ->
                 matchViewModel.setGuestColorHex(color)
-                matchViewModel.setGuestLogo(logoUrl)
             }
         }
 
