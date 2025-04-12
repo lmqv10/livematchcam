@@ -2,6 +2,7 @@ package it.lmqv.livematchcam.fragments.soccer
 
 import android.graphics.Color
 import android.os.Bundle
+import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -76,7 +77,7 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 
                 binding.homeColor.setOnClickListener {
                     if (isAvailable) {
-                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
                             matchViewModel.setHomeLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()
                         }
@@ -109,7 +110,7 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 
                 binding.guestColor.setOnClickListener {
                     if (isAvailable) {
-                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
                             matchViewModel.setGuestLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()
                         }

@@ -111,10 +111,11 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     private var isMute : Boolean = false
 
-    private val width = 1280
-    private val height = 720
-    private val vBitrate = 8000 * 1000
-    private var fps = 25
+    private val width = 1920
+    private val height = 1080
+    private val vBitrate = 6000 * 1000
+    private var fps = 30
+
     private var rotation = 0
     private val sampleRate = 32000
     private val isStereo = true

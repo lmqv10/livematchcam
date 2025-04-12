@@ -78,7 +78,7 @@ class UvcSonyCameraSource: VideoSource() {
         }
     }
 
-    fun getSize(sourceWidth: Int = 1280, sourceheight: Int = 720, sourceFps: Int = 30): Size {
+    fun getSize(sourceWidth: Int = 1920, sourceheight: Int = 1080, sourceFps: Int = 20): Size {
         var currentSize: Size? = null
         val sizeList: List<Size> = cameraHelper?.supportedSizeList?.toMutableList() ?: listOf()
 

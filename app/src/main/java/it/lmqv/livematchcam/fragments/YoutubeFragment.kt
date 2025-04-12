@@ -118,8 +118,7 @@ class YoutubeFragment : Fragment(), IServersFragment {
             .collect { (account, liveBroadcasts, firebaseAccountKey) ->
             */
 
-            youtubeViewModel.liveBroadcasts
-            .collect { liveBroadcasts ->
+            youtubeViewModel.liveBroadcasts.collect { liveBroadcasts ->
                 var liveBroadcastItems = liveBroadcasts.map { x ->
                     BroadcastItem(
                         x.snippet.thumbnails.standard.url,
@@ -257,6 +256,16 @@ class YoutubeFragment : Fragment(), IServersFragment {
             requireContext().showQRCode(binding.liveUrl.text.toString())
         }
 
+        binding.refresh.setOnClickListener {
+            googleViewModel.account.value.let {
+                if (it != null) {
+                    handleSignIn(it)
+                }
+            }
+        }
+
+
+
         /*binding.login.setOnClickListener {
             var googleSignInClient = GoogleSignIn.getClient(requireActivity(), googleSignInOptions)
             val signInIntent = googleSignInClient.signInIntent
@@ -311,7 +320,9 @@ class YoutubeFragment : Fragment(), IServersFragment {
         }
         catch (e: Exception)
         {
-            toast("streamsListYouTube::${e.message.toString()}")
+            /*requireActivity().runOnUiThread {
+                toast("streamsListYouTube::${e.message.toString()}")
+            }*/
         }
     }
 
@@ -325,7 +336,9 @@ class YoutubeFragment : Fragment(), IServersFragment {
         }
         catch (e: Exception)
         {
-            toast("broadcastListYouTube::${e.message.toString()}")
+            /*requireActivity().runOnUiThread {
+                toast("broadcastListYouTube::${e.message.toString()}")
+            }*/
         }
     }
 

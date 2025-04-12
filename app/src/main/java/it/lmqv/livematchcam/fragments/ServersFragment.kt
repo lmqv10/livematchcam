@@ -85,9 +85,11 @@ class ServersFragment : Fragment(), IServersFragment {
         }*/
 
         binding.edittextServer.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                binding.edittextServer.post { binding.edittextServer.selectAll() }
-            }
+            try {
+                if (hasFocus) {
+                    binding.edittextServer.post { binding.edittextServer.selectAll() }
+                }
+            } catch (_: Exception) { }
         }
         binding.edittextServer.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }

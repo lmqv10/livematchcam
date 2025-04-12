@@ -85,7 +85,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
                 binding.homeColor.setOnClickListener {
                     if (isAvailable) {
-                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
                             matchViewModel.setHomeLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()
                         }
@@ -118,7 +118,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
                 binding.guestColor.setOnClickListener {
                     if (isAvailable) {
-                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
                             matchViewModel.setGuestLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()
                         }

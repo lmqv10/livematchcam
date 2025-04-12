@@ -3,6 +3,7 @@ package it.lmqv.livematchcam.fragments
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.text.InputFilter
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -104,7 +105,7 @@ class MatchInfoFragment : Fragment() {
 
                 binding.homeColor.setOnClickListener {
                     if (isAvailable) {
-                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
                             matchViewModel.setHomeLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()
                         }
@@ -137,7 +138,7 @@ class MatchInfoFragment : Fragment() {
 
                 binding.guestColor.setOnClickListener {
                     if (isAvailable) {
-                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL) { updatedTeamLogo ->
+                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
                             matchViewModel.setGuestLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()
                         }
