@@ -19,6 +19,7 @@ import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.utils.KeyValue
 import it.lmqv.livematchcam.extensions.bitrateFormat
 import it.lmqv.livematchcam.extensions.degreeFormat
+import it.lmqv.livematchcam.extensions.fpsFormat
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.singleDecimalFormat
@@ -91,6 +92,10 @@ class StatusFragment : Fragment(),
 
         statusViewModel.bitrate.observe(viewLifecycleOwner, Observer { data ->
             binding.bitrate.text = bitrateFormat(data)
+        })
+
+        statusViewModel.fps.observe(viewLifecycleOwner, Observer { data ->
+            binding.fps.text = fpsFormat(data)
         })
 
         statusViewModel.angleDegrees.observe(viewLifecycleOwner, Observer { degrees ->

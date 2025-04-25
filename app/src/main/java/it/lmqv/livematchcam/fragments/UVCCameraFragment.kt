@@ -54,8 +54,8 @@ import it.lmqv.livematchcam.sources.UvcSonyCameraSource
 import it.lmqv.livematchcam.utils.KeyValue
 import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
-import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
+import it.lmqv.livematchcam.viewmodels.UVCStatusViewModel
 import it.lmqv.livematchcam.views.SwipeSurfaceView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,9 +82,11 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     private lateinit var zoomLevelHandler: IZoomLevelHandler
     private lateinit var offsetDegreeHandler: IOffsetDegreeHandler
 
-    private val statusFragment = StatusFragment.newInstance()
-    private val statusViewModel: StatusViewModel by activityViewModels()
+    private val statusFragment = UVCStatusFragment.newInstance()
+    private val statusViewModel: UVCStatusViewModel by activityViewModels()
 
+    private var uvcCameraSource: UvcSonyCameraSource = UvcSonyCameraSource()
+    //private var uvcCameraSource: CameraUvcSource = CameraUvcSource()
     private lateinit var controlBarFragment: IControlBarFragment
     private lateinit var scoreBoardFragment: IScoreBoardFragment
     private var scoreBoardFilter: ImageObjectFilterRender = ImageObjectFilterRender()
@@ -97,7 +99,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
     val genericStream: GenericStream by lazy {
         GenericStream(requireContext(), this,
-            UvcSonyCameraSource(),
+            uvcCameraSource,
             MicrophoneSource()).apply {
             //getGlInterface().autoHandleOrientation = true
             getStreamClient().setBitrateExponentialFactor(0.5f)
@@ -113,7 +115,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     private var fps = 25*/
     private val width = 1920
     private val height = 1080
-    private val vBitrate = 6000 * 1000
+    private val vBitrate = 8000 * 1000
     private var fps = 20
     private var rotation = 0
     private val sampleRate = 32000
@@ -186,11 +188,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        statusViewModel.angleDegrees.observe(viewLifecycleOwner) { degrees ->
-            val offset = this.offsetDegreeHandler.getOffsetByDegrees(degrees)
-            onChangeZoom(offset)
-        }
-
         val audioManager = requireActivity().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         this.isMute = audioManager.isMicrophoneMute
 
@@ -200,6 +197,10 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
             binding.microphone.setImageResource(R.drawable.microphone_on)
         }
         //this.genericStream.getStreamClient().setOnlyVideo(true)
+
+        this.genericStream.setFpsListener { fps ->
+            statusViewModel.setFPS(fps)
+        }
 
         binding.surfaceView.setCallbackListener(this)
         binding.surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
@@ -522,33 +523,15 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     }
 
     override fun swipeUp() {
-        zoomLevelHandler.increase()
     }
 
     override fun swipeDown() {
-        zoomLevelHandler.decrease()
     }
 
     override fun swipeLeft() {
-        zoomLevelHandler.lower()
     }
 
     override fun swipeRight() {
-        zoomLevelHandler.upper()
-    }
-
-    fun updateZoom(zoomLevel: ManualZoomLevel) {
-        this.offsetDegreeHandler.manualZoomLevel(zoomLevel)
-        statusViewModel.angleDegrees.value?.let {
-            val offset = this.offsetDegreeHandler.getOffsetByDegrees(it)
-            onChangeZoom(offset)
-        }
-    }
-
-    private fun onChangeZoom(offset: Float) {
-        zoomLevelHandler.withOffset(offset) { zoomLevel ->
-            statusViewModel.setZoomLevel(zoomLevel)
-        }
     }
 
     private fun startStreamingTimer() {

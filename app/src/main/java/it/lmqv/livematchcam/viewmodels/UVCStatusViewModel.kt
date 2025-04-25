@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class StatusViewModel : ViewModel() {
+class UVCStatusViewModel : ViewModel() {
     private val _bitrate = MutableLiveData(0.0f)
     val bitrate: LiveData<Float> = _bitrate
     fun setBitrate(updatedBitrate: Float) { _bitrate.value = updatedBitrate }
@@ -19,11 +19,4 @@ class StatusViewModel : ViewModel() {
             _fps.value = updatedFps
         }
     }
-    private val _angleDegrees = MutableLiveData(IntArray(3))
-    val angleDegrees: LiveData<IntArray> = _angleDegrees
-    fun setAngleDegrees(updatedDegrees: IntArray) { _angleDegrees.value = updatedDegrees }
-
-    private val _zoomLevel = MutableLiveData(0.0f)
-    val zoomLevel: LiveData<Float> = _zoomLevel
-    fun setZoomLevel(updatedZoomLevel: Float) { _zoomLevel.value = updatedZoomLevel }
 }

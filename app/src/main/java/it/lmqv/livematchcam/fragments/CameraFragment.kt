@@ -113,7 +113,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     private val width = 1920
     private val height = 1080
-    private val vBitrate = 6000 * 1000
+    private val vBitrate = 8000 * 1000
     private var fps = 30
 
     private var rotation = 0
@@ -192,6 +192,10 @@ open class CameraFragment: Fragment(), ConnectChecker,
             binding.microphone.setImageResource(R.drawable.microphone_on)
         }
         //this.genericStream.getStreamClient().setOnlyVideo(true)
+
+        this.genericStream.setFpsListener { fps ->
+            statusViewModel.setFPS(fps)
+        }
 
         binding.surfaceView.setCallbackListener(this)
         binding.surfaceView.holder.addCallback(object: SurfaceHolder.Callback {

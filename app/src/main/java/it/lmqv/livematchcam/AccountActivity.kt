@@ -113,8 +113,8 @@ class AccountActivity : AppCompatActivity() {
 
         binding.disconnect.setOnClickListener { _ ->
             googleViewModel.setAccountKey(null)
-            binding.connect.isVisible = true
-            binding.disconnect.isVisible = false
+            binding.connect.isEnabled = true
+            binding.disconnect.isEnabled = false
             //binding.accountKey.isEnabled = true
         }
     }
@@ -139,8 +139,8 @@ class AccountActivity : AppCompatActivity() {
                 binding.accountKey.text = Editable.Factory.getInstance().newEditable(accountKey ?: "")
 
                 val isConnected = !accountName.isNullOrEmpty() && !accountKey.isNullOrEmpty()
-                binding.connect.isVisible = !isConnected
-                binding.disconnect.isVisible = isConnected
+                binding.connect.isEnabled = !isConnected
+                binding.disconnect.isEnabled = isConnected
                 //binding.accountKey.isEnabled = !isConnected
             }
         }

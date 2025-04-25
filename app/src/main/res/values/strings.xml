@@ -120,6 +120,7 @@
     <string name="score_placeholder">0</string>
     <string name="degree_placeholder">0°</string>
     <string name="bitrate_placeholder">0 mb/s</string>
+    <string name="fps_placeholder">0 fps</string>
     <string name="zoom_placeholder">0.0</string>
     <string name="set_placeholder">Set</string>
     <string name="first_set_placeholder">1</string>

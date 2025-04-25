@@ -191,37 +191,6 @@ class UVCStreamActivity : AppCompatActivity() {
             .commit()
     }
 
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        when (keyCode) {
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                cameraFragment.updateZoom(ManualZoomLevel.None)
-                return true
-            }
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                cameraFragment.updateZoom(ManualZoomLevel.None)
-                return true
-            }
-        }
-        return super.onKeyUp(keyCode, event)
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        when (keyCode) {
-            KeyEvent.KEYCODE_HEADSETHOOK -> {
-                cameraFragment.updateZoom(ManualZoomLevel.None)
-                return true
-            }
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                cameraFragment.updateZoom(ManualZoomLevel.In)
-                return true
-            }
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                cameraFragment.updateZoom(ManualZoomLevel.Out)
-                return true
-            }
-        }
-        return super.onKeyDown(keyCode, event)
-    }
 
     /*override fun onBackPressed() {
         AlertDialog.Builder(this)

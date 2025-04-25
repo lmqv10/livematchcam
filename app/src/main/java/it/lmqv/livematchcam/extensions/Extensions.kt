@@ -99,6 +99,11 @@ fun bitrateFormat(value:Float) : String {
     return formatter.format(value)
 }
 
+fun fpsFormat(value:Int) : String {
+    val formatter = String.format(Locale.getDefault(), "%d fps", value)
+    return formatter.format(value)
+}
+
 fun formatTime(seconds: Int = 0): String {
     var formattedTime : String
     if (seconds > 3600) {

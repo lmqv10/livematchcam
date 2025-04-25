@@ -9,6 +9,7 @@ import com.pedro.encoder.input.sources.OrientationForced
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.serenegiant.usb.Size
 import com.serenegiant.usb.UVCCamera
+import it.lmqv.livematchcam.extensions.Logd
 import java.util.Collections
 
 class UvcSonyCameraSource: VideoSource() {
@@ -78,7 +79,8 @@ class UvcSonyCameraSource: VideoSource() {
         }
     }
 
-    fun getSize(sourceWidth: Int = 1920, sourceheight: Int = 1080, sourceFps: Int = 20): Size {
+    //private fun getSize(sourceWidth: Int = 1920, sourceheight: Int = 1080, sourceFps: Int = 30): Size {
+    private fun getSize(sourceWidth: Int = width, sourceheight: Int = height, sourceFps: Int = fps): Size {
         var currentSize: Size? = null
         val sizeList: List<Size> = cameraHelper?.supportedSizeList?.toMutableList() ?: listOf()
 
@@ -124,4 +126,22 @@ class UvcSonyCameraSource: VideoSource() {
 
         return currentSize
     }
+
+    //private var frameCount = 0
+    //private var lastFpsTimestamp = System.currentTimeMillis()
+
+    /*private fun emitFrameRate() {
+        frameCount++
+        val currentTime = System.currentTimeMillis()
+        val elapsedSeconds = (currentTime - lastFpsTimestamp) / 1000.0
+
+        if (elapsedSeconds >= 1.0) { // Update FPS every second
+            val fps = frameCount / elapsedSeconds
+            Logd("SurfaceTexture FPS:: ${"%.2f".format(fps)}")
+
+            // Reset counters
+            frameCount = 0
+            lastFpsTimestamp = currentTime
+        }
+    }*/
 }
