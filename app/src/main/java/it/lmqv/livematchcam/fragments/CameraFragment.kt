@@ -113,8 +113,8 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     private val width = 1920
     private val height = 1080
-    private val vBitrate = 8000 * 1000
-    private var fps = 30
+    private val vBitrate = 7500 * 1000
+    private var fps = 25
 
     private var rotation = 0
     private val sampleRate = 32000
