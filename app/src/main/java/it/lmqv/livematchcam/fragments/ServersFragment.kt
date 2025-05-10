@@ -86,7 +86,7 @@ class ServersFragment : Fragment(), IServersFragment {
 
         binding.edittextServer.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             try {
-                if (hasFocus) {
+                if (hasFocus && _binding != null) {
                     binding.edittextServer.post { binding.edittextServer.selectAll() }
                 }
             } catch (_: Exception) { }

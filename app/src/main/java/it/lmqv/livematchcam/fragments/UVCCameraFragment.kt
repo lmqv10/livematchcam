@@ -67,8 +67,7 @@ import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
 class UVCCameraFragment: Fragment(), ConnectChecker,
-    IScoreBoardFragment.OnUpdateCallback,
-    SwipeSurfaceView.OnSwipeGesture {
+    IScoreBoardFragment.OnUpdateCallback {
 
     companion object {
         fun getInstance(): UVCCameraFragment = UVCCameraFragment()
@@ -115,7 +114,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     private var fps = 25*/
     private val width = 1920
     private val height = 1080
-    private val vBitrate = 7500 * 1000
+    private val vBitrate = 5000 * 1000
     private var fps = 25
     private var rotation = 0
     private val sampleRate = 32000
@@ -202,7 +201,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
             statusViewModel.setFPS(fps)
         }
 
-        binding.surfaceView.setCallbackListener(this)
         binding.surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 //Logd("surfaceCreated")
@@ -520,18 +518,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
                 setPosition(0.15f, 0.15f)
             }
         }
-    }
-
-    override fun swipeUp() {
-    }
-
-    override fun swipeDown() {
-    }
-
-    override fun swipeLeft() {
-    }
-
-    override fun swipeRight() {
     }
 
     private fun startStreamingTimer() {
