@@ -19,4 +19,20 @@ class UVCStatusViewModel : ViewModel() {
             _fps.value = updatedFps
         }
     }
+
+    private val _sourceResolution = MutableLiveData(0)
+    val sourceResolution: LiveData<Int> = _sourceResolution
+    fun setSourceResolution(updatedResolution: Int) {
+        viewModelScope.launch(Dispatchers.Main) {
+            _sourceResolution.value = updatedResolution
+        }
+    }
+
+    private val _sourceFps = MutableLiveData(0)
+    val sourceFps: LiveData<Int> = _sourceFps
+    fun setSourceFps(updatedFps: Int) {
+        viewModelScope.launch(Dispatchers.Main) {
+            _sourceFps.value = updatedFps
+        }
+    }
 }

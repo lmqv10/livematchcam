@@ -111,6 +111,8 @@
                 <action android:name="it.lmqv.livematchcam.USB_PERMISSION" />
             </intent-filter>
         </receiver-->
+
+        <service android:name=".services.CounterService" />
     </application>
 
 </manifest>

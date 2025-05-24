@@ -10,6 +10,7 @@
         android:id="@+id/control_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minWidth="100dp"
         android:background="@drawable/alpha_background"
         android:orientation="vertical">
 
@@ -17,8 +18,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:minHeight="40dp"
+            android:minHeight="30dp"
             android:weightSum="5">
+
             <TextView
                 android:id="@+id/bitrate"
                 android:layout_width="0dp"
@@ -46,14 +48,46 @@
                 android:layout_gravity="center_vertical"
                 android:textSize="11sp"
                 android:text="@string/fps_placeholder" />
+
         </LinearLayout>
 
         <LinearLayout
-            android:visibility="invisible"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/sourceResolution"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primary"
+                android:background="@drawable/alpha_background"
+                android:textStyle="bold"
+                android:padding="3dp"
+                android:gravity="center"
+                android:layout_gravity="center_vertical"
+                android:textSize="11sp"
+                android:text="@string/resolution_placeholder" />
+
+            <TextView
+                android:id="@+id/sourceFps"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primary"
+                android:background="@drawable/alpha_background"
+                android:textStyle="bold"
+                android:padding="3dp"
+                android:gravity="center"
+                android:layout_gravity="center_vertical"
+                android:textSize="11sp"
+                android:text="@string/fps_placeholder" />
+
             <ImageView
+                android:visibility="gone"
                 android:id="@+id/reset_rotation"
                 android:src="@drawable/switch_icon"
                 android:layout_width="50dp"
@@ -63,6 +97,7 @@
                 tools:ignore="ContentDescription"/>
 
             <ImageView
+                android:visibility="gone"
                 android:id="@+id/zoom_offset"
                 android:src="@drawable/zoom_offset"
                 android:layout_width="50dp"

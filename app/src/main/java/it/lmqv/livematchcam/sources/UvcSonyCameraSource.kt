@@ -9,7 +9,6 @@ import com.pedro.encoder.input.sources.OrientationForced
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.serenegiant.usb.Size
 import com.serenegiant.usb.UVCCamera
-import it.lmqv.livematchcam.extensions.Logd
 import java.util.Collections
 
 class UvcSonyCameraSource: VideoSource() {
@@ -18,12 +17,12 @@ class UvcSonyCameraSource: VideoSource() {
     private var running = false
 
     override fun create(width: Int, height: Int, fps: Int, rotation: Int): Boolean {
-        //Logd("create($width, $height, $fps, $rotation)")
+        //Logd("CameraSource::create($width, $height, $fps, $rotation)")
         return true
     }
 
     override fun start(surfaceTexture: SurfaceTexture) {
-        //Logd("start")
+        //Logd("CameraSource::start")
         this.surfaceTexture = surfaceTexture
         surface = Surface(surfaceTexture)
         cameraHelper = CameraHelper()
@@ -32,7 +31,7 @@ class UvcSonyCameraSource: VideoSource() {
     }
 
     override fun stop() {
-        //Logd("stop")
+        //Logd("CameraSource::stop")
         surface?.let { cameraHelper?.removeSurface(it) }
         surface?.release()
         surface = null
@@ -61,6 +60,7 @@ class UvcSonyCameraSource: VideoSource() {
         override fun onCameraOpen(device: UsbDevice) {
             //Logd("onCameraOpen ${device.deviceName}")
             cameraHelper?.previewSize = getSize()
+            //Logd("onCameraSize ${getSize()}")
             cameraHelper?.startPreview()
             surface?.let { cameraHelper?.addSurface(it, false) }
         }
@@ -79,9 +79,9 @@ class UvcSonyCameraSource: VideoSource() {
         }
     }
 
-    //private fun getSize(sourceWidth: Int = width, sourceheight: Int = height, sourceFps: Int = fps): Size {
-    //private fun getSize(sourceWidth: Int = 1920, sourceheight: Int = 1080, sourceFps: Int = 25): Size {
-    private fun getSize(sourceWidth: Int = 1280, sourceheight: Int = 720, sourceFps: Int = 30): Size {
+    private fun getSize(sourceWidth: Int = width, sourceheight: Int = height, sourceFps: Int = fps): Size { // tEst
+    // private fun getSize(sourceWidth: Int = 1920, sourceheight: Int = 1080, sourceFps: Int = 60): Size { // tEst
+    // private fun getSize(sourceWidth: Int = 1280, sourceheight: Int = 720, sourceFps: Int = 25): Size { // OK
         var currentSize: Size? = null
         val sizeList: List<Size> = cameraHelper?.supportedSizeList?.toMutableList() ?: listOf()
 
@@ -128,21 +128,17 @@ class UvcSonyCameraSource: VideoSource() {
         return currentSize
     }
 
-    //private var frameCount = 0
-    //private var lastFpsTimestamp = System.currentTimeMillis()
-
-    /*private fun emitFrameRate() {
-        frameCount++
-        val currentTime = System.currentTimeMillis()
-        val elapsedSeconds = (currentTime - lastFpsTimestamp) / 1000.0
-
-        if (elapsedSeconds >= 1.0) { // Update FPS every second
-            val fps = frameCount / elapsedSeconds
-            Logd("SurfaceTexture FPS:: ${"%.2f".format(fps)}")
-
-            // Reset counters
-            frameCount = 0
-            lastFpsTimestamp = currentTime
-        }
+    /*fun updatePreviewSize(sourceWidth: Int, sourceheight: Int, sourceFps: Int) {
+        //Logd("updatePreviewSize $sourceWidth x $sourceheight @$sourceFps")
+        //Logd("cameraStopPreview")
+        cameraHelper?.stopPreview()
+        //Logd("cameraRemoveSurface")
+        surface?.let { cameraHelper?.removeSurface(it) }
+        //Logd("cameraPreviewSize")
+        cameraHelper?.previewSize = getSize(sourceWidth, sourceheight, sourceFps)
+        //Logd("cameraStartPreview")
+        cameraHelper?.startPreview()
+        //Logd("cameraAddSurface")
+        surface?.let { cameraHelper?.addSurface(it, false) }
     }*/
 }

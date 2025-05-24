@@ -104,6 +104,12 @@ fun fpsFormat(value:Int) : String {
     return formatter.format(value)
 }
 
+fun resolutionFormat(value:Int) : String {
+    val formatter = String.format(Locale.getDefault(), "%dp", value)
+    return formatter.format(value)
+}
+
+
 fun formatTime(seconds: Int = 0): String {
     var formattedTime : String
     if (seconds > 3600) {

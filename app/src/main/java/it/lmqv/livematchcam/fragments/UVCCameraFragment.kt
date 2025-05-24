@@ -78,9 +78,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
     private lateinit var settingsRepository: SettingsRepository
 
-    private lateinit var zoomLevelHandler: IZoomLevelHandler
-    private lateinit var offsetDegreeHandler: IOffsetDegreeHandler
-
     private val statusFragment = UVCStatusFragment.newInstance()
     private val statusViewModel: UVCStatusViewModel by activityViewModels()
 
@@ -89,8 +86,8 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     private lateinit var controlBarFragment: IControlBarFragment
     private lateinit var scoreBoardFragment: IScoreBoardFragment
     private var scoreBoardFilter: ImageObjectFilterRender = ImageObjectFilterRender()
-    private var spotBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
-    private var mainBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
+    //private var spotBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
+    //private var mainBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
     private var sportsFactory = SportsFactory
 
     private var _binding: FragmentUvcCameraBinding? = null
@@ -112,10 +109,10 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     private val height = 720
     private val vBitrate = 8000 * 1000
     private var fps = 25*/
-    private val width = 1920
-    private val height = 1080
+    private var width = 1920
+    private var height = 1080
     private val vBitrate = 6000 * 1000
-    private var fps = 30
+    private var fps = 20
     private var rotation = 0
     private val sampleRate = 32000
     private val isStereo = true
@@ -178,9 +175,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
             .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
             .commit()
 
-        this.zoomLevelHandler = NoDebounceExtraSmoothZoomLevelHandler(requireContext(), genericStream.videoSource)
-        this.offsetDegreeHandler = ManualZoomLevelHandler(requireContext())
-
         return binding.root
     }
 
@@ -203,15 +197,15 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
         binding.surfaceView.holder.addCallback(object: SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                //Logd("surfaceCreated")
+                //Logd("surfaceCreated::startPreview")
                 if (!genericStream.isOnPreview) genericStream.startPreview(binding.surfaceView)
             }
             override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-                //Logd("surfaceChanged")
+                //Logd("surfaceChanged::setPreviewResolution")
                 genericStream.getGlInterface().setPreviewResolution(width, height)
             }
             override fun surfaceDestroyed(holder: SurfaceHolder) {
-                //Logd("surfaceDestroyed")
+                //Logd("surfaceDestroyed::stopPreview")
                 if (genericStream.isOnPreview) genericStream.stopPreview()
             }
         })
@@ -286,8 +280,8 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
             //genericStream.getStreamClient().setOnlyAudio(false)
         }
 
-        binding.changeRotationStrategy.setOnClickListener {
-            this.changeZoomStrategyDialog()
+        binding.changeVideoSettings.setOnClickListener {
+            this.changeVideoSettingsDialog()
         }
 
         lifecycleScope.launch {
@@ -296,14 +290,14 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
             }
         }
 
-        lifecycleScope.launch {
+        /*lifecycleScope.launch {
             combine(
                 matchViewModel.spotBannerURL,
                 matchViewModel.spotBannerVisible
             ) { url, visible -> Pair(url, visible)
             }.collect { (url, visible) ->
                 launchOnStarted {
-                    //Logd("spotBannerURL : $spotBannerURL")
+                    ////Logd("spotBannerURL : $spotBannerURL")
                     if (url.isNotEmpty() && visible)
                     {
                         val bitmap = Coil.imageLoader(requireContext()).execute(
@@ -333,9 +327,9 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
                     }
                 }
             }
-        }
+        }*/
 
-        lifecycleScope.launch {
+        /*lifecycleScope.launch {
             combine(
                 matchViewModel.mainBannerURL,
                 matchViewModel.mainBannerVisible
@@ -343,7 +337,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
                 Pair(url, visible)
             }.collect { (url, visible) ->
                 launchOnStarted {
-                    //Logd("mainBannerURL : $mainBannerURL")
+                    ////Logd("mainBannerURL : $mainBannerURL")
                     if (url.isNotEmpty() && visible) {
                         val bitmap = Coil.imageLoader(requireContext()).execute(
                             ImageRequest.Builder(requireContext())
@@ -372,25 +366,11 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
                     }
                 }
             }
-        }
-
-        matchViewModel.score.observe(viewLifecycleOwner) { iScore ->
-            val command = iScore?.command
-            if (command == Command.ZOOM_IN.toString()) {
-                this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.In)
-            }
-            if (command == Command.ZOOM_DEFAULT.toString()) {
-                this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.None)
-            }
-            if (command == Command.ZOOM_OUT.toString()) {
-                this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.Out)
-            }
-        }
+        }*/
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        prepare()
         genericStream.getStreamClient().setReTries(10)
 
         // Create the callback
@@ -426,12 +406,12 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     override fun onStart() {
         super.onStart()
 
+        prepare()
+
         this.scoreBoardFragment.setOnUpdate(this)
 
         genericStream.getGlInterface().clearFilters()
         genericStream.getGlInterface().addFilter(0, this.scoreBoardFilter)
-        genericStream.getGlInterface().addFilter(1, this.spotBannerFilter)
-        genericStream.getGlInterface().addFilter(2, this.mainBannerFilter)
 
         refresh()
     }
@@ -447,20 +427,45 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
             val screenWidth = width
             val screenHeight = height
 
+            //Logd("prepareVideo && prepareAudio")
+
+            statusViewModel.setSourceResolution(height)
+            statusViewModel.setSourceFps(fps)
+
             genericStream.prepareVideo(screenWidth, screenHeight, vBitrate, rotation = rotation, fps = fps) &&
                     genericStream.prepareAudio(sampleRate, isStereo, aBitrate)
             true
         } catch (e: IllegalArgumentException) {
             false
+        } catch (e: Exception) {
+            false
         }
 
         if (!prepared) {
             toast("Audio or Video configuration failed")
-            activity?.finish()
+            //activity?.finish()
         }
     }
 
+    private fun recreate()
+    {
+        if (genericStream.isOnPreview) {
+            //Logd("stopPreview")
+            genericStream.stopPreview()
+            //uvcCameraSource.updatePreviewSize(width, height, fps)
+            prepare()
+            //Logd("setPreviewResolution")
+            genericStream.getGlInterface().clearFilters()
+            genericStream.getGlInterface().addFilter(0, this.scoreBoardFilter)
+            genericStream.getGlInterface().setPreviewResolution(width, height)
+            //Logd("startPreview")
+            genericStream.startPreview(binding.surfaceView)
+            //Logd("refresh")
+            refresh()
+        }
 
+
+    }
 
     override fun onConnectionStarted(url: String) {
         toast("Streaming Started")
@@ -538,60 +543,62 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
         timeElapsedInSeconds = 0
     }
 
-    private fun changeZoomStrategyDialog() {
+    private fun changeVideoSettingsDialog() {
         val inflater = LayoutInflater.from(requireContext())
-        val dialogView = inflater.inflate(R.layout.dialog_change_settings, null)
+        val dialogView = inflater.inflate(R.layout.dialog_change_video_settings, null)
 
-        val spinnerZoomStrategies = dialogView.findViewById<Spinner>(R.id.zoom_strategies)
-        val optionsZoomStrategies = listOf(
-            KeyValue<KClass<*>>(NoDebounceExtraSmoothZoomLevelHandler::class, "1. smooth progressive zoom No Debounce"),
-            KeyValue<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "2. progressive zoom No Debounce"),
-            KeyValue<KClass<*>>(SmoothZoomLevelHandler::class, "3. progressive zoom with Debounce"),
-            KeyValue<KClass<*>>(NoDebounceZoomLevelHandler::class, "4. No Debounce"),
-            KeyValue<KClass<*>>(SingleZoomLevelHandler::class, "5. Debounce"),
+        val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
+        val optionsVideoResolutions = listOf(
+            KeyValue(1080, "1080p"),
+            KeyValue(720, "720p")
         )
 
-        val adapterZoomServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsZoomStrategies)
-        adapterZoomServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerZoomStrategies.adapter = adapterZoomServer
-        spinnerZoomStrategies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        val adapterVideoResolutions = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsVideoResolutions)
+        adapterVideoResolutions.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerVideoResolutions.isEnabled = !genericStream.isStreaming
+        spinnerVideoResolutions.adapter = adapterVideoResolutions
+        spinnerVideoResolutions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
-                val selectedZoomHandler = selectedItem.key.constructors.first().call(requireContext(), genericStream.videoSource)
-                this@UVCCameraFragment.zoomLevelHandler = selectedZoomHandler as IZoomLevelHandler
+                val selectedItem = parent.getItemAtPosition(position) as KeyValue<Int>
+                var selectedItemValue = selectedItem.key
+                if (height != selectedItemValue) {
+                    height = selectedItemValue
+                    width = if (height == 1080) { 1920 } else { 1280 }
+                    //Logd("change Resolutions:${width}x${height}")
+                    recreate()
+                }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
-        val defaultPositionStrategy = optionsZoomStrategies.indexOfFirst { it.key == zoomLevelHandler::class }
-        spinnerZoomStrategies.setSelection(defaultPositionStrategy)
+        val defaultResolution = optionsVideoResolutions.indexOfFirst { it.key == this.height }
+        spinnerVideoResolutions.setSelection(defaultResolution)
 
-        val spinnerOffsetStrategies = dialogView.findViewById<Spinner>(R.id.offset_strategies)
-        val optionsOffsetStrategies = listOf(
-            KeyValue<KClass<*>>(LeftRightOffsetGapDegreeHandler::class, "1. Fixed Left/Right with Gap Degree"),
-            KeyValue<KClass<*>>(ManualZoomLevelHandler::class, "2. Manual Zoom In/Out (vol +/-)"),
-            KeyValue<KClass<*>>(LeftRightWithManualZoomLevelHandler::class, "3. Field Zone Left/Right Manual Depth In/Out (vol +/-)"),
-            KeyValue<KClass<*>>(LeftRightWithAutoDepthZoomLevelHandler::class, "4. Field Zone Left/Right Auto Up Down"),
-            KeyValue<KClass<*>>(LeftRightOffsetGapNoCornerHandler::class, "5. Fixed Left/Right with Gap Degree No Corner (2x angle)"),
-            KeyValue<KClass<*>>(ProgressiveOffsetDegreeHandler::class, "6. Progressive Left/Right Degree multiplier"),
-            KeyValue<KClass<*>>(ProgressiveOffsetDegreeWithCapHandler::class, "7. Progressive Left/Right Degree multiplier with cap (3x)"),
-            KeyValue<KClass<*>>(LeftRightOffsetDegreeHandler::class, "8. Fixed Left/Right Degree")
+        val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.video_fps)
+        val optionsVideoFps = listOf(
+            KeyValue(20, "20fps"),
+            KeyValue(25, "25fps"),
+            KeyValue(30, "30fps"),
+            KeyValue(60, "60fps")
         )
 
-        val adapterOffsetServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsOffsetStrategies)
-        adapterOffsetServer.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerOffsetStrategies.adapter = adapterOffsetServer
-        spinnerOffsetStrategies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        val adapterVideoFps = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsVideoFps)
+        adapterVideoFps.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerVideoFps.isEnabled = !genericStream.isStreaming
+        spinnerVideoFps.adapter = adapterVideoFps
+        spinnerVideoFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
-                this@UVCCameraFragment.offsetDegreeHandler.destroy()
-                val selectedOffsetHandler = selectedItem.key.constructors.first().call(requireContext())
-                this@UVCCameraFragment.offsetDegreeHandler = selectedOffsetHandler as IOffsetDegreeHandler
+                val selectedItem = parent.getItemAtPosition(position) as KeyValue<Int>
+                var selectedItemValue = selectedItem.key
+                if (fps != selectedItemValue) {
+                    fps = selectedItemValue
+                    //Logd("change Fps:$fps")
+                    recreate()
+                }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
-        val defaultPositionOffset = optionsOffsetStrategies.indexOfFirst { it.key == offsetDegreeHandler::class }
-        spinnerOffsetStrategies.setSelection(defaultPositionOffset)
-
+        val defaultVideoFps = optionsVideoFps.indexOfFirst { it.key == this.fps }
+        spinnerVideoFps.setSelection(defaultVideoFps)
 
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)

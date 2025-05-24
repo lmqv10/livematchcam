@@ -23,6 +23,7 @@ import it.lmqv.livematchcam.extensions.degreeFormat
 import it.lmqv.livematchcam.extensions.fpsFormat
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
+import it.lmqv.livematchcam.extensions.resolutionFormat
 import it.lmqv.livematchcam.extensions.singleDecimalFormat
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.viewmodels.UVCStatusViewModel
@@ -56,6 +57,14 @@ class UVCStatusFragment : Fragment() {
 
         statusViewModel.fps.observe(viewLifecycleOwner, Observer { data ->
             binding.fps.text = fpsFormat(data)
+        })
+
+        statusViewModel.sourceResolution.observe(viewLifecycleOwner, Observer { data ->
+            binding.sourceResolution.text = resolutionFormat(data)
+        })
+
+        statusViewModel.sourceFps.observe(viewLifecycleOwner, Observer { data ->
+            binding.sourceFps.text = fpsFormat(data)
         })
     }
 
