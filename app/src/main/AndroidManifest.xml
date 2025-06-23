@@ -112,7 +112,8 @@
             </intent-filter>
         </receiver-->
 
-        <service android:name=".services.CounterService" />
+        <service android:name=".services.CounterService"
+            android:exported="false"/>
     </application>
 
 </manifest>

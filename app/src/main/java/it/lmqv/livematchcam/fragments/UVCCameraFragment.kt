@@ -2,7 +2,6 @@ package it.lmqv.livematchcam.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,56 +14,33 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
-import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import coil.Coil
-import coil.request.ImageRequest
 import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
+import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentUvcCameraBinding
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
-import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
-import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
-import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
-import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetGapDegreeHandler
-import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetGapNoCornerHandler
-import it.lmqv.livematchcam.handlers.offset.LeftRightWithAutoDepthZoomLevelHandler
-import it.lmqv.livematchcam.handlers.offset.LeftRightWithManualZoomLevelHandler
-import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
-import it.lmqv.livematchcam.handlers.offset.ManualZoomLevelHandler
-import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
-import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeWithCapHandler
-import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.NoDebounceExtraSmoothZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.NoDebounceSmoothZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.NoDebounceZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.SingleZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.SmoothZoomLevelHandler
 import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.sources.UvcSonyCameraSource
 import it.lmqv.livematchcam.utils.KeyValue
-import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import it.lmqv.livematchcam.viewmodels.UVCStatusViewModel
-import it.lmqv.livematchcam.views.SwipeSurfaceView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.reflect.KClass
 
 class UVCCameraFragment: Fragment(), ConnectChecker,
     IScoreBoardFragment.OnUpdateCallback {
@@ -81,13 +57,10 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     private val statusFragment = UVCStatusFragment.newInstance()
     private val statusViewModel: UVCStatusViewModel by activityViewModels()
 
-    private var uvcCameraSource: UvcSonyCameraSource = UvcSonyCameraSource()
-    //private var uvcCameraSource: CameraUvcSource = CameraUvcSource()
     private lateinit var controlBarFragment: IControlBarFragment
     private lateinit var scoreBoardFragment: IScoreBoardFragment
+    private var uvcSonyCameraSource: UvcSonyCameraSource = UvcSonyCameraSource()
     private var scoreBoardFilter: ImageObjectFilterRender = ImageObjectFilterRender()
-    //private var spotBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
-    //private var mainBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
     private var sportsFactory = SportsFactory
 
     private var _binding: FragmentUvcCameraBinding? = null
@@ -95,7 +68,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
     val genericStream: GenericStream by lazy {
         GenericStream(requireContext(), this,
-            uvcCameraSource,
+            this.uvcSonyCameraSource,
             MicrophoneSource()).apply {
             //getGlInterface().autoHandleOrientation = true
             getStreamClient().setBitrateExponentialFactor(0.5f)
@@ -105,19 +78,14 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
     private var isMute : Boolean = false
 
-    /*private val width = 1280
-    private val height = 720
-    private val vBitrate = 8000 * 1000
-    private var fps = 25*/
-    private var width = 1920
-    private var height = 1080
+    private var width = 1280
+    private var height = 720
     private val vBitrate = 6000 * 1000
-    private var fps = 20
+    private var fps = 30
     private var rotation = 0
     private val sampleRate = 32000
     private val isStereo = true
     private val aBitrate = 128 * 1000
-    //private var recordPath = ""
 
     private var timeElapsedInSeconds = 0
     private var job: Job? = null
@@ -128,29 +96,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     }.apply {
         setMaxBitrate(vBitrate + aBitrate)
     }
-
-    //private lateinit var usbManager: UsbManager
-    //private val ACTION_USB_PERMISSION = "it.lmqv.livematchcam.USB_PERMISSION."
-    //private lateinit var permissionIntent: PendingIntent
-
-    /*private val usbReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                ACTION_USB_PERMISSION -> {
-                    Toast.makeText(context, "ACTION_USB_PERMISSION", Toast.LENGTH_SHORT).show()
-                    val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        device?.let {
-                            Toast.makeText(context, "USB Permission Granted!", Toast.LENGTH_SHORT).show()
-                            // You can now communicate with the USB device
-                        }
-                    } else {
-                        Toast.makeText(context, "USB Permission Denied!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
-    }*/
 
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreateView(
@@ -246,25 +191,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
             dialog.show()
         }
 
-        /*bRecord.setOnClickListener {
-            if (!genericStream.isRecording) {
-                val folder = PathUtils.getRecordPath()
-                if (!folder.exists()) folder.mkdir()
-                val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-                recordPath = "${folder.absolutePath}/${sdf.format(Date())}.mp4"
-                genericStream.startRecord(recordPath) { status ->
-                    if (status == RecordController.Status.RECORDING) {
-                        bRecord.setImageResource(R.drawable.stop_icon)
-                    }
-                }
-                bRecord.setImageResource(R.drawable.pause_icon)
-            } else {
-                genericStream.stopRecord()
-                bRecord.setImageResource(R.drawable.record_icon)
-                PathUtils.updateGallery(requireContext(), recordPath)
-            }
-        }*/
-
         binding.microphone.setOnClickListener {
             val microphoneSource = MicrophoneSource()
             this.isMute = !this.isMute
@@ -284,89 +210,23 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
             this.changeVideoSettingsDialog()
         }
 
+        binding.changeVideoSource.setOnClickListener {
+            when (genericStream.videoSource)
+            {
+                is UvcSonyCameraSource -> {
+                    genericStream.changeVideoSource(Camera2Source(requireContext()))
+                }
+                is Camera2Source -> {
+                    genericStream.changeVideoSource(this.uvcSonyCameraSource)
+                }
+            }
+        }
+
         lifecycleScope.launch {
             streamersViewModel.currentKey.collect { _ ->
                 binding.bStartStop.isClickable = true
             }
         }
-
-        /*lifecycleScope.launch {
-            combine(
-                matchViewModel.spotBannerURL,
-                matchViewModel.spotBannerVisible
-            ) { url, visible -> Pair(url, visible)
-            }.collect { (url, visible) ->
-                launchOnStarted {
-                    ////Logd("spotBannerURL : $spotBannerURL")
-                    if (url.isNotEmpty() && visible)
-                    {
-                        val bitmap = Coil.imageLoader(requireContext()).execute(
-                            ImageRequest.Builder(requireContext())
-                                .data(url)
-                                .build()
-                        ).drawable?.toBitmap()?.copy(Bitmap.Config.ARGB_8888, true)
-
-                        bitmap.apply {
-                            val maxFactor = 20f
-                            val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
-                            val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
-
-                            val factorX = maxFactor / defaultScaleX
-                            val scaleX = factorX * defaultScaleX
-                            val scaleY = factorX * defaultScaleY
-
-                            spotBannerFilter.apply {
-                                setImage(bitmap)
-                                setScale(scaleX, scaleY)
-                                setAlpha(0.75f)
-                                setPosition(100f - scaleX, 0f)
-                            }
-                        }
-                    } else {
-                        spotBannerFilter.setAlpha(0.0f)
-                    }
-                }
-            }
-        }*/
-
-        /*lifecycleScope.launch {
-            combine(
-                matchViewModel.mainBannerURL,
-                matchViewModel.mainBannerVisible
-            ) { url, visible ->
-                Pair(url, visible)
-            }.collect { (url, visible) ->
-                launchOnStarted {
-                    ////Logd("mainBannerURL : $mainBannerURL")
-                    if (url.isNotEmpty() && visible) {
-                        val bitmap = Coil.imageLoader(requireContext()).execute(
-                            ImageRequest.Builder(requireContext())
-                                .data(url)
-                                .build()
-                        ).drawable?.toBitmap()?.copy(Bitmap.Config.ARGB_8888, true)
-
-                        bitmap.apply {
-                            val maxFactor = 80f
-                            val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
-                            val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
-
-                            val factorX = maxFactor / defaultScaleX
-                            val scaleX = factorX * defaultScaleX
-                            val scaleY = factorX * defaultScaleY
-
-                            mainBannerFilter.apply {
-                                setImage(bitmap)
-                                setScale(scaleX, scaleY)
-                                setAlpha(0.75f)
-                                setPosition((100f - scaleX) / 2, (100f - scaleY) / 2)
-                            }
-                        }
-                    } else {
-                        mainBannerFilter.setAlpha(0.0f)
-                    }
-                }
-            }
-        }*/
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

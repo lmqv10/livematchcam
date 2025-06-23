@@ -9,19 +9,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import coil.load
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.databinding.FragmentSoccerControlBarBinding
 import it.lmqv.livematchcam.databinding.FragmentSoccerRemoteControlBinding
-import it.lmqv.livematchcam.extensions.Logd
-import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.firebase.SoccerScore
-import it.lmqv.livematchcam.fragments.BaseControlBarFragment
 import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
-import it.lmqv.livematchcam.utils.TimerHandler
 import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.viewmodels.SoccerScoreViewModel
 import kotlinx.coroutines.flow.combine
@@ -35,9 +30,6 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
     private var _binding: FragmentSoccerRemoteControlBinding? = null
     private val binding get() = _binding!!
 
-    /*private val timerHandler: TimerHandler = TimerHandler.newInstance { timeElapsedInSeconds ->
-        binding.matchTime.text = formatTime(timeElapsedInSeconds)
-    }*/
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

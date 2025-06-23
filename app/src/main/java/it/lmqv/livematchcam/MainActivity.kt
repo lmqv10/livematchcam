@@ -27,6 +27,7 @@ import it.lmqv.livematchcam.fragments.IServersFragment
 import it.lmqv.livematchcam.fragments.ServersFragment
 import it.lmqv.livematchcam.fragments.MatchInfoFragment
 import it.lmqv.livematchcam.fragments.YoutubeFragment
+import it.lmqv.livematchcam.services.CounterService
 import it.lmqv.livematchcam.viewmodels.GoogleViewModel
 import kotlinx.coroutines.launch
 
@@ -104,6 +105,8 @@ class MainActivity : AppCompatActivity() {
         initializeData()
 
         requestPermissions()
+
+        startService(Intent(this, CounterService::class.java))
 
         /*val database = FirebaseDatabase.getInstance()
         val ref = database.getReference("teams")
