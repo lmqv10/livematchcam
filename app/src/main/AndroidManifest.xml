@@ -54,7 +54,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <activity
@@ -76,17 +75,13 @@
             android:exported="true"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
-            tools:ignore="DiscouragedApi">
-        </activity>
-
+            tools:ignore="DiscouragedApi"/>
         <activity
             android:name=".UVCStreamActivity"
             android:exported="true"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
-            tools:ignore="DiscouragedApi">
-        </activity>
-
+            tools:ignore="DiscouragedApi"/>
         <activity
             android:name=".RemoteScoreActivity"
             android:screenOrientation="landscape"
@@ -94,6 +89,16 @@
             tools:ignore="DiscouragedApi" />
         <activity
             android:name=".AccountActivity"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
+            tools:ignore="DiscouragedApi" />
+        <activity
+            android:name=".OneShotActivity"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
+            tools:ignore="DiscouragedApi" />
+        <activity
+            android:name=".ScheduledActivity"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />

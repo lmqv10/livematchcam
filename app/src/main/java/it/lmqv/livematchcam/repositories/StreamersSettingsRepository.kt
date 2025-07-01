@@ -19,7 +19,7 @@ class StreamersSettingsRepository(private val context: Context) {
 
     private val gson = Gson()
 
-    private val KEYS = stringPreferencesKey("StreamKeys")
+    //private val KEYS = stringPreferencesKey("StreamKeys")
     //private val SERVERS = stringPreferencesKey("StreamServers")
     private val CURRENT_KEY = stringPreferencesKey("CurrentKey")
     private val CURRENT_SERVER = stringPreferencesKey("CurrentServer")
@@ -38,7 +38,7 @@ class StreamersSettingsRepository(private val context: Context) {
         context.streamersSettingsDatastore.edit { preferences -> preferences[SERVERS] = gson.toJson(servers) }
     }*/
 
-    val getKeys: Flow<List<KeyValue<String>>> = context.streamersSettingsDatastore.data.map { preferences ->
+    /*val getKeys: Flow<List<KeyValue<String>>> = context.streamersSettingsDatastore.data.map { preferences ->
         val jsonString = preferences[KEYS] ?: ("[" +
                 "{\"description\":\"Custom\",\"key\":\"\"}," +
                 "{\"description\":\"Lecco 2010\",\"key\":\"yyx0-at5u-b330-4avg-4kx6\"}," +
@@ -50,7 +50,7 @@ class StreamersSettingsRepository(private val context: Context) {
             val listType = object : TypeToken<List<KeyValue<String>>>() {}.type
             gson.fromJson(jsonString, listType)
         }
-    }
+    }*/
     /*suspend fun setKeys(keys: List<KeyValue<String>>) {
         context.streamersSettingsDatastore.edit { preferences -> preferences[KEYS] =  gson.toJson(keys) }
     }*/

@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
             window.insetsController?.let { controller ->
                 controller.hide(WindowInsets.Type.systemBars())

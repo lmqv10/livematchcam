@@ -18,8 +18,8 @@ class StreamersViewModel(application: Application) : AndroidViewModel(applicatio
     //private val _servers = MutableStateFlow<List<KeyValue<String>>>(emptyList())
     //val servers: StateFlow<List<KeyValue<String>>> = _servers
 
-    private val _keys = MutableStateFlow<List<KeyValue<String>>>(emptyList())
-    val keys: StateFlow<List<KeyValue<String>>> = _keys
+    /*private val _keys = MutableStateFlow<List<KeyValue<String>>>(emptyList())
+    val keys: StateFlow<List<KeyValue<String>>> = _keys*/
 
     private val _currentKey = MutableStateFlow<String?>(null)
     val currentKey: StateFlow<String?> = _currentKey
@@ -48,7 +48,7 @@ class StreamersViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         //observeRepositoryFlow(streamersSettingsRepository.getServers, _servers)
-        observeRepositoryFlow(streamersSettingsRepository.getKeys, _keys)
+        //observeRepositoryFlow(streamersSettingsRepository.getKeys, _keys)
         viewModelScope.launch {
             streamersSettingsRepository.getCurrentKey.collect { _currentKey.value = it }
         }
@@ -77,12 +77,12 @@ class StreamersViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }*/
 
-    private fun <T> observeRepositoryFlow(
+    /*private fun <T> observeRepositoryFlow(
         repositoryFlow: Flow<List<KeyValue<T>>>,
         stateFlow: MutableStateFlow<List<KeyValue<T>>>
     ) {
         viewModelScope.launch {
             repositoryFlow.collect { stateFlow.value = it }
         }
-    }
+    }*/
 }

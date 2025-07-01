@@ -137,6 +137,8 @@
     <string name="logo_url_placeholder">http://...</string>
     <string name="spot_banner">Top-Right banner</string>
     <string name="main_banner">Main banner</string>
+    <string name="show_banner">Banner On</string>
+    <string name="hide_banner">Banner Off</string>
 
     <string name="confirm_stop_message">Stop streaming.\n Confirm?</string>
     <string name="confirm_start_message">Start streaming.\n Confirm?</string>

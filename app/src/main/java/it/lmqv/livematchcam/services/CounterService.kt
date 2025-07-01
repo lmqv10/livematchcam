@@ -44,10 +44,9 @@ class CounterService : Service() {
                 job = scope.launch {
                     while (isActive) {
                         if (!isPaused) {
-                            secondsCount++
-                            //Logd("Counter:: $secondsCount")
-                            _counterState.value = CounterState.Running(secondsCount)
                             delay(1000)
+                            secondsCount++
+                            _counterState.value = CounterState.Running(secondsCount)
                         } else {
                             delay(100) // Small delay when paused to reduce CPU usage
                         }

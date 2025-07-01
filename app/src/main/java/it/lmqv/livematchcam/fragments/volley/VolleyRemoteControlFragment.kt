@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyRemoteControlBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
@@ -25,6 +26,7 @@ import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 
@@ -238,7 +240,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             lifecycleScope.launch {
                 requireContext().showEditStringDialog(
                     R.string.spot_banner_placeholder,
-                    matchViewModel.spotBannerURL.last(),
+                    matchViewModel.spotBannerURL.first(),
                     arrayOf()
                 ) { updatedText ->
                     matchViewModel.setSpotBannerURL(updatedText)
@@ -251,7 +253,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             lifecycleScope.launch {
                 requireContext().showEditStringDialog(
                     R.string.main_banner_placeholder,
-                    matchViewModel.mainBannerURL.last(),
+                    matchViewModel.mainBannerURL.first(),
                     arrayOf()
                 ) { updatedText ->
                     matchViewModel.setMainBannerURL(updatedText)

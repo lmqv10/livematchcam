@@ -15,11 +15,13 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
+import coil.load
 import coil.request.ImageRequest
 import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
@@ -283,6 +285,28 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         binding.changeRotationStrategy.setOnClickListener {
             this.changeZoomStrategyDialog()
+        }
+
+        binding.mainBannerSwitch.setOnCheckedChangeListener { _, isChecked ->
+            matchViewModel.setMainBannerVisible(isChecked)
+        }
+
+        lifecycleScope.launch {
+            matchViewModel.mainBannerVisible.collect { isVisible ->
+                binding.mainBannerSwitch.isChecked = isVisible
+                if (isVisible) {
+                    binding.mainBannerTip.text = resources.getString(R.string.show_banner)
+                } else {
+                    binding.mainBannerTip.text = resources.getString(R.string.hide_banner)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            matchViewModel.mainBannerURL.collect { spotBannerURL ->
+                var isEnabled = !spotBannerURL.isNullOrEmpty()
+                binding.mainBannerSwitch.isEnabled = isEnabled
+            }
         }
 
         lifecycleScope.launch {
