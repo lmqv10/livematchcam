@@ -200,13 +200,20 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
                 controls.first.visibility = View.VISIBLE
                 controls.second.visibility = View.VISIBLE
 
+                val winColor = ContextCompat.getColor(requireContext(), R.color.secondary_dark)
+                val loseColor = ContextCompat.getColor(requireContext(), R.color.BLACK)
+
                 if (index < setsSize - 1) {
-                    val winColor = ContextCompat.getColor(requireContext(), R.color.secondary_dark)
                     if (score.home > score.guest) {
                         controls.first.setTextColor(winColor)
+                        controls.second.setTextColor(loseColor)
                     } else {
+                        controls.first.setTextColor(loseColor)
                         controls.second.setTextColor(winColor)
                     }
+                } else {
+                    controls.second.setTextColor(loseColor)
+                    controls.second.setTextColor(loseColor)
                 }
             } else {
                 controls.first.visibility = View.GONE

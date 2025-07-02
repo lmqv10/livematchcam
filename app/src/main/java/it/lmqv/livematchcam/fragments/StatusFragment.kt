@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -22,6 +23,7 @@ import it.lmqv.livematchcam.extensions.degreeFormat
 import it.lmqv.livematchcam.extensions.fpsFormat
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
+import it.lmqv.livematchcam.extensions.resolutionFormat
 import it.lmqv.livematchcam.extensions.singleDecimalFormat
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import kotlinx.coroutines.launch
@@ -33,6 +35,12 @@ class StatusFragment : Fragment(),
     companion object {
         fun newInstance() = StatusFragment()
     }
+
+    interface OnZoomButtonClickListener {
+        fun onZoomIn()
+        fun onZoomOut()
+    }
+    private var listener: OnZoomButtonClickListener? = null
 
     private val statusViewModel: StatusViewModel by activityViewModels()
     private var _binding: FragmentStatusBinding? = null
@@ -84,6 +92,14 @@ class StatusFragment : Fragment(),
             }
         }
 
+        statusViewModel.sourceResolution.observe(viewLifecycleOwner, Observer { data ->
+            binding.sourceResolution.text = resolutionFormat(data)
+        })
+
+        statusViewModel.sourceFps.observe(viewLifecycleOwner, Observer { data ->
+            binding.sourceFps.text = fpsFormat(data)
+        })
+
         return binding.root
     }
 
@@ -134,8 +150,21 @@ class StatusFragment : Fragment(),
         binding.zoomOffset.setOnClickListener {
             this.editZoomOffset()
         }
+
+        binding.zoomOut.setOnClickListener {
+            listener?.onZoomOut()
+        }
+
+        binding.zoomIn.setOnClickListener {
+            listener?.onZoomIn()
+        }
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = parentFragment as? OnZoomButtonClickListener
+            ?: throw ClassCastException("$parentFragment must implement OnZoomButtonClickListener")
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

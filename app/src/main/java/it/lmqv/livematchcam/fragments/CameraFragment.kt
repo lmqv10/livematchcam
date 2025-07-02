@@ -76,6 +76,7 @@ import kotlin.reflect.KClass
 
 open class CameraFragment: Fragment(), ConnectChecker,
     IScoreBoardFragment.OnUpdateCallback,
+    StatusFragment.OnZoomButtonClickListener,
     SwipeSurfaceView.OnSwipeGesture {
 
     companion object {
@@ -113,9 +114,9 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     private var isMute : Boolean = false
 
-    private val width = 1920
-    private val height = 1080
-    private val vBitrate = 5000 * 1000
+    private var width = 1920
+    private var height = 1080
+    private val vBitrate = 6000 * 1000
     private var fps = 30
 
     private var rotation = 0
@@ -180,6 +181,16 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        launchOnStarted {
+            matchViewModel.isRealtimeDatabaseAvailable.collect { isAvailable ->
+                if (isAvailable) {
+                    binding.mainBannerContainer.visibility = View.VISIBLE
+                } else {
+                    binding.mainBannerContainer.visibility = View.GONE
+                }
+            }
+        }
 
         statusViewModel.angleDegrees.observe(viewLifecycleOwner) { degrees ->
             val offset = this.offsetDegreeHandler.getOffsetByDegrees(degrees)
@@ -283,8 +294,9 @@ open class CameraFragment: Fragment(), ConnectChecker,
             //genericStream.getStreamClient().setOnlyAudio(false)
         }
 
-        binding.changeRotationStrategy.setOnClickListener {
-            this.changeZoomStrategyDialog()
+        binding.changeResolutionStrategy.setOnClickListener {
+            //this.changeZoomStrategyDialog()
+            this.changeVideoSettingsDialog()
         }
 
         binding.mainBannerSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -410,7 +422,6 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        prepare()
         genericStream.getStreamClient().setReTries(10)
 
         callback = object : OnBackPressedCallback(true) {
@@ -445,6 +456,8 @@ open class CameraFragment: Fragment(), ConnectChecker,
     override fun onStart() {
         super.onStart()
 
+        prepare()
+
         this.scoreBoardFragment.setOnUpdate(this)
 
         genericStream.getGlInterface().clearFilters()
@@ -466,6 +479,9 @@ open class CameraFragment: Fragment(), ConnectChecker,
             val screenWidth = width
             val screenHeight = height
 
+            statusViewModel.setSourceResolution(height)
+            statusViewModel.setSourceFps(fps)
+
             genericStream.prepareVideo(screenWidth, screenHeight, vBitrate, rotation = rotation, fps = fps) &&
                     genericStream.prepareAudio(sampleRate, isStereo, aBitrate)
             true
@@ -476,6 +492,26 @@ open class CameraFragment: Fragment(), ConnectChecker,
         if (!prepared) {
             toast("Audio or Video configuration failed")
             activity?.finish()
+        }
+    }
+
+    private fun recreate()
+    {
+        if (genericStream.isOnPreview) {
+            //Logd("stopPreview")
+            genericStream.stopPreview()
+            //uvcCameraSource.updatePreviewSize(width, height, fps)
+            prepare()
+            //Logd("setPreviewResolution")
+            genericStream.getGlInterface().clearFilters()
+            genericStream.getGlInterface().addFilter(0, this.scoreBoardFilter)
+            genericStream.getGlInterface().addFilter(1, this.spotBannerFilter)
+            genericStream.getGlInterface().addFilter(2, this.mainBannerFilter)
+            genericStream.getGlInterface().setPreviewResolution(width, height)
+            //Logd("startPreview")
+            genericStream.startPreview(binding.surfaceView)
+            //Logd("refresh")
+            refresh()
         }
     }
 
@@ -538,27 +574,27 @@ open class CameraFragment: Fragment(), ConnectChecker,
     }
 
     override fun swipeUp() {
-        zoomLevelHandler.increase()
+        //zoomLevelHandler.increase()
     }
 
     override fun swipeDown() {
-        zoomLevelHandler.decrease()
+        //zoomLevelHandler.decrease()
     }
 
     override fun swipeLeft() {
-        zoomLevelHandler.lower()
+        //zoomLevelHandler.lower()
     }
 
     override fun swipeRight() {
-        zoomLevelHandler.upper()
+        //zoomLevelHandler.upper()
     }
 
     fun updateZoom(zoomLevel: ManualZoomLevel) {
-        this.offsetDegreeHandler.manualZoomLevel(zoomLevel)
+        /*this.offsetDegreeHandler.manualZoomLevel(zoomLevel)
         statusViewModel.angleDegrees.value?.let {
             val offset = this.offsetDegreeHandler.getOffsetByDegrees(it)
             onChangeZoom(offset)
-        }
+        }*/
     }
 
     private fun onChangeZoom(offset: Float) {
@@ -655,4 +691,83 @@ open class CameraFragment: Fragment(), ConnectChecker,
         dialog.show()
     }
 
+    override fun onZoomIn() {
+        zoomLevelHandler.increase()
+    }
+
+    override fun onZoomOut() {
+        zoomLevelHandler.decrease()
+    }
+
+    private fun changeVideoSettingsDialog() {
+        val inflater = LayoutInflater.from(requireContext())
+        val dialogView = inflater.inflate(R.layout.dialog_change_video_settings, null)
+
+        val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
+        val optionsVideoResolutions = listOf(
+            KeyValue(1080, "1080p"),
+            KeyValue(720, "720p")
+        )
+
+        val adapterVideoResolutions = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsVideoResolutions)
+        adapterVideoResolutions.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerVideoResolutions.isEnabled = !genericStream.isStreaming
+        spinnerVideoResolutions.adapter = adapterVideoResolutions
+        spinnerVideoResolutions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as KeyValue<Int>
+                var selectedItemValue = selectedItem.key
+                if (height != selectedItemValue) {
+                    height = selectedItemValue
+                    width = if (height == 1080) { 1920 } else { 1280 }
+                    //Logd("change Resolutions:${width}x${height}")
+                    recreate()
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+        val defaultResolution = optionsVideoResolutions.indexOfFirst { it.key == this.height }
+        spinnerVideoResolutions.setSelection(defaultResolution)
+
+        val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.video_fps)
+        val optionsVideoFps = listOf(
+            KeyValue(20, "20fps"),
+            KeyValue(25, "25fps"),
+            KeyValue(30, "30fps"),
+            //KeyValue(60, "60fps")
+        )
+
+        val adapterVideoFps = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsVideoFps)
+        adapterVideoFps.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerVideoFps.isEnabled = !genericStream.isStreaming
+        spinnerVideoFps.adapter = adapterVideoFps
+        spinnerVideoFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as KeyValue<Int>
+                var selectedItemValue = selectedItem.key
+                if (fps != selectedItemValue) {
+                    fps = selectedItemValue
+                    //Logd("change Fps:$fps")
+                    recreate()
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+        val defaultVideoFps = optionsVideoFps.indexOfFirst { it.key == this.fps }
+        spinnerVideoFps.setSelection(defaultVideoFps)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                requireActivity().hideSystemUI()
+            }
+            .create()
+
+        dialog.setOnShowListener {
+            requireActivity().hideSystemUI()
+        }
+
+        dialog.show()
+    }
 }

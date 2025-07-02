@@ -53,13 +53,13 @@ class ServersFragment : Fragment() , IServersFragment {
             }
         }
 
-        binding.edittextServer.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        /*binding.edittextServer.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             try {
                 if (hasFocus && _binding != null) {
                     binding.edittextServer.post { binding.edittextServer.selectAll() }
                 }
             } catch (_: Exception) { }
-        }
+        }*/
 
         binding.edittextServer.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
@@ -72,11 +72,12 @@ class ServersFragment : Fragment() , IServersFragment {
             override fun afterTextChanged(p0: Editable?) { }
         })
 
-        binding.edittextKey.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        /*binding.edittextKey.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 binding.edittextKey.post { binding.edittextKey.selectAll() }
             }
-        }
+        }*/
+
         binding.edittextKey.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { }
             override fun onTextChanged(newKey: CharSequence, start: Int, before: Int, count: Int) {

@@ -82,6 +82,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     private var height = 720
     private val vBitrate = 6000 * 1000
     private var fps = 30
+
     private var rotation = 0
     private val sampleRate = 32000
     private val isStereo = true
@@ -323,8 +324,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
             //Logd("refresh")
             refresh()
         }
-
-
     }
 
     override fun onConnectionStarted(url: String) {
