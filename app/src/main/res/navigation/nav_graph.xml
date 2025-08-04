@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/matchInfoFragment">
+
+    <fragment
+        android:id="@+id/matchInfoFragment"
+        android:name="it.lmqv.livematchcam.fragments.MatchInfoFragment"
+        android:label="Detail" />
+
+    <fragment
+        android:id="@+id/youTubeFragment"
+        android:name="it.lmqv.livematchcam.fragments.YoutubeFragment"
+        android:label="YouTube" />
+
+    <fragment
+        android:id="@+id/serversFragment"
+        android:name="it.lmqv.livematchcam.fragments.ServersFragment"
+        android:label="Home" />
+</navigation>

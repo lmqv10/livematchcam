@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/matchInfoFragment"
+        android:icon="@drawable/shirt_stroke_layer"
+        android:title="@string/match_info" />
+    <item
+        android:id="@+id/youTubeFragment"
+        android:icon="@drawable/zoom_offset"
+        android:title="@string/youtube" />
+    <item
+        android:id="@+id/serversFragment"
+        android:icon="@drawable/edit_pen"
+        android:title="@string/server" />
+</menu>

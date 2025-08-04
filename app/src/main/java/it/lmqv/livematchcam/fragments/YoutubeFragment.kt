@@ -1,49 +1,33 @@
 package it.lmqv.livematchcam.fragments
 
 import android.accounts.Account
-import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.ImageView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.Scope
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.youtube.YouTube
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.qrcode.QRCodeWriter
-import it.lmqv.livematchcam.R
+import it.lmqv.livematchcam.INavigateDrawerActivity
 import it.lmqv.livematchcam.adapters.BroadcastItem
 import it.lmqv.livematchcam.adapters.BroadcastsAdapter
+import it.lmqv.livematchcam.auth.AuthResult
 import it.lmqv.livematchcam.databinding.FragmentYoutubeBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.formatDate
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showQRCode
-import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.firebase.FirebaseDataManager
-import it.lmqv.livematchcam.viewmodels.GoogleViewModel
+import it.lmqv.livematchcam.viewmodels.AccountViewModel
+import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlin.math.max
 
@@ -57,7 +41,8 @@ class YoutubeFragment : Fragment(), IServersFragment {
     //private val CLIENT_ID : String = "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com"
 
     private val youtubeViewModel: YoutubeViewModel by activityViewModels()
-    private val googleViewModel: GoogleViewModel by activityViewModels()
+    private val accountViewModel: AccountViewModel by activityViewModels()
+    private val actionsViewModel: FloatingActionsViewModel by activityViewModels()
 
     private var _binding: FragmentYoutubeBinding? = null
     private val binding get() = _binding!!
@@ -108,6 +93,8 @@ class YoutubeFragment : Fragment(), IServersFragment {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        actionsViewModel.setStreamActions((activity as? INavigateDrawerActivity))
+
         launchOnStarted {
             /*combine(
                 googleViewModel.account,
@@ -155,7 +142,11 @@ class YoutubeFragment : Fragment(), IServersFragment {
         }
 
         launchOnStarted {
-            googleViewModel.account.collectLatest { account ->
+            accountViewModel.authState.collectLatest { state ->
+                val account = when (state) {
+                    is AuthResult.Authenticated -> state.account.account
+                    is AuthResult.Unauthenticated, is AuthResult.Error -> null
+                }
                 //Logd("YouTubeFragment. Google Account Name :${account}");
                 if (account != null) {
                     handleSignIn(account)
@@ -257,14 +248,16 @@ class YoutubeFragment : Fragment(), IServersFragment {
         }
 
         binding.refresh.setOnClickListener {
-            googleViewModel.account.value.let {
-                if (it != null) {
-                    handleSignIn(it)
+            accountViewModel.authState.value.let {
+                val account = when (it) {
+                    is AuthResult.Authenticated -> it.account.account
+                    is AuthResult.Unauthenticated, is AuthResult.Error -> null
+                }
+                if (account != null) {
+                    handleSignIn(account)
                 }
             }
         }
-
-
 
         /*binding.login.setOnClickListener {
             var googleSignInClient = GoogleSignIn.getClient(requireActivity(), googleSignInOptions)

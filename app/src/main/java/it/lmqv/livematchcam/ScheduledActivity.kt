@@ -1,46 +1,29 @@
 package it.lmqv.livematchcam
 
-import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.view.Menu
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import it.lmqv.livematchcam.databinding.ActivityMainBinding
+import it.lmqv.livematchcam.databinding.ActivityScheduledBinding
 import it.lmqv.livematchcam.fragments.IServersFragment
-import it.lmqv.livematchcam.fragments.ServersFragment
-import it.lmqv.livematchcam.fragments.MatchInfoFragment
 import it.lmqv.livematchcam.fragments.YoutubeFragment
-import it.lmqv.livematchcam.services.CounterService
-import it.lmqv.livematchcam.viewmodels.GoogleViewModel
-import kotlinx.coroutines.launch
 
 class ScheduledActivity : AppCompatActivity() {
 
     private val youtubeFragment : IServersFragment = YoutubeFragment.newInstance()
 
-    private lateinit var binding: ActivityMainBinding
-    private val googleViewModel: GoogleViewModel by viewModels()
+    private lateinit var binding: ActivityScheduledBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityScheduledBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -79,28 +62,16 @@ class ScheduledActivity : AppCompatActivity() {
         binding.activityUsb.setOnClickListener {
             startActivity(Intent(this, UVCStreamActivity::class.java))
         }
-
-        initializeData()
     }
 
     override fun onStart() {
         super.onStart()
 
-        supportFragmentManager.beginTransaction()
+        /*supportFragmentManager.beginTransaction()
             .replace(R.id.sportsContainer, MatchInfoFragment.newInstance()).commit()
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.serversContainer, youtubeFragment as Fragment).commit()
+            .replace(R.id.serversContainer, youtubeFragment as Fragment).commit()*/
 
-    }
-
-    private fun initializeData() {
-        val account = GoogleSignIn.getLastSignedInAccount(this)
-        if (account != null) {
-            googleViewModel.setAccount(account.account)
-            //toast("sign in as ${account.account?.name}")
-        } else {
-            googleViewModel.setAccount(null)
-        }
     }
 }

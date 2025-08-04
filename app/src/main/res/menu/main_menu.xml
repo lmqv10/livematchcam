@@ -2,22 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:visible="false"
-        android:id="@+id/menu_nearby"
-        app:showAsAction="ifRoom|withText" />
-
-    <item
-        android:id="@+id/menu_account"
-        android:icon="@drawable/login"
+        android:id="@+id/menu_settings"
+        android:icon="@drawable/settings"
         android:title=""
-        app:showAsAction="ifRoom|withText" />
-
-    <!--item
-        android:id="@+id/menu_sign_in"
-        android:title="@string/google_sign_in"
-        app:showAsAction="ifRoom|withText" />
-    <item
-        android:id="@+id/menu_sign_out"
-        android:title="@string/sign_out"
-        app:showAsAction="ifRoom|withText" /-->
+        app:showAsAction="ifRoom" />
 </menu>

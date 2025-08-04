@@ -13,7 +13,7 @@ class SplashActivity : AppCompatActivity() {
         
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, MatchActivity::class.java))
             finish()
         }, 1000)
     }

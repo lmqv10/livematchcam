@@ -1,17 +1,23 @@
 package it.lmqv.livematchcam.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import it.lmqv.livematchcam.INavigateDrawerActivity
+import it.lmqv.livematchcam.R
+import it.lmqv.livematchcam.StreamActivity
+import it.lmqv.livematchcam.UVCStreamActivity
 import it.lmqv.livematchcam.databinding.FragmentServersBinding
 import it.lmqv.livematchcam.extensions.launchOnStarted
+import it.lmqv.livematchcam.viewmodels.FloatingAction
+import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import kotlinx.coroutines.launch
 
@@ -24,6 +30,8 @@ class ServersFragment : Fragment() , IServersFragment {
     }
 
     private val streamersViewModel: StreamersViewModel by activityViewModels()
+    private val actionsViewModel: FloatingActionsViewModel by activityViewModels()
+
     private var _binding: FragmentServersBinding? = null
     private val binding get() = _binding!!
 
@@ -37,6 +45,30 @@ class ServersFragment : Fragment() , IServersFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        actionsViewModel.setStreamActions((activity as? INavigateDrawerActivity))
+        /*actionsViewModel.setActions(
+            listOf(
+                FloatingAction(
+                    id = R.id.activity_usb.toString(),
+                    iconRes = R.drawable.usb_cam,
+                    contentDescription = "usb",
+                    onClick = {
+                        startActivity(Intent(requireActivity(), UVCStreamActivity::class.java))
+                    }
+                ),
+                FloatingAction(
+                    id = R.id.activity_Live.toString(),
+                    iconRes = R.drawable.play_stream,
+                    contentDescription = "play",
+                    onClick = {
+                        startActivity(Intent(requireActivity(), StreamActivity::class.java))
+                    }
+                )
+
+            )
+        )*/
+
         launchOnStarted {
             streamersViewModel.currentServer.collect { currentServer ->
                 if (currentServer != null && binding.edittextServer.text.toString() != currentServer) {

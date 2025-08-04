@@ -106,7 +106,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/broadcasts"
-                    android:textColor="@color/appColor"
+                    android:textColor="@color/appColorSecondary"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
                     tools:ignore="MissingConstraints" />
@@ -137,7 +137,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/streaming_url"
-                android:textColor="@color/appColor"
+                android:textColor="@color/appColorSecondary"
                 android:textStyle="bold" />
 
             <TextView
@@ -156,7 +156,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/live_url"
-                android:textColor="@color/appColor"
+                android:textColor="@color/appColorSecondary"
                 android:textStyle="bold" />
 
             <LinearLayout

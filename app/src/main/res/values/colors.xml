@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="appColor">#666969</color>
-    <color name="appColor1">#0B2666</color>
-    <color name="appColor2">#4D9ACA</color>
+    <color name="appColorPrimary">#FF9800</color>
+    <color name="appColorSecondary">#666969</color>
 
-    <color name="colorPrimary">#FF9800</color>
-
-    <color name="alpha">#22000000</color>
-    <color name="alpha_dark">#11000000</color>
-
-    <color name="appColorHint">#EDD940</color>
     <color name="primary">#FFFFFFFF</color>
     <color name="secondary">#FF9800</color>
     <color name="secondary_dark">#C87900</color>
     <color name="secondary_darker">#724501</color>
-    <color name="primary_50">#AAFFFFFF</color>
+
+    <color name="alpha">#22000000</color>
+    <color name="alpha_dark">#11000000</color>
 
     <color name="score_background_start">#ff676767</color>
     <color name="score_background_center">#ff565656</color>

@@ -14,21 +14,20 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.Scope
+import it.lmqv.livematchcam.auth.AuthResult
 import it.lmqv.livematchcam.databinding.ActivityAccountBinding
-import it.lmqv.livematchcam.viewmodels.GoogleViewModel
+import it.lmqv.livematchcam.viewmodels.AccountViewModel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class AccountActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAccountBinding
-    private val googleViewModel: GoogleViewModel by viewModels()
+    private val accountViewModel: AccountViewModel by viewModels()
 
-    private val GOOGLE_APIS_AUTH_YOUTUBE : String = "https://www.googleapis.com/auth/youtube"
+    /*private val GOOGLE_APIS_AUTH_YOUTUBE : String = "https://www.googleapis.com/auth/youtube"
     private val CLIENT_ID : String = "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com"
 
     private val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -36,8 +35,8 @@ class AccountActivity : AppCompatActivity() {
         .requestScopes(Scope(GOOGLE_APIS_AUTH_YOUTUBE))
         .requestServerAuthCode(CLIENT_ID, true)
         .build()
-
-    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    */
+    /*private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             if (task.isSuccessful) {
@@ -47,6 +46,14 @@ class AccountActivity : AppCompatActivity() {
             invalidateOptionsMenu()
         } else {
             //toast("googleSignInLauncher::failed::${result.resultCode}")
+        }
+    }*/
+
+    private val signInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            accountViewModel.handleSignInResult(result.data)
         }
     }
 
@@ -87,32 +94,26 @@ class AccountActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.arrow_left) // Opzionale: icona personalizzata
 
-        val account = GoogleSignIn.getLastSignedInAccount(this)
+        /*val account = GoogleSignIn.getLastSignedInAccount(this)
         if (account != null) {
             googleViewModel.setAccount(account.account)
-        }
+        }*/
 
         binding.googleSignIn.setOnClickListener { _ ->
-            val googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions)
-            val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
+            signInLauncher.launch(accountViewModel.getSignInIntent())
         }
 
         binding.googleSignOut.setOnClickListener { _ ->
-            val googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions)
-            googleSignInClient.signOut().addOnCompleteListener {
-                googleViewModel.setAccount(null)
-                googleViewModel.setAccountKey(null)
-            }
+             accountViewModel.signOut()
         }
 
         binding.connect.setOnClickListener { _ ->
             val accountKey = binding.accountKey.text.toString()
-            googleViewModel.setAccountKey(accountKey)
+            accountViewModel.setAccountKey(accountKey)
         }
 
         binding.disconnect.setOnClickListener { _ ->
-            googleViewModel.setAccountKey(null)
+            accountViewModel.setAccountKey(null)
             binding.connect.isEnabled = true
             binding.disconnect.isEnabled = false
             //binding.accountKey.isEnabled = true
@@ -124,21 +125,22 @@ class AccountActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             combine(
-                googleViewModel.account,
-                googleViewModel.firebaseAccountKey)
-            { account, accountKey -> Pair(account, accountKey) }
-            .collect { (account, accountKey) ->
+                accountViewModel.authState,
+                accountViewModel.firebaseAccountKey)
+            { state, accountKey -> Pair(state, accountKey) }
+            .collect { (state, accountKey) ->
 
-                val isLogged = account != null;
-                var accountName = account?.name
-                binding.accountName.text = accountName ?: getString(R.string.google_sign_in);
+                val isLogged = accountViewModel.isLogged()
+                val accountDesc = accountViewModel.accountDesc()
+
+                binding.accountName.text = accountDesc;
                 binding.googleSignIn.isVisible = !isLogged
                 binding.googleSignOut.isVisible = isLogged
                 binding.authorizedAccount.isVisible = isLogged
 
                 binding.accountKey.text = Editable.Factory.getInstance().newEditable(accountKey ?: "")
 
-                val isConnected = !accountName.isNullOrEmpty() && !accountKey.isNullOrEmpty()
+                val isConnected = !accountDesc.isNullOrEmpty() && !accountKey.isNullOrEmpty()
                 binding.connect.isEnabled = !isConnected
                 binding.disconnect.isEnabled = isConnected
                 //binding.accountKey.isEnabled = !isConnected

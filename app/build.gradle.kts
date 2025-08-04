@@ -78,6 +78,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.multidex)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
     implementation(libs.rootencoder.library)
     implementation(libs.rootencoder.extra.sources)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -117,6 +119,7 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.androidx.preference)
     //implementation(libs.compose.compiler)
 
     testImplementation(libs.junit)

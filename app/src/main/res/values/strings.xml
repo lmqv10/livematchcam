@@ -114,7 +114,8 @@
     <string name="camera_uvc">CameraUVC</string>
     <string name="bitmap">Bitmap</string>
 
-    <string name="description_placeholder">U15-Gir.A</string>
+    <string name="account_placeholder">-</string>
+    <string name="description_placeholder">-</string>
     <string name="title_placeholder">Event Title</string>
     <string name="date_placeholder">01/01/2025 10:00</string>
     <string name="time_placeholder">00:00</string>
@@ -151,4 +152,22 @@
     <string name="sign_out">Sign out</string>
 
     <string name="permission_tip" translatable="false">You have already denied permission access. Go to the Settings page to turn on permissions</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
+    <string name="youtube">YouTube</string>
 </resources>

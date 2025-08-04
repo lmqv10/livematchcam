@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/match_drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/custom_toolbar"
+            layout="@layout/custom_toolbar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/match_nav_host_fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/custom_toolbar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:navGraph="@navigation/nav_graph"
+            app:defaultNavHost="true"
+            tools:layout="@layout/fragment_servers" />
+
+        <!--
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            android:layout_marginTop="?attr/actionBarSize"
+            app:layout_constraintTop_toBottomOf="@id/custom_toolbar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:weightSum="2">
+
+            <FrameLayout
+                android:id="@+id/serversContainer"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
+
+            <FrameLayout
+                android:id="@+id/sportsContainer"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
+        -->
+
+        <LinearLayout
+            android:id="@+id/floating_action_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom|end"
+            android:padding="16dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tv_version"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!--Button
+                android:visibility="gone"
+                android:id="@+id/activity_youtube"
+                android:text="TEST"
+                android:layout_marginEnd="20dp"/-->
+
+            <!--ImageView
+                style="@style/defaultImageViewStyle"
+                android:id="@+id/activity_usb"
+                android:src="@drawable/usb_cam"
+                android:layout_marginEnd="20dp"/>
+
+            <ImageView
+                style="@style/defaultImageViewStyle"
+                android:id="@+id/activity_Live"
+                android:src="@drawable/play_stream" /-->
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_version"
+            android:layout_width="match_parent"
+            android:gravity="start"
+            android:textColor="@color/secondary_dark"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:text="@string/version"
+            android:paddingHorizontal="5dp"
+            android:paddingBottom="2dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Drawer laterale -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/match_nav_view"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/drawer_menu"
+        app:headerLayout="@layout/nav_header"
+        android:background="@color/primary"/>
+
+</androidx.drawerlayout.widget.DrawerLayout>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <!--
     <style name="Theme.LiveMatchCam" parent="android:Theme.Material.Light.NoActionBar" />
 
     <style name="AppTheme.NoActionBar">
@@ -11,5 +11,5 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
+    -->
 </resources>

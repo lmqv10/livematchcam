@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="it.lmqv.livematchcam">
 
-    <uses-feature android:name="android.hardware.camera"/>
-    <uses-feature android:name="android.hardware.camera.autofocus"
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
         android:required="false" />
     <uses-feature android:name="android.hardware.usb.host" />
 
@@ -14,32 +15,39 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <!--uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--
+uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /-->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /
+    -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <!--uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!--
+uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /
+    -->
     <uses-permission android:name="android.permission.USB_PERMISSION" />
 
     <application
         android:name=".LiveMatchApp"
         android:allowBackup="true"
-        android:requestLegacyExternalStorage="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -52,12 +60,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name=".MainActivity"
+            android:name=".MatchActivity"
             android:exported="true"
             android:immersive="true"
             android:launchMode="singleTask"
@@ -67,21 +75,23 @@
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
-            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" android:resource="@xml/device_filter" />
-        </activity>
 
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
+        </activity>
         <activity
             android:name=".StreamActivity"
             android:exported="true"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
-            tools:ignore="DiscouragedApi"/>
+            tools:ignore="DiscouragedApi" />
         <activity
             android:name=".UVCStreamActivity"
             android:exported="true"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
-            tools:ignore="DiscouragedApi"/>
+            tools:ignore="DiscouragedApi" />
         <activity
             android:name=".RemoteScoreActivity"
             android:screenOrientation="landscape"
@@ -107,18 +117,19 @@
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
-
-        <!--receiver
+        <!--
+receiver
             android:name=".UsbPermissionReceiver"
             android:exported="true"
             android:permission="no.permission.BROADCAST_USB_PERMISSION">
             <intent-filter>
                 <action android:name="it.lmqv.livematchcam.USB_PERMISSION" />
             </intent-filter>
-        </receiver-->
-
-        <service android:name=".services.CounterService"
-            android:exported="false"/>
+        </receiver
+        -->
+        <service
+            android:name=".services.CounterService"
+            android:exported="false" />
     </application>
 
 </manifest>

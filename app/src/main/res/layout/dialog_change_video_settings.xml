@@ -11,7 +11,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="5dp"
         android:text="@string/video_resolution"
-        android:textColor="@color/appColor"
+        android:textColor="@color/appColorSecondary"
         android:textStyle="bold" />
 
     <Spinner
@@ -27,7 +27,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="5dp"
         android:text="@string/video_fps"
-        android:textColor="@color/appColor"
+        android:textColor="@color/appColorSecondary"
         android:textStyle="bold" />
 
     <Spinner

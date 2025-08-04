@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/stream_url"
-            android:textColor="@color/appColor"
+            android:textColor="@color/appColorSecondary"
             android:textStyle="bold" />
 
         <!--Spinner
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@string/stream_key"
-            android:textColor="@color/appColor"
+            android:textColor="@color/appColorSecondary"
             android:textStyle="bold" />
 
         <EditText

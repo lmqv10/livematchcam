@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!-- Prima riga -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="100dp"
+            android:scaleType="centerCrop"
+            android:background="#DDD" />
+
+        <Button
+            android:id="@+id/buttonSetImage"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Set Image" />
+    </LinearLayout>
+
+    <!-- Seconda riga -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:gravity="center_vertical">
+
+        <View
+            android:id="@+id/colorBox1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:background="#FF0000" />
+
+        <View
+            android:id="@+id/colorBox2"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:background="#0000FF"
+            android:layout_marginStart="8dp" />
+
+        <Button
+            android:id="@+id/buttonColor1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Color 1" />
+
+        <Button
+            android:id="@+id/buttonColor2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Color 2" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="bottom"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:padding="10dp"
+    android:background="@color/secondary_dark">
+
+    <ImageView
+        android:layout_width="@dimen/user_icon_size"
+        android:layout_height="@dimen/user_icon_size"
+        android:scaleType="centerCrop"
+        app:tint="@color/primary"
+        android:src="@drawable/login"
+        android:contentDescription="@string/description_placeholder"
+        android:padding="4dp" />
+
+    <!--TextView
+        android:id="@+id/textViewName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Name"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp" /-->
+
+    <TextView
+        android:id="@+id/textAccountEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/account_placeholder"
+        android:textColor="@android:color/white"
+        android:textSize="12sp" />
+</LinearLayout>

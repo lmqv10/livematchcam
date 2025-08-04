@@ -13,12 +13,13 @@ import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import coil.load
+import it.lmqv.livematchcam.INavigateDrawerActivity
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.RemoteScoreActivity
-import it.lmqv.livematchcam.YouTubeActivity
 import it.lmqv.livematchcam.databinding.FragmentMatchInfoBinding
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
@@ -26,10 +27,10 @@ import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.factories.Sports
-import it.lmqv.livematchcam.viewmodels.GoogleViewModel
+import it.lmqv.livematchcam.viewmodels.FloatingAction
+import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.viewmodels.MatchViewModel
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 
 class MatchInfoFragment : Fragment() {
@@ -38,8 +39,8 @@ class MatchInfoFragment : Fragment() {
         fun newInstance() = MatchInfoFragment()
     }
 
-    private val googleViewModel: GoogleViewModel by viewModels()
     private val matchViewModel: MatchViewModel by viewModels()
+    private val actionsViewModel: FloatingActionsViewModel by activityViewModels()
 
     private val cardItems = listOf(
         CardItem(sport = Sports.SOCCER, description = "Soccer", icon = R.drawable.sport_soccer),
@@ -60,6 +61,8 @@ class MatchInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //Logd("SportsFragment::matchViewModelID: ${matchViewModel.instanceId}")
+
+        actionsViewModel.setMatchInfoActions((activity as? INavigateDrawerActivity))
 
         launchOnStarted {
             matchViewModel.isRealtimeDatabaseAvailable.collect { isAvailable ->

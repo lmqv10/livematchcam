@@ -12,7 +12,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="5dp"
         android:text=""
-        android:textColor="@color/appColor"
+        android:textColor="@color/appColorSecondary"
         android:textStyle="bold" />
 
     <EditText
@@ -25,6 +25,6 @@
         android:text=""
         android:inputType="text"
         android:imeOptions="flagNoExtractUi|flagNoEnterAction"
-        android:textColor="@color/appColor" />
+        android:textColor="@color/appColorSecondary" />
 
 </LinearLayout>

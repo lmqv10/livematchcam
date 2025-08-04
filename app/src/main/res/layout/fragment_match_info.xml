@@ -39,7 +39,7 @@
                             android:layout_gravity="center_vertical"
                             android:gravity="center_horizontal"
                             android:text="@string/match_info"
-                            android:textColor="@color/appColor"
+                            android:textColor="@color/appColorSecondary"
                             android:textStyle="bold" />
 
                         <ImageView
@@ -111,7 +111,7 @@
                 android:gravity="center_horizontal"
                 android:text="@string/sport"
                 android:layout_marginTop="10dp"
-                android:textColor="@color/appColor"
+                android:textColor="@color/appColorSecondary"
                 android:textStyle="bold" />
 
             <View
