@@ -46,7 +46,6 @@
                 android:gravity="left"
                 android:padding="5dp"
                 android:textSize="18sp"
-                android:textStyle="bold"
                 android:hint="@string/google_sign_in"/>
 
             <ImageView
@@ -157,15 +156,14 @@
 
                 <Button
                     android:enabled="false"
-                    android:id="@+id/activity_Live"
+                    android:id="@+id/activity_addremove"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:background="@drawable/score_board_secondary_background"
                     android:paddingHorizontal="40dp"
                     android:paddingVertical="5dp"
                     android:text="Add/Remove"
-                    android:textColor="@color/text_color_selector"
-                    android:textStyle="bold" />
+                    android:textColor="@color/text_color_selector"/>
 
             </LinearLayout>
 

@@ -17,6 +17,7 @@ import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyRemoteControlBinding
 import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
@@ -24,10 +25,11 @@ import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 
 class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
@@ -53,10 +55,10 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        matchViewModel.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
+        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
             binding.homeTeam.text = homeTeam
         }
-        matchViewModel.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
+        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
             binding.awayTeam.text = guestTeam
         }
 
@@ -69,9 +71,9 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
         launchOnStarted {
             combine(
-                matchViewModel.isRealtimeDatabaseAvailable,
-                matchViewModel.homeColorHex,
-                matchViewModel.homeLogo) {
+                MatchRepository.isRealtimeDatabaseAvailable,
+                MatchRepository.homePrimaryColorHex,
+                MatchRepository.homeLogo) {
                     available, color, logo -> Triple(available, color, logo)
             }.collect { (isAvailable, colorHex, logoURL) ->
                 //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
@@ -88,12 +90,12 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                 binding.homeColor.setOnClickListener {
                     if (isAvailable) {
                         requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-                            matchViewModel.setHomeLogo(updatedTeamLogo)
+                            MatchRepository.setHomeLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()
                         }
                     } else {
                         requireContext().showColorPickerDialog { color ->
-                            matchViewModel.setHomeColorHex(color)
+                            MatchRepository.setHomePrimaryColorHex(color)
                         }
                     }
                 }
@@ -102,9 +104,9 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
         launchOnStarted {
             combine(
-                matchViewModel.isRealtimeDatabaseAvailable,
-                matchViewModel.guestColorHex,
-                matchViewModel.guestLogo) {
+                MatchRepository.isRealtimeDatabaseAvailable,
+                MatchRepository.guestPrimaryColorHex,
+                MatchRepository.guestLogo) {
                     available, color, logo -> Triple(available, color, logo)
             }.collect { (isAvailable, colorHex, logoURL) ->
                 //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
@@ -121,45 +123,46 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                 binding.guestColor.setOnClickListener {
                     if (isAvailable) {
                         requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-                            matchViewModel.setGuestLogo(updatedTeamLogo)
+                            MatchRepository.setGuestLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()
                         }
                     } else {
                         requireContext().showColorPickerDialog { color ->
-                            matchViewModel.setGuestColorHex(color)
+                            MatchRepository.setGuestPrimaryColorHex(color)
                         }
                     }
                 }
             }
         }
 
-        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
-            try {
-                //Logd("VolleyRemoteControl::score.observe")
-                val score = scoreInstance as? VolleyScore ?: VolleyScore()
-                volleyScoreViewModel.initScore(score)
-                //Logd("VolleyRemoteControl::score $score")
+        viewLifecycleOwner.lifecycleScope.launch {
+            MatchRepository.score.collectLatest { scoreInstance ->
+                Logd("VolleyRemoteControl::score.collectLatest:: $scoreInstance")
+                try {
+                    val score = scoreInstance as VolleyScore
+                    volleyScoreViewModel.initScore(score)
+                    binding.homeScore.text = score.sets.last().home.toString()
+                    binding.awayScore.text = score.sets.last().guest.toString()
 
-                binding.homeScore.text = score.sets.last().home.toString()
-                binding.awayScore.text = score.sets.last().guest.toString()
+                    binding.removeLastSet.isEnabled = score.sets.size > 1
+                    binding.addNewSet.isEnabled = score.sets.size < 5
 
-                binding.removeLastSet.isEnabled = score.sets.size > 1
-                binding.addNewSet.isEnabled = score.sets.size < 5
-
-                binding.currentSet.text = score.sets.size.toString()
-            } catch (e: Exception) {
-                //Logd("VolleyRemoteControl Exception  $e.message")
+                    binding.currentSet.text = score.sets.size.toString()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Loge("VolleyRemoteControl::tException:: ${e.message.toString()}")
+                }
             }
         }
 
         lifecycleScope.launch {
-            matchViewModel.spotBannerVisible.collect { isVisible ->
+            MatchRepository.spotBannerVisible.collect { isVisible ->
                 binding.spotBannerSwitch.isChecked = isVisible
             }
         }
 
         lifecycleScope.launch {
-            matchViewModel.spotBannerURL.collect { spotBannerURL ->
+            MatchRepository.spotBannerURL.collect { spotBannerURL ->
                 if (!spotBannerURL.isNullOrEmpty()) {
                     binding.spotBannerPreview.load(spotBannerURL) {
                         placeholder(R.drawable.preview_missing)
@@ -187,21 +190,21 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         }
 
         binding.spotBannerTrash.setOnClickListener {
-            matchViewModel.setSpotBannerURL("")
+            MatchRepository.setSpotBannerURL("")
         }
 
         binding.spotBannerSwitch.setOnCheckedChangeListener { _, isChecked ->
-            matchViewModel.setSpotBannerVisible(isChecked)
+            MatchRepository.setSpotBannerVisible(isChecked)
         }
 
         lifecycleScope.launch {
-            matchViewModel.mainBannerVisible.collect { isVisible ->
+            MatchRepository.mainBannerVisible.collect { isVisible ->
                 binding.mainBannerSwitch.isChecked = isVisible
             }
         }
 
         lifecycleScope.launch {
-            matchViewModel.mainBannerURL.collect { spotBannerURL ->
+            MatchRepository.mainBannerURL.collect { spotBannerURL ->
                 if (!spotBannerURL.isNullOrEmpty()) {
                     binding.mainBannerPreview.load(spotBannerURL) {
                         placeholder(R.drawable.preview_missing)
@@ -229,21 +232,21 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         }
 
         binding.mainBannerTrash.setOnClickListener {
-            matchViewModel.setMainBannerURL("")
+            MatchRepository.setMainBannerURL("")
         }
 
         binding.mainBannerSwitch.setOnCheckedChangeListener { _, isChecked ->
-            matchViewModel.setMainBannerVisible(isChecked)
+            MatchRepository.setMainBannerVisible(isChecked)
         }
 
         binding.spotBannerPreview.setOnClickListener {
             lifecycleScope.launch {
                 requireContext().showEditStringDialog(
                     R.string.spot_banner_placeholder,
-                    matchViewModel.spotBannerURL.first(),
+                    MatchRepository.spotBannerURL.first(),
                     arrayOf()
                 ) { updatedText ->
-                    matchViewModel.setSpotBannerURL(updatedText)
+                    MatchRepository.setSpotBannerURL(updatedText)
                     requireActivity().hideSystemUI()
                 }
             }
@@ -253,10 +256,10 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             lifecycleScope.launch {
                 requireContext().showEditStringDialog(
                     R.string.main_banner_placeholder,
-                    matchViewModel.mainBannerURL.first(),
+                    MatchRepository.mainBannerURL.first(),
                     arrayOf()
                 ) { updatedText ->
-                    matchViewModel.setMainBannerURL(updatedText)
+                    MatchRepository.setMainBannerURL(updatedText)
                     requireActivity().hideSystemUI()
                 }
             }
@@ -288,9 +291,10 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             }
         })*/
 
-        volleyScoreViewModel.liveScore.observe(viewLifecycleOwner) { liveScore ->
-            if (liveScore != null) {
-                matchViewModel.setScore(liveScore)
+        viewLifecycleOwner.lifecycleScope.launch {
+            volleyScoreViewModel.liveScore.collectLatest { liveScore ->
+                Logd("VolleyControlBar::liveScore.collectLatest::$liveScore")
+                MatchRepository.setScore(liveScore)
             }
         }
 
@@ -303,7 +307,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         }
 
         binding.resetMatch.setOnClickListener {
-            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
             val title = dialogView.findViewById<TextView>(R.id.dialog_message)
             title.text = getString(R.string.reset_match_data_message)
 
@@ -354,7 +358,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         binding.homeTeam.setOnClickListener {
             var teamName = binding.homeTeam.text.toString()
             requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                matchViewModel.setHomeTeam(updatedTeamName)
+                MatchRepository.setHomeTeam(updatedTeamName)
                 requireActivity().hideSystemUI()
             }
         }
@@ -362,7 +366,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         binding.awayTeam.setOnClickListener {
             var teamName = binding.awayTeam.text.toString()
             requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                matchViewModel.setGuestTeam(updatedTeamName)
+                MatchRepository.setGuestTeam(updatedTeamName)
                 requireActivity().hideSystemUI()
             }
         }
@@ -374,6 +378,11 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                 requireActivity().hideSystemUI()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun hideKeyboard() {

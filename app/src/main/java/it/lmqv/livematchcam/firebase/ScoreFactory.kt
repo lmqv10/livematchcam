@@ -4,18 +4,7 @@ import com.google.firebase.database.DataSnapshot
 import it.lmqv.livematchcam.extensions.toMap
 import it.lmqv.livematchcam.factories.Sports
 
-class ScoreFactory {
-
-    companion object {
-        @Volatile
-        private var INSTANCE: ScoreFactory? = null
-
-        fun getInstance(): ScoreFactory {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: ScoreFactory().also { INSTANCE = it }
-            }
-        }
-    }
+object ScoreFactory {
 
     fun buildByType(scoreType: String, snapshot: DataSnapshot): IScore {
         var scoreSnapshot = snapshot.child("score")
@@ -25,7 +14,8 @@ class ScoreFactory {
                     home = scoreSnapshot.child("home").getValue(Long::class.java) ?: 0,
                     away = scoreSnapshot.child("away").getValue(Long::class.java) ?: 0,
                     period = scoreSnapshot.child("period").getValue(String::class.java) ?: "",
-                    command = scoreSnapshot.child("command").getValue(String::class.java) ?: "")
+                    command = scoreSnapshot.child("command").getValue(String::class.java) ?: ""
+                )
             }
             Sports.VOLLEY.name -> {
                 VolleyScore(
@@ -41,7 +31,7 @@ class ScoreFactory {
                 )
             }
             else -> {
-                UnknownScore("")
+                UnknownScore()
             }
         }
         return score as IScore
@@ -52,6 +42,13 @@ class ScoreFactory {
             is SoccerScore -> score.toMap()
             is VolleyScore -> score.toMap()
             else -> mapOf()
+        }
+    }
+
+    fun getInitialScore(sport: Sports) : IScore {
+        return when (sport) {
+            Sports.SOCCER -> SoccerScore()
+            Sports.VOLLEY -> VolleyScore()
         }
     }
 

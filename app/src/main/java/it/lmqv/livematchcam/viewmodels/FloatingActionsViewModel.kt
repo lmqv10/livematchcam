@@ -3,6 +3,7 @@ package it.lmqv.livematchcam.viewmodels
 import androidx.lifecycle.ViewModel
 import it.lmqv.livematchcam.INavigateDrawerActivity
 import it.lmqv.livematchcam.R
+import it.lmqv.livematchcam.RemoteScoreActivity
 import it.lmqv.livematchcam.StreamActivity
 import it.lmqv.livematchcam.UVCStreamActivity
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,32 +24,35 @@ class FloatingActionsViewModel : ViewModel() {
         _actions.value = emptyList()
     }
 
-    fun setMatchInfoActions(navigator : INavigateDrawerActivity?) {
-        var actions = listOf(
-            FloatingAction(
-                id = R.id.serversFragment.toString(),
-                iconRes = R.drawable.arrow_right,
-                contentDescription = "server",
-                onClick = {
-                    navigator?.navigateAsDrawerSelection(R.id.serversFragment)
-                }
-            )
-        )
+    fun setOnlyStreamActions(navigator : INavigateDrawerActivity?) {
+        var actions = getBaseActions(navigator)
         _actions.value = actions
     }
 
-    fun setStreamActions(navigator : INavigateDrawerActivity?) {
-        var actions = listOf(
-            FloatingAction(
-                id = R.id.matchInfoFragment.toString(),
-                iconRes = R.drawable.arrow_left,
-                contentDescription = "matchInfo",
+    fun setWithRemoteScoreActions(navigator : INavigateDrawerActivity?) {
+        var actions = getBaseActions(navigator)
+        var withRemoteScoreActions = actions.toMutableList().apply {
+            add(0, FloatingAction(
+                id = "RemoteContolActivity",
+                iconRes = R.drawable.remote_controller,
+                contentDescription = "remote",
                 onClick = {
-                    navigator?.navigateAsDrawerSelection(R.id.matchInfoFragment)
+                    navigator?.navigateAsStartActivity(RemoteScoreActivity::class.java)
                 }
-            ),
+            ))
+        }
+        _actions.value = withRemoteScoreActions
+    }
+
+
+    fun setEmptyActions() {
+        _actions.value = listOf<FloatingAction>()
+    }
+
+    private fun getBaseActions(navigator : INavigateDrawerActivity?) : List<FloatingAction>{
+        return listOf(
             FloatingAction(
-                id = R.id.activity_usb.toString(),
+                id = "UVCStreamActivity",
                 iconRes = R.drawable.usb_cam,
                 contentDescription = "usb",
                 onClick = {
@@ -56,7 +60,7 @@ class FloatingActionsViewModel : ViewModel() {
                 }
             ),
             FloatingAction(
-                id = R.id.activity_Live.toString(),
+                id = "StreamActivity",
                 iconRes = R.drawable.play_stream,
                 contentDescription = "play",
                 onClick = {
@@ -64,10 +68,5 @@ class FloatingActionsViewModel : ViewModel() {
                 }
             )
         )
-        _actions.value = actions
     }
-
-    /*fun setActions(actions: List<FloatingAction>) {
-        _actions.value = actions
-    }*/
 }

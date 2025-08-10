@@ -23,7 +23,6 @@
             android:layout_height="wrap_content"
             android:textColor="@color/primary"
             android:background="@color/secondary_dark"
-            android:textStyle="bold"
             android:padding="3dp"
             android:gravity="end"
             android:layout_gravity="center_vertical"
@@ -37,7 +36,6 @@
             android:layout_height="wrap_content"
             android:textColor="@color/primary"
             android:background="@color/secondary_dark"
-            android:textStyle="bold"
             android:padding="3dp"
             android:gravity="end"
             android:layout_gravity="center_vertical"
@@ -72,7 +70,6 @@
             android:minWidth="40dp"
             android:textColor="@color/text_color_secondary_selector"
             android:background="@color/WHITESMOKE"
-            android:textStyle="bold"
             android:text="@string/degree_placeholder" />
 
         <ImageView
@@ -110,7 +107,6 @@
             android:minWidth="40dp"
             android:textColor="@color/text_color_secondary_selector"
             android:background="@color/WHITESMOKE"
-            android:textStyle="bold"
             android:text="@string/degree_placeholder" />
     </LinearLayout>
 
@@ -143,7 +139,6 @@
             android:minWidth="40dp"
             android:textColor="@color/text_color_selector"
             android:hint="@string/degree_placeholder"
-            android:textStyle="bold"
             android:text="@string/degree_placeholder" />
 
         <ImageView
@@ -169,7 +164,6 @@
             android:minWidth="40dp"
             android:textColor="@color/text_color_selector"
             android:hint="@string/degree_placeholder"
-            android:textStyle="bold"
             android:text="@string/degree_placeholder" />
 
     </LinearLayout>
@@ -188,7 +182,6 @@
             android:layout_height="wrap_content"
             android:textColor="@color/primary"
             android:background="@drawable/alpha_background"
-            android:textStyle="bold"
             android:padding="3dp"
             android:gravity="center"
             android:layout_gravity="center_vertical"
@@ -202,7 +195,6 @@
             android:layout_height="wrap_content"
             android:textColor="@color/primary"
             android:background="@drawable/alpha_background"
-            android:textStyle="bold"
             android:padding="3dp"
             android:gravity="center"
             android:layout_gravity="center_vertical"
@@ -238,7 +230,6 @@
             android:textSize="12sp"
             android:minWidth="30dp"
             android:textColor="@color/primary"
-            android:textStyle="bold"
             android:text="@string/zoom_placeholder" />
 
         <ImageView
@@ -261,7 +252,6 @@
             android:textSize="12sp"
             android:minWidth="30dp"
             android:textColor="@color/primary"
-            android:textStyle="bold"
             android:text="@string/zoom_placeholder" />
 
     </LinearLayout>

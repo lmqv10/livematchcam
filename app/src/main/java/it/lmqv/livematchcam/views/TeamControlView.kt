@@ -1,88 +1,110 @@
 package it.lmqv.livematchcam.views
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.appcompat.app.AlertDialog
+import coil.load
 import it.lmqv.livematchcam.R
+import it.lmqv.livematchcam.dialogs.LogosRecentsDialog
+import it.lmqv.livematchcam.databinding.ViewTeamControlBinding
+import it.lmqv.livematchcam.extensions.hideKeyboard
+import it.lmqv.livematchcam.extensions.setFillAndBorder
+import it.lmqv.livematchcam.extensions.showColorPickerDialog
+import it.lmqv.livematchcam.extensions.showEditStringDialog
 
-class ImageColorControlView @JvmOverloads constructor(
+class TeamControlView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
 
-    private val imageView: ImageView
-    private val buttonSetImage: Button
-    private val colorBox1: View
-    private val colorBox2: View
-    private val buttonColor1: Button
-    private val buttonColor2: Button
+    private var _binding: ViewTeamControlBinding? = null
+    private val binding get() = _binding!!
+
+    var onPrimaryColorsChanged: ((Int) -> Unit)? = null
+    var onSecondaryColorsChanged: ((Int) -> Unit)? = null
+    var onLogoURLChanged: ((String) -> Unit)? = null
+    var onTeamNameChanged: ((String) -> Unit)? = null
 
     init {
         orientation = VERTICAL
-        LayoutInflater.from(context).inflate(R.layout.view_team_control, this, true)
+        _binding = ViewTeamControlBinding.inflate(LayoutInflater.from(context), this, true)
 
-        imageView = findViewById(R.id.imageView)
-        buttonSetImage = findViewById(R.id.buttonSetImage)
-        colorBox1 = findViewById(R.id.colorBox1)
-        colorBox2 = findViewById(R.id.colorBox2)
-        buttonColor1 = findViewById(R.id.buttonColor1)
-        buttonColor2 = findViewById(R.id.buttonColor2)
+        /*context.theme
+            .obtainStyledAttributes(attrs, R.styleable.TeamControlView, 0, 0)
+            .apply {
+                try {
+                    binding.textTeamName.text = getString(R.styleable.TeamControlView_teamName) ?: ""
+                    binding.imageLogo.tag = getString(R.styleable.TeamControlView_logoURL) ?: ""
+                    binding.primaryColor.setFillAndBorder(getColor(R.styleable.TeamControlView_primaryColor, Color.BLACK))
+                    binding.secondaryColor.setFillAndBorder(getColor(R.styleable.TeamControlView_secondaryColor, Color.BLACK))
+                } finally {
+                    recycle()
+                }
+            }*/
 
-        buttonSetImage.setOnClickListener {
-            promptForImageUrl()
-        }
+        binding.textTeamName.setOnClickListener {
+            val sourceTeamName = binding.textTeamName.text.toString()
 
-        buttonColor1.setOnClickListener {
-            pickColor { color ->
-                colorBox1.setBackgroundColor(color)
+            context.showEditStringDialog(R.string.team_name, sourceTeamName) { updatedTeamName ->
+                binding.textTeamName.text = updatedTeamName
+                onTeamNameChanged?.invoke(updatedTeamName)
+                this.hideKeyboard()
             }
         }
 
-        buttonColor2.setOnClickListener {
-            pickColor { color ->
-                colorBox2.setBackgroundColor(color)
+        binding.imageLogo.setOnClickListener {
+            val sourceLogoUrl = binding.imageLogo.tag.toString()
+
+            /*context.showEditStringDialog(R.string.choose_logo, sourceLogoUrl, arrayOf()) { updatedLogoUrl ->
+                onLogoURLChanged?.invoke(updatedLogoUrl)
+                this.hideKeyboard()
+            }*/
+
+            var dialog = LogosRecentsDialog(context, sourceLogoUrl) { updatedLogoUrl ->
+                onLogoURLChanged?.invoke(updatedLogoUrl)
+            }
+            dialog.show()
+
+        }
+
+        binding.primaryColor.setOnClickListener {
+            context.showColorPickerDialog { color ->
+                onPrimaryColorsChanged?.invoke(color)
+                binding.primaryColor.setFillAndBorder(color)
+            }
+        }
+        binding.secondaryColor.setOnClickListener {
+            context.showColorPickerDialog { color ->
+                onSecondaryColorsChanged?.invoke(color)
+                binding.secondaryColor.setFillAndBorder(color)
             }
         }
     }
 
-    private fun promptForImageUrl() {
-        val editText = EditText(context)
-        AlertDialog.Builder(context)
-            .setTitle("Enter Image URL")
-            .setView(editText)
-            .setPositiveButton("Load") { _, _ ->
-                val url = editText.text.toString()
-                loadImageFromUrl(url)
+    fun setLogoUrl(sourceLogoUrl: String) {
+        binding.imageLogo.tag = sourceLogoUrl
+
+        if (sourceLogoUrl.isEmpty()) {
+            binding.imageLogo.setImageResource(R.drawable.shield_add)
+        } else {
+            binding.imageLogo.load(sourceLogoUrl) {
+                placeholder(R.drawable.refresh)
+                error(R.drawable.shield_add)
+                allowHardware(false)
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
     }
 
-    private fun loadImageFromUrl(url: String) {
-        // Usa Glide o altra libreria per caricare l'immagine
-        /*Glide.with(context)
-            .load(url)
-            .placeholder(R.drawable.placeholder) // opzionale
-            .error(R.drawable.error) // opzionale
-            .into(imageView)*/
+    fun setTeamName(name: String) {
+        binding.textTeamName.text = name
     }
 
-    private fun pickColor(callback: (Int) -> Unit) {
-        val colors = arrayOf("Red", "Green", "Blue", "Yellow")
-        val colorValues = arrayOf(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW)
-
-        AlertDialog.Builder(context)
-            .setTitle("Choose color")
-            .setItems(colors) { _, which ->
-                callback(colorValues[which])
-            }
-            .show()
+    fun setPrimaryColor(color: Int) {
+        binding.primaryColor.setFillAndBorder(fillColor = color)
     }
+
+    /*fun setSecondaryColor(color: Int) {
+        binding.secondaryColor.setFillAndBorder(fillColor = color)
+    }*/
 }

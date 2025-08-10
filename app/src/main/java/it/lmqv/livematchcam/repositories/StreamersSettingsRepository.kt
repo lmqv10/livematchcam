@@ -7,10 +7,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.factories.Sports
-import it.lmqv.livematchcam.utils.KeyValue
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.map
 
 val Context.streamersSettingsDatastore: DataStore<Preferences> by preferencesDataStore(name = "streamers_settings")
@@ -24,6 +24,7 @@ class StreamersSettingsRepository(private val context: Context) {
     private val CURRENT_KEY = stringPreferencesKey("CurrentKey")
     private val CURRENT_SERVER = stringPreferencesKey("CurrentServer")
     private val SPORT = stringPreferencesKey("Sport")
+    //private val SYNC_ENABLED = booleanPreferencesKey("SyncEnabled")
 
     /*val getServers: Flow<List<KeyValue<String>>> = context.streamersSettingsDatastore.data.map { preferences ->
         val jsonString = preferences[SERVERS] ?: "[{\"description\":\"YouTube\",\"key\":\"rtmp://a.rtmp.youtube.com/live2\"}]"
@@ -70,11 +71,12 @@ class StreamersSettingsRepository(private val context: Context) {
     }
 
     val getSport: Flow<Sports> = context.streamersSettingsDatastore.data.map { preferences ->
-        var sportName = preferences[SPORT] ?: Sports.SOCCER.name
-        Sports.valueOf(sportName)
+        Logd("StreamersSettingsRepository.getSport()")
+        Sports.valueOf(preferences[SPORT] ?: Sports.SOCCER.name)
     }
 
-    suspend fun setSport(currentSport: Sports) {
-        context.streamersSettingsDatastore.edit { preferences -> preferences[SPORT] = currentSport.name }
+    suspend fun setSport(updatedSport: Sports) {
+        Logd("StreamersSettingsRepository.setSport($updatedSport)")
+        context.streamersSettingsDatastore.edit { preferences -> preferences[SPORT] = updatedSport.name }
     }
 }

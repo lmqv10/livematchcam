@@ -1,6 +1,5 @@
 package it.lmqv.livematchcam.fragments.soccer
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,10 +10,16 @@ import it.lmqv.livematchcam.databinding.FragmentSoccerScoreBoardLightBinding
 import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
-import it.lmqv.livematchcam.firebase.SoccerScore
 import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
-import it.lmqv.livematchcam.viewmodels.Command
 import kotlinx.coroutines.flow.combine
+import androidx.core.graphics.toColorInt
+import androidx.lifecycle.lifecycleScope
+import it.lmqv.livematchcam.extensions.Loge
+import it.lmqv.livematchcam.firebase.SoccerScore
+import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.viewmodels.Command
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
@@ -27,7 +32,7 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentSoccerScoreBoardLightBinding.inflate(inflater, container, false)
         return binding.root
@@ -36,52 +41,58 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        matchViewModel.homeTeam.observe(viewLifecycleOwner) { team ->
+        MatchRepository.homeTeam.observe(viewLifecycleOwner) { team ->
             binding.homeTeam.text = team
             onUpdateCallback?.refresh()
         }
 
-        matchViewModel.guestTeam.observe(viewLifecycleOwner) { team ->
+        MatchRepository.guestTeam.observe(viewLifecycleOwner) { team ->
             binding.awayTeam.text = team
             onUpdateCallback?.refresh()
         }
 
-        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
-            try {
-                val score = scoreInstance as SoccerScore
-                binding.homeScore.text = score.home.toString()
-                binding.awayScore.text = score.away.toString()
-                binding.matchPeriod.text = score.period
+        viewLifecycleOwner.lifecycleScope.launch {
+            MatchRepository.score.collectLatest { scoreInstance ->
+                //Logd("SoccerScoreBoard::${scoreInstance}")
+                try {
+                    val score = scoreInstance as SoccerScore
+                    binding.homeScore.text = score.home.toString()
+                    binding.awayScore.text = score.away.toString()
+                    binding.matchPeriod.text = score.period
 
-                val command = score.command
-                if (command == Command.START_TIME.toString()) {
-                    if (!isStarted()) {
-                        startTime()
+                    val command = score.command
+                    if (command == Command.START_TIME.toString()) {
+                        if (!isStarted()) {
+                            startTime()
+                        }
                     }
-                }
-                if (command == Command.PAUSE.toString()) {
-                    if (isStarted()) {
-                        pauseTime()
+                    if (command == Command.PAUSE.toString()) {
+                        if (isStarted()) {
+                            pauseTime()
+                        }
                     }
-                }
-                if (command == Command.RESET_TIME.toString()) {
-                    if (!isStarted()) {
-                        resetTime()
+                    if (command == Command.RESET_TIME.toString()) {
+                        if (!isStarted()) {
+                            resetTime()
+                        }
                     }
+                    onUpdateCallback?.refresh()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Loge("SoccerScoreBoard::Exception:: ${e.message.toString()}")
                 }
-            } catch (e: Exception) { }
-            onUpdateCallback?.refresh()
+            }
         }
 
         launchOnStarted {
             combine(
-                matchViewModel.homeColorHex,
-                matchViewModel.homeLogo) {
+                MatchRepository.homePrimaryColorHex,
+                MatchRepository.homeLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
-                binding.homeColorBar.setBackgroundColor(Color.parseColor(colorHex))
+                binding.homeColorBar.setBackgroundColor(colorHex.toColorInt())
 
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.homeLogo.visibility = View.VISIBLE
                     binding.homeColorBar.visibility = View.VISIBLE
                     binding.homeShirt.visibility = View.INVISIBLE
@@ -99,7 +110,7 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
                     binding.homeLogo.visibility = View.GONE
                     binding.homeColorBar.visibility = View.GONE
                     binding.homeShirt.visibility = View.VISIBLE
-                    binding.homeShirt.setShirtByColor(Color.parseColor(colorHex))
+                    binding.homeShirt.setShirtByColor(colorHex.toColorInt())
                     onUpdateCallback?.refresh()
                 }
             }
@@ -107,13 +118,13 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
         launchOnStarted {
             combine(
-                matchViewModel.guestColorHex,
-                matchViewModel.guestLogo) {
+                MatchRepository.guestPrimaryColorHex,
+                MatchRepository.guestLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
-                binding.awayColorBar.setBackgroundColor(Color.parseColor(colorHex))
+                binding.awayColorBar.setBackgroundColor(colorHex.toColorInt())
 
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.awayLogo.visibility = View.VISIBLE
                     binding.awayColorBar.visibility = View.VISIBLE
                     binding.awayShirt.visibility = View.INVISIBLE
@@ -131,11 +142,16 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
                     binding.awayLogo.visibility = View.GONE
                     binding.awayColorBar.visibility = View.GONE
                     binding.awayShirt.visibility = View.VISIBLE
-                    binding.awayShirt.setShirtByColor(Color.parseColor(colorHex))
+                    binding.awayShirt.setShirtByColor(colorHex.toColorInt())
                     onUpdateCallback?.refresh()
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onTickTimer(timeElapsedInSeconds: Int) {

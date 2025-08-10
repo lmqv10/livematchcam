@@ -11,26 +11,30 @@ import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.Space
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import it.lmqv.livematchcam.auth.AuthResult
 import it.lmqv.livematchcam.databinding.ActivityMatchBinding
+import it.lmqv.livematchcam.extensions.dpToPx
 import it.lmqv.livematchcam.services.CounterService
 import it.lmqv.livematchcam.viewmodels.AccountViewModel
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
@@ -51,6 +55,13 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     private lateinit var headerView: View
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var navController: NavController
+
+    private val topLevelsFragments = setOf(
+        R.id.serverConfigurationFragment,
+        R.id.youtubeConfigurationFragment,
+        R.id.youtubeStreamFragment
+    )
 
     private val permissions = mutableListOf(
         Manifest.permission.RECORD_AUDIO,
@@ -73,12 +84,14 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (Build.VERSION.SDK_INT >= VERSION_CODES.R) {
+            @Suppress("DEPRECATION")
             window.setDecorFitsSystemWindows(false)
             window.insetsController?.let { controller ->
                 controller.hide(WindowInsets.Type.systemBars())
                 controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
+            @Suppress("DEPRECATION")
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
@@ -98,20 +111,53 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
         }
 
         val navHostFragment = supportFragmentManager
-            .findFragmentById(binding.matchNavHostFragment.id) as NavHostFragment
-        val navController = navHostFragment.navController
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
+        /*navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            try {
+                // L'ID della root del graph
+                val rootId = navController.graph.id
+                val backStackEntries = mutableListOf<String>()
+
+                // Dal top, scendiamo fino alla root
+                var currentEntry: NavBackStackEntry? = navController.currentBackStackEntry
+                while (currentEntry != null) {
+                    backStackEntries.add(currentEntry.destination.label.toString())
+                    if (currentEntry.destination.id == rootId) break
+                    currentEntry = try {
+                        navController.getBackStackEntry(currentEntry.destination.id - 1)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    }
+                }
+                Log.d("LM_NAV_DEBUG", "Back stack: ${backStackEntries.joinToString(" -> ")}")
+            } catch (e: Exception) {
+                Log.e("LM_NAV_DEBUG", "Error reading back stack", e)
+            }
+        }*/
 
         appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.serversFragment,
-                R.id.matchInfoFragment,
-                R.id.youTubeFragment
-            ),
+            topLevelsFragments,
             binding.matchDrawerLayout
         )
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
         NavigationUI.setupWithNavController(binding.matchNavView, navController)
+
+        onBackPressedDispatcher.addCallback(this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val currentId = navController.currentDestination?.id
+                    if (currentId in topLevelsFragments) {
+                        finish()
+                    } else {
+                        navController.popBackStack()
+                    }
+                }
+            }
+        )
 
         transitionAnim(true)
         binding.tvVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
@@ -125,34 +171,46 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
         requestPermissions()
 
         startService(Intent(this, CounterService::class.java))
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                floatingActionsViewModel.actions.collect { actions ->
+                    var actionsContainer = binding.floatingActionContainer
+                    actionsContainer.removeAllViews()
+                    if (actions.isNotEmpty()) {
+                        actionsContainer.visibility = View.VISIBLE
+
+                        actions.forEachIndexed { index, action ->
+                            val imageView = ImageView(
+                                ContextThemeWrapper(this@MatchActivity, R.style.AppTheme),
+                                null, 0, R.style.defaultImageViewStyle
+                            ).apply {
+                                setImageResource(action.iconRes)
+                                contentDescription = action.contentDescription
+                                setOnClickListener { action.onClick() }
+                            }
+                            actionsContainer.addView(imageView)
+
+                            if (index != actions.lastIndex) {
+                                val space = Space(this@MatchActivity).apply {
+                                    layoutParams = LinearLayout.LayoutParams(
+                                        10.dpToPx(this@MatchActivity),
+                                        LinearLayout.LayoutParams.MATCH_PARENT
+                                    )
+                                }
+                                actionsContainer.addView(space)
+                            }
+                        }
+                    } else {
+                        actionsContainer.visibility = View.GONE
+                    }
+                }
+            }
+        }
     }
 
     override fun onStart() {
         super.onStart()
-
-        lifecycleScope.launchWhenStarted {
-            floatingActionsViewModel.actions.collect { actions ->
-                var actionsContainer = binding.floatingActionContainer
-                actionsContainer.removeAllViews()
-                if (actions.isNotEmpty()) {
-                    actionsContainer.visibility = View.VISIBLE
-
-                    actions.forEach { action ->
-                        val imageView = ImageView(
-                            ContextThemeWrapper(this@MatchActivity, R.style.AppTheme),
-                            null, 0, R.style.defaultImageViewStyle
-                        ).apply {
-                            setImageResource(action.iconRes)
-                            contentDescription = action.contentDescription
-                            setOnClickListener { action.onClick() }
-                        }
-                        actionsContainer.addView(imageView)
-                    }
-                } else {
-                    actionsContainer.visibility = View.GONE
-                }
-            }
-        }
 
         lifecycleScope.launch {
             accountViewModel.authState.collectLatest { state ->
@@ -160,50 +218,28 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                     .getHeaderView(0)
                     .findViewById<TextView>(R.id.textAccountEmail)
                     .text = accountViewModel.accountDesc()
-
-                val youTubeFragment = binding.matchNavView.menu.findItem(R.id.youTubeFragment)
-                youTubeFragment.isVisible = state is AuthResult.Authenticated
             }
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_settings -> {
-                startActivity(Intent(this, SettingsActivity::class.java))
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
-
-        val menuItem = menu.findItem(R.id.menu_settings)
-        val drawable = menuItem.icon
-        drawable?.let {
-            it.setTint(ContextCompat.getColor(this, R.color.primary))
-            menuItem.icon = it
-        }
         return true
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(binding.matchNavHostFragment.id)
         return NavigationUI.navigateUp(navController, appBarConfiguration)
     }
 
     override fun navigateAsDrawerSelection(@IdRes destinationId: Int) {
-        val navController = findNavController(binding.matchNavHostFragment.id)
+        val navController = findNavController(binding.navHostFragment.id)
         navController.navigate(destinationId, null, NavOptions.Builder()
             .setPopUpTo(R.id.nav_graph, false)
             .build()
         )
     }
 
-    override fun navigateAsStartActivity(activityClass: Class<out Activity>)
-    {
+    override fun navigateAsStartActivity(activityClass: Class<out Activity>) {
         startActivity(Intent(this, activityClass))
     }
 

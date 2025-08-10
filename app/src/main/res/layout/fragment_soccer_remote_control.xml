@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context=".fragments.soccer.SoccerControlBarFragment">
+    tools:context=".fragments.soccer.SoccerRemoteControlFragment">
 
     <LinearLayout
         android:id="@+id/control_home"
@@ -36,7 +36,6 @@
                 android:layout_weight="3"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textSize="25sp"
                 android:textColor="@color/black"
                 android:text="@string/home_team"/>
@@ -61,7 +60,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/black"
@@ -149,7 +147,6 @@
                 android:layout_weight="3"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textSize="25sp"
                 android:textColor="@color/black"
                 android:text="@string/away_team"/>
@@ -181,7 +178,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/black"
@@ -220,7 +216,6 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="5dp"
-            android:textStyle="bold"
             android:textSize="30sp"
             android:minWidth="40dp"
             android:textColor="@color/secondary_darker"

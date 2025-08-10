@@ -1,64 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
     <!-- Prima riga -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:weightSum="5">
 
-        <ImageView
+        <!--ImageView
             android:id="@+id/imageView"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="100dp"
-            android:scaleType="centerCrop"
-            android:background="#DDD" />
-
-        <Button
-            android:id="@+id/buttonSetImage"
-            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="Set Image" />
+            android:scaleType="centerCrop"
+            android:background="#DDD"
+            tools:ignore="ContentDescription" /-->
+
+        <ImageView
+            android:id="@+id/image_logo"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="match_parent"
+            android:gravity="start"
+            android:padding="5dp"
+            android:src="@drawable/shield_add"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/text_team_name"
+            style="@style/editTextView"
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:layout_height="wrap_content"
+            android:text="@string/hint_home_team"/>
+
     </LinearLayout>
 
-    <!-- Seconda riga -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="4dp"
         android:gravity="center_vertical">
 
-        <View
-            android:id="@+id/colorBox1"
+        <ImageView
+            android:id="@+id/primaryColor"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="50dp"
-            android:background="#FF0000" />
+            android:layout_height="match_parent"
+            android:background="@color/black"
+            tools:ignore="ContentDescription" />
 
-        <View
-            android:id="@+id/colorBox2"
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/secondaryColor"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="50dp"
-            android:background="#0000FF"
-            android:layout_marginStart="8dp" />
+            android:layout_height="match_parent"
+            android:layout_marginStart="3dp"
+            tools:ignore="ContentDescription" />
 
-        <Button
-            android:id="@+id/buttonColor1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="Color 1" />
-
-        <Button
-            android:id="@+id/buttonColor2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Color 2" />
     </LinearLayout>
 </LinearLayout>

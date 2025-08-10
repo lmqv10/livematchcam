@@ -10,13 +10,18 @@ import androidx.core.content.ContextCompat
 import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyScoreBoardBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.firebase.SetScore
-import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
+import it.lmqv.livematchcam.repositories.MatchRepository
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
+import androidx.core.graphics.toColorInt
+import androidx.lifecycle.lifecycleScope
+import it.lmqv.livematchcam.extensions.Loge
+import it.lmqv.livematchcam.firebase.VolleyScore
 
 class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
@@ -31,7 +36,7 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentVolleyScoreBoardBinding.inflate(inflater, container, false)
         return binding.root
@@ -48,29 +53,20 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
             Pair(binding.homeScore5set, binding.awayScore5set),
         )
 
-        matchViewModel.homeTeam.observe(viewLifecycleOwner) { team ->
+        MatchRepository.homeTeam.observe(viewLifecycleOwner) { team ->
             binding.homeTeam.text = team
             onUpdateCallback?.refresh()
         }
 
-        matchViewModel.guestTeam.observe(viewLifecycleOwner) { team ->
+        MatchRepository.guestTeam.observe(viewLifecycleOwner) { team ->
             binding.awayTeam.text = team
             onUpdateCallback?.refresh()
         }
 
-        /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            binding.homeLogo.setShirtByColor(Color.parseColor(homeColorHex))
-            onUpdateCallback?.refresh()
-        }
-        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            binding.awayLogo.setShirtByColor(Color.parseColor(guestColorHex))
-            onUpdateCallback?.refresh()
-        }*/
-
         launchOnStarted {
             combine(
-                matchViewModel.homeColorHex,
-                matchViewModel.homeLogo) {
+                MatchRepository.homePrimaryColorHex,
+                MatchRepository.homeLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
                 binding.homeColorBar.setBackgroundColor(Color.parseColor(colorHex))
@@ -91,7 +87,7 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
                 } else {
                     binding.homeLogo.visibility = View.GONE
                     binding.homeShirt.visibility = View.VISIBLE
-                    binding.homeShirt.setShirtByColor(Color.parseColor(colorHex))
+                    binding.homeShirt.setShirtByColor(colorHex.toColorInt())
                     onUpdateCallback?.refresh()
                 }
             }
@@ -99,13 +95,13 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
         launchOnStarted {
             combine(
-                matchViewModel.guestColorHex,
-                matchViewModel.guestLogo) {
+                MatchRepository.guestPrimaryColorHex,
+                MatchRepository.guestLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
-                binding.awayColorBar.setBackgroundColor(Color.parseColor(colorHex))
+                binding.awayColorBar.setBackgroundColor(colorHex.toColorInt())
 
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.awayLogo.visibility = View.VISIBLE
                     binding.awayShirt.visibility = View.INVISIBLE
                     binding.awayLogo.load(logoURL) {
@@ -127,65 +123,25 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
             }
         }
 
-        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
-            try {
-                //Logd("VolleyScoreBoard::score.observe")
-                val score = scoreInstance as VolleyScore
-                //Logd("VolleyScoreBoard::score $score")
-                updateScore(score.sets)
-                //updateSetsScore(score.sets)
-                updateLeagueDescription(score.league)
-            } catch (e: Exception) {
-                //Logd("ScoreBoard::Exception ${e.message}")
-            }
-            onUpdateCallback?.refresh()
-        }
-
-        /*scoreViewModel.currentSet.observe(viewLifecycleOwner) { currentSet ->
-            this.currentSet = currentSet
-            onUpdateCallback?.refresh()
-        }*/
-
-        /*scoreViewModel.matchLeague.observe(viewLifecycleOwner) { currentDescription ->
-            if (currentDescription == "") {
-                binding.matchDescription.visibility = View.GONE
-            } else {
-                binding.matchDescription.visibility = View.VISIBLE
-            }
-
-            binding.matchDescription.text = currentDescription
-            onUpdateCallback?.refresh()
-        }*/
-
-        /*scoreViewModel.score.observe(viewLifecycleOwner) { score ->
-            binding.homeScore1set.text = score[Set.SET1]?.homePoints.toString()
-            binding.awayScore1set.text = score[Set.SET1]?.awayPoints.toString()
-
-            binding.homeScore2set.text = score[Set.SET2]?.homePoints.toString()
-            binding.awayScore2set.text = score[Set.SET2]?.awayPoints.toString()
-
-            binding.homeScore3set.text = score[Set.SET3]?.homePoints.toString()
-            binding.awayScore3set.text = score[Set.SET3]?.awayPoints.toString()
-
-            binding.homeScore4set.text = score[Set.SET4]?.homePoints.toString()
-            binding.awayScore4set.text = score[Set.SET4]?.awayPoints.toString()
-
-            binding.homeScore5set.text = score[Set.SET5]?.homePoints.toString()
-            binding.awayScore5set.text = score[Set.SET5]?.awayPoints.toString()
-
-            val sets = score.values
-                .map { x ->
-                    Pair((x.homePoints >= x.targetPoints && x.homePoints - x.awayPoints >= 2).toInt(),
-                        (x.awayPoints >= x.targetPoints && x.awayPoints - x.homePoints >= 2).toInt())
+        viewLifecycleOwner.lifecycleScope.launch {
+            MatchRepository.score.collectLatest { scoreInstance ->
+                //Logd("VolleyScoreBoard::score.collectLatest:: $scoreInstance")
+                try {
+                    val score = scoreInstance as VolleyScore
+                    updateScore(score.sets)
+                    updateLeagueDescription(score.league)
+                    onUpdateCallback?.refresh()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Loge("VolleyScoreBoard::Exception:: ${e.message.toString()}")
                 }
-                .reduce { sets, result ->
-                    Pair(sets.first + result.first, sets.second + result.second)  }
+            }
+        }
+    }
 
-            binding.homeScoreSets.text = sets.first.toString()
-            binding.awayScoreSets.text = sets.second.toString()
-            onUpdateCallback?.refresh()
-        }*/
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun updateScore(sets: List<SetScore>) {
@@ -222,18 +178,6 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
         }
     }
-
-    /*private fun updateSetsScore(setsScore: List<SetScore>) {
-        val sets = setsScore
-            .map { x ->
-                Pair((x.home > x.guest).toInt(), (x.guest < x.home).toInt())
-            }
-            .reduce { sets, result ->
-                Pair(sets.first + result.first, sets.second + result.second)  }
-
-        binding.homeScoreSets.text = sets.first.toString()
-        binding.awayScoreSets.text = sets.second.toString()
-    }*/
 
     private fun updateLeagueDescription(description: String) {
         if (description == "") {

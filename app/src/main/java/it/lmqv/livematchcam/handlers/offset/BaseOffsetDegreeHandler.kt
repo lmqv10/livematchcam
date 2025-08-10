@@ -4,6 +4,7 @@ import android.content.Context
 import it.lmqv.livematchcam.repositories.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 enum class ManualZoomLevel {
@@ -34,27 +35,32 @@ abstract class BaseOffsetDegreeHandler(protected val context: Context) : IOffset
     protected var rightDegree: Int = 0
     protected var degreeOffset: Float = 0.0f
 
+    private var zoomJob: Job? = null
+    private var leftDegreeJob: Job? = null
+    private var rightDegreeJob: Job? = null
+
     //addOffsetAtDegree(0.2f, 20)
     private var settingsRepository: SettingsRepository = SettingsRepository(context)
 
     init {
-        CoroutineScope(Dispatchers.Main).launch {
+        zoomJob = CoroutineScope(Dispatchers.Main).launch {
             settingsRepository.zoomOffset.collect { zoomOffset ->
                 offset = zoomOffset
             }
         }
-        CoroutineScope(Dispatchers.Main).launch {
+        leftDegreeJob = CoroutineScope(Dispatchers.Main).launch {
             settingsRepository.leftDegree.collect { degree ->
                 leftDegree = -degree
             }
         }
-        CoroutineScope(Dispatchers.Main).launch {
+        rightDegreeJob = CoroutineScope(Dispatchers.Main).launch {
             settingsRepository.rightDegree.collect { degree ->
                 rightDegree = degree
             }
         }
         initialize()
     }
+
 
     /*override fun addOffsetAtDegree(offset: Float, degree: Int) {
         degreesOffset[degree] = offset
@@ -80,7 +86,13 @@ abstract class BaseOffsetDegreeHandler(protected val context: Context) : IOffset
         }
     }*/
     abstract override fun initialize()
-    abstract override fun destroy()
+
+    override fun destroy() {
+        zoomJob?.cancel()
+        leftDegreeJob?.cancel()
+        rightDegreeJob?.cancel()
+    }
+
     abstract override fun manualZoomLevel(zoomLevel: ManualZoomLevel)
 
     override fun getOffsetByDegrees(degrees: IntArray) : Float {

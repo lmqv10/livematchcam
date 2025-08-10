@@ -73,6 +73,15 @@ class AccountViewModel(private val application: Application) : AndroidViewModel(
         }
     }
 
+    fun accountName() : String?
+    {
+        val state = authState.value
+        return when (state) {
+            is AuthResult.Authenticated -> state.account.email
+            is AuthResult.Unauthenticated, is AuthResult.Error -> null
+        }
+    }
+
     init {
         viewModelScope.launch {
             authManager.authState.collectLatest { state ->

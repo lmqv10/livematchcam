@@ -2,20 +2,35 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/matchInfoFragment">
+    app:startDestination="@id/serverConfigurationFragment">
 
     <fragment
-        android:id="@+id/matchInfoFragment"
-        android:name="it.lmqv.livematchcam.fragments.MatchInfoFragment"
-        android:label="Detail" />
+        android:id="@+id/serverConfigurationFragment"
+        android:name="it.lmqv.livematchcam.fragments.ServerConfigurationFragment"
+        android:label="@string/server">
+        <argument
+            android:name="syncStrategy"
+            app:argType="it.lmqv.livematchcam.constants.SyncStrategy"
+            android:defaultValue="LOCAL" />
+    </fragment>
 
     <fragment
-        android:id="@+id/youTubeFragment"
-        android:name="it.lmqv.livematchcam.fragments.YoutubeFragment"
-        android:label="YouTube" />
+        android:id="@+id/youtubeConfigurationFragment"
+        android:name="it.lmqv.livematchcam.fragments.YoutubeConfigurationFragment"
+        android:label="@string/youtube">
+        <argument
+            android:name="syncStrategy"
+            app:argType="it.lmqv.livematchcam.constants.SyncStrategy"
+            android:defaultValue="FIREBASE" />
+    </fragment>
 
     <fragment
-        android:id="@+id/serversFragment"
-        android:name="it.lmqv.livematchcam.fragments.ServersFragment"
-        android:label="Home" />
+        android:id="@+id/youtubeStreamFragment"
+        android:name="it.lmqv.livematchcam.fragments.YoutubeStreamFragment"
+        android:label="@string/youtube_stream">
+        <argument
+            android:name="syncStrategy"
+            app:argType="it.lmqv.livematchcam.constants.SyncStrategy"
+            android:defaultValue="FIREBASE" />
+    </fragment>
 </navigation>

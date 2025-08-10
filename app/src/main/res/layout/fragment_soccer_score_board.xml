@@ -30,7 +30,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
                 android:textColor="@color/primary"
-                android:textStyle="bold"
                 android:text="@string/hint_home_team"
                 android:gravity="center" />
 
@@ -44,7 +43,6 @@
                 android:layout_weight="3"
                 android:textColor="@color/primary"
                 android:text="@string/hint_away_team"
-                android:textStyle="bold"
                 android:gravity="center" />
 
             <ImageView
@@ -79,7 +77,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/period_placeholder"
-                android:textStyle="bold"
                 android:textColor="@color/white"
                 android:background="@drawable/score_board_background"
                 android:textSize="10dp"
@@ -98,7 +95,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
                     android:textAlignment="center"
-                    android:textStyle="bold"
                     android:textColor="@color/black"
                     android:background="@drawable/score_board_primary_background"
                     android:text="@string/score_placeholder" />
@@ -109,7 +105,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
                     android:textAlignment="center"
-                    android:textStyle="bold"
                     android:textColor="@color/black"
                     android:background="@drawable/score_board_primary_background"
                     android:text="@string/score_placeholder"/>
@@ -120,9 +115,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/time_placeholder"
-                android:textStyle="bold"
                 android:textColor="@color/BLACK"
-                android:textSize="10dp"
+                android:textSize="10sp"
                 android:gravity="center" />
 
         </LinearLayout>

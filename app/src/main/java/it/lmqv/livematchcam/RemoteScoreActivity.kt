@@ -3,7 +3,6 @@ package it.lmqv.livematchcam
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -11,15 +10,15 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import it.lmqv.livematchcam.databinding.ActivityAccountBinding
+import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.databinding.ActivityRemoteScoreBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.factories.SportsFactory
-import it.lmqv.livematchcam.fragments.CameraFragment
-import it.lmqv.livematchcam.fragments.IControlBarFragment
 import it.lmqv.livematchcam.fragments.IRemoteControlFragment
 import it.lmqv.livematchcam.fragments.IScoreBoardFragment
-import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
+import it.lmqv.livematchcam.repositories.MatchRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class RemoteScoreActivity : AppCompatActivity(),
     IScoreBoardFragment.OnUpdateCallback {
@@ -28,7 +27,7 @@ class RemoteScoreActivity : AppCompatActivity(),
     private lateinit var remoteControlFragment: IRemoteControlFragment
     private lateinit var scoreBoardFragment: IScoreBoardFragment
 
-    private var sportsFactory = SportsFactory
+    private lateinit var sportCollectJob : Job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,12 +39,14 @@ class RemoteScoreActivity : AppCompatActivity(),
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            @Suppress("DEPRECATION")
             window.setDecorFitsSystemWindows(false)
             window.insetsController?.let { controller ->
                 controller.hide(WindowInsets.Type.systemBars())
                 controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
+            @Suppress("DEPRECATION")
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
@@ -64,33 +65,42 @@ class RemoteScoreActivity : AppCompatActivity(),
         if (supportActionBar != null) {
             supportActionBar!!.setDisplayShowTitleEnabled(false) // Hide default title if needed
         }
+
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.arrow_left) // Opzionale: icona personalizzata
-
     }
 
     override fun onStart() {
         super.onStart()
 
-        val sportFragmentFactory = sportsFactory.get()
-        this.remoteControlFragment = sportFragmentFactory.getRemoteControl()
-        this.scoreBoardFragment = sportFragmentFactory.getScoreBoard()
-        this.scoreBoardFragment.setOnUpdate(this)
+        this.sportCollectJob = lifecycleScope.launch {
+            MatchRepository.sport.collectLatest { sport ->
+                val sportFragmentFactory = SportsFactory.get(sport)
+                remoteControlFragment = sportFragmentFactory.getRemoteControl()
+                scoreBoardFragment = sportFragmentFactory.getScoreBoard()
+                scoreBoardFragment.setOnUpdate(this@RemoteScoreActivity)
 
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
-            .commit()
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
+                    .commit()
 
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.container, this.remoteControlFragment as Fragment)
-            .commit()
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.container, remoteControlFragment as Fragment)
+                    .commit()
+            }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        this.sportCollectJob.cancel()
     }
 
     override fun refresh() { }

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.safeargs.kotlin)
 }
 
 android {
@@ -121,6 +122,8 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.androidx.preference)
     //implementation(libs.compose.compiler)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

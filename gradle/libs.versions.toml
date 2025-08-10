@@ -39,7 +39,7 @@ database-ktx="21.0.0"
 usbcamera="3.3.3"
 uvcandroid = "1.0.9"
 navigation-ktx = "2.9.3"
-
+navigation = "2.9.3"
 sdk29_appcompat = "1.3.1"
 sdk29_coreKtx = "1.3.2"
 sdk_29_material = "1.3.0"
@@ -101,9 +101,12 @@ com-jiangdongguo-libuvccommon = { group = "com.github.jiangdongguo.AndroidUSBCam
 com-jiangdongguo-libnative = { group = "com.github.jiangdongguo.AndroidUSBCamera", name="libnative", version.ref = "usbcamera" }
 com-herohan-uvcandroid = { module = "com.herohan:UVCAndroid", version.ref = "uvcandroid" }
 androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
+navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
+navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+safeargs-kotlin = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }

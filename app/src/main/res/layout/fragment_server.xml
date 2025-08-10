@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.ServerFragment"
+    android:layout_marginVertical="5dp"
+    android:layout_marginHorizontal="10dp"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/server"
+        android:textSize="20sp"
+        android:layout_marginBottom="10dp"
+        android:textColor="@color/secondary_dark"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stream_url"
+            android:textColor="@color/appColorSecondary"/>
+
+        <TextView
+            android:id="@+id/text_server"
+            style="@style/editTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/hint_protocol"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/stream_key"
+            android:textColor="@color/appColorSecondary"/>
+
+        <TextView
+            android:id="@+id/text_key"
+            style="@style/editTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/hint_key"/>
+
+    </LinearLayout>
+</LinearLayout>

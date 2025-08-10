@@ -8,6 +8,7 @@ import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.utils.Debouncer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
@@ -37,6 +38,9 @@ abstract class ZoomLevelHandler(
 
     protected var currentCameraZoom: Float = 0f
 
+    private var initialJob: Job? = null
+    private var zoomJob: Job? = null
+
     init {
         when (videoSource) {
             is Camera1Source -> {
@@ -56,7 +60,7 @@ abstract class ZoomLevelHandler(
         this.currentCameraZoom = this.current
 
         settingsRepository = SettingsRepository(context)
-        CoroutineScope(Dispatchers.Main).launch {
+        initialJob = CoroutineScope(Dispatchers.Main).launch {
             settingsRepository.initialZoom.collect { initialZoom ->
                 current = initialZoom
                 applyZoom()
@@ -78,7 +82,7 @@ abstract class ZoomLevelHandler(
     }
 
     private fun setCurrentZoom(value: Float) {
-        CoroutineScope(Dispatchers.Main).launch {
+        zoomJob = CoroutineScope(Dispatchers.Main).launch {
             if (current != value) {
                 current = max(lower, min(upper, value))
                 settingsRepository.setInitialZoom(current)

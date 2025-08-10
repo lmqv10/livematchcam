@@ -11,8 +11,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="5dp"
         android:text="@string/zoom_strategy"
-        android:textColor="@color/appColorSecondary"
-        android:textStyle="bold" />
+        android:textColor="@color/appColorSecondary" />
 
     <Spinner
         android:id="@+id/zoom_strategies"
@@ -27,8 +26,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="5dp"
         android:text="@string/offset_strategy"
-        android:textColor="@color/appColorSecondary"
-        android:textStyle="bold" />
+        android:textColor="@color/appColorSecondary"/>
 
     <Spinner
         android:id="@+id/offset_strategies"

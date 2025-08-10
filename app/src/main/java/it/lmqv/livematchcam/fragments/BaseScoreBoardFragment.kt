@@ -11,7 +11,6 @@ import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.services.CounterService
 import it.lmqv.livematchcam.viewmodels.CounterViewModel
-import it.lmqv.livematchcam.viewmodels.MatchViewModel
 
 interface IScoreBoardFragment {
     interface OnUpdateCallback {
@@ -32,7 +31,6 @@ abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment {
         this.onUpdateCallback = callback
     }
 
-    protected val matchViewModel: MatchViewModel by activityViewModels()
     private val counterViewModel: CounterViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

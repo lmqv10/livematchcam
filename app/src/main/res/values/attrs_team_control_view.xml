@@ -1,8 +1,8 @@
 <resources>
-    <declare-styleable name="TeamControlView">
-        <attr name="exampleString" format="string" />
-        <attr name="exampleDimension" format="dimension" />
-        <attr name="exampleColor" format="color" />
-        <attr name="exampleDrawable" format="color|reference" />
-    </declare-styleable>
+    <!--declare-styleable name="TeamControlView">
+        <attr name="teamName" format="string" />
+        <attr name="logoURL" format="string" />
+        <attr name="primaryColor" format="color" />
+        <attr name="secondaryColor" format="color" />
+    </declare-styleable-->
 </resources>

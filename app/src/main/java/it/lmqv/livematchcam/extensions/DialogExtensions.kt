@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import it.lmqv.livematchcam.R
@@ -130,6 +131,42 @@ fun Context.showEditStringDialog(@StringRes
     dialog.show()
 }
 
+fun Context.showLogoDialog(@StringRes
+                                 resTitleId: Int,
+                                 textValue: String,
+                                 delegate: (updatedTextValue: String) -> Unit) {
+    var context = this
+    val inflater = LayoutInflater.from(context)
+    val dialogView = inflater.inflate(R.layout.dialog_edit_text, null)
+
+    val tvTitle = dialogView.findViewById<TextView>(R.id.tv_title)
+    tvTitle.text = getString(resTitleId)
+
+    val etTextValue = dialogView.findViewById<EditText>(R.id.et_text_value)
+    etTextValue.text = Editable.Factory.getInstance().newEditable(textValue)
+
+    etTextValue.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        if (hasFocus) {
+            etTextValue.post(Runnable { etTextValue.selectAll() })
+        }
+    }
+
+    val dialog = androidx.appcompat.app.AlertDialog.Builder(context)
+        .setView(dialogView)
+        .setPositiveButton("Confirm") { dialog, _ ->
+            delegate(etTextValue.text.toString())
+            dialog.dismiss()
+        }
+        .create()
+
+    dialog.setOnShowListener {
+        etTextValue.requestFocus()
+    }
+    dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+    dialog.show()
+}
+
+
 fun Context.showQRCode(content: String) {
     var context = this
     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_qrcode, null)
@@ -146,7 +183,7 @@ fun Context.showQRCode(content: String) {
         val bitMatrix = qrCodeWriter.encode(content, BarcodeFormat.QR_CODE, 500, 500)
         val width = bitMatrix.width
         val height = bitMatrix.height
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        val bitmap = createBitmap(width, height, Bitmap.Config.RGB_565)
 
         for (x in 0 until width) {
             for (y in 0 until height) {
@@ -155,6 +192,7 @@ fun Context.showQRCode(content: String) {
         }
         qrCodeImageView.setImageBitmap(bitmap)
     } catch (e: Exception) {
+        Logd("Exception:: ${e.message.toString()}")
         e.printStackTrace()
     }
     dialog.show()

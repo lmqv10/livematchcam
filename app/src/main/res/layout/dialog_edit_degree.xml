@@ -12,7 +12,6 @@
         android:layout_height="match_parent"
         android:paddingHorizontal="5dp"
         android:gravity="center"
-        android:textStyle="bold"
         android:textSize="20sp"
         android:textColor="@color/secondary" />
 
@@ -37,7 +36,6 @@
         android:layout_height="match_parent"
         android:paddingHorizontal="5dp"
         android:gravity="center"
-        android:textStyle="bold"
         android:textSize="20sp"
         android:textColor="@color/secondary" />
 

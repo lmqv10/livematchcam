@@ -25,20 +25,22 @@ import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentUvcCameraBinding
+import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.sources.UvcSonyCameraSource
 import it.lmqv.livematchcam.utils.KeyValue
-import it.lmqv.livematchcam.viewmodels.MatchViewModel
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import it.lmqv.livematchcam.viewmodels.UVCStatusViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -50,7 +52,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     }
 
     private val streamersViewModel: StreamersViewModel by activityViewModels()
-    protected val matchViewModel: MatchViewModel by activityViewModels()
 
     private lateinit var settingsRepository: SettingsRepository
 
@@ -61,7 +62,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     private lateinit var scoreBoardFragment: IScoreBoardFragment
     private var uvcSonyCameraSource: UvcSonyCameraSource = UvcSonyCameraSource()
     private var scoreBoardFilter: ImageObjectFilterRender = ImageObjectFilterRender()
-    private var sportsFactory = SportsFactory
+    private lateinit var sportCollectJob : Job
 
     private var _binding: FragmentUvcCameraBinding? = null
     private val binding get() = _binding!!
@@ -109,17 +110,29 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
         childFragmentManager.beginTransaction()
             .add(R.id.status_container, statusFragment).commit()
 
-        var sportFragmentFactory = sportsFactory.get()
-        this.controlBarFragment = sportFragmentFactory.getControlBar()
-        this.scoreBoardFragment = sportFragmentFactory.getScoreBoard()
+        this.sportCollectJob = viewLifecycleOwner.lifecycleScope.launch {
+            MatchRepository.sport.collectLatest { sport ->
+                var sportFragmentFactory = SportsFactory.get(sport)
+                controlBarFragment = sportFragmentFactory.getControlBar()
+                scoreBoardFragment = sportFragmentFactory.getScoreBoard()
 
-        childFragmentManager.beginTransaction()
-            .replace(R.id.control_bar_container, this.controlBarFragment as Fragment, "ControlBarFragmentTag")
-            .commit()
+                childFragmentManager.beginTransaction()
+                    .replace(
+                        R.id.control_bar_container,
+                        controlBarFragment as Fragment,
+                        "ControlBarFragmentTag"
+                    )
+                    .commit()
 
-        childFragmentManager.beginTransaction()
-            .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
-            .commit()
+                childFragmentManager.beginTransaction()
+                    .replace(
+                        R.id.score_board_placeholder,
+                        scoreBoardFragment as Fragment,
+                        "ScoreBoardFragmentTag"
+                    )
+                    .commit()
+            }
+        }
 
         return binding.root
     }
@@ -158,7 +171,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
         binding.bStartStop.setOnClickListener {
             toast(streamersViewModel.getServerURI())
-            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
             val title = dialogView.findViewById<TextView>(R.id.dialog_message)
             if (genericStream.isStreaming) {
                 title.text = getString(R.string.confirm_stop_message)
@@ -238,7 +251,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
         callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (genericStream.isStreaming) {
-                    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
+                    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
                     val title = dialogView.findViewById<TextView>(R.id.dialog_message)
                     title.text = getString(R.string.confirm_stop_message)
 
@@ -277,8 +290,14 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
         refresh()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        this.sportCollectJob.cancel()
         genericStream.release()
         callback.remove()
     }
@@ -297,8 +316,10 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
                     genericStream.prepareAudio(sampleRate, isStereo, aBitrate)
             true
         } catch (e: IllegalArgumentException) {
+            Loge("IllegalArgumentException:: ${e.message.toString()}")
             false
         } catch (e: Exception) {
+            Loge("Exception:: ${e.message.toString()}")
             false
         }
 

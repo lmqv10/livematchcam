@@ -9,10 +9,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyControlBarBinding
-import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
@@ -20,8 +21,11 @@ import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseControlBarFragment
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 class VolleyControlBarFragment() : BaseControlBarFragment() {
     companion object {
@@ -46,27 +50,20 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        matchViewModel.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
+        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
             binding.homeTeam.text = homeTeam
         }
-        matchViewModel.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
+        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
             binding.awayTeam.text = guestTeam
         }
 
-        /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
-        }
-        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
-        }*/
         launchOnStarted {
             combine(
-                matchViewModel.homeColorHex,
-                matchViewModel.homeLogo) {
+                MatchRepository.homePrimaryColorHex,
+                MatchRepository.homeLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
-                //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.homeColor.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
@@ -80,12 +77,12 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
 
         launchOnStarted {
             combine(
-                matchViewModel.guestColorHex,
-                matchViewModel.guestLogo) {
+                MatchRepository.guestPrimaryColorHex,
+                MatchRepository.guestLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
                 //binding.awayColor.isClickable = logoURL.isNullOrEmpty()
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.awayColor.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
@@ -97,28 +94,30 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
             }
         }
 
-        matchViewModel.score.observe(viewLifecycleOwner) { scoreInstance ->
-            try {
-                //Logd("VolleyControlBar::score.observe")
-                val score = scoreInstance as? VolleyScore ?: VolleyScore()
-                volleyScoreViewModel.initScore(score)
-                //Logd("VolleyControlBar::score $score")
+        viewLifecycleOwner.lifecycleScope.launch {
+            MatchRepository.score.collectLatest { scoreInstance ->
+                //Logd("VolleyControlBar::score.collectLatest:: $scoreInstance")
+                try {
+                    val score = scoreInstance as VolleyScore
+                    volleyScoreViewModel.initScore(score)
+                    binding.homeScore.text = score.sets.last().home.toString()
+                    binding.awayScore.text = score.sets.last().guest.toString()
 
-                binding.homeScore.text = score.sets.last().home.toString()
-                binding.awayScore.text = score.sets.last().guest.toString()
+                    binding.removeLastSet.isEnabled = score.sets.size > 1
+                    binding.addNewSet.isEnabled = score.sets.size < 5
 
-                binding.removeLastSet.isEnabled = score.sets.size > 1
-                binding.addNewSet.isEnabled = score.sets.size < 5
-
-                binding.currentSet.text = score.sets.size.toString()
-            } catch (e: Exception) {
-                //Logd("VolleyControlBar Exception  $e.message")
+                    binding.currentSet.text = score.sets.size.toString()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Loge("VolleyControlBar::Exception:: ${e.message.toString()}")
+                }
             }
         }
 
-        volleyScoreViewModel.liveScore.observe(viewLifecycleOwner) { liveScore ->
-            if (liveScore != null) {
-                matchViewModel.setScore(liveScore)
+        viewLifecycleOwner.lifecycleScope.launch {
+            volleyScoreViewModel.liveScore.collectLatest { liveScore ->
+                //Logd("VolleyControlBar::liveScore.collectLatest::$liveScore")
+                MatchRepository.setScore(liveScore)
             }
         }
 
@@ -131,7 +130,7 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
         }
 
         binding.resetMatch.setOnClickListener {
-            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
             val title = dialogView.findViewById<TextView>(R.id.dialog_message)
             title.text = getString(R.string.reset_match_data_message)
 
@@ -169,20 +168,20 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
 
         binding.homeColor.setOnClickListener {
             requireContext().showColorPickerDialog { color ->
-                matchViewModel.setHomeColorHex(color)
+                MatchRepository.setHomePrimaryColorHex(color)
             }
         }
 
         binding.awayColor.setOnClickListener {
             requireContext().showColorPickerDialog { color ->
-                matchViewModel.setGuestColorHex(color)
+                MatchRepository.setGuestPrimaryColorHex(color)
             }
         }
 
         binding.homeTeam.setOnClickListener {
             var teamName = binding.homeTeam.text.toString()
             requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                matchViewModel.setHomeTeam(updatedTeamName)
+                MatchRepository.setHomeTeam(updatedTeamName)
                 requireActivity().hideSystemUI()
             }
         }
@@ -190,7 +189,7 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
         binding.awayTeam.setOnClickListener {
             var teamName = binding.awayTeam.text.toString()
             requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                matchViewModel.setGuestTeam(updatedTeamName)
+                MatchRepository.setGuestTeam(updatedTeamName)
                 requireActivity().hideSystemUI()
             }
         }
@@ -202,5 +201,10 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
                 requireActivity().hideSystemUI()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

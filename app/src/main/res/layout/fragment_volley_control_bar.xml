@@ -38,7 +38,6 @@
                 android:layout_weight="3"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textColor="@color/primary"
                 android:text="@string/home_team"/>
         </LinearLayout>
@@ -62,7 +61,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/primary"
@@ -110,7 +108,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/primary"
@@ -121,7 +118,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/primary"
@@ -184,7 +180,6 @@
                 android:layout_weight="3"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textColor="@color/primary"
                 android:text="@string/away_team"/>
 
@@ -215,7 +210,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/primary"

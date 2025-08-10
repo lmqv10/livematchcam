@@ -24,7 +24,7 @@ class BroadcastsAdapter(
 
         override fun getCount(): Int = items.size
 
-        override fun getItem(position: Int): Any = items[position]
+        override fun getItem(position: Int): BroadcastItem = items[position]
 
         override fun getItemId(position: Int): Long = position.toLong()
 
@@ -34,6 +34,7 @@ class BroadcastsAdapter(
             val imageView = view.findViewById<ImageView>(R.id.spinner_item_image)
             val titleView = view.findViewById<TextView>(R.id.spinner_item_text)
             val dateView = view.findViewById<TextView>(R.id.spinner_item_date)
+            //val keyView = view.findViewById<TextView>(R.id.spinner_item_broadcast_key)
 
             val item = items[position]
             imageView.load(item.imageURL) {
@@ -43,6 +44,7 @@ class BroadcastsAdapter(
 
             titleView.text = item.text
             dateView.text = item.dateFormat
+            //keyView.text = item.id
 
             return view
         }

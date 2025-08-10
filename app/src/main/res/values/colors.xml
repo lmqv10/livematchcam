@@ -4,9 +4,13 @@
     <color name="appColorSecondary">#666969</color>
 
     <color name="primary">#FFFFFFFF</color>
+    <color name="primary_1">#FF9800</color>
+    <color name="primary_2">#FFFFFFFF</color>
     <color name="secondary">#FF9800</color>
     <color name="secondary_dark">#C87900</color>
     <color name="secondary_darker">#724501</color>
+
+    <color name="primary_negative">#FF000000</color>
 
     <color name="alpha">#22000000</color>
     <color name="alpha_dark">#11000000</color>

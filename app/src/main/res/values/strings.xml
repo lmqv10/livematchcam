@@ -11,10 +11,12 @@
     <string name="tv_select">Select your streamer</string>
     <string name="hint_match_league">Serie C - Girone A</string>
     <string name="hint_home_team">AAA</string>
+    <string name="hint_title">ddddd - dd mmmm yyyy - Ore: hh:mm</string>
     <string name="hint_away_team">BBB</string>
     <string name="hint_protocol">rtmp://yourendpoint/streamname</string>
     <string name="hint_live">https://youtube.com/live/xxxxxxxxxxx</string>
     <string name="hint_key">xxxx-xxxx-xxxx-xxxx-xxxx</string>
+    <string name="hint_sport">Sport</string>
     <string name="left_degree">Left zoom at</string>
     <string name="right_degree">Right zoom at</string>
     <string name="hint_degree">0°</string>
@@ -24,6 +26,7 @@
     <string name="auto_zoom">auto zoom</string>
     <string name="streaming_url">Streaming URL</string>
     <string name="live_url">Live URL</string>
+    <string name="rtmp_server">RTMP Server</string>
     <string name="server">Server Configuration</string>
     <string name="broadcasts">Broadcasts</string>
     <string name="account">Account</string>
@@ -34,12 +37,13 @@
     <string name="match_info">Match info</string>
     <string name="stream_url">Stream URL</string>
     <string name="stream_key">Stream Key</string>
+    <string name="err_message">ERR</string>
     <string name="zoom_strategy">Zoom Strategy</string>
     <string name="offset_strategy">Offset Strategy</string>
     <string name="video_resolution">Video Resolution</string>
     <string name="video_fps">fps</string>
     <string name="choose_color">Choose shirt color</string>
-    <string name="choose_logo">Insert logo URL</string>
+    <string name="choose_logo">Insert or choose logo URL</string>
     <string name="handle_streamers">Streamers</string>
     <string name="add_remove">Add/Remove</string>
     <string name="stream">Stream</string>
@@ -52,6 +56,8 @@
     <string name="away_team">Team 2</string>
     <string name="streamin_time">00:00:00</string>
 
+    <string name="sport_soccer">Soccer</string>
+    <string name="sport_volley">Volley</string>
     <!--filters-->
     <string name="grey_scale">Grey scale</string>
     <string name="negative">Negative</string>
@@ -115,8 +121,14 @@
     <string name="bitmap">Bitmap</string>
 
     <string name="account_placeholder">-</string>
-    <string name="description_placeholder">-</string>
+    <string name="description_placeholder">...</string>
+    <string name="warning_placeholder">Confirm?</string>
+    <string name="live_name_placeholder">xxxxxxxxxxxxx</string>
+    <string name="live_id_placeholder">xxxxxxxxxxxxx</string>
+    <string name="server_placeholder">rtmp://...</string>
     <string name="title_placeholder">Event Title</string>
+    <string name="label_event_description">Description</string>
+    <string name="label_datetime">Date</string>
     <string name="date_placeholder">01/01/2025 10:00</string>
     <string name="time_placeholder">00:00</string>
     <string name="period_placeholder">1T</string>
@@ -141,8 +153,13 @@
     <string name="show_banner">Banner On</string>
     <string name="hide_banner">Banner Off</string>
 
+    <string name="logo_left">Home</string>
+    <string name="logo_right">Guest</string>
+
     <string name="confirm_stop_message">Stop streaming.\n Confirm?</string>
     <string name="confirm_start_message">Start streaming.\n Confirm?</string>
+
+    <string name="confirm_create_live_stream">Create Stream. Confirm?</string>
 
     <string name="reset_match_data_message">Reset match data.\n Confirm?</string>
 
@@ -150,6 +167,7 @@
     <string name="google_sign_in">Google Sign in</string>
     <string name="account_key_placeholder">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</string>
     <string name="sign_out">Sign out</string>
+
 
     <string name="permission_tip" translatable="false">You have already denied permission access. Go to the Settings page to turn on permissions</string>
     <string name="title_activity_settings">SettingsActivity</string>
@@ -170,4 +188,5 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
     <string name="youtube">YouTube</string>
+    <string name="youtube_stream">New Youtube Stream</string>
 </resources>

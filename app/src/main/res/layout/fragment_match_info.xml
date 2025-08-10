@@ -1,135 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/alpha_background"
+    android:layout_margin="10dp"
+    android:padding="10dp"
     tools:context=".fragments.MatchInfoFragment">
 
     <LinearLayout
+        android:id="@+id/match_info"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@drawable/alpha_background"
-        android:layout_margin="10dp"
-        android:padding="10dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_horizontal"
+            android:text="@string/match_info"
+            android:textColor="@color/appColorSecondary" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginVertical="5dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:weightSum="2">
 
-                <LinearLayout
-                    android:id="@+id/match_info"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:id="@+id/match_info_header"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:weightSum="10">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="9"
-                            android:layout_gravity="center_vertical"
-                            android:gravity="center_horizontal"
-                            android:text="@string/match_info"
-                            android:textColor="@color/appColorSecondary"
-                            android:textStyle="bold" />
-
-                        <ImageView
-                            android:id="@+id/remote_score"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:src="@drawable/remote_controller"
-                            app:tint="@color/primary"
-                            android:background="@drawable/score_board_secondary_background"/>
-
-                    </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@android:color/darker_gray"
-                    android:layout_marginVertical="8dp"/>
-
-                <LinearLayout
-                android:layout_width="match_parent"
+            <it.lmqv.livematchcam.views.TeamControlView
+                android:id="@+id/homeTeamControl"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="8">
+                android:layout_weight="1"
+            />
 
-                <ImageView
-                    android:id="@+id/home_color"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="40dp"
-                    android:gravity="start"
-                    android:src="@drawable/shirt_layers" />
-
-                <TextView
-                    android:id="@+id/home_team"
-                    android:layout_width="0dp"
-                    android:layout_weight="3"
-                    android:layout_height="wrap_content"
-                    android:textSize="20dp"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center"
-                    android:textStyle="bold"
-                    android:text="@string/home_team"/>
-
-                <TextView
-                    android:id="@+id/guest_team"
-                    android:layout_width="0dp"
-                    android:layout_weight="3"
-                    android:layout_height="wrap_content"
-                    android:textSize="20dp"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center"
-                    android:textStyle="bold"
-                    android:text="@string/away_team"/>
-
-                <ImageView
-                    android:id="@+id/guest_color"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="40dp"
-                    android:gravity="start"
-                    android:src="@drawable/shirt_layers" />
-            </LinearLayout>
-            </LinearLayout>
-            <TextView
-                android:layout_width="match_parent"
+            <it.lmqv.livematchcam.views.TeamControlView
+                android:id="@+id/guestTeamControl"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center_horizontal"
-                android:text="@string/sport"
-                android:layout_marginTop="10dp"
-                android:textColor="@color/appColorSecondary"
-                android:textStyle="bold" />
+                android:layout_weight="1"
+            />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray"
-                android:layout_marginVertical="8dp"/>
-
-            <GridView
-                android:id="@+id/sports_grid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:horizontalSpacing="3dp"
-                android:layout_marginTop="10dp"
-                android:gravity="center_horizontal"
-                android:layout_gravity="center_horizontal"
-                android:numColumns="2"
-                android:verticalSpacing="2dp" />
         </LinearLayout>
     </LinearLayout>
-</FrameLayout>
+
+    <FrameLayout
+        android:layout_marginTop="5dp"
+        android:id="@+id/sportsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+    />
+
+</LinearLayout>

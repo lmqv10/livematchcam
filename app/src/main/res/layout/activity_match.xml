@@ -19,7 +19,7 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
         <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/match_nav_host_fragment"
+            android:id="@+id/nav_host_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -27,35 +27,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:navGraph="@navigation/nav_graph"
             app:defaultNavHost="true"
-            tools:layout="@layout/fragment_servers" />
-
-        <!--
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:baselineAligned="false"
-            android:orientation="horizontal"
-            android:layout_marginTop="?attr/actionBarSize"
-            app:layout_constraintTop_toBottomOf="@id/custom_toolbar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:weightSum="2">
-
-            <FrameLayout
-                android:id="@+id/serversContainer"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                />
-
-            <FrameLayout
-                android:id="@+id/sportsContainer"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                />
-        </LinearLayout>
-        -->
+            tools:layout="@layout/fragment_server_configuration" />
 
         <LinearLayout
             android:id="@+id/floating_action_container"
@@ -63,28 +35,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="bottom|end"
-            android:padding="16dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
             android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintBottom_toTopOf="@id/tv_version"
             app:layout_constraintEnd_toEndOf="parent">
-
-            <!--Button
-                android:visibility="gone"
-                android:id="@+id/activity_youtube"
-                android:text="TEST"
-                android:layout_marginEnd="20dp"/-->
-
-            <!--ImageView
-                style="@style/defaultImageViewStyle"
-                android:id="@+id/activity_usb"
-                android:src="@drawable/usb_cam"
-                android:layout_marginEnd="20dp"/>
-
-            <ImageView
-                style="@style/defaultImageViewStyle"
-                android:id="@+id/activity_Live"
-                android:src="@drawable/play_stream" /-->
         </LinearLayout>
 
         <TextView
@@ -93,7 +49,6 @@
             android:gravity="start"
             android:textColor="@color/secondary_dark"
             android:textSize="11sp"
-            android:textStyle="bold"
             android:text="@string/version"
             android:paddingHorizontal="5dp"
             android:paddingBottom="2dp"

@@ -11,6 +11,7 @@ import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.repositories.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class RotationSensorService(private val activity: FragmentActivity) : SensorEventListener {
@@ -36,16 +37,22 @@ class RotationSensorService(private val activity: FragmentActivity) : SensorEven
     private var isRegistered = false
     private var settingsRepository: SettingsRepository
 
+    private var autoZoomJob: Job? = null
+
     init {
         rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
         settingsRepository = SettingsRepository(activity)
 
-        CoroutineScope(Dispatchers.Main).launch {
+        autoZoomJob = CoroutineScope(Dispatchers.Main).launch {
             settingsRepository.autoZoomEnabled.collect { enabled ->
                 isEnabled = enabled
                 register()
             }
         }
+    }
+
+    fun destroy() {
+        autoZoomJob?.cancel()
     }
 
     fun register() {

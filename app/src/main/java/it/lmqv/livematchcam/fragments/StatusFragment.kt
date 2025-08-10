@@ -1,8 +1,8 @@
 package it.lmqv.livematchcam.fragments
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import android.view.LayoutInflater
@@ -27,7 +27,6 @@ import it.lmqv.livematchcam.extensions.resolutionFormat
 import it.lmqv.livematchcam.extensions.singleDecimalFormat
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 class StatusFragment : Fragment(),
     RotationSensorService.OnRotationListener {
@@ -160,14 +159,16 @@ class StatusFragment : Fragment(),
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        rotationSensorService.destroy()
+        _binding = null
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         listener = parentFragment as? OnZoomButtonClickListener
             ?: throw ClassCastException("$parentFragment must implement OnZoomButtonClickListener")
-    }
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     override fun onResume() {
@@ -185,11 +186,12 @@ class StatusFragment : Fragment(),
     }
 
     override fun onError(e: Exception) {
-        binding.angleDegreeX.text = "ERR"
-        binding.angleDegreeZ.text = "ERR"
+        binding.angleDegreeX.text = getString(R.string.stream_key)
+        binding.angleDegreeZ.text = getString(R.string.stream_key)
     }
 
     // TODO : Improve
+    @SuppressLint("DefaultLocale")
     private fun editZoomOffset() {
         val inflater = LayoutInflater.from(requireContext())
         val dialogView = inflater.inflate(R.layout.dialog_edit_offset, null)
@@ -209,7 +211,7 @@ class StatusFragment : Fragment(),
 
         lifecycleScope.launch {
             settingsRepository.zoomOffset.collect { offset ->
-                val selected = floatValues.filter { x -> x.key == offset }.first()
+                val selected = floatValues.first { x -> x.key == offset }
                 numberPicker.value = floatValues.indexOf(selected)
             }
         }
@@ -289,5 +291,4 @@ class StatusFragment : Fragment(),
         }
         dialog.show()
     }
-
 }

@@ -11,15 +11,20 @@ import android.os.Build
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.google.api.client.util.DateTime
 import it.lmqv.livematchcam.R
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.reflect.full.memberProperties
@@ -31,6 +36,33 @@ fun Service.toast(message: String, duration: Int = Toast.LENGTH_SHORT) {
 
 fun Context.toast(message: String, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(this, message, duration).show()
+}
+
+fun View.hideKeyboard() {
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+    imm?.hideSoftInputFromWindow(windowToken, 0)
+    clearFocus()
+}
+
+fun View.setEnabledRecursively(enabled: Boolean) {
+    this.isEnabled = enabled
+    this.isClickable = enabled
+    this.isFocusable = enabled
+    this.alpha = if (enabled) 1.0f else 0.5f
+
+    if (this is ViewGroup) {
+        for (i in 0 until childCount) {
+            getChildAt(i).setEnabledRecursively(enabled)
+        }
+    }
+}
+
+fun Fragment.hideKeyboard() {
+    view?.let { v ->
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        imm?.hideSoftInputFromWindow(v.windowToken, 0)
+        v.clearFocus()
+    }
 }
 
 fun MenuItem.setColor(context: Context, @ColorRes color: Int) {
@@ -131,6 +163,12 @@ fun formatDate(dateTime: DateTime?, format: String = "EEEE dd MMMM yyyy HH:mm"):
         dateFormat = sdf.format(date)
     }
     return dateFormat
+}
+
+fun formatDate(calendar: Calendar): String {
+    val dateFormat = SimpleDateFormat("EEEE - dd MMMM yyyy - HH:mm", Locale.getDefault())
+    val dateTimeString = dateFormat.format(calendar.time).lowercase()
+    return dateTimeString
 }
 
 fun formatDateFromString(dateString: String, format: String = "ddd dd/MM/yyyy HH:mm"): String {

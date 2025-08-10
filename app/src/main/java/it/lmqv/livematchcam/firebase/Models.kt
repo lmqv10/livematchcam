@@ -1,8 +1,10 @@
 package it.lmqv.livematchcam.firebase
 
-data class Accounts(
+import it.lmqv.livematchcam.factories.Sports
+
+/*data class Accounts(
     val accounts: Map<String, Account>
-)
+)*/
 
 data class Account(
     val guid: String = "",
@@ -14,31 +16,54 @@ data class Account(
     val matches: Map<String, Match> = emptyMap()
 )
 
+/*data class Event(
+    val match: Match = Match(),
+    var eventInfo: EventInfo = EventInfo()
+    TODO var banners: Banners = Banners()
+)*/
+
 data class Match(
     val homeTeam: String = "ABC",
-    val homeColorHex: String = "#FFFFFF",
+    val homePrimaryColorHex: String = "#FFFFFF",
+    val homeSecondaryColorHex: String = "#FFFFFF",
     val homeLogo: String = "",
     val guestTeam: String = "DEF",
-    val guestColorHex: String = "#000000",
+    val guestPrimaryColorHex: String = "#000000",
+    val guestSecondaryColorHex: String = "#000000",
     val guestLogo: String = "",
     val spotBannerURL: String = "",
     val spotBannerVisible: Boolean = false,
     val mainBannerURL: String = "",
-    val mainBannerVisible: Boolean = false,
-    var type: String = "",
+    val mainBannerVisible: Boolean = false
+)
+
+data class EventInfo(
+    var sport: Sports = Sports.SOCCER,
+    var score: IScore = SoccerScore()
+)
+
+data class EventInfoData(
+    var sport: String = "",
     var score: Map<String, Any?>? = null
+)
+
+data class Banners (
+    val spotBannerURL: String = "",
+    val spotBannerVisible: Boolean = false,
+    val mainBannerURL: String = "",
+    val mainBannerVisible: Boolean = false
 )
 
 interface IScore {
     val command: String
 }
 
-class UnknownScore(override val command: String) : IScore
+class UnknownScore(override val command: String = "") : IScore
 
 data class SoccerScore (
     val home: Long = 0,
     val away: Long = 0,
-    val period: String = "",
+    val period: String = "1T",
     override val command: String = ""
 ) : IScore
 

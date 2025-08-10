@@ -16,7 +16,7 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
     val streamURL: StateFlow<String?> = _streamURL
 
     suspend fun setCurrentBoundStreamId(currentBoundStreamId: String?) {
-        val liveStream = _liveStreams.firstOrNull { x -> x.id == currentBoundStreamId }
+        val liveStream = _liveStreams.value.firstOrNull { x -> x.id == currentBoundStreamId }
         val ingestionInfo = liveStream?.cdn?.ingestionInfo
         val ingestionAddress = ingestionInfo?.ingestionAddress
         val streamName = ingestionInfo?.streamName!!
@@ -42,8 +42,9 @@ class YoutubeViewModel(application: Application) : AndroidViewModel(application)
         _liveURL.value = "\thttps://youtube.com/live/" + updatedBroadcast.id
     }
 
-    private var _liveStreams = listOf<LiveStream>()
+    private var _liveStreams = MutableStateFlow<List<LiveStream>>(mutableListOf())
+    val liveStreams: StateFlow<List<LiveStream>> = _liveStreams
     fun setLiveStreams(liveStreams: List<LiveStream>) {
-        _liveStreams = liveStreams
+        _liveStreams.value = liveStreams
     }
 }

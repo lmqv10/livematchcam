@@ -8,11 +8,13 @@ import com.google.firebase.database.ValueEventListener
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.factories.Sports
 
-class FirebaseDataManager {
+object FirebaseDataManager {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
 
     private var matchKeyRef: DatabaseReference? = null
     private var matchValueEventListener: ValueEventListener? = null
+    private var eventInfoKeyRef: DatabaseReference? = null
+    private var eventInfoValueEventListener: ValueEventListener? = null
 
     private var isAdministrator: Boolean = false
     private var isAuthorizedUser: Boolean = false
@@ -20,18 +22,6 @@ class FirebaseDataManager {
     private val isValidAccount: Boolean get() =
         (isAdministrator || isAuthorizedUser)
         && currentAccountKey.isNotEmpty()
-
-    companion object {
-        @Volatile
-        private var INSTANCE: FirebaseDataManager? = null
-
-        fun getInstance(): FirebaseDataManager {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: FirebaseDataManager().also { INSTANCE = it }
-            }
-        }
-    }
-
 
     fun authenticateAccount(accountGoogle: String,
                             accountKey: String,
@@ -75,34 +65,77 @@ class FirebaseDataManager {
         }
     }
 
-    fun attachMatchValueEventListener(currentKey: String?,
-                                      sport: Sports,
-                                      onChangeCallback: (Match, IScore) -> Unit) {
+    fun attachMatchValueEventListener(currentKey: String?, onMatchChangeCallback: (Match) -> Unit) {
         val isValidKey = !currentKey.isNullOrEmpty()
-        //Logd("attachMatchValueEventListener $isValidKey")
+        //Logd("FirebaseDataManager::attachMatchValueEventListener $currentKey")
         if (isValidKey) {
-            this.matchKeyRef = database.getReference("accounts/$currentAccountKey/matches/$currentKey")
+            detachMatchValueEventListener()
 
-            if (this.matchValueEventListener != null) {
-                this.matchKeyRef?.removeEventListener(this.matchValueEventListener!!)
-            }
+            this.matchKeyRef = database.getReference("accounts/$currentAccountKey/matches/$currentKey/match")
+            this.matchValueEventListener =
+                matchKeyRef?.addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            val match = snapshot.getValue(Match::class.java)
+                            if (match != null) {
+                                onMatchChangeCallback(match)
+                            }
+                        } else {
+                            updateMatchValue(Match())
+                        }
+                    }
 
-            this.matchValueEventListener = matchKeyRef?.addValueEventListener(object : ValueEventListener {
+                    override fun onCancelled(error: DatabaseError) {
+                    }
+                })
+        }
+    }
+
+    fun detachMatchValueEventListener () {
+        if (this.matchValueEventListener != null) {
+            //Logd("FirebaseDataManager::detachMatchValueEventListener $matchKeyRef")
+            this.matchKeyRef?.removeEventListener(this.matchValueEventListener!!)
+        }
+    }
+
+    fun attachEventInfoValueEventListener(currentKey: String?, selectedSport : Sports, onScoreChangeCallback: (EventInfo) -> Unit) {
+        val isValidKey = !currentKey.isNullOrEmpty()
+        //Logd("FirebaseDataManager::attachMatchValueEventListener $currentKey")
+        if (isValidKey) {
+            this.detachEventInfoValueEventListener()
+
+            this.eventInfoKeyRef = database.getReference("accounts/$currentAccountKey/matches/$currentKey/eventInfo")
+            this.eventInfoValueEventListener = this.eventInfoKeyRef?.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
-                        val match = snapshot.getValue(Match::class.java)
-                        if (match != null) {
-                            val score = ScoreFactory.getInstance().buildByType(match.type, snapshot)
-                            //Logd("onDataChange::${score}")
-                            onChangeCallback(match, score)
+                        val eventInfoData = snapshot.getValue(EventInfoData::class.java)
+                        if (eventInfoData != null) {
+                            val score = ScoreFactory.buildByType(eventInfoData.sport, snapshot)
+                            val sport: Sports = enumValues<Sports>().find { it.name == eventInfoData.sport } ?: Sports.SOCCER
+                            var eventInfo = EventInfo(sport, score)
+                            //Logd("FirebaseDataManager::onDataChange::$eventInfo")
+                            onScoreChangeCallback(eventInfo)
                         }
                     } else {
-                        updateMatchValue(Match(type = sport.name))
+                        //Logd("FirebaseDataManager::onDataCreate::$selectedSport")
+
+                        var defaultScore = ScoreFactory.getInitialScore(selectedSport)
+                        val scoreMap = ScoreFactory.buildMap(defaultScore)
+                        val eventInfoData = EventInfoData(selectedSport.name, scoreMap)
+                        updateEventInfoValue(eventInfoData)
                     }
                 }
                 override fun onCancelled(error: DatabaseError) {
                 }
             })
+        }
+    }
+
+
+    fun detachEventInfoValueEventListener () {
+        if (this.eventInfoValueEventListener != null) {
+            //Logd("FirebaseDataManager::detachEventInfoValueEventListener $eventInfoKeyRef")
+            this.eventInfoKeyRef?.removeEventListener(this.eventInfoValueEventListener!!)
         }
     }
 
@@ -112,9 +145,9 @@ class FirebaseDataManager {
         }
     }
 
-    fun updateScoreValue(score: Map<String, Any?>?) {
+    fun updateEventInfoValue(eventInfoData: EventInfoData) {
         if (this.isValidAccount) {
-            this.matchKeyRef?.child("score")?.setValue(score)
+            this.eventInfoKeyRef?.setValue(eventInfoData)
         }
     }
 
@@ -140,7 +173,6 @@ class FirebaseDataManager {
             }
         })
     }*/
-
 
     /*fun saveAccount(accountId: String, account: Account, callback: (Boolean) -> Unit) {
         accountsRef.child(accountId).setValue(account)

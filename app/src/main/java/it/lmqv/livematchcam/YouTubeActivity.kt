@@ -4,16 +4,18 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -36,6 +38,8 @@ import com.google.android.gms.nearby.connection.Strategy
 import com.google.android.gms.tasks.Task
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.http.FileContent
+import com.google.api.client.http.InputStreamContent
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.DateTime
@@ -48,6 +52,7 @@ import com.google.api.services.youtube.model.LiveStream
 import com.google.api.services.youtube.model.LiveStreamSnippet
 import it.lmqv.livematchcam.databinding.ActivityYouTubeBinding
 import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.utils.KeyValue
 import kotlinx.coroutines.CoroutineScope
@@ -57,6 +62,13 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlin.text.set
 
 class YouTubeActivity : AppCompatActivity() {
 
@@ -214,8 +226,8 @@ class YouTubeActivity : AppCompatActivity() {
         val account = GoogleSignIn.getLastSignedInAccount(this)
         if (account != null) {
             // User is already signed in
-            val email = account.email
-            val displayName = account.displayName
+            //val email = account.email
+            //val displayName = account.displayName
             accountName = account.account?.name ?: ""
             //val idToken = account.serverAuthCode
             CoroutineScope(Dispatchers.IO).launch {
@@ -259,7 +271,7 @@ class YouTubeActivity : AppCompatActivity() {
         }
         catch (e: Exception)
         {
-
+            Loge("YoutubeActivity::tException:: ${e.message.toString()}")
         }
     }
 
@@ -292,7 +304,7 @@ class YouTubeActivity : AppCompatActivity() {
         }
         catch (e: Exception)
         {
-            var m = e.message
+            Loge("YoutubeActivity::tException:: ${e.message.toString()}")
         }
     }
 
@@ -328,6 +340,7 @@ class YouTubeActivity : AppCompatActivity() {
                 .insert("snippet,status", liveBroadcast)
 
             val broadcastResponse = broadcastInsert.execute()
+
             val broadcastId = broadcastResponse.id
 
             val liveStream = LiveStream()
@@ -352,8 +365,8 @@ class YouTubeActivity : AppCompatActivity() {
 
             // Retrieve the ingestion details:
             val ingestionInfo = streamResponse.cdn.ingestionInfo
-            val streamKey = ingestionInfo.streamName  // This is your RTMP stream key
-            val ingestionUrl = ingestionInfo.ingestionAddress  // RTMP server URL
+            //val streamKey = ingestionInfo.streamName  // This is your RTMP stream key
+            //val ingestionUrl = ingestionInfo.ingestionAddress  // RTMP server URL
 
             //Logd("streamKey:: $streamKey")
             //Logd("ingestionUrl:: $ingestionUrl")
@@ -365,11 +378,57 @@ class YouTubeActivity : AppCompatActivity() {
             bindRequest.execute()
         }
         catch (e: Exception) {
-            Log.d("EXCEPTION", e.message.toString())
+            Loge("YoutubeActivity::tException:: ${e.message.toString()}")
             //var exx = e.message
         }
 
     }
+
+    private fun setBroadcastThumbnail(broadcastId: String, thumbnailFile: File) {
+        try {
+            val transport = NetHttpTransport()
+            val jsonFactory = GsonFactory.getDefaultInstance()
+
+            val credential = GoogleAccountCredential.usingOAuth2(
+                applicationContext, listOf("https://www.googleapis.com/auth/youtube")
+            )
+            credential.selectedAccountName = accountName /* Set the authenticated user's account name */
+
+            val youtubeService = YouTube.Builder(transport, jsonFactory, credential)
+                .setApplicationName("LiveMatchCam")
+                .build()
+
+            val mediaContent = FileContent("image/jpeg", thumbnailFile)
+
+            /*Thread {
+                try {
+
+                    val thumbnailSet = youtubeService.thumbnails()
+                        .set(videoId, content)
+                    thumbnailSet.execute()
+                    runOnUiThread {
+                        // Mostra conferma all'utente
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    runOnUiThread {
+                        // Mostra errore
+                    }
+                }
+            }.start()*/
+
+            val thumbnailSet = youtubeService.thumbnails()
+                .set(broadcastId, mediaContent)
+
+            val thumbnailSetResponse = thumbnailSet.execute()
+
+        }
+        catch (e: Exception) {
+            Loge("YoutubeActivity::tException:: ${e.message.toString()}")
+            //var exx = e.message
+        }
+    }
+
 
     private fun oAuthHandler() {
         val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -405,8 +464,8 @@ class YouTubeActivity : AppCompatActivity() {
                 //Logd("TOKEN::" + accessToken)
             }
             //_AccessToken = account.idToken!!
-            val tes = account.email
-            var scopes = account.grantedScopes
+            //val tes = account.email
+            //var scopes = account.grantedScopes
 
             // Exchange the serverAuthCode for an access token using your backend or library.
         } else {
@@ -472,10 +531,10 @@ class YouTubeActivity : AppCompatActivity() {
             }
         } catch (e: UserRecoverableAuthException) {
             // Handle by prompting the user to grant permissions
-            Logd("User action required: ${e.intent}")
+            Loge("User action required: ${e.intent}")
             null
         } catch (e: Exception) {
-            Logd("Failed to get token: ${e.message}")
+            Loge("Failed to get token: ${e.message}")
             null
         }
     }

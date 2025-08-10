@@ -15,29 +15,23 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
-import coil.load
 import coil.request.ImageRequest
 import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.Camera1Source
 import com.pedro.encoder.input.sources.video.Camera2Source
-import com.pedro.encoder.input.sources.video.VideoFileSource
-import com.pedro.encoder.input.sources.video.VideoSource
-import com.pedro.extrasources.CameraUvcSource
 import com.pedro.library.generic.GenericStream
-import com.pedro.library.rtmp.RtmpCamera1
 import com.pedro.library.util.BitrateAdapter
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.views.SwipeSurfaceView
 import it.lmqv.livematchcam.databinding.FragmentCameraBinding
-import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
@@ -45,34 +39,21 @@ import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
-import it.lmqv.livematchcam.handlers.offset.LeftRightWithManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
-import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetDegreeHandler
-import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetGapDegreeHandler
-import it.lmqv.livematchcam.handlers.offset.LeftRightOffsetGapNoCornerHandler
-import it.lmqv.livematchcam.handlers.offset.LeftRightWithAutoDepthZoomLevelHandler
-import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
 import it.lmqv.livematchcam.handlers.offset.ManualZoomLevelHandler
-import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeHandler
-import it.lmqv.livematchcam.handlers.offset.ProgressiveOffsetDegreeWithCapHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.NoDebounceExtraSmoothZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.NoDebounceSmoothZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.NoDebounceZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.SingleZoomLevelHandler
-import it.lmqv.livematchcam.handlers.zoom.SmoothZoomLevelHandler
 import it.lmqv.livematchcam.utils.KeyValue
-import it.lmqv.livematchcam.viewmodels.Command
-import it.lmqv.livematchcam.viewmodels.MatchViewModel
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.reflect.KClass
 
 open class CameraFragment: Fragment(), ConnectChecker,
     IScoreBoardFragment.OnUpdateCallback,
@@ -84,7 +65,6 @@ open class CameraFragment: Fragment(), ConnectChecker,
     }
 
     private val streamersViewModel: StreamersViewModel by activityViewModels()
-    protected val matchViewModel: MatchViewModel by activityViewModels()
 
     private lateinit var settingsRepository: SettingsRepository
 
@@ -99,7 +79,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
     private var scoreBoardFilter: ImageObjectFilterRender = ImageObjectFilterRender()
     private var spotBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
     private var mainBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
-    private var sportsFactory = SportsFactory
+    private lateinit var sportCollectJob : Job
 
     private var _binding: FragmentCameraBinding? = null
     private val binding get() = _binding!!
@@ -146,17 +126,29 @@ open class CameraFragment: Fragment(), ConnectChecker,
         childFragmentManager.beginTransaction()
             .add(R.id.status_container, statusFragment).commit()
 
-        var sportFragmentFactory = sportsFactory.get()
-        this.controlBarFragment = sportFragmentFactory.getControlBar()
-        this.scoreBoardFragment = sportFragmentFactory.getScoreBoard()
+        this.sportCollectJob = viewLifecycleOwner.lifecycleScope.launch {
+            MatchRepository.sport.collectLatest { sport ->
+                var sportFragmentFactory = SportsFactory.get(sport)
+                controlBarFragment = sportFragmentFactory.getControlBar()
+                scoreBoardFragment = sportFragmentFactory.getScoreBoard()
 
-        childFragmentManager.beginTransaction()
-            .replace(R.id.control_bar_container, this.controlBarFragment as Fragment, "ControlBarFragmentTag")
-            .commit()
+                childFragmentManager.beginTransaction()
+                    .replace(
+                        R.id.control_bar_container,
+                        controlBarFragment as Fragment,
+                        "ControlBarFragmentTag"
+                    )
+                    .commit()
 
-        childFragmentManager.beginTransaction()
-            .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
-            .commit()
+                childFragmentManager.beginTransaction()
+                    .replace(
+                        R.id.score_board_placeholder,
+                        scoreBoardFragment as Fragment,
+                        "ScoreBoardFragmentTag"
+                    )
+                    .commit()
+            }
+        }
 
         when (genericStream.videoSource) {
             is Camera1Source -> {
@@ -183,7 +175,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
         super.onViewCreated(view, savedInstanceState)
 
         launchOnStarted {
-            matchViewModel.isRealtimeDatabaseAvailable.collect { isAvailable ->
+            MatchRepository.isRealtimeDatabaseAvailable.collect { isAvailable ->
                 if (isAvailable) {
                     binding.mainBannerContainer.visibility = View.VISIBLE
                 } else {
@@ -226,7 +218,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         binding.bStartStop.setOnClickListener {
             toast(streamersViewModel.getServerURI())
-            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
             val title = dialogView.findViewById<TextView>(R.id.dialog_message)
             if (genericStream.isStreaming) {
                 title.text = getString(R.string.confirm_stop_message)
@@ -300,11 +292,11 @@ open class CameraFragment: Fragment(), ConnectChecker,
         }
 
         binding.mainBannerSwitch.setOnCheckedChangeListener { _, isChecked ->
-            matchViewModel.setMainBannerVisible(isChecked)
+            MatchRepository.setMainBannerVisible(isChecked)
         }
 
         lifecycleScope.launch {
-            matchViewModel.mainBannerVisible.collect { isVisible ->
+            MatchRepository.mainBannerVisible.collect { isVisible ->
                 binding.mainBannerSwitch.isChecked = isVisible
                 if (isVisible) {
                     binding.mainBannerTip.text = resources.getString(R.string.show_banner)
@@ -315,8 +307,8 @@ open class CameraFragment: Fragment(), ConnectChecker,
         }
 
         lifecycleScope.launch {
-            matchViewModel.mainBannerURL.collect { spotBannerURL ->
-                var isEnabled = !spotBannerURL.isNullOrEmpty()
+            MatchRepository.mainBannerURL.collect { spotBannerURL ->
+                var isEnabled = spotBannerURL.isNotEmpty()
                 binding.mainBannerSwitch.isEnabled = isEnabled
             }
         }
@@ -329,8 +321,8 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         lifecycleScope.launch {
             combine(
-                matchViewModel.spotBannerURL,
-                matchViewModel.spotBannerVisible
+                MatchRepository.spotBannerURL,
+                MatchRepository.spotBannerVisible
             ) { url, visible -> Pair(url, visible)
             }.collect { (url, visible) ->
                 launchOnStarted {
@@ -368,8 +360,8 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         lifecycleScope.launch {
             combine(
-                matchViewModel.mainBannerURL,
-                matchViewModel.mainBannerVisible
+                MatchRepository.mainBannerURL,
+                MatchRepository.mainBannerVisible
             ) { url, visible ->
                 Pair(url, visible)
             }.collect { (url, visible) ->
@@ -405,7 +397,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
             }
         }
 
-        matchViewModel.score.observe(viewLifecycleOwner) { iScore ->
+        /*matchViewModel.score.observe(viewLifecycleOwner) { iScore ->
             val command = iScore?.command
             if (command == Command.ZOOM_IN.toString()) {
                 this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.In)
@@ -416,8 +408,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
             if (command == Command.ZOOM_OUT.toString()) {
                 this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.Out)
             }
-        }
-
+        }*/
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -427,7 +418,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
         callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (genericStream.isStreaming) {
-                    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_start_stop_stream, null)
+                    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
                     val title = dialogView.findViewById<TextView>(R.id.dialog_message)
                     title.text = getString(R.string.confirm_stop_message)
 
@@ -468,8 +459,14 @@ open class CameraFragment: Fragment(), ConnectChecker,
         refresh()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        this.sportCollectJob.cancel()
         genericStream.release()
         callback.remove()
     }
@@ -486,6 +483,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
                     genericStream.prepareAudio(sampleRate, isStereo, aBitrate)
             true
         } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
             false
         }
 
@@ -556,20 +554,25 @@ open class CameraFragment: Fragment(), ConnectChecker,
     }
 
     override fun refresh() {
-        this.scoreBoardFragment.getBitmapView { scoreBoardBitmap ->
-            val maxFactor = 25f
-            val defaultScaleX = (scoreBoardBitmap.width * 100 / width).toFloat()
-            val defaultScaleY = (scoreBoardBitmap.height * 100 / height).toFloat()
+        try {
+            this.scoreBoardFragment.getBitmapView { scoreBoardBitmap ->
+                val maxFactor = 25f
+                val defaultScaleX = (scoreBoardBitmap.width * 100 / width).toFloat()
+                val defaultScaleY = (scoreBoardBitmap.height * 100 / height).toFloat()
 
-            val factorX = maxFactor / defaultScaleX
-            val scaleX = factorX * defaultScaleX
-            val scaleY = factorX * defaultScaleY
+                val factorX = maxFactor / defaultScaleX
+                val scaleX = factorX * defaultScaleX
+                val scaleY = factorX * defaultScaleY
 
-            this.scoreBoardFilter.apply {
-                setImage(scoreBoardBitmap)
-                setScale(scaleX, scaleY)
-                setPosition(0.15f, 0.15f)
+                this.scoreBoardFilter.apply {
+                    setImage(scoreBoardBitmap)
+                    setScale(scaleX, scaleY)
+                    setPosition(0.15f, 0.15f)
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Loge("CameraFragment::Exception:: ${e.message.toString()}")
         }
     }
 
@@ -589,13 +592,13 @@ open class CameraFragment: Fragment(), ConnectChecker,
         //zoomLevelHandler.upper()
     }
 
-    fun updateZoom(zoomLevel: ManualZoomLevel) {
-        /*this.offsetDegreeHandler.manualZoomLevel(zoomLevel)
+    /*fun updateZoom(zoomLevel: ManualZoomLevel) {
+        this.offsetDegreeHandler.manualZoomLevel(zoomLevel)
         statusViewModel.angleDegrees.value?.let {
             val offset = this.offsetDegreeHandler.getOffsetByDegrees(it)
             onChangeZoom(offset)
-        }*/
-    }
+        }
+    }*/
 
     private fun onChangeZoom(offset: Float) {
         zoomLevelHandler.withOffset(offset) { zoomLevel ->
@@ -621,6 +624,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
         timeElapsedInSeconds = 0
     }
 
+    /*
     private fun changeZoomStrategyDialog() {
         val inflater = LayoutInflater.from(requireContext())
         val dialogView = inflater.inflate(R.layout.dialog_change_settings, null)
@@ -689,7 +693,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
         }
 
         dialog.show()
-    }
+    }*/
 
     override fun onZoomIn() {
         zoomLevelHandler.increase()
