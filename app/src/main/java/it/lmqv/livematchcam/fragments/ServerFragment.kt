@@ -12,7 +12,8 @@ import it.lmqv.livematchcam.databinding.FragmentServerBinding
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showEditStringDialog
-import it.lmqv.livematchcam.viewmodels.StreamersViewModel
+import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.viewmodels.ServerViewModel
 
 class ServerFragment : Fragment() {
 
@@ -21,7 +22,7 @@ class ServerFragment : Fragment() {
         fun newInstance() = ServerFragment()
     }
 
-    private val streamersViewModel: StreamersViewModel by activityViewModels()
+    private val serverViewModel: ServerViewModel by activityViewModels()
 
     private var _binding: FragmentServerBinding? = null
     private val binding get() = _binding!!
@@ -38,7 +39,13 @@ class ServerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         launchOnStarted {
-            streamersViewModel.currentServer.collect { currentServer ->
+            serverViewModel.serverURI.collect { serverURI ->
+                MatchRepository.setRTMPServer(serverURI)
+            }
+        }
+
+        launchOnStarted {
+            serverViewModel.currentServer.collect { currentServer ->
                 if (currentServer != null && binding.textServer.text.toString() != currentServer) {
                     binding.textServer.text = currentServer
                 }
@@ -46,7 +53,7 @@ class ServerFragment : Fragment() {
         }
 
         launchOnStarted {
-            streamersViewModel.currentKey.collect { currentKey ->
+            serverViewModel.currentKey.collect { currentKey ->
                 if (currentKey != null && binding.textKey.text.toString() != currentKey) {
                     binding.textKey.text = currentKey
                 }
@@ -55,8 +62,8 @@ class ServerFragment : Fragment() {
 
         binding.textServer.setOnClickListener {
             val sourceServer = binding.textServer.text.toString()
-            requireContext().showEditStringDialog(R.string.stream_url, sourceServer, arrayOf<InputFilter>()) { updatedServer ->
-                streamersViewModel.setCurrentServer(updatedServer)
+            requireContext().showEditStringDialog(R.string.rtmp_server, sourceServer, arrayOf<InputFilter>()) { updatedServer ->
+                serverViewModel.setCurrentServer(updatedServer)
                 requireActivity().hideSystemUI()
             }
         }
@@ -64,7 +71,7 @@ class ServerFragment : Fragment() {
         binding.textKey.setOnClickListener {
             val sourceKey = binding.textKey.text.toString()
             requireContext().showEditStringDialog(R.string.stream_key, sourceKey, arrayOf<InputFilter>()) { updatedKey ->
-                streamersViewModel.setCurrentKey(updatedKey)
+                serverViewModel.setCurrentKey(updatedKey)
                 requireActivity().hideSystemUI()
             }
         }

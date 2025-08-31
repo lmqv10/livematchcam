@@ -1,67 +1,177 @@
 package it.lmqv.livematchcam.preferences
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.core.content.edit
-import java.util.Calendar
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
+import com.google.gson.reflect.TypeToken
+import it.lmqv.livematchcam.adapters.LiveBroadcastItem
+import it.lmqv.livematchcam.extensions.Loge
+import it.lmqv.livematchcam.extensions.loadBitmapFromUrl
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.lang.reflect.Type
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.String
 
-class LiveStreamPreferences(context: Context) {
-    private val prefs = context.getSharedPreferences("live_stream_prefs", Context.MODE_PRIVATE)
+data class ThumbnailAssets(
+    var background: Bitmap? = null,
+    var logoHome: Bitmap? = null,
+    var logoGuest: Bitmap? = null,
+    var calendar: ZonedDateTime = ZonedDateTime.now())
 
-    private val key_id: String = "id"
-    private val key_description: String = "description"
-    private val key_background: String = "background"
-    private val key_logo_home: String = "logo_home"
-    private val key_logo_guest: String = "logo_guest"
-    private val key_date = "key_date"
 
-    fun getId(): String? {
-        return prefs.getString(key_id, null)
-    }
+data class ScheduleData(
+    var backgroundFilePath: String = "",
+    var logoHome: String = "",
+    var logoGuest: String = "",
+    var title: String = "",
+    var liveStreamId: String? = null,
+    var scheduleTime: ZonedDateTime = ZonedDateTime.now())
 
-    fun setId(id: String) {
-        prefs.edit { putString(key_id, id) }
-    }
+data class KeyScheduleData(
+    val key: String,
+    val value: ScheduleData
+)
 
-    fun getDescription(): String? {
-        return prefs.getString(key_description, null)
-    }
-    fun setDescription(description: String) {
-        prefs.edit { putString(key_description, description) }
-    }
+suspend fun ScheduleData.toThumbnailAsset(context: Context) : ThumbnailAssets {
+    return ThumbnailAssets(
+        BitmapFactory.decodeFile(this.backgroundFilePath),
+        context.loadBitmapFromUrl(this.logoHome),
+        context.loadBitmapFromUrl(this.logoGuest),
+        this.scheduleTime
+    )
+}
 
-    fun getBackground(): String? {
-        return prefs.getString(key_background, null)
-    }
-    fun setBackground(background: String) {
-        prefs.edit { putString(key_background, background) }
-    }
+class SchedulesPreferences(context: Context) {
+    private val prefs = context.getSharedPreferences("schedules_prefs", Context.MODE_PRIVATE)
 
-    fun getLogoHome(): String {
-        return prefs.getString(key_logo_home, null) ?: ""
-    }
-    fun setLogoHome(logoHome: String) {
-        prefs.edit { putString(key_logo_home, logoHome) }
-    }
+    private val prefSchedulesKey: String = "schedules"
 
-    fun getLogoGuest(): String {
-        return prefs.getString(key_logo_guest, null) ?: ""
-    }
-    fun setLogoGuest(logoGuest: String) {
-        prefs.edit { putString(key_logo_guest, logoGuest) }
-    }
+    private val zonedDateTimeAdapter = object : JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime> {
+        override fun serialize(src: ZonedDateTime?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
+            return JsonPrimitive(src?.format(DateTimeFormatter.ISO_ZONED_DATE_TIME))
+        }
 
-    fun setDate(date: Calendar) {
-        prefs.edit {
-            putLong(key_date, date.timeInMillis)
+        override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): ZonedDateTime {
+            return ZonedDateTime.parse(json?.asString, DateTimeFormatter.ISO_ZONED_DATE_TIME)
         }
     }
 
-    fun getDate(): Calendar {
-        val timeInMillisecond = prefs.getLong(key_date, -1L)
-        return if (timeInMillisecond != -1L) {
-            Calendar.getInstance().apply { timeInMillis = timeInMillisecond }
-        } else {
-            Calendar.getInstance()
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(ZonedDateTime::class.java, zonedDateTimeAdapter)
+        .create()
+
+    private val newScheduleKey : String = "new_schedule"
+
+    private val _currentSchedule = MutableStateFlow<KeyScheduleData>(KeyScheduleData(newScheduleKey, ScheduleData()))
+    val currentSchedule: StateFlow<KeyScheduleData> = _currentSchedule
+
+    fun set(backgroundFilePath: String? = null,
+        scheduleTime: ZonedDateTime? = null,
+        logoHome: String? = null,
+        logoGuest: String? = null,
+        title: String? = null,
+        liveStreamId: String? = null) {
+
+        var current = _currentSchedule.value
+        var currentSchedule = current.value
+        var updated = currentSchedule.copy(
+            backgroundFilePath = backgroundFilePath ?: currentSchedule.backgroundFilePath,
+            scheduleTime = scheduleTime ?: currentSchedule.scheduleTime,
+            logoHome = logoHome ?: currentSchedule.logoHome,
+            logoGuest = logoGuest ?: currentSchedule.logoGuest,
+            title = title ?: currentSchedule.title,
+            liveStreamId = liveStreamId ?: currentSchedule.liveStreamId,
+        )
+        _currentSchedule.value = KeyScheduleData(current.key, updated)
+        saveMatch(_currentSchedule.value)
+    }
+
+    fun isEditing() : Boolean {
+        return _currentSchedule.value.key != newScheduleKey
+    }
+
+    fun load(broadcastItem: LiveBroadcastItem.EditBroadcast) {
+        try {
+            var scheduleData = getAll().find { x -> x.key == broadcastItem.broadcastId }
+            var currentSchedule = _currentSchedule.value.value
+            var updatedScheduledData = ScheduleData(
+                backgroundFilePath = scheduleData?.value?.backgroundFilePath ?: currentSchedule.backgroundFilePath,
+                scheduleTime = broadcastItem.scheduledStartTime, // ?: scheduleData?.value?.scheduleTime ?: currentSchedule.scheduleTime,
+                logoHome = scheduleData?.value?.logoHome ?: currentSchedule.logoHome,
+                logoGuest = scheduleData?.value?.logoGuest ?: currentSchedule.logoGuest,
+                title = scheduleData?.value?.title ?: currentSchedule.title,
+                liveStreamId = scheduleData?.value?.liveStreamId ?: currentSchedule.liveStreamId)
+
+            //Logd("== Created $updatedScheduledData -> ${gson.toJson(updatedScheduledData)}")
+            _currentSchedule.value = KeyScheduleData(broadcastItem.broadcastId, updatedScheduledData)
+            saveMatch(_currentSchedule.value)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Loge(e.message.toString())
         }
+    }
+
+    fun load() {
+        try {
+            var newScheduledData = getAll().first { x -> x.key == newScheduleKey }
+            //Logd("== Loaded Add $newScheduledData -> ${gson.toJson(newScheduledData)}")
+            _currentSchedule.value = newScheduledData
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Loge(e.message.toString())
+        }
+    }
+
+    fun getAll(): List<KeyScheduleData> {
+        val json = prefs.getString(prefSchedulesKey, null) ?: return emptyList()
+        val type = object : TypeToken<List<KeyScheduleData>>() {}.type
+        return gson.fromJson(json, type)
+    }
+
+    fun cleanupMatches(broadcastsItems: List<LiveBroadcastItem>) {
+
+        val broadcastIds = broadcastsItems
+            .filterIsInstance<LiveBroadcastItem.EditBroadcast>()
+            .map { it.broadcastId }
+            .toSet()
+
+        if (broadcastIds.size > 0)
+        {
+            val schedules = getAll()
+            val cleanup = schedules
+                .filter { x -> x.key == newScheduleKey || x.key in broadcastIds }
+
+            //Logd("== cleanupMatches ${gson.toJson(cleanup)}")
+
+            prefs.edit { putString(prefSchedulesKey, gson.toJson(cleanup)) }
+        }
+    }
+
+    /*fun clear() {
+        prefs.edit { clear() }
+    }*/
+
+    fun add(broadcastId: String) {
+        var scheduleData =  _currentSchedule.value.value
+        saveMatch(KeyScheduleData(broadcastId, scheduleData))
+    }
+
+    private fun saveMatch(item: KeyScheduleData) {
+        val matches = getAll().toMutableList()
+        matches.removeAll { it.key == item.key }
+        matches.add(0, item)
+        val json = gson.toJson(matches)
+        //Logd("== Save $json")
+        prefs.edit { putString(prefSchedulesKey, json) }
     }
 }

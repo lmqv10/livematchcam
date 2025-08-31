@@ -3,7 +3,8 @@ package it.lmqv.livematchcam.preferences
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import it.lmqv.livematchcam.utils.KeyValue
+import it.lmqv.livematchcam.utils.KeyDescription
+import androidx.core.content.edit
 
 class RecentsLogosPreferences(context: Context) {
     private val prefs = context.getSharedPreferences("recent_prefs", Context.MODE_PRIVATE)
@@ -12,7 +13,7 @@ class RecentsLogosPreferences(context: Context) {
     private val key: String = "logos"
     private val gson = Gson()
 
-    fun getRecents(): List<KeyValue<String>> {
+    fun getRecents(): List<KeyDescription<String>> {
         val defaultJson = """
             [
                 { "description": "ALB", "key": "https://content-s3.tuttocampo.it/Teams/200/1201525.png" },
@@ -32,16 +33,16 @@ class RecentsLogosPreferences(context: Context) {
         """.trimIndent()
 
         val json = prefs.getString(key, null) ?: defaultJson // return emptyList()
-        val type = object : TypeToken<List<KeyValue<String>>>() {}.type
+        val type = object : TypeToken<List<KeyDescription<String>>>() {}.type
         return gson.fromJson(json, type)
     }
 
-    fun saveRecent(item: KeyValue<String>) {
+    fun saveRecent(item: KeyDescription<String>) {
         val current = getRecents().toMutableList()
         current.removeAll { it.key == item.key }
         current.add(0, item)
         val limited = current.take(maxItems)
         val json = gson.toJson(limited)
-        prefs.edit().putString(key, json).apply()
+        prefs.edit { putString(key, json) }
     }
 }

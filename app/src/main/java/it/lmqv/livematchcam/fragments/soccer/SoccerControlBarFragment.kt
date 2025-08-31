@@ -1,6 +1,5 @@
 package it.lmqv.livematchcam.fragments.soccer
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,33 +9,40 @@ import androidx.lifecycle.lifecycleScope
 import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentSoccerControlBarBinding
+import it.lmqv.livematchcam.dialogs.TimePickerDialog
 import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
+import it.lmqv.livematchcam.extensions.parseTimeToSeconds
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
-import it.lmqv.livematchcam.firebase.SoccerScore
+import it.lmqv.livematchcam.services.firebase.SoccerScore
 import it.lmqv.livematchcam.fragments.BaseControlBarFragment
 import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.services.CounterService
+import it.lmqv.livematchcam.viewmodels.CounterViewModel
 import it.lmqv.livematchcam.viewmodels.SoccerScoreViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import androidx.core.graphics.toColorInt
 
 class SoccerControlBarFragment() : BaseControlBarFragment() {
     companion object {
         fun newInstance() = SoccerControlBarFragment()
     }
     private val soccerScoreViewModel: SoccerScoreViewModel by activityViewModels()
+    private val counterViewModel: CounterViewModel by activityViewModels()
 
     private var _binding: FragmentSoccerControlBarBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentSoccerControlBarBinding.inflate(inflater, container, false)
         return binding.root
@@ -59,14 +65,14 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
                 MatchRepository.homeLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.homeColor.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
                         allowHardware(false)
                     }
                 } else {
-                    binding.homeColor.setShirtByColor(Color.parseColor(colorHex))
+                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
                 }
             }
         }
@@ -77,14 +83,14 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
                 MatchRepository.guestLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.awayColor.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
                         allowHardware(false)
                     }
                 } else {
-                    binding.awayColor.setShirtByColor(Color.parseColor(colorHex))
+                    binding.awayColor.setShirtByColor(colorHex.toColorInt())
                 }
             }
         }
@@ -102,12 +108,12 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
                     if (command == Command.START_TIME.toString()) {
                         binding.startTime.visibility = View.GONE
                         binding.stopTime.visibility = View.VISIBLE
-                        binding.resetTime.isEnabled = false
+                        //binding.resetTime.isEnabled = false
                     }
                     if (command == Command.PAUSE.toString()) {
                         binding.startTime.visibility = View.VISIBLE
                         binding.stopTime.visibility = View.GONE
-                        binding.resetTime.isEnabled = true
+                        //binding.resetTime.isEnabled = true
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -181,8 +187,37 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
             soccerScoreViewModel.setCommand(Command.PAUSE)
         }
 
-        binding.resetTime.setOnClickListener {
+        /*binding.resetTime.setOnClickListener {
             soccerScoreViewModel.setCommand(Command.RESET_TIME)
+        }*/
+
+        binding.matchTime.setOnClickListener {
+            val currentSeconds = parseTimeToSeconds(binding.matchTime.text.toString())
+
+            TimePickerDialog(
+                context = requireContext(),
+                seconds = currentSeconds,
+                onConfirm = { seconds ->
+                    binding.matchTime.text = formatTime(seconds)
+                    counterViewModel.setCounter(seconds)
+                },
+                onCancel = {
+                }
+            ).show()
+        }
+
+        binding.matchTime.text = formatTime(0)
+        launchOnStarted {
+            counterViewModel.counterState.collect { state ->
+                var seconds = 0
+                when (state) {
+                    is CounterService.CounterState.Running -> seconds = state.seconds
+                    is CounterService.CounterState.Paused -> seconds = state.seconds
+                    is CounterService.CounterState.Stopped -> seconds = 0
+                }
+
+                binding.matchTime.text = formatTime(seconds)
+            }
         }
     }
 

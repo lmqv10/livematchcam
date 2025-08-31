@@ -1,6 +1,5 @@
 package it.lmqv.livematchcam
 
-import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
@@ -14,7 +13,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import it.lmqv.livematchcam.databinding.ActivityAccountBinding
 import it.lmqv.livematchcam.viewmodels.AccountViewModel
 import kotlinx.coroutines.flow.combine
@@ -50,7 +51,7 @@ class AccountActivity : AppCompatActivity() {
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             accountViewModel.handleSignInResult(result.data)
         }
     }
@@ -69,7 +70,8 @@ class AccountActivity : AppCompatActivity() {
             window.setDecorFitsSystemWindows(false)
             window.insetsController?.let { controller ->
                 controller.hide(WindowInsets.Type.systemBars())
-                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
             @Suppress("DEPRECATION")
@@ -104,7 +106,7 @@ class AccountActivity : AppCompatActivity() {
         }
 
         binding.googleSignOut.setOnClickListener { _ ->
-             accountViewModel.signOut()
+            accountViewModel.signOut()
         }
 
         binding.connect.setOnClickListener { _ ->
@@ -118,32 +120,33 @@ class AccountActivity : AppCompatActivity() {
             binding.disconnect.isEnabled = false
             //binding.accountKey.isEnabled = true
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
 
         lifecycleScope.launch {
-            combine(
-                accountViewModel.authState,
-                accountViewModel.firebaseAccountKey)
-            { state, accountKey -> Pair(state, accountKey) }
-            .collect { (state, accountKey) ->
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                combine(
+                    accountViewModel.authState,
+                    accountViewModel.firebaseAccountKey
+                )
+                { state, accountKey -> Pair(state, accountKey) }
+                    .collect { (state, accountKey) ->
 
-                val isLogged = accountViewModel.isLogged()
-                val accountDesc = accountViewModel.accountDesc()
+                        val isLogged = accountViewModel.isLogged()
+                        val accountDesc = accountViewModel.accountDesc()
 
-                binding.accountName.text = accountDesc;
-                binding.googleSignIn.isVisible = !isLogged
-                binding.googleSignOut.isVisible = isLogged
-                binding.authorizedAccount.isVisible = isLogged
+                        binding.accountName.text = accountDesc
+                        binding.googleSignIn.isVisible = !isLogged
+                        binding.googleSignOut.isVisible = isLogged
+                        binding.authorizedAccount.isVisible = isLogged
 
-                binding.accountKey.text = Editable.Factory.getInstance().newEditable(accountKey ?: "")
+                        binding.accountKey.text =
+                            Editable.Factory.getInstance().newEditable(accountKey ?: "")
 
-                val isConnected = !accountDesc.isNullOrEmpty() && !accountKey.isNullOrEmpty()
-                binding.connect.isEnabled = !isConnected
-                binding.disconnect.isEnabled = isConnected
-                //binding.accountKey.isEnabled = !isConnected
+                        val isConnected =
+                            !accountDesc.isNullOrEmpty() && !accountKey.isNullOrEmpty()
+                        binding.connect.isEnabled = !isConnected
+                        binding.disconnect.isEnabled = isConnected
+                        //binding.accountKey.isEnabled = !isConnected
+                    }
             }
         }
 
@@ -171,7 +174,7 @@ class AccountActivity : AppCompatActivity() {
                 binding.disconnect.isVisible = isConnected
                 binding.accountKey.isEnabled = !isConnected
 
-                /*FirebaseDataManager.getInstance()
+                /*FirebaseDataService.getInstance()
                     .authenticateAccount(accountName, accountKey, { account ->
                         Logd("Account Name: ${account.name}")
                         Logd("Admin: ${account.admin}")
@@ -184,10 +187,10 @@ class AccountActivity : AppCompatActivity() {
                 }*/
             }
         }*/
-    }
+        }
 
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
+        override fun onSupportNavigateUp(): Boolean {
+            finish()
+            return true
+        }
     }
-}

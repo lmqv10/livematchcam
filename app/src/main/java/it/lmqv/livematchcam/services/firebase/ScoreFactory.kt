@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.firebase
+package it.lmqv.livematchcam.services.firebase
 
 import com.google.firebase.database.DataSnapshot
 import it.lmqv.livematchcam.extensions.toMap

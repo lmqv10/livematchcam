@@ -36,16 +36,14 @@ import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
-import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.NoDebounceExtraSmoothZoomLevelHandler
-import it.lmqv.livematchcam.utils.KeyValue
+import it.lmqv.livematchcam.utils.KeyDescription
 import it.lmqv.livematchcam.repositories.MatchRepository
-import it.lmqv.livematchcam.viewmodels.StreamersViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -63,10 +61,6 @@ open class CameraFragment: Fragment(), ConnectChecker,
     companion object {
         fun getInstance(): CameraFragment = CameraFragment()
     }
-
-    private val streamersViewModel: StreamersViewModel by activityViewModels()
-
-    private lateinit var settingsRepository: SettingsRepository
 
     private lateinit var zoomLevelHandler: IZoomLevelHandler
     private lateinit var offsetDegreeHandler: IOffsetDegreeHandler
@@ -108,6 +102,9 @@ open class CameraFragment: Fragment(), ConnectChecker,
     private var timeElapsedInSeconds = 0
     private var job: Job? = null
 
+    private var serverURI: String? = null
+
+
     //Bitrate adapter used to change the bitrate on fly depend of the bandwidth.
     private val bitrateAdapter = BitrateAdapter {
         genericStream.setVideoBitrateOnFly(it)
@@ -120,8 +117,6 @@ open class CameraFragment: Fragment(), ConnectChecker,
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
-
-        settingsRepository = SettingsRepository(requireContext())
 
         childFragmentManager.beginTransaction()
             .add(R.id.status_container, statusFragment).commit()
@@ -175,6 +170,15 @@ open class CameraFragment: Fragment(), ConnectChecker,
         super.onViewCreated(view, savedInstanceState)
 
         launchOnStarted {
+            MatchRepository.RTMPServerURI.collect { configuredServerURI ->
+                configuredServerURI?.let {
+                    binding.bStartStop.isClickable = true
+                }
+                this.serverURI = configuredServerURI
+            }
+        }
+
+        launchOnStarted {
             MatchRepository.isRealtimeDatabaseAvailable.collect { isAvailable ->
                 if (isAvailable) {
                     binding.mainBannerContainer.visibility = View.VISIBLE
@@ -217,39 +221,41 @@ open class CameraFragment: Fragment(), ConnectChecker,
         })
 
         binding.bStartStop.setOnClickListener {
-            toast(streamersViewModel.getServerURI())
-            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
-            val title = dialogView.findViewById<TextView>(R.id.dialog_message)
-            if (genericStream.isStreaming) {
-                title.text = getString(R.string.confirm_stop_message)
-            } else {
-                title.text = getString(R.string.confirm_start_message)
-            }
+            if (this.serverURI != null) {
+                toast(this.serverURI!!)
+                val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
+                val title = dialogView.findViewById<TextView>(R.id.dialog_message)
+                if (genericStream.isStreaming) {
+                    title.text = getString(R.string.confirm_stop_message)
+                } else {
+                    title.text = getString(R.string.confirm_start_message)
+                }
 
-            val dialog = AlertDialog.Builder(requireContext())
-                .setView(dialogView)
-                .setPositiveButton("OK") { dialog, _ ->
-                    val serverUri = streamersViewModel.getServerURI()
-                    if (!genericStream.isStreaming) {
-                        genericStream.startStream(serverUri)
-                        binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
-                    } else {
-                        genericStream.stopStream()
-                        binding.bStartStop.setImageResource(R.drawable.stream_icon)
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
+                    .setPositiveButton("OK") { dialog, _ ->
+                        if (!genericStream.isStreaming) {
+                            genericStream.startStream(this.serverURI!!)
+                            binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
+                        } else {
+                            genericStream.stopStream()
+                            binding.bStartStop.setImageResource(R.drawable.stream_icon)
+                        }
+                        dialog.dismiss()
+                        requireActivity().hideSystemUI()
                     }
-                    dialog.dismiss()
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                        requireActivity().hideSystemUI()
+                    }
+                    .create()
+                dialog.setOnShowListener {
                     requireActivity().hideSystemUI()
-                    toast(serverUri)
                 }
-                .setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.dismiss()
-                    requireActivity().hideSystemUI()
-                }
-                .create()
-            dialog.setOnShowListener {
-                requireActivity().hideSystemUI()
+                dialog.show()
+            } else {
+                toast("no RTMP server configured")
             }
-            dialog.show()
         }
 
         /*bRecord.setOnClickListener {
@@ -310,12 +316,6 @@ open class CameraFragment: Fragment(), ConnectChecker,
             MatchRepository.mainBannerURL.collect { spotBannerURL ->
                 var isEnabled = spotBannerURL.isNotEmpty()
                 binding.mainBannerSwitch.isEnabled = isEnabled
-            }
-        }
-
-        lifecycleScope.launch {
-            streamersViewModel.currentKey.collect { _ ->
-                binding.bStartStop.isClickable = true
             }
         }
 
@@ -428,6 +428,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
                             genericStream.stopStream()
                             binding.bStartStop.setImageResource(R.drawable.stream_icon)
                             isEnabled = false
+
                             requireActivity().onBackPressedDispatcher.onBackPressed()
                         }
                         .setNegativeButton("Cancel") { _, _ -> }
@@ -514,17 +515,17 @@ open class CameraFragment: Fragment(), ConnectChecker,
     }
 
     override fun onConnectionStarted(url: String) {
-        toast("Streaming Started")
+        toast("Streaming Started on $url")
         this.startStreamingTimer()
     }
 
     override fun onConnectionSuccess() {
-        toast("Connected on ${streamersViewModel.getServerURI()}")
+        toast("Connected on ${serverURI}")
     }
 
     override fun onConnectionFailed(reason: String) {
         if (genericStream.getStreamClient().reTry(5000, reason, null)) {
-            toast("Retry")
+            toast("Retry: $reason")
         } else {
             genericStream.stopStream()
             binding.bStartStop.setImageResource(R.drawable.stream_icon)
@@ -631,11 +632,11 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerZoomStrategies = dialogView.findViewById<Spinner>(R.id.zoom_strategies)
         val optionsZoomStrategies = listOf(
-            KeyValue<KClass<*>>(NoDebounceExtraSmoothZoomLevelHandler::class, "1. smooth progressive zoom No Debounce"),
-            KeyValue<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "2. progressive zoom No Debounce"),
-            KeyValue<KClass<*>>(SmoothZoomLevelHandler::class, "3. progressive zoom with Debounce"),
-            KeyValue<KClass<*>>(NoDebounceZoomLevelHandler::class, "4. No Debounce"),
-            KeyValue<KClass<*>>(SingleZoomLevelHandler::class, "5. Debounce"),
+            KeyDescription<KClass<*>>(NoDebounceExtraSmoothZoomLevelHandler::class, "1. smooth progressive zoom No Debounce"),
+            KeyDescription<KClass<*>>(NoDebounceSmoothZoomLevelHandler::class, "2. progressive zoom No Debounce"),
+            KeyDescription<KClass<*>>(SmoothZoomLevelHandler::class, "3. progressive zoom with Debounce"),
+            KeyDescription<KClass<*>>(NoDebounceZoomLevelHandler::class, "4. No Debounce"),
+            KeyDescription<KClass<*>>(SingleZoomLevelHandler::class, "5. Debounce"),
         )
 
         val adapterZoomServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsZoomStrategies)
@@ -643,7 +644,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
         spinnerZoomStrategies.adapter = adapterZoomServer
         spinnerZoomStrategies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
+                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<KClass<*>>
                 val selectedZoomHandler = selectedItem.key.constructors.first().call(requireContext(), genericStream.videoSource)
                 this@CameraFragment.zoomLevelHandler = selectedZoomHandler as IZoomLevelHandler
             }
@@ -654,14 +655,14 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerOffsetStrategies = dialogView.findViewById<Spinner>(R.id.offset_strategies)
         val optionsOffsetStrategies = listOf(
-            KeyValue<KClass<*>>(LeftRightOffsetGapDegreeHandler::class, "1. Fixed Left/Right with Gap Degree"),
-            KeyValue<KClass<*>>(ManualZoomLevelHandler::class, "2. Manual Zoom In/Out (vol +/-)"),
-            KeyValue<KClass<*>>(LeftRightWithManualZoomLevelHandler::class, "3. Field Zone Left/Right Manual Depth In/Out (vol +/-)"),
-            KeyValue<KClass<*>>(LeftRightWithAutoDepthZoomLevelHandler::class, "4. Field Zone Left/Right Auto Up Down"),
-            KeyValue<KClass<*>>(LeftRightOffsetGapNoCornerHandler::class, "5. Fixed Left/Right with Gap Degree No Corner (2x angle)"),
-            KeyValue<KClass<*>>(ProgressiveOffsetDegreeHandler::class, "6. Progressive Left/Right Degree multiplier"),
-            KeyValue<KClass<*>>(ProgressiveOffsetDegreeWithCapHandler::class, "7. Progressive Left/Right Degree multiplier with cap (3x)"),
-            KeyValue<KClass<*>>(LeftRightOffsetDegreeHandler::class, "8. Fixed Left/Right Degree")
+            KeyDescription<KClass<*>>(LeftRightOffsetGapDegreeHandler::class, "1. Fixed Left/Right with Gap Degree"),
+            KeyDescription<KClass<*>>(ManualZoomLevelHandler::class, "2. Manual Zoom In/Out (vol +/-)"),
+            KeyDescription<KClass<*>>(LeftRightWithManualZoomLevelHandler::class, "3. Field Zone Left/Right Manual Depth In/Out (vol +/-)"),
+            KeyDescription<KClass<*>>(LeftRightWithAutoDepthZoomLevelHandler::class, "4. Field Zone Left/Right Auto Up Down"),
+            KeyDescription<KClass<*>>(LeftRightOffsetGapNoCornerHandler::class, "5. Fixed Left/Right with Gap Degree No Corner (2x angle)"),
+            KeyDescription<KClass<*>>(ProgressiveOffsetDegreeHandler::class, "6. Progressive Left/Right Degree multiplier"),
+            KeyDescription<KClass<*>>(ProgressiveOffsetDegreeWithCapHandler::class, "7. Progressive Left/Right Degree multiplier with cap (3x)"),
+            KeyDescription<KClass<*>>(LeftRightOffsetDegreeHandler::class, "8. Fixed Left/Right Degree")
         )
 
         val adapterOffsetServer = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsOffsetStrategies)
@@ -669,7 +670,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
         spinnerOffsetStrategies.adapter = adapterOffsetServer
         spinnerOffsetStrategies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyValue<KClass<*>>
+                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<KClass<*>>
                 this@CameraFragment.offsetDegreeHandler.destroy()
                 val selectedOffsetHandler = selectedItem.key.constructors.first().call(requireContext())
                 this@CameraFragment.offsetDegreeHandler = selectedOffsetHandler as IOffsetDegreeHandler
@@ -709,17 +710,18 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
         val optionsVideoResolutions = listOf(
-            KeyValue(1080, "1080p"),
-            KeyValue(720, "720p")
+            KeyDescription(1080, "1080p"),
+            KeyDescription(720, "720p")
         )
 
         val adapterVideoResolutions = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsVideoResolutions)
         adapterVideoResolutions.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerVideoResolutions.isEnabled = !genericStream.isStreaming
         spinnerVideoResolutions.adapter = adapterVideoResolutions
+        @Suppress("UNCHECKED_CAST")
         spinnerVideoResolutions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyValue<Int>
+                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
                 var selectedItemValue = selectedItem.key
                 if (height != selectedItemValue) {
                     height = selectedItemValue
@@ -735,19 +737,20 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.video_fps)
         val optionsVideoFps = listOf(
-            KeyValue(20, "20fps"),
-            KeyValue(25, "25fps"),
-            KeyValue(30, "30fps"),
-            //KeyValue(60, "60fps")
+            KeyDescription(20, "20fps"),
+            KeyDescription(25, "25fps"),
+            KeyDescription(30, "30fps"),
+            //KeyDescription(60, "60fps")
         )
 
         val adapterVideoFps = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsVideoFps)
         adapterVideoFps.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerVideoFps.isEnabled = !genericStream.isStreaming
         spinnerVideoFps.adapter = adapterVideoFps
+        @Suppress("UNCHECKED_CAST")
         spinnerVideoFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyValue<Int>
+                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
                 var selectedItemValue = selectedItem.key
                 if (fps != selectedItemValue) {
                     fps = selectedItemValue

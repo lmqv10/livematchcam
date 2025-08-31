@@ -3,8 +3,8 @@ package it.lmqv.livematchcam.viewmodels
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import it.lmqv.livematchcam.extensions.Logd
-import it.lmqv.livematchcam.firebase.SetScore
-import it.lmqv.livematchcam.firebase.VolleyScore
+import it.lmqv.livematchcam.services.firebase.SetScore
+import it.lmqv.livematchcam.services.firebase.VolleyScore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.math.max

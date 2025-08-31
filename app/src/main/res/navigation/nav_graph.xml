@@ -10,7 +10,7 @@
         android:label="@string/server">
         <argument
             android:name="syncStrategy"
-            app:argType="it.lmqv.livematchcam.constants.SyncStrategy"
+            app:argType="it.lmqv.livematchcam.utils.SyncStrategy"
             android:defaultValue="LOCAL" />
     </fragment>
 
@@ -20,7 +20,7 @@
         android:label="@string/youtube">
         <argument
             android:name="syncStrategy"
-            app:argType="it.lmqv.livematchcam.constants.SyncStrategy"
+            app:argType="it.lmqv.livematchcam.utils.SyncStrategy"
             android:defaultValue="FIREBASE" />
     </fragment>
 
@@ -30,7 +30,7 @@
         android:label="@string/youtube_stream">
         <argument
             android:name="syncStrategy"
-            app:argType="it.lmqv.livematchcam.constants.SyncStrategy"
+            app:argType="it.lmqv.livematchcam.utils.SyncStrategy"
             android:defaultValue="FIREBASE" />
     </fragment>
 </navigation>

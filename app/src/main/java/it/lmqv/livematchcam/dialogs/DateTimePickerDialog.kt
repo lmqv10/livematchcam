@@ -6,16 +6,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Window
 import it.lmqv.livematchcam.databinding.DialogDateTimePickerBinding
-import java.util.*
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class DateTimePickerDialog(
     context: Context,
-    private val calendar: Calendar,
-    private val onConfirm: (selectedDateTime: Calendar) -> Unit,
+    private val onConfirm: (selectedDateTime: ZonedDateTime) -> Unit,
     private val onCancel: () -> Unit
 ) : Dialog(context) {
 
     private lateinit var binding: DialogDateTimePickerBinding
+    private var dateTime: ZonedDateTime? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,23 +25,21 @@ class DateTimePickerDialog(
         binding = DialogDateTimePickerBinding.inflate(LayoutInflater.from(context))
         setContentView(binding.root)
 
-        binding.timePicker.setIs24HourView(true)
-        binding.datePicker.minDate = System.currentTimeMillis()
-
         binding.btnConfirm.setOnClickListener {
-            val calendar = Calendar.getInstance()
             val datePicker = binding.datePicker
             val timePicker = binding.timePicker
 
-            calendar.set(
+            val pickedDateTime = ZonedDateTime.of(
                 datePicker.year,
-                datePicker.month,
+                datePicker.month + 1,
                 datePicker.dayOfMonth,
                 timePicker.hour,
-                timePicker.minute
+                timePicker.minute,
+                0,
+                0,
+                ZoneId.systemDefault()
             )
-
-            onConfirm(calendar)
+            onConfirm(pickedDateTime)
             dismiss()
         }
 
@@ -49,13 +48,29 @@ class DateTimePickerDialog(
             dismiss()
         }
 
-        binding.datePicker.updateDate(
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH))
 
-        binding.timePicker.hour = calendar.get(Calendar.HOUR_OF_DAY)
-        binding.timePicker.minute = calendar.get(Calendar.MINUTE)
+        binding.timePicker.setIs24HourView(true)
+        var initialDateTime = this.dateTime ?: ZonedDateTime.now()
+
+        if (initialDateTime.isBefore(ZonedDateTime.now())) {
+            initialDateTime = ZonedDateTime.now()
+        }
+
+        binding.datePicker.updateDate(
+            initialDateTime.year,
+            initialDateTime.monthValue - 1,
+            initialDateTime.dayOfMonth)
+
+        binding.timePicker.hour = initialDateTime.hour
+        binding.timePicker.minute = initialDateTime.minute
+        binding.datePicker.minDate = initialDateTime.toInstant().toEpochMilli()
     }
 
+    fun setDate(dateTime: ZonedDateTime) {
+        if (dateTime.isAfter(ZonedDateTime.now())) {
+            this.dateTime = dateTime
+        } else {
+            this.dateTime = ZonedDateTime.now()
+        }
+    }
 }

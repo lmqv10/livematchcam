@@ -1,14 +1,13 @@
 package it.lmqv.livematchcam.viewmodels
 
-import android.accounts.Account
 import android.app.Application
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.auth.AuthResult
-import it.lmqv.livematchcam.auth.GoogleAuthManager
+import it.lmqv.livematchcam.services.auth.AuthResult
 import it.lmqv.livematchcam.repositories.AccountRepository
+import it.lmqv.livematchcam.services.auth.GoogleAuthService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,22 +15,39 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+/*class AccountViewModelFactory(
+    private val application: Application,
+    private val authService: IAuthService
+) : ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(AccountViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return AccountViewModel(application, authService) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}*/
 
 class AccountViewModel(private val application: Application) : AndroidViewModel(application)  {
 
     private var firebaseAccountRepository: AccountRepository = AccountRepository(application)
-    private val authManager = GoogleAuthManager(application)
+    private val authService = GoogleAuthService(application)
 
-    val authState: StateFlow<AuthResult> = authManager.authState
+    val authState: StateFlow<AuthResult> = authService.authState
 
-    fun getSignInIntent(): Intent = authManager.getSignInIntent()
+    fun updateLastSignedInAccount() {
+        authService.updateLastSignedInAccount()
+    }
+
+    fun getSignInIntent(): Intent = authService.getSignInIntent()
 
     fun handleSignInResult(data: Intent?) {
-        authManager.handleSignInResult(data)
+        authService.handleSignInResult(data)
     }
 
     fun signOut(onComplete: (() -> Unit)? = null) {
-        authManager.signOut(onComplete)
+        authService.signOut(onComplete)
     }
 
     //private val _account = MutableStateFlow<Account?>(null)
@@ -84,7 +100,7 @@ class AccountViewModel(private val application: Application) : AndroidViewModel(
 
     init {
         viewModelScope.launch {
-            authManager.authState.collectLatest { state ->
+            authService.authState.collectLatest { state ->
                 when (state) {
                     is AuthResult.Authenticated -> {
                         var account = state.account.account

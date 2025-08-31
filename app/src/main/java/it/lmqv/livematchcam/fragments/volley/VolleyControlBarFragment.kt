@@ -1,6 +1,5 @@
 package it.lmqv.livematchcam.fragments.volley
 
-import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
 import android.view.LayoutInflater
@@ -19,13 +18,14 @@ import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
-import it.lmqv.livematchcam.firebase.VolleyScore
+import it.lmqv.livematchcam.services.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseControlBarFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import androidx.core.graphics.toColorInt
 
 class VolleyControlBarFragment() : BaseControlBarFragment() {
     companion object {
@@ -41,7 +41,7 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentVolleyControlBarBinding.inflate(inflater, container, false)
         return binding.root
@@ -70,7 +70,7 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
                         allowHardware(false)
                     }
                 } else {
-                    binding.homeColor.setShirtByColor(Color.parseColor(colorHex))
+                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
                 }
             }
         }
@@ -89,7 +89,7 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
                         allowHardware(false)
                     }
                 } else {
-                    binding.awayColor.setShirtByColor(Color.parseColor(colorHex))
+                    binding.awayColor.setShirtByColor(colorHex.toColorInt())
                 }
             }
         }

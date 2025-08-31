@@ -3,20 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp">
+    android:paddingVertical="4dp">
 
     <ImageView
         android:id="@+id/spinner_item_image"
-        android:layout_width="128dp"
-        android:layout_height="96dp"
-        android:src="@drawable/youtube_logo"
-        android:layout_marginEnd="8dp" />
+        android:layout_width="@dimen/image_size_width_large"
+        android:layout_height="@dimen/image_size_height"
+        android:contentDescription="@string/description_placeholder"
+        android:src="@drawable/preview_missing"
+        android:layout_marginEnd="5dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:orientation="vertical">
+
         <TextView
             android:id="@+id/spinner_item_text"
             android:layout_width="wrap_content"
@@ -29,8 +31,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/date_placeholder"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:textColor="@color/black" />
+
         <!--TextView
             android:id="@+id/spinner_item_broadcast_key"
             android:layout_width="wrap_content"

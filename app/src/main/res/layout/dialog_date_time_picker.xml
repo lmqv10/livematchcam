@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/dialogRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="5dp"
-        android:text="@string/video_resolution"
+        android:text="@string/date_time"
         android:textColor="@color/appColorSecondary"/>
 
     <LinearLayout
@@ -47,13 +46,15 @@
         <ImageView
             style="@style/smallImageViewStyle"
             android:id="@+id/btnCancel"
-            android:src="@drawable/ic_cancel" />
+            android:src="@drawable/ic_cancel"
+            android:contentDescription="@string/description_placeholder" />
 
         <ImageView
             style="@style/smallImageViewStyle"
             android:id="@+id/btnConfirm"
             android:src="@drawable/ic_confirm"
-            android:layout_marginStart="8dp" />
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/description_placeholder" />
 
     </LinearLayout>
 

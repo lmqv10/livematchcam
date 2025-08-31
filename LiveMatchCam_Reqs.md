@@ -1,29 +1,25 @@
-versione free
-+ rtmp / key
-+ auto zoom
-+ nomi
-+ colore maglia
-+ score
 
+DEV:
+- EVITARE CHE CHIAVI CUSTOM RTMP VENGANO SALVATE IN FIREBASE!!!
+- Complete Live on Stop  -> youtubeViewModel.completeLive() 
+    NOTA: valutare anche il goLive() a comando soprattutto UI!!!
+BUG
+- Rimuovere il comando remoto senza Firebase disponibile
 
-next step:
-+ loghi
-+ sponsor banners  
-+ spot video
-+ stats
+STEP 2
+- Migliorare la vista dell'Account UI
+- Migliorare la vista remote control
+- Gestione del secondo colore di maglietta
+- Gestione di bannter multipli temporizzati (se possibile animati)
+- Implementare Video full screen per spot/pubblicità
+- Premettere di configurarsi il proprio firebase per remote
+- Se autenticato aprire su Youtube
+- Unificare la CameraFragmente e la UVCCameraFragment per le parti comuni.
 
+To be verify
 -- remote commands "nearby"
 -- remote configurations
 -- replay (slow motion)
-
-https://i-predict.it/assets/loghi-hd/Venezia.png
-https://i-predict.it/assets/loghi-hd/Roma.png
-https://avisbiella.it/wp-content/uploads/2022/01/Logo_AVIS.png
-https://i.pinimg.com/originals/d8/6d/81/d86d816c89cc355af1bd2ef96ca96d62.png
-https://logodix.com/logo/1746008.png
-https://cdn.verovolley.com/wp-content/uploads/elementor/thumbs/cropped-logo-vero-volley-png-quadrato-1-qgzs9a903nsl3fis33qoyl3bwl7z2ugng6i5acp60o.png
-https://live2sport.com/image/Volleyball_W_Italy_Picco_Lecco.png
-https://www.nowpadova.com/images/2020/01/23/AVIST_large.jpg
 
 Obiettivo: 
   Creare un'applicazione per organizzare, 
@@ -53,54 +49,38 @@ Utenti Autorizzati:
  Definizione di utenti autorizzati ad utilizzare il servizio.
 
 Generate Key from account name oe mail, and some random part ?? use AES encripton??
-
-Login.. with 
-Start up
->> ask for last five match.. youtube api
->> ask for firebase matches (Configured) 
-  - Clean old matches
-  - Add new matches with default value (no logo, team name)
-  - Store new data
->> all data will be sync beetween account
---> Edit data in app (sync with firebase database and all connected devices
-
 License Key:
 
 
+https://i-predict.it/assets/loghi-hd/Venezia.png
+https://i-predict.it/assets/loghi-hd/Roma.png
+https://avisbiella.it/wp-content/uploads/2022/01/Logo_AVIS.png
+https://i.pinimg.com/originals/d8/6d/81/d86d816c89cc355af1bd2ef96ca96d62.png
+https://logodix.com/logo/1746008.png
+https://cdn.verovolley.com/wp-content/uploads/elementor/thumbs/cropped-logo-vero-volley-png-quadrato-1-qgzs9a903nsl3fis33qoyl3bwl7z2ugng6i5acp60o.png
+https://live2sport.com/image/Volleyball_W_Italy_Picco_Lecco.png
+https://www.nowpadova.com/images/2020/01/23/AVIST_large.jpg
 
-val imageView = ImageView(requireContext())
-                    imageView.load(spotBannerURL) {
-                        allowHardware(false)
-                        listener(
-                            onError = { _, error ->
-                                Logd(error.throwable.message ?: "ERROR")
-                            },
-                            onSuccess = { _, result ->
-                                try {
-                                    val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
-                                    val maxFactor = 20f
-                                    val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
-                                    val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
 
-                                    Logd("spotBannerURL: width : ${bitmap?.width} x height : ${bitmap?.height}")
 
-                                    val factorX = maxFactor / defaultScaleX
-                                    val scaleX = factorX * defaultScaleX
-                                    val scaleY = factorX * defaultScaleY
+/*navController.addOnDestinationChangedListener { controller, destination, arguments ->
+    try {
+        val rootId = navController.graph.id
+        val backStackEntries = mutableListOf<String>()
 
-                                    Logd("spotBannerURL: scaleX : $scaleX - scaleY : $scaleY")
-
-                                    var spotBannerFilter = ImageObjectFilterRender()
-                                    spotBannerFilter.apply {
-                                        setImage(bitmap)
-                                        setScale(scaleX, scaleY)
-                                        setAlpha(0.75f)
-                                        setPosition(100f - scaleX, 0f)
-                                    }
-                                    genericStream.getGlInterface().setFilter(1, spotBannerFilter)
-                                } catch (e : Exception) {
-                                    Logd("spotBannerURL: scaleX : ${e.message}")
-                                }
-                            }
-                        )
-                    }
+        var currentEntry: NavBackStackEntry? = navController.currentBackStackEntry
+        while (currentEntry != null) {
+            backStackEntries.add(currentEntry.destination.label.toString())
+            if (currentEntry.destination.id == rootId) break
+            currentEntry = try {
+                navController.getBackStackEntry(currentEntry.destination.id - 1)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+        Log.d("LM_NAV_DEBUG", "Back stack: ${backStackEntries.joinToString(" -> ")}")
+    } catch (e: Exception) {
+        Log.e("LM_NAV_DEBUG", "Error reading back stack", e)
+    }
+}*/

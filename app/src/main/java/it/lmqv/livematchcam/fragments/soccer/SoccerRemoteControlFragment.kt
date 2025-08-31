@@ -1,6 +1,5 @@
 package it.lmqv.livematchcam.fragments.soccer
 
-import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
 import android.view.LayoutInflater
@@ -18,7 +17,7 @@ import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
-import it.lmqv.livematchcam.firebase.SoccerScore
+import it.lmqv.livematchcam.services.firebase.SoccerScore
 import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
 import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.repositories.MatchRepository
@@ -26,6 +25,7 @@ import it.lmqv.livematchcam.viewmodels.SoccerScoreViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import androidx.core.graphics.toColorInt
 
 class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
     companion object {
@@ -38,7 +38,7 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentSoccerRemoteControlBinding.inflate(inflater, container, false)
         return binding.root
@@ -63,14 +63,14 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
                     available, color, logo -> Triple(available, color, logo)
             }.collect { (isAvailable, colorHex, logoURL) ->
                 //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.homeColor.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
                         allowHardware(false)
                     }
                 } else {
-                    binding.homeColor.setShirtByColor(Color.parseColor(colorHex))
+                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
                 }
 
                 binding.homeColor.setOnClickListener {
@@ -96,14 +96,14 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
                     available, color, logo -> Triple(available, color, logo)
             }.collect { (isAvailable, colorHex, logoURL) ->
                 //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.guestColor.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
                         allowHardware(false)
                     }
                 } else {
-                    binding.guestColor.setShirtByColor(Color.parseColor(colorHex))
+                    binding.guestColor.setShirtByColor(colorHex.toColorInt())
                 }
 
                 binding.guestColor.setOnClickListener {
@@ -148,8 +148,8 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
                         binding.stopTime.visibility = View.GONE
                         binding.resetTime.isEnabled = true
                     }
-                    if (command == Command.RESET_TIME.toString()) {
-                    }
+                    //if (command == Command.RESET_TIME.toString()) {
+                    //}
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Loge("SoccerRemoteControl::Exception:: ${e.message.toString()}")
@@ -229,15 +229,15 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
         }
 
         binding.zoomIn.setOnClickListener {
-            binding.currentZoom.text = "In"
+            binding.currentZoom.text = getString(R.string.zoom_in)
             soccerScoreViewModel.setCommand(Command.ZOOM_IN)
         }
         binding.zoomDefault.setOnClickListener {
-            binding.currentZoom.text = "None"
+            binding.currentZoom.text = getString(R.string.zoom_none)
             soccerScoreViewModel.setCommand(Command.ZOOM_DEFAULT)
         }
         binding.zoomOut.setOnClickListener {
-            binding.currentZoom.text = "Out"
+            binding.currentZoom.text = getString(R.string.zoom_out)
             soccerScoreViewModel.setCommand(Command.ZOOM_OUT)
         }
     }

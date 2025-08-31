@@ -29,7 +29,8 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:gravity="start"
-                android:src="@drawable/shirt_layers" />
+                android:src="@drawable/shirt_layers"
+                android:contentDescription="@string/description_placeholder" />
 
             <TextView
                 android:id="@+id/home_team"
@@ -116,16 +117,26 @@
                 tools:ignore="ContentDescription" />
         </FrameLayout>
 
-        <ImageView
+        <!--ImageView
             android:id="@+id/reset_time"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_gravity="center_vertical"
             android:background="@drawable/alpha_background"
             android:src="@drawable/time_reset"
             app:tint="@color/image_tint_secondary_selector"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription" /-->
 
+        <TextView
+            android:id="@+id/match_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/time_placeholder"
+            android:background="@drawable/alpha_background"
+            android:textColor="@color/primary"
+            android:padding="4dp"
+            android:textSize="18sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -158,7 +169,8 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:gravity="start"
-                android:src="@drawable/shirt_layers" />
+                android:src="@drawable/shirt_layers"
+                android:contentDescription="@string/description_placeholder" />
         </LinearLayout>
 
         <LinearLayout

@@ -38,7 +38,7 @@ class CounterService : Service() {
                 isPaused = false
                 _counterState.value = CounterState.Running(secondsCount)
             } else {
-                secondsCount = 0
+                //secondsCount = 0
                 _counterState.value = CounterState.Running(secondsCount)
 
                 job = scope.launch {
@@ -68,6 +68,14 @@ class CounterService : Service() {
         secondsCount = 0
         isPaused = false
         _counterState.value = CounterState.Stopped
+    }
+
+    fun setCounter(seconds: Int) {
+        secondsCount = seconds
+
+        if (!isRunning()) {
+            _counterState.value = CounterState.Paused(secondsCount)
+        }
     }
 
     fun isRunning() : Boolean {

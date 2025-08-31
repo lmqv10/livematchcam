@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.combine
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.extensions.Loge
-import it.lmqv.livematchcam.firebase.SoccerScore
+import it.lmqv.livematchcam.services.firebase.SoccerScore
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.Command
 import kotlinx.coroutines.flow.collectLatest

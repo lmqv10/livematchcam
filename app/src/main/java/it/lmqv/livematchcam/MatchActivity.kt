@@ -15,10 +15,10 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
@@ -35,11 +35,17 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import it.lmqv.livematchcam.databinding.ActivityMatchBinding
 import it.lmqv.livematchcam.extensions.dpToPx
+import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.services.CounterService
+import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.viewmodels.AccountViewModel
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
+import it.lmqv.livematchcam.views.AnimateImageVIew
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlin.getValue
 
 interface INavigateDrawerActivity {
     fun navigateAsDrawerSelection(@IdRes destinationId: Int)
@@ -114,30 +120,6 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        /*navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            try {
-                // L'ID della root del graph
-                val rootId = navController.graph.id
-                val backStackEntries = mutableListOf<String>()
-
-                // Dal top, scendiamo fino alla root
-                var currentEntry: NavBackStackEntry? = navController.currentBackStackEntry
-                while (currentEntry != null) {
-                    backStackEntries.add(currentEntry.destination.label.toString())
-                    if (currentEntry.destination.id == rootId) break
-                    currentEntry = try {
-                        navController.getBackStackEntry(currentEntry.destination.id - 1)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                }
-                Log.d("LM_NAV_DEBUG", "Back stack: ${backStackEntries.joinToString(" -> ")}")
-            } catch (e: Exception) {
-                Log.e("LM_NAV_DEBUG", "Error reading back stack", e)
-            }
-        }*/
-
         appBarConfiguration = AppBarConfiguration(
             topLevelsFragments,
             binding.matchDrawerLayout
@@ -159,7 +141,13 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
             }
         )
 
-        transitionAnim(true)
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.slide_in, R.anim.slide_out)
+        } else {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
+        }
+
         binding.tvVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
 
         headerView = binding.matchNavView.getHeaderView(0)
@@ -181,7 +169,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                         actionsContainer.visibility = View.VISIBLE
 
                         actions.forEachIndexed { index, action ->
-                            val imageView = ImageView(
+                            val imageView = AnimateImageVIew(
                                 ContextThemeWrapper(this@MatchActivity, R.style.AppTheme),
                                 null, 0, R.style.defaultImageViewStyle
                             ).apply {
@@ -207,19 +195,40 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                 }
             }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
 
         lifecycleScope.launch {
-            accountViewModel.authState.collectLatest { state ->
-                binding.matchNavView
-                    .getHeaderView(0)
-                    .findViewById<TextView>(R.id.textAccountEmail)
-                    .text = accountViewModel.accountDesc()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                accountViewModel.authState.collectLatest { state ->
+                    if (accountViewModel.isLogged()) {
+                        YouTubeClientProvider
+                            .initialize(this@MatchActivity, accountViewModel.accountName()) { message ->
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    toast(message, Toast.LENGTH_SHORT)
+                                }
+                            }
+
+                        binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = true
+                        binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = true
+
+                        binding.matchNavView.getHeaderView(0)
+                            .findViewById<TextView>(R.id.textAccountEmail).text = accountViewModel.accountName()
+                    } else {
+
+                        binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = false
+                        binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = false
+
+                        binding.matchNavView.getHeaderView(0)
+                            .findViewById<TextView>(R.id.textAccountEmail).text = getString(R.string.google_sign_in)
+                    }
+                }
             }
         }
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        accountViewModel.updateLastSignedInAccount()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -241,16 +250,6 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun navigateAsStartActivity(activityClass: Class<out Activity>) {
         startActivity(Intent(this, activityClass))
-    }
-
-    @Suppress("DEPRECATION")
-    private fun transitionAnim(isOpen: Boolean) {
-        if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val type = if (isOpen) OVERRIDE_TRANSITION_OPEN else OVERRIDE_TRANSITION_CLOSE
-            overrideActivityTransition(type, R.anim.slide_in, R.anim.slide_out)
-        } else {
-            overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
-        }
     }
 
     private fun requestPermissions() {

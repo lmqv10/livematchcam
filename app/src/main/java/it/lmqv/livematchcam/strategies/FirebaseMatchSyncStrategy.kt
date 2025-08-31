@@ -3,15 +3,15 @@ package it.lmqv.livematchcam.strategies
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
-import it.lmqv.livematchcam.firebase.EventInfo
-import it.lmqv.livematchcam.firebase.EventInfoData
-import it.lmqv.livematchcam.firebase.FirebaseDataManager
-import it.lmqv.livematchcam.firebase.Match
-import it.lmqv.livematchcam.firebase.Quadruple
-import it.lmqv.livematchcam.firebase.ScoreFactory
+import it.lmqv.livematchcam.services.firebase.EventInfo
+import it.lmqv.livematchcam.services.firebase.EventInfoData
+import it.lmqv.livematchcam.services.firebase.FirebaseDataService
+import it.lmqv.livematchcam.services.firebase.Match
+import it.lmqv.livematchcam.services.firebase.Quadruple
+import it.lmqv.livematchcam.services.firebase.ScoreFactory
 import it.lmqv.livematchcam.repositories.AccountRepository
+import it.lmqv.livematchcam.repositories.FirebaseDataRepository
 import it.lmqv.livematchcam.repositories.MatchRepository
-import it.lmqv.livematchcam.repositories.StreamersSettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,7 +23,7 @@ import java.util.UUID
 class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
     override val instanceId: String? = UUID.randomUUID().toString()
 
-    private val streamersSettingsRepository = StreamersSettingsRepository(context)
+    private val firebaseDataRepository = FirebaseDataRepository(context)
     private val firebaseAccountRepository = AccountRepository(context)
 
     private lateinit var onMatchUpdated: (Match) -> Unit
@@ -44,21 +44,21 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
             combine(
                 firebaseAccountRepository.accountGoogle,
                 firebaseAccountRepository.accountKey,
-                streamersSettingsRepository.getCurrentKey,
+                firebaseDataRepository.streamName,
                 MatchRepository.sport
-            ) { accountGoogle, accountKey, key, sport ->
-                Quadruple(accountGoogle, accountKey, key, sport)
-            }.collect { (accountGoogle, accountKey, key, sport) ->
+            ) { accountGoogle, accountKey, streamName, sport ->
+                Quadruple(accountGoogle, accountKey, streamName, sport)
+            }.collect { (accountGoogle, accountKey, streamName, sport) ->
                 //Logd("$instanceId :: FirebaseMatchSyncStrategy::collect:: $key")
-                FirebaseDataManager.authenticateAccount(accountGoogle, accountKey, {
+                FirebaseDataService.authenticateAccount(accountGoogle, accountKey, {
                     _isRealtimeDatabaseAvailable.value = true
 
-                    FirebaseDataManager.attachMatchValueEventListener(key) { match ->
+                    FirebaseDataService.attachMatchValueEventListener(streamName) { match ->
                         //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify Match Update")
                         onMatchUpdated(match)
                     }
 
-                    FirebaseDataManager.attachEventInfoValueEventListener(key, sport) { eventInfo ->
+                    FirebaseDataService.attachEventInfoValueEventListener(streamName, sport) { eventInfo ->
                         //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify EventInfo Update")
                         onEventInfoUpdated(eventInfo)
                     }
@@ -75,8 +75,8 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
         //Logd("$instanceId: FirebaseMatchSyncStrategy::dispose")
         syncJob.cancel()
         _isRealtimeDatabaseAvailable.value = false
-        FirebaseDataManager.detachMatchValueEventListener()
-        FirebaseDataManager.detachEventInfoValueEventListener()
+        FirebaseDataService.detachMatchValueEventListener()
+        FirebaseDataService.detachEventInfoValueEventListener()
 
         //Logd("$instanceId: LocalMatchSyncStrategy::reset to manual match")
         this.onMatchUpdated(Match())
@@ -85,7 +85,7 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
     }
 
     override fun updateMatch(match: Match) {
-        FirebaseDataManager.updateMatchValue(match)
+        FirebaseDataService.updateMatchValue(match)
     }
 
     override fun updateEventInfo(eventInfo: EventInfo) {
@@ -93,7 +93,7 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
         val scoreMap = ScoreFactory.buildMap(score)
         val eventInfoData = EventInfoData(eventInfo.sport.name, scoreMap)
 
-        FirebaseDataManager.updateEventInfoValue(eventInfoData)
+        FirebaseDataService.updateEventInfoValue(eventInfoData)
     }
 
     private val _isRealtimeDatabaseAvailable = MutableLiveData(false)

@@ -1,13 +1,10 @@
 package it.lmqv.livematchcam.fragments.volley
 
-import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -23,7 +20,7 @@ import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
-import it.lmqv.livematchcam.firebase.VolleyScore
+import it.lmqv.livematchcam.services.firebase.VolleyScore
 import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
@@ -31,6 +28,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.core.graphics.toColorInt
 
 class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
     companion object {
@@ -46,7 +44,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentVolleyRemoteControlBinding.inflate(inflater, container, false)
         return binding.root
@@ -77,14 +75,14 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                     available, color, logo -> Triple(available, color, logo)
             }.collect { (isAvailable, colorHex, logoURL) ->
                 //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.homeColor.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
                         allowHardware(false)
                     }
                 } else {
-                    binding.homeColor.setShirtByColor(Color.parseColor(colorHex))
+                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
                 }
 
                 binding.homeColor.setOnClickListener {
@@ -110,14 +108,14 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                     available, color, logo -> Triple(available, color, logo)
             }.collect { (isAvailable, colorHex, logoURL) ->
                 //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.guestColor.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
                         error(R.drawable.shirt_white)
                         allowHardware(false)
                     }
                 } else {
-                    binding.guestColor.setShirtByColor(Color.parseColor(colorHex))
+                    binding.guestColor.setShirtByColor(colorHex.toColorInt())
                 }
 
                 binding.guestColor.setOnClickListener {
@@ -163,7 +161,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
         lifecycleScope.launch {
             MatchRepository.spotBannerURL.collect { spotBannerURL ->
-                if (!spotBannerURL.isNullOrEmpty()) {
+                if (spotBannerURL.isNotEmpty()) {
                     binding.spotBannerPreview.load(spotBannerURL) {
                         placeholder(R.drawable.preview_missing)
                         error(R.drawable.preview_missing)
@@ -205,7 +203,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
         lifecycleScope.launch {
             MatchRepository.mainBannerURL.collect { spotBannerURL ->
-                if (!spotBannerURL.isNullOrEmpty()) {
+                if (spotBannerURL.isNotEmpty()) {
                     binding.mainBannerPreview.load(spotBannerURL) {
                         placeholder(R.drawable.preview_missing)
                         error(R.drawable.preview_missing)
@@ -385,12 +383,12 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         _binding = null
     }
 
-    private fun hideKeyboard() {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val view = requireActivity().currentFocus
-        if (view != null) {
-            imm.hideSoftInputFromWindow(view.windowToken, 0)
-            view.clearFocus() // Rimuove il focus
-        }
-    }
+//    private fun hideKeyboard() {
+//        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//        val view = requireActivity().currentFocus
+//        if (view != null) {
+//            imm.hideSoftInputFromWindow(view.windowToken, 0)
+//            view.clearFocus() // Rimuove il focus
+//        }
+//    }
 }

@@ -1,7 +1,7 @@
 package it.lmqv.livematchcam.strategies
 
 import android.content.Context
-import it.lmqv.livematchcam.constants.SyncStrategy
+import it.lmqv.livematchcam.utils.SyncStrategy
 
 class MatchSyncStrategyFactory {
     private var localMatchSyncStrategy: LocalMatchSyncStrategy? = null

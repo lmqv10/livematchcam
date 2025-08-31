@@ -25,7 +25,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/stream_url"
+            android:text="@string/rtmp_server"
             android:textColor="@color/appColorSecondary"/>
 
         <TextView
@@ -33,7 +33,7 @@
             style="@style/editTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/hint_protocol"/>
+            android:hint="@string/hint_protocol"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -47,7 +47,7 @@
             style="@style/editTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/hint_key"/>
+            android:hint="@string/hint_key"/>
 
     </LinearLayout>
 </LinearLayout>

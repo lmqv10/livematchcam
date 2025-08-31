@@ -1,14 +1,11 @@
+@file:Suppress("DEPRECATION")
+
 package it.lmqv.livematchcam
 
 import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.View
@@ -39,7 +36,6 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.FileContent
-import com.google.api.client.http.InputStreamContent
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.DateTime
@@ -54,7 +50,7 @@ import it.lmqv.livematchcam.databinding.ActivityYouTubeBinding
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.utils.KeyValue
+import it.lmqv.livematchcam.utils.KeyDescription
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,23 +59,17 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import kotlin.text.set
 
 class YouTubeActivity : AppCompatActivity() {
 
     private val SERVICE_ID: String = "cam.livematch.nearby"
-    private val TAG: String = "LMCamNearbyConnections"
+    //private val TAG: String = "LMCamNearbyConnections"
     private val STRATEGY: Strategy = Strategy.P2P_STAR
     private lateinit var connectionsClient: ConnectionsClient
 
     companion object {
-        private const val REQUEST_CODE_LOCATION_PERMISSION = 1
-        private const val REQUEST_CODE_BLUETOOTH_PERMISSION = 2
+        //private const val REQUEST_CODE_LOCATION_PERMISSION = 1
+        //private const val REQUEST_CODE_BLUETOOTH_PERMISSION = 2
         private const val REQUEST_CODE_PERMISSION = 3
     }
     private var connectedEndpointId: String = ""
@@ -260,7 +250,7 @@ class YouTubeActivity : AppCompatActivity() {
             request.mine = true // Retrieve broadcasts from the authenticated user
             val response = request.execute()
             withContext(Dispatchers.Main) {
-                var streams = response.items.map { x -> KeyValue<String>(x.id, "LiveStream: ${x.snippet.title} ${x.id}") }
+                var streams = response.items.map { x -> KeyDescription<String>(x.id, "LiveStream: ${x.snippet.title} ${x.id}") }
 
                 val adapterServer =
                     ArrayAdapter(this@YouTubeActivity, android.R.layout.simple_spinner_item, streams)
@@ -293,7 +283,7 @@ class YouTubeActivity : AppCompatActivity() {
             request.mine = true // Retrieve broadcasts from the authenticated user
             val response = request.execute()
             withContext(Dispatchers.Main) {
-                var broadcasts = response.items.map { x -> KeyValue<String>(x.id, "LiveBroadcast: ${x.snippet.title} - ${x.id}") }
+                var broadcasts = response.items.map { x -> KeyDescription<String>(x.id, "LiveBroadcast: ${x.snippet.title} - ${x.id}") }
 
                 // "Os8jYda6AD0"
                 val adapterServer = ArrayAdapter(this@YouTubeActivity, android.R.layout.simple_spinner_item, broadcasts)
@@ -365,11 +355,11 @@ class YouTubeActivity : AppCompatActivity() {
 
             // Retrieve the ingestion details:
             val ingestionInfo = streamResponse.cdn.ingestionInfo
-            //val streamKey = ingestionInfo.streamName  // This is your RTMP stream key
-            //val ingestionUrl = ingestionInfo.ingestionAddress  // RTMP server URL
+            val streamKey = ingestionInfo.streamName  // This is your RTMP stream key
+            val ingestionUrl = ingestionInfo.ingestionAddress  // RTMP server URL
 
-            //Logd("streamKey:: $streamKey")
-            //Logd("ingestionUrl:: $ingestionUrl")
+            toast("streamKey:: $streamKey")
+            toast("ingestionUrl:: $ingestionUrl")
 
     // Bind the broadcast to the stream:
             val bindRequest = youtubeService.liveBroadcasts()
@@ -383,52 +373,6 @@ class YouTubeActivity : AppCompatActivity() {
         }
 
     }
-
-    private fun setBroadcastThumbnail(broadcastId: String, thumbnailFile: File) {
-        try {
-            val transport = NetHttpTransport()
-            val jsonFactory = GsonFactory.getDefaultInstance()
-
-            val credential = GoogleAccountCredential.usingOAuth2(
-                applicationContext, listOf("https://www.googleapis.com/auth/youtube")
-            )
-            credential.selectedAccountName = accountName /* Set the authenticated user's account name */
-
-            val youtubeService = YouTube.Builder(transport, jsonFactory, credential)
-                .setApplicationName("LiveMatchCam")
-                .build()
-
-            val mediaContent = FileContent("image/jpeg", thumbnailFile)
-
-            /*Thread {
-                try {
-
-                    val thumbnailSet = youtubeService.thumbnails()
-                        .set(videoId, content)
-                    thumbnailSet.execute()
-                    runOnUiThread {
-                        // Mostra conferma all'utente
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    runOnUiThread {
-                        // Mostra errore
-                    }
-                }
-            }.start()*/
-
-            val thumbnailSet = youtubeService.thumbnails()
-                .set(broadcastId, mediaContent)
-
-            val thumbnailSetResponse = thumbnailSet.execute()
-
-        }
-        catch (e: Exception) {
-            Loge("YoutubeActivity::tException:: ${e.message.toString()}")
-            //var exx = e.message
-        }
-    }
-
 
     private fun oAuthHandler() {
         val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -494,7 +438,7 @@ class YouTubeActivity : AppCompatActivity() {
             if (response.isSuccessful) {
                 // Parse the JSON response
                 val responseData = response.body?.string()
-                val json = JSONObject(responseData)
+                val json = JSONObject(responseData!!)
                 val items = json.getJSONArray("items")
 
                 if (items.length() > 0) {
@@ -507,7 +451,7 @@ class YouTubeActivity : AppCompatActivity() {
                     val description = snippet.getString("description")
                     val subscriberCount = statistics.getString("subscriberCount")
 
-                    //Logd("Channel Title: $title" + " -Description: $description" + " -Subscribers: $subscriberCount")
+                    toast("Channel Title: $title" + " -Description: $description" + " -Subscribers: $subscriberCount")
                 } else {
                     //Logd("No channel information found.")
                 }

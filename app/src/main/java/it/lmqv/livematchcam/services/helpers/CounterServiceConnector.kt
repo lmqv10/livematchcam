@@ -63,6 +63,10 @@ class CounterServiceConnector(context: Context) : CoroutineScope {
         counterService?.stopCounter()
     }
 
+    fun setCounter(seconds: Int) {
+        counterService?.setCounter(seconds)
+    }
+
     fun isRunning() : Boolean {
         return counterService?.isRunning() ?: false
     }

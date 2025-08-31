@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.firebase
+package it.lmqv.livematchcam.services.firebase
 
 import it.lmqv.livematchcam.factories.Sports
 
@@ -47,12 +47,12 @@ data class EventInfoData(
     var score: Map<String, Any?>? = null
 )
 
-data class Banners (
+/*data class Banners (
     val spotBannerURL: String = "",
     val spotBannerVisible: Boolean = false,
     val mainBannerURL: String = "",
     val mainBannerVisible: Boolean = false
-)
+)*/
 
 interface IScore {
     val command: String

@@ -1,7 +1,7 @@
 package it.lmqv.livematchcam.strategies
 
-import it.lmqv.livematchcam.firebase.EventInfo
-import it.lmqv.livematchcam.firebase.Match
+import it.lmqv.livematchcam.services.firebase.EventInfo
+import it.lmqv.livematchcam.services.firebase.Match
 import kotlinx.coroutines.flow.Flow
 
 interface IMatchSyncStrategy {

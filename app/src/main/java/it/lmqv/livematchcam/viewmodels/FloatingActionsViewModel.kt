@@ -20,9 +20,9 @@ class FloatingActionsViewModel : ViewModel() {
     private val _actions = MutableStateFlow<List<FloatingAction>>(emptyList())
     val actions: StateFlow<List<FloatingAction>> = _actions
 
-    fun clear() {
+    /*fun clear() {
         _actions.value = emptyList()
-    }
+    }*/
 
     fun setOnlyStreamActions(navigator : INavigateDrawerActivity?) {
         var actions = getBaseActions(navigator)
@@ -53,7 +53,7 @@ class FloatingActionsViewModel : ViewModel() {
         return listOf(
             FloatingAction(
                 id = "UVCStreamActivity",
-                iconRes = R.drawable.usb_cam,
+                iconRes = R.drawable.ic_uvc_camera,
                 contentDescription = "usb",
                 onClick = {
                     navigator?.navigateAsStartActivity(UVCStreamActivity::class.java)

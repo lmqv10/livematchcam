@@ -1,7 +1,6 @@
 package it.lmqv.livematchcam.extensions
 
 import android.util.Log
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -29,8 +28,3 @@ fun Fragment.launchOnStarted(delegate: suspend () -> Unit) {
         }
     }
 }
-
-fun Fragment.toast(message: String, duration: Int = Toast.LENGTH_SHORT) {
-    Toast.makeText(requireContext(), message, duration).show()
-}
-

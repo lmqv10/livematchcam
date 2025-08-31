@@ -13,6 +13,7 @@ class CounterViewModel(application: Application) : AndroidViewModel(application)
     fun startCounter() = serviceConnector.startCounter()
     fun pauseCounter() = serviceConnector.pauseCounter()
     fun stopCounter() = serviceConnector.stopCounter()
+    fun setCounter(seconds: Int) = serviceConnector.setCounter(seconds)
 
     override fun onCleared() {
         serviceConnector.unbind(getApplication())

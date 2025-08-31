@@ -5,13 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import it.lmqv.livematchcam.extensions.toArgbHex
 import it.lmqv.livematchcam.factories.Sports
-import it.lmqv.livematchcam.firebase.IScore
-import it.lmqv.livematchcam.firebase.Match
+import it.lmqv.livematchcam.services.firebase.IScore
+import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.strategies.IMatchSyncStrategy
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
-import it.lmqv.livematchcam.firebase.EventInfo
-import it.lmqv.livematchcam.firebase.ScoreFactory
+import it.lmqv.livematchcam.services.firebase.EventInfo
+import it.lmqv.livematchcam.services.firebase.ScoreFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,6 +83,13 @@ object MatchRepository {
 
     private val _mainBannerVisible = MutableStateFlow(currentMatch.mainBannerVisible)
     val mainBannerVisible: StateFlow<Boolean> = _mainBannerVisible
+
+    private val _RTMPServerURI = MutableStateFlow<String?>(null)
+    val RTMPServerURI: StateFlow<String?> = _RTMPServerURI
+
+    fun setRTMPServer(serverUri: String?) {
+        _RTMPServerURI.value = serverUri
+    }
 
     private var _sport = MutableStateFlow<Sports>(currentEventInfo.sport)
     val sport: StateFlow<Sports> = _sport

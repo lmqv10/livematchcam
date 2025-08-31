@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.constants
+package it.lmqv.livematchcam.utils
 
 enum class SyncStrategy
 {

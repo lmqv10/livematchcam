@@ -7,14 +7,14 @@ import android.view.inputmethod.InputMethodManager
 import it.lmqv.livematchcam.adapters.LogoItem
 import it.lmqv.livematchcam.adapters.LogosAdapter
 import it.lmqv.livematchcam.databinding.DialogLogosRecentsBinding
-import it.lmqv.livematchcam.utils.KeyValue
+import it.lmqv.livematchcam.utils.KeyDescription
 import it.lmqv.livematchcam.preferences.RecentsLogosPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 
-class LogosRecentsDialog @JvmOverloads constructor(
+class LogosRecentsDialog constructor(
     context: Context,
     private val currentLogoURL: String,
     private val onInputConfirmed: (String) -> Unit
@@ -33,7 +33,7 @@ class LogosRecentsDialog @JvmOverloads constructor(
         binding.confirmButton.setOnClickListener {
             val input = binding.editTextInput.text.toString().trim()
             if (input.isNotEmpty()) {
-                recentLogosManager.saveRecent(KeyValue<String>(input, input))
+                recentLogosManager.saveRecent(KeyDescription<String>(input, input))
             }
             onInputConfirmed(input)
             val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

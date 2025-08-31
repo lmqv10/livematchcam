@@ -3,8 +3,8 @@ package it.lmqv.livematchcam.strategies
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
-import it.lmqv.livematchcam.firebase.EventInfo
-import it.lmqv.livematchcam.firebase.Match
+import it.lmqv.livematchcam.services.firebase.EventInfo
+import it.lmqv.livematchcam.services.firebase.Match
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
@@ -14,7 +14,7 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
     private lateinit var onMatchUpdated: (Match) -> Unit
     private lateinit var onEventInfoUpdated: (EventInfo) -> Unit
 
-    //private val streamersSettingsRepository = StreamersSettingsRepository(context)
+    //private val streamersSettingsRepository = ServerSettingsRepository(context)
 
     //private var syncJob = SupervisorJob()
     //private val syncScope = CoroutineScope(syncJob + Dispatchers.IO)

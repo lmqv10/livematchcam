@@ -7,7 +7,7 @@
     <string name="old_api">Old API (16 – 20)</string>
     <string name="from_file">From file</string>
     <string name="display">Screen</string>
-    <string name="live_stream">Live Stream</string>
+    <string name="live_stream">Choose Stream Key</string>
     <string name="tv_select">Select your streamer</string>
     <string name="hint_match_league">Serie C - Girone A</string>
     <string name="hint_home_team">AAA</string>
@@ -28,19 +28,21 @@
     <string name="live_url">Live URL</string>
     <string name="rtmp_server">RTMP Server</string>
     <string name="server">Server Configuration</string>
-    <string name="broadcasts">Broadcasts</string>
+    <string name="broadcasts">Add or Update Match</string>
+    <string name="thumbnail">Thumbnail</string>
     <string name="account">Account</string>
     <string name="account_key">Account Key</string>
     <string name="match">Teams Configuration</string>
     <string name="_config_auto_zoom">Auto Zoom</string>
     <string name="sport">Sport</string>
     <string name="match_info">Match info</string>
-    <string name="stream_url">Stream URL</string>
     <string name="stream_key">Stream Key</string>
     <string name="err_message">ERR</string>
     <string name="zoom_strategy">Zoom Strategy</string>
     <string name="offset_strategy">Offset Strategy</string>
     <string name="video_resolution">Video Resolution</string>
+    <string name="date_time">Select Scheduled Date and Time</string>
+    <string name="start_period_time">Select Start minute and Seconds</string>
     <string name="video_fps">fps</string>
     <string name="choose_color">Choose shirt color</string>
     <string name="choose_logo">Insert or choose logo URL</string>
@@ -49,6 +51,9 @@
     <string name="stream">Stream</string>
     <string name="go_live">Go Live</string>
     <string name="remote_score">Remote Score</string>
+    <string name="add">Add</string>
+    <string name="new_schedule">Schedule a match</string>
+    <string name="select_thumbnail">Select a Thumbnail and a Live Stream</string>
 
     <string name="match_league">Match Description</string>
     <string name="team_name">Team Name</string>
@@ -114,20 +119,17 @@
     <string name="internal">Internal Audio</string>
     <string name="mix">Mix audio</string>
     <string name="video_source">Video source</string>
-    <string name="camera1">Camera1</string>
-    <string name="camera2">Camera2</string>
-    <string name="camerax">CameraX</string>
     <string name="camera_uvc">CameraUVC</string>
     <string name="bitmap">Bitmap</string>
 
     <string name="account_placeholder">-</string>
-    <string name="description_placeholder">...</string>
+    <string name="description_placeholder">&#8230;</string>
     <string name="warning_placeholder">Confirm?</string>
     <string name="live_name_placeholder">xxxxxxxxxxxxx</string>
     <string name="live_id_placeholder">xxxxxxxxxxxxx</string>
-    <string name="server_placeholder">rtmp://...</string>
+    <string name="server_placeholder">rtmp://&#8230;</string>
     <string name="title_placeholder">Event Title</string>
-    <string name="label_event_description">Description</string>
+    <string name="label_event_title">Title</string>
     <string name="label_datetime">Date</string>
     <string name="date_placeholder">01/01/2025 10:00</string>
     <string name="time_placeholder">00:00</string>
@@ -147,7 +149,7 @@
     <string name="set_5_placeholder">5 Set</string>
     <string name="spot_banner_placeholder">URL spot banner</string>
     <string name="main_banner_placeholder">URL main banner</string>
-    <string name="logo_url_placeholder">http://...</string>
+    <string name="logo_url_placeholder">http://&#8230;</string>
     <string name="spot_banner">Top-Right banner</string>
     <string name="main_banner">Main banner</string>
     <string name="show_banner">Banner On</string>
@@ -159,7 +161,8 @@
     <string name="confirm_stop_message">Stop streaming.\n Confirm?</string>
     <string name="confirm_start_message">Start streaming.\n Confirm?</string>
 
-    <string name="confirm_create_live_stream">Create Stream. Confirm?</string>
+    <string name="confirm_create_live_stream">Create Or Update Event. Confirm?</string>
+    <string name="confirm_delete_live_stream">Delete Event. Confirm?</string>
 
     <string name="reset_match_data_message">Reset match data.\n Confirm?</string>
 
@@ -188,5 +191,11 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
     <string name="youtube">YouTube</string>
-    <string name="youtube_stream">New Youtube Stream</string>
+    <string name="youtube_stream">Next Match</string>
+
+    <string name="zoom_in">In</string>
+    <string name="zoom_none">None</string>
+    <string name="zoom_out">Out</string>
+
+
 </resources>

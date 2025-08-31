@@ -10,7 +10,6 @@
 
     <dimen name="toolbar_title_size">@dimen/text_size_big</dimen>
 
-
     <dimen name="menu_font">16sp</dimen>
     <dimen name="grid_1">4dp</dimen>
     <dimen name="grid_2">8dp</dimen>
@@ -27,4 +26,8 @@
     <dimen name="status_width">100dp</dimen>
 
     <dimen name="dialog_width">500dp</dimen>
+
+    <dimen name="image_size_width_small">72dp</dimen>
+    <dimen name="image_size_width_large">160dp</dimen>
+    <dimen name="image_size_height">90dp</dimen>
 </resources>

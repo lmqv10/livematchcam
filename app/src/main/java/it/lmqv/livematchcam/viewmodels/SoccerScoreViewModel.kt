@@ -1,7 +1,7 @@
 package it.lmqv.livematchcam.viewmodels
 
 import androidx.lifecycle.ViewModel
-import it.lmqv.livematchcam.firebase.SoccerScore
+import it.lmqv.livematchcam.services.firebase.SoccerScore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.math.max

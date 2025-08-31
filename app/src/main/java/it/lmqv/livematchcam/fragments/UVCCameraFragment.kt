@@ -28,13 +28,12 @@ import it.lmqv.livematchcam.databinding.FragmentUvcCameraBinding
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
+import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.repositories.MatchRepository
-import it.lmqv.livematchcam.repositories.SettingsRepository
 import it.lmqv.livematchcam.sources.UvcSonyCameraSource
-import it.lmqv.livematchcam.utils.KeyValue
-import it.lmqv.livematchcam.viewmodels.StreamersViewModel
+import it.lmqv.livematchcam.utils.KeyDescription
 import it.lmqv.livematchcam.viewmodels.UVCStatusViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,10 +49,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     companion object {
         fun getInstance(): UVCCameraFragment = UVCCameraFragment()
     }
-
-    private val streamersViewModel: StreamersViewModel by activityViewModels()
-
-    private lateinit var settingsRepository: SettingsRepository
 
     private val statusFragment = UVCStatusFragment.newInstance()
     private val statusViewModel: UVCStatusViewModel by activityViewModels()
@@ -92,6 +87,9 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     private var timeElapsedInSeconds = 0
     private var job: Job? = null
 
+    private var serverURI: String? = null
+
+
     //Bitrate adapter used to change the bitrate on fly depend of the bandwidth.
     private val bitrateAdapter = BitrateAdapter {
         genericStream.setVideoBitrateOnFly(it)
@@ -104,8 +102,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentUvcCameraBinding.inflate(inflater, container, false)
-
-        settingsRepository = SettingsRepository(requireContext())
 
         childFragmentManager.beginTransaction()
             .add(R.id.status_container, statusFragment).commit()
@@ -140,6 +136,15 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        launchOnStarted {
+            MatchRepository.RTMPServerURI.collect { configuredServerURI ->
+                configuredServerURI?.let {
+                    binding.bStartStop.isClickable = true
+                }
+                this.serverURI = configuredServerURI
+            }
+        }
+
         val audioManager = requireActivity().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         this.isMute = audioManager.isMicrophoneMute
 
@@ -170,39 +175,41 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
         })
 
         binding.bStartStop.setOnClickListener {
-            toast(streamersViewModel.getServerURI())
-            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
-            val title = dialogView.findViewById<TextView>(R.id.dialog_message)
-            if (genericStream.isStreaming) {
-                title.text = getString(R.string.confirm_stop_message)
-            } else {
-                title.text = getString(R.string.confirm_start_message)
-            }
+            if (this.serverURI != null) {
+                toast(this.serverURI!!)
+                val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
+                val title = dialogView.findViewById<TextView>(R.id.dialog_message)
+                if (genericStream.isStreaming) {
+                    title.text = getString(R.string.confirm_stop_message)
+                } else {
+                    title.text = getString(R.string.confirm_start_message)
+                }
 
-            val dialog = AlertDialog.Builder(requireContext())
-                .setView(dialogView)
-                .setPositiveButton("OK") { dialog, _ ->
-                    val serverUri = streamersViewModel.getServerURI()
-                    if (!genericStream.isStreaming) {
-                        genericStream.startStream(serverUri)
-                        binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
-                    } else {
-                        genericStream.stopStream()
-                        binding.bStartStop.setImageResource(R.drawable.stream_icon)
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
+                    .setPositiveButton("OK") { dialog, _ ->
+                        if (!genericStream.isStreaming) {
+                            genericStream.startStream(this.serverURI!!)
+                            binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
+                        } else {
+                            genericStream.stopStream()
+                            binding.bStartStop.setImageResource(R.drawable.stream_icon)
+                        }
+                        dialog.dismiss()
+                        requireActivity().hideSystemUI()
                     }
-                    dialog.dismiss()
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                        requireActivity().hideSystemUI()
+                    }
+                    .create()
+                dialog.setOnShowListener {
                     requireActivity().hideSystemUI()
-                    toast(serverUri)
                 }
-                .setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.dismiss()
-                    requireActivity().hideSystemUI()
-                }
-                .create()
-            dialog.setOnShowListener {
-                requireActivity().hideSystemUI()
+                dialog.show()
+            } else {
+                toast("no RTMP server configured")
             }
-            dialog.show()
         }
 
         binding.microphone.setOnClickListener {
@@ -235,12 +242,6 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
                 }
             }
         }
-
-        lifecycleScope.launch {
-            streamersViewModel.currentKey.collect { _ ->
-                binding.bStartStop.isClickable = true
-            }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -261,6 +262,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
                             genericStream.stopStream()
                             binding.bStartStop.setImageResource(R.drawable.stream_icon)
                             isEnabled = false
+
                             requireActivity().onBackPressedDispatcher.onBackPressed()
                         }
                         .setNegativeButton("Cancel") { _, _ -> }
@@ -348,17 +350,17 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
     }
 
     override fun onConnectionStarted(url: String) {
-        toast("Streaming Started")
+        toast("Streaming Started on $url")
         this.startStreamingTimer()
     }
 
     override fun onConnectionSuccess() {
-        toast("Connected on ${streamersViewModel.getServerURI()}")
+        toast("Connected on ${serverURI}")
     }
 
     override fun onConnectionFailed(reason: String) {
         if (genericStream.getStreamClient().reTry(5000, reason, null)) {
-            toast("Retry")
+            toast("Retry $reason")
         } else {
             genericStream.stopStream()
             binding.bStartStop.setImageResource(R.drawable.stream_icon)
@@ -429,17 +431,18 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
         val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
         val optionsVideoResolutions = listOf(
-            KeyValue(1080, "1080p"),
-            KeyValue(720, "720p")
+            KeyDescription(1080, "1080p"),
+            KeyDescription(720, "720p")
         )
 
         val adapterVideoResolutions = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsVideoResolutions)
         adapterVideoResolutions.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerVideoResolutions.isEnabled = !genericStream.isStreaming
         spinnerVideoResolutions.adapter = adapterVideoResolutions
+        @Suppress("UNCHECKED_CAST")
         spinnerVideoResolutions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyValue<Int>
+                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
                 var selectedItemValue = selectedItem.key
                 if (height != selectedItemValue) {
                     height = selectedItemValue
@@ -455,19 +458,20 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
         val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.video_fps)
         val optionsVideoFps = listOf(
-            KeyValue(20, "20fps"),
-            KeyValue(25, "25fps"),
-            KeyValue(30, "30fps"),
-            KeyValue(60, "60fps")
+            KeyDescription(20, "20fps"),
+            KeyDescription(25, "25fps"),
+            KeyDescription(30, "30fps"),
+            KeyDescription(60, "60fps")
         )
 
         val adapterVideoFps = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsVideoFps)
         adapterVideoFps.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerVideoFps.isEnabled = !genericStream.isStreaming
         spinnerVideoFps.adapter = adapterVideoFps
+        @Suppress("UNCHECKED_CAST")
         spinnerVideoFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyValue<Int>
+                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
                 var selectedItemValue = selectedItem.key
                 if (fps != selectedItemValue) {
                     fps = selectedItemValue

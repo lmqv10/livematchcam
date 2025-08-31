@@ -1,6 +1,5 @@
 package it.lmqv.livematchcam.fragments.volley
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +11,7 @@ import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyScoreBoardBinding
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
-import it.lmqv.livematchcam.firebase.SetScore
+import it.lmqv.livematchcam.services.firebase.SetScore
 import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import kotlinx.coroutines.flow.collectLatest
@@ -21,7 +20,7 @@ import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.extensions.Loge
-import it.lmqv.livematchcam.firebase.VolleyScore
+import it.lmqv.livematchcam.services.firebase.VolleyScore
 
 class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
@@ -29,7 +28,7 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
         fun newInstance() = VolleyScoreBoardFragment()
     }
 
-    private var setsControls: List<Pair<TextView, TextView>> = mutableListOf();
+    private var setsControls: List<Pair<TextView, TextView>> = mutableListOf()
 
     private var _binding: FragmentVolleyScoreBoardBinding? = null
     private val binding get() = _binding!!
@@ -69,9 +68,9 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
                 MatchRepository.homeLogo) {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
-                binding.homeColorBar.setBackgroundColor(Color.parseColor(colorHex))
+                binding.homeColorBar.setBackgroundColor(colorHex.toColorInt())
 
-                if (!logoURL.isNullOrEmpty()) {
+                if (logoURL.isNotEmpty()) {
                     binding.homeLogo.visibility = View.VISIBLE
                     binding.homeShirt.visibility = View.INVISIBLE
                     binding.homeLogo.load(logoURL) {
@@ -117,7 +116,7 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
                 } else {
                     binding.awayLogo.visibility = View.GONE
                     binding.awayShirt.visibility = View.VISIBLE
-                    binding.awayShirt.setShirtByColor(Color.parseColor(colorHex))
+                    binding.awayShirt.setShirtByColor(colorHex.toColorInt())
                     onUpdateCallback?.refresh()
                 }
             }

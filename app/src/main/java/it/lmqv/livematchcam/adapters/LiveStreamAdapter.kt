@@ -8,10 +8,14 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import it.lmqv.livematchcam.R
 
+//sealed class LiveBroadcastItem {
+//    data class EditBroadcast()
+//}
+
 data class LiveStreamItem(val title: String,
-                                 val id: String,
-                                 val address: String,
-                                 val streamName: String)
+    val id: String,
+    val address: String,
+    val streamName: String)
 
 class LiveStreamAdapter(
         private val context: Context,

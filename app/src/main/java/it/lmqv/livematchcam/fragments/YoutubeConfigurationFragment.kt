@@ -10,7 +10,7 @@ import androidx.navigation.fragment.navArgs
 import it.lmqv.livematchcam.INavigateDrawerActivity
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
-import it.lmqv.livematchcam.constants.SyncStrategy
+import it.lmqv.livematchcam.utils.SyncStrategy
 import it.lmqv.livematchcam.databinding.FragmentYoutubeConfigurationBinding
 import it.lmqv.livematchcam.repositories.MatchSyncStrategyRepository
 import kotlin.getValue

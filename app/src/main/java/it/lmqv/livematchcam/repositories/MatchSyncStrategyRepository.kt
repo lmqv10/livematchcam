@@ -1,7 +1,7 @@
 package it.lmqv.livematchcam.repositories
 
 import android.content.Context
-import it.lmqv.livematchcam.constants.SyncStrategy
+import it.lmqv.livematchcam.utils.SyncStrategy
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.strategies.IMatchSyncStrategy
 import it.lmqv.livematchcam.strategies.MatchSyncStrategyFactory
