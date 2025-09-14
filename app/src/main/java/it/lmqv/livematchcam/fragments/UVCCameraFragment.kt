@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
-import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -25,6 +24,8 @@ import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentUvcCameraBinding
+import it.lmqv.livematchcam.dialogs.StartStreamingDialog
+import it.lmqv.livematchcam.dialogs.StopStreamingDialog
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
@@ -32,9 +33,12 @@ import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.sources.UvcSonyCameraSource
 import it.lmqv.livematchcam.utils.KeyDescription
 import it.lmqv.livematchcam.viewmodels.UVCStatusViewModel
+import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
+import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -52,6 +56,9 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
     private val statusFragment = UVCStatusFragment.newInstance()
     private val statusViewModel: UVCStatusViewModel by activityViewModels()
+    private val youtubeViewModel: YoutubeViewModel by activityViewModels {
+        YoutubeViewModelFactory(requireActivity().application, YouTubeClientProvider.get())
+    }
 
     private lateinit var controlBarFragment: IControlBarFragment
     private lateinit var scoreBoardFragment: IScoreBoardFragment
@@ -176,37 +183,31 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
 
         binding.bStartStop.setOnClickListener {
             if (this.serverURI != null) {
-                toast(this.serverURI!!)
-                val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
-                val title = dialogView.findViewById<TextView>(R.id.dialog_message)
                 if (genericStream.isStreaming) {
-                    title.text = getString(R.string.confirm_stop_message)
+                    var dialog = StopStreamingDialog(requireContext(),
+                        { shouldEnd ->
+                            genericStream.stopStream()
+                            if (shouldEnd) { youtubeViewModel.completeLive() }
+                            binding.bStartStop.setImageResource(R.drawable.stream_icon)
+                            requireActivity().hideSystemUI()
+                        }, { requireActivity().hideSystemUI() })
+                    dialog.setOnShowListener {
+                        requireActivity().hideSystemUI()
+                    }
+                    dialog.show()
                 } else {
-                    title.text = getString(R.string.confirm_start_message)
-                }
-
-                val dialog = AlertDialog.Builder(requireContext())
-                    .setView(dialogView)
-                    .setPositiveButton("OK") { dialog, _ ->
-                        if (!genericStream.isStreaming) {
+                    toast(this.serverURI!!)
+                    var dialog = StartStreamingDialog(requireContext(),
+                        {
                             genericStream.startStream(this.serverURI!!)
                             binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
-                        } else {
-                            genericStream.stopStream()
-                            binding.bStartStop.setImageResource(R.drawable.stream_icon)
-                        }
-                        dialog.dismiss()
+                            requireActivity().hideSystemUI()
+                        }, { requireActivity().hideSystemUI() })
+                    dialog.setOnShowListener {
                         requireActivity().hideSystemUI()
                     }
-                    .setNegativeButton("Cancel") { dialog, _ ->
-                        dialog.dismiss()
-                        requireActivity().hideSystemUI()
-                    }
-                    .create()
-                dialog.setOnShowListener {
-                    requireActivity().hideSystemUI()
+                    dialog.show()
                 }
-                dialog.show()
             } else {
                 toast("no RTMP server configured")
             }
@@ -252,21 +253,17 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
         callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (genericStream.isStreaming) {
-                    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
-                    val title = dialogView.findViewById<TextView>(R.id.dialog_message)
-                    title.text = getString(R.string.confirm_stop_message)
-
-                    val dialog = AlertDialog.Builder(requireContext())
-                        .setView(dialogView)
-                        .setPositiveButton("OK") { dialog, _ ->
+                    var dialog = StopStreamingDialog(requireContext(),
+                        { shouldEnd ->
                             genericStream.stopStream()
-                            binding.bStartStop.setImageResource(R.drawable.stream_icon)
-                            isEnabled = false
+                            if (shouldEnd) { youtubeViewModel.completeLive() }
 
+                            isEnabled = false
                             requireActivity().onBackPressedDispatcher.onBackPressed()
-                        }
-                        .setNegativeButton("Cancel") { _, _ -> }
-                        .create()
+                        }, { })
+                    dialog.setOnShowListener {
+                        requireActivity().hideSystemUI()
+                    }
                     dialog.show()
                 } else {
                     isEnabled = false

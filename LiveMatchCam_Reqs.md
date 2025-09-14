@@ -1,11 +1,4 @@
 
-DEV:
-- EVITARE CHE CHIAVI CUSTOM RTMP VENGANO SALVATE IN FIREBASE!!!
-- Complete Live on Stop  -> youtubeViewModel.completeLive() 
-    NOTA: valutare anche il goLive() a comando soprattutto UI!!!
-BUG
-- Rimuovere il comando remoto senza Firebase disponibile
-
 STEP 2
 - Migliorare la vista dell'Account UI
 - Migliorare la vista remote control
@@ -15,7 +8,8 @@ STEP 2
 - Premettere di configurarsi il proprio firebase per remote
 - Se autenticato aprire su Youtube
 - Unificare la CameraFragmente e la UVCCameraFragment per le parti comuni.
-
+- Valutare anche il goLive() soprattutto UI!!!
+- 
 To be verify
 -- remote commands "nearby"
 -- remote configurations

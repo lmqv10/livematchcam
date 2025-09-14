@@ -16,6 +16,7 @@ import com.google.api.services.youtube.model.MonitorStreamInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.internal.notify
 import java.io.File
 import java.time.ZonedDateTime
 import java.util.Date
@@ -23,17 +24,35 @@ import java.util.Date
 data class LiveStreamContentData (
     var thumbnail: File,
     var title: String,
-    var scheduleTime: ZonedDateTime,
+    var scheduledStartTime: ZonedDateTime,
     var liveStreamId: String,
     var liveBroadcastId: String?,
 )
 
+object YouTubeFactory {
+    fun getInstance(context: Context, accountName: String?) : YouTube {
+        return YouTube
+            .Builder(
+                NetHttpTransport(),
+                GsonFactory.getDefaultInstance(),
+                GoogleAccountCredential
+                    .usingOAuth2(context, listOf("https://www.googleapis.com/auth/youtube"))
+                    .apply {
+                        selectedAccountName = accountName
+                    })
+            .setApplicationName("LiveMatchCam")
+            .build()
+    }
+}
+
 object YouTubeClientProvider {
     private var client: YouTubeClient? = null
 
-    fun initialize(context: Context,
-       accountName: String?,
-       notify: (message: String) -> Unit) {
+    fun initialize(
+        context: Context,
+        accountName: String?,
+        notify: (message: String) -> Unit,
+    ) {
         client = YouTubeClient.create(context, accountName, notify)
     }
 
@@ -44,12 +63,15 @@ object YouTubeClientProvider {
 
 class YouTubeClient private constructor(
     private val youTube: YouTube,
-    private val notify: (message: String) -> Unit = { }) {
+    private val notify: (message: String) -> Unit = { },
+) {
 
     companion object {
-        fun create(context: Context,
-                   accountName: String?,
-                   notify: (message: String) -> Unit): YouTubeClient {
+        fun create(
+            context: Context,
+            accountName: String?,
+            notify: (message: String) -> Unit,
+        ): YouTubeClient {
             var youTube = YouTubeFactory.getInstance(context, accountName)
             return YouTubeClient(youTube, notify)
         }
@@ -93,6 +115,7 @@ class YouTubeClient private constructor(
 //            val response = this.youTube.liveBroadcasts()
 //                .transition("live", liveBroadcastId, "status")
 //                .execute()
+//            notify(response.status.lifeCycleStatus)
 //            onComplete(response.status.lifeCycleStatus)
 //        }
 //        catch (e: Exception) {
@@ -104,9 +127,13 @@ class YouTubeClient private constructor(
     fun completeLive(liveBroadcastId: String, onComplete : (status: String) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                notify("Send end stream")
+
                 val response = youTube.liveBroadcasts()
                     .transition("complete", liveBroadcastId, "status")
                     .execute()
+
+                notify("Stream status ${response.status.lifeCycleStatus}")
                 onComplete(response.status.lifeCycleStatus)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -138,8 +165,10 @@ class YouTubeClient private constructor(
             try {
                 notify("Start create Event")
 
-                var zoneDateTime = liveStreamContentData.scheduleTime
-                val googleScheduledStartTime = DateTime(Date.from(zoneDateTime.toInstant()))
+                var eventScheduledStartTime = liveStreamContentData.scheduledStartTime
+                val now = ZonedDateTime.now()
+                var googleTimeZoneScheduledStartTime = if (now.isBefore(eventScheduledStartTime)) { eventScheduledStartTime } else { now.plusMinutes(1) }
+                val googleScheduledStartTime = DateTime(Date.from(googleTimeZoneScheduledStartTime.toInstant()))
 
                 val liveBroadcast = LiveBroadcast().apply {
                     snippet = LiveBroadcastSnippet().apply {
@@ -209,21 +238,5 @@ class YouTubeClient private constructor(
                 notify(e.message.toString())
             }
         }
-    }
-}
-
-object YouTubeFactory {
-    fun getInstance(context: Context, accountName: String?) : YouTube {
-        return YouTube
-            .Builder(
-                NetHttpTransport(),
-                GsonFactory.getDefaultInstance(),
-                GoogleAccountCredential
-                    .usingOAuth2(context, listOf("https://www.googleapis.com/auth/youtube"))
-                    .apply {
-                        selectedAccountName = accountName
-                    })
-            .setApplicationName("LiveMatchCam")
-            .build()
     }
 }

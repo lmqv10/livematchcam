@@ -8,7 +8,6 @@ import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.services.firebase.IScore
 import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.strategies.IMatchSyncStrategy
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.services.firebase.EventInfo
 import it.lmqv.livematchcam.services.firebase.ScoreFactory
@@ -33,6 +32,7 @@ object MatchRepository {
                     onMatchUpdated = { match -> notifyMatchChanges(match) },
                     onEventInfoUpdated = { eventInfo -> notifyEventInfoChanges(eventInfo) }
                 )
+
                 //isRealtimeDatabaseAvailable = syncStrategy.isRealtimeDatabaseAvailable
                 //Logd("$instanceId :: MatchRepository::onSyncStrategy::isRealtimeDatabaseAvailable >> ${isRealtimeDatabaseAvailable.last()}")
             }
@@ -86,14 +86,14 @@ object MatchRepository {
 
     private val _RTMPServerURI = MutableStateFlow<String?>(null)
     val RTMPServerURI: StateFlow<String?> = _RTMPServerURI
-
     fun setRTMPServer(serverUri: String?) {
         _RTMPServerURI.value = serverUri
     }
 
+    var currentBroadcastId: String = ""
+
     private var _sport = MutableStateFlow<Sports>(currentEventInfo.sport)
     val sport: StateFlow<Sports> = _sport
-
     fun setSport(updatedSport: Sports) {
         if (currentEventInfo.sport != updatedSport) {
             //Logd("$instanceId :: MatchRepository::setSport:: $updatedSport")
@@ -176,7 +176,7 @@ object MatchRepository {
 
     private fun notifyMatchChanges(updatedMatch: Match) {
         try {
-            Logd("$instanceId :: MatchRepository::notifyMatchChanges:: $updatedMatch")
+            //Logd("$instanceId :: MatchRepository::notifyMatchChanges:: $updatedMatch")
             currentMatch = updatedMatch
 
             if (_homeTeam.value != currentMatch.homeTeam) {
@@ -219,13 +219,14 @@ object MatchRepository {
                 _mainBannerVisible.value = currentMatch.mainBannerVisible
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             Loge("$instanceId :: MatchRepository::Exception::notifyMatchChanges:: ${e.message.toString()}")
         }
     }
 
     private fun notifyEventInfoChanges(updatedEventInfo: EventInfo) {
         try {
-            Logd("$instanceId :: MatchRepository::notifyEventInfoChanges:: $updatedEventInfo")
+            //Logd("$instanceId :: MatchRepository::notifyEventInfoChanges:: $updatedEventInfo")
             currentEventInfo = updatedEventInfo
 
             if (_sport.value != currentEventInfo.sport) {
@@ -236,6 +237,7 @@ object MatchRepository {
                 _score.value = currentEventInfo.score
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             Loge("$instanceId :: MatchRepository::Exception::notifyEventInfoChanges:: ${e.message.toString()}")
         }
     }

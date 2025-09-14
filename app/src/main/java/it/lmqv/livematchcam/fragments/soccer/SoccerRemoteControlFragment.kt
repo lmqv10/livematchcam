@@ -130,7 +130,7 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             MatchRepository.score.collectLatest { scoreInstance ->
-                Logd("SoccerRemoteControl::${scoreInstance}")
+                //Logd("SoccerRemoteControl::${scoreInstance}")
                 try {
                     val score = scoreInstance as SoccerScore
                     soccerScoreViewModel.initScore(score)
@@ -159,28 +159,28 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             soccerScoreViewModel.liveScore.collectLatest { liveScore ->
-                Logd("SoccerRemoteControlBar $liveScore")
+                //Logd("SoccerRemoteControlBar $liveScore")
                 MatchRepository.setScore(liveScore)
             }
         }
 
         binding.homeScoreMinus.setOnClickListener {
-            Logd("SoccerRemoteControlBar::homeScoreMinus")
+            //Logd("SoccerRemoteControlBar::homeScoreMinus")
             soccerScoreViewModel.incrementHomeScore(-1)
         }
 
         binding.homeScoreAdd.setOnClickListener {
-            Logd("SoccerRemoteControlBar::homeScoreAdd")
+            //Logd("SoccerRemoteControlBar::homeScoreAdd")
             soccerScoreViewModel.incrementHomeScore()
         }
 
         binding.awayScoreMinus.setOnClickListener {
-            Logd("SoccerRemoteControlBar::awayScoreMinus")
+            //Logd("SoccerRemoteControlBar::awayScoreMinus")
             soccerScoreViewModel.incrementGuestScore(-1)
         }
 
         binding.awayScoreAdd.setOnClickListener {
-            Logd("SoccerRemoteControlBar::awayScoreAdd")
+            //Logd("SoccerRemoteControlBar::awayScoreAdd")
             soccerScoreViewModel.incrementGuestScore()
         }
 

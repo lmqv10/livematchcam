@@ -13,6 +13,10 @@ import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.utils.SyncStrategy
 import it.lmqv.livematchcam.databinding.FragmentYoutubeConfigurationBinding
 import it.lmqv.livematchcam.repositories.MatchSyncStrategyRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlin.getValue
 
 class YoutubeConfigurationFragment : Fragment() {
@@ -29,6 +33,9 @@ class YoutubeConfigurationFragment : Fragment() {
 
     private val youtubeFragment = YoutubeFragment.newInstance()
     private val matchInfoFragment = MatchInfoFragment.newInstance()
+
+    private val syncJob = SupervisorJob()
+    private val syncScope = CoroutineScope(syncJob + Dispatchers.IO)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,15 +62,29 @@ class YoutubeConfigurationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val args: YoutubeConfigurationFragmentArgs by navArgs()
-        val syncStrategy: SyncStrategy = args.syncStrategy
-        MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)
+        actionsViewModel.setEmptyActions()
 
-        actionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
+        syncScope.launch {
+            try {
+                val args: YoutubeConfigurationFragmentArgs by navArgs()
+                val syncStrategy: SyncStrategy = args.syncStrategy
+                MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)?.collect { isAvailable ->
+                    if (isAvailable) {
+                        actionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
+                    } else {
+                        actionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
+                    }
+                }
+            }
+            catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        syncJob.cancel()
     }
 }

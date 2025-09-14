@@ -98,6 +98,7 @@ class YoutubeFragment : Fragment() {
         launchOnStarted {
             youtubeViewModel.currentBroadcast.collect { currentBroadcast ->
                 if (currentBroadcast != null) {
+                    //Logd("youtubeFragment:currentBroadcast.collect::${currentBroadcast.broadcastId}")
                     val itemsList = List(binding.spinnerBroadcast.adapter.count) { index ->
                         binding.spinnerBroadcast.adapter.getItem(index)!! as LiveBroadcastItem.EditBroadcast
                     }

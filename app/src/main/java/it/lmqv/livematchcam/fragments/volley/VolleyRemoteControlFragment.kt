@@ -135,7 +135,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             MatchRepository.score.collectLatest { scoreInstance ->
-                Logd("VolleyRemoteControl::score.collectLatest:: $scoreInstance")
+                //Logd("VolleyRemoteControl::score.collectLatest:: $scoreInstance")
                 try {
                     val score = scoreInstance as VolleyScore
                     volleyScoreViewModel.initScore(score)

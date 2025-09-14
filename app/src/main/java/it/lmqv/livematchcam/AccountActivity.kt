@@ -13,10 +13,13 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
+import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import it.lmqv.livematchcam.databinding.ActivityAccountBinding
+import it.lmqv.livematchcam.extensions.hideKeyboard
+import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.viewmodels.AccountViewModel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -25,28 +28,6 @@ class AccountActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAccountBinding
     private val accountViewModel: AccountViewModel by viewModels()
-
-    /*private val GOOGLE_APIS_AUTH_YOUTUBE : String = "https://www.googleapis.com/auth/youtube"
-    private val CLIENT_ID : String = "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com"
-
-    private val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestEmail()
-        .requestScopes(Scope(GOOGLE_APIS_AUTH_YOUTUBE))
-        .requestServerAuthCode(CLIENT_ID, true)
-        .build()
-    */
-    /*private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            if (task.isSuccessful) {
-                val account = task.result
-                googleViewModel.setAccount(account.account)
-            }
-            invalidateOptionsMenu()
-        } else {
-            //toast("googleSignInLauncher::failed::${result.resultCode}")
-        }
-    }*/
 
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -96,11 +77,6 @@ class AccountActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.arrow_left) // Opzionale: icona personalizzata
 
-        /*val account = GoogleSignIn.getLastSignedInAccount(this)
-        if (account != null) {
-            googleViewModel.setAccount(account.account)
-        }*/
-
         binding.googleSignIn.setOnClickListener { _ ->
             signInLauncher.launch(accountViewModel.getSignInIntent())
         }
@@ -109,16 +85,13 @@ class AccountActivity : AppCompatActivity() {
             accountViewModel.signOut()
         }
 
-        binding.connect.setOnClickListener { _ ->
-            val accountKey = binding.accountKey.text.toString()
-            accountViewModel.setAccountKey(accountKey)
-        }
-
-        binding.disconnect.setOnClickListener { _ ->
-            accountViewModel.setAccountKey(null)
-            binding.connect.isEnabled = true
-            binding.disconnect.isEnabled = false
-            //binding.accountKey.isEnabled = true
+        binding.accountKey.setOnClickListener {
+            val sourceKey = binding.accountKey.text.toString()
+            showEditStringDialog(R.string.account_key, sourceKey, arrayOf()) { updatedAccountKey ->
+                binding.accountKey.text = updatedAccountKey
+                accountViewModel.setAccountKey(updatedAccountKey)
+                binding.accountKey.hideKeyboard()
+            }
         }
 
         lifecycleScope.launch {
@@ -126,71 +99,31 @@ class AccountActivity : AppCompatActivity() {
                 combine(
                     accountViewModel.authState,
                     accountViewModel.firebaseAccountKey
-                )
-                { state, accountKey -> Pair(state, accountKey) }
-                    .collect { (state, accountKey) ->
+                ) { state, accountKey -> Pair(state, accountKey) }
+                .collect { (state, accountKey) ->
 
-                        val isLogged = accountViewModel.isLogged()
-                        val accountDesc = accountViewModel.accountDesc()
+                    val isLogged = accountViewModel.isLogged()
+                    val accountDesc = accountViewModel.accountDesc()
 
-                        binding.accountName.text = accountDesc
-                        binding.googleSignIn.isVisible = !isLogged
-                        binding.googleSignOut.isVisible = isLogged
-                        binding.authorizedAccount.isVisible = isLogged
+                    binding.accountName.text = accountDesc
+                    binding.googleSignIn.isVisible = !isLogged
+                    binding.googleSignOut.isVisible = isLogged
+                    binding.authorizedAccount.isVisible = isLogged
 
-                        binding.accountKey.text =
-                            Editable.Factory.getInstance().newEditable(accountKey ?: "")
+                    binding.accountKey.text = accountKey ?: ""
 
-                        val isConnected =
-                            !accountDesc.isNullOrEmpty() && !accountKey.isNullOrEmpty()
-                        binding.connect.isEnabled = !isConnected
-                        binding.disconnect.isEnabled = isConnected
-                        //binding.accountKey.isEnabled = !isConnected
-                    }
+                    val isConnected =
+                        !accountDesc.isNullOrEmpty() && !accountKey.isNullOrEmpty()
+
+                    val resIcon = if (isConnected) R.drawable.cloud_check else R.drawable.cloud_cross
+                    TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.accountKey, resIcon, 0, 0, 0)
+                }
             }
-        }
-
-        /*lifecycleScope.launch {
-            googleViewModel.account.collect { account ->
-                val isLogged = account != null;
-                binding.accountName.text = account?.name ?: getString(R.string.google_sign_in);
-                binding.googleSignIn.isVisible = !isLogged
-                binding.googleSignOut.isVisible = isLogged
-                binding.authorizedAccount.isVisible = isLogged
-            }
-        }*/
-
-        /*lifecycleScope.launch {
-            googleViewModel.firebaseAccount.collect { firebaseAccount ->
-                val accountName = firebaseAccount.accountName
-                val accountKey = firebaseAccount.accountKey
-
-                binding.accountKey.text = Editable.Factory.getInstance().newEditable(accountKey ?: "")
-
-                val isConnected = !accountName.isNullOrEmpty() && !accountKey.isNullOrEmpty()
-                Logd("AccountActivity. firebaseAccount $firebaseAccount");
-                Logd("AccountActivity. connectedToAccount: $isConnected");
-                binding.connect.isVisible = !isConnected
-                binding.disconnect.isVisible = isConnected
-                binding.accountKey.isEnabled = !isConnected
-
-                /*FirebaseDataService.getInstance()
-                    .authenticateAccount(accountName, accountKey, { account ->
-                        Logd("Account Name: ${account.name}")
-                        Logd("Admin: ${account.admin}")
-                        binding.connect.isVisible = false
-                        binding.disconnect.isVisible = true
-                        binding.accountKey.isEnabled = false
-                    },{
-                        Log.e("Firebase", "Failed to fetch account.")
-                    })
-                }*/
-            }
-        }*/
-        }
-
-        override fun onSupportNavigateUp(): Boolean {
-            finish()
-            return true
         }
     }
+
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
+    }
+}

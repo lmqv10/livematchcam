@@ -14,7 +14,7 @@ class RecentsLogosPreferences(context: Context) {
     private val gson = Gson()
 
     fun getRecents(): List<KeyDescription<String>> {
-        val defaultJson = """
+        /*val defaultJson = """
             [
                 { "description": "ALB", "key": "https://content-s3.tuttocampo.it/Teams/200/1201525.png" },
                 { "description": "ALC", "key": "https://content-s3.tuttocampo.it/Teams/200/1011300.png" },
@@ -30,9 +30,9 @@ class RecentsLogosPreferences(context: Context) {
                 { "description": "UBR", "key": "https://content-s3.tuttocampo.it/Teams/200/1281730.png" },
                 { "description": "COM", "key": "https://content-s3.tuttocampo.it/Teams/200/1124524.png" }
             ]
-        """.trimIndent()
+        """.trimIndent()*/
 
-        val json = prefs.getString(key, null) ?: defaultJson // return emptyList()
+        val json = prefs.getString(key, null) ?: return emptyList()
         val type = object : TypeToken<List<KeyDescription<String>>>() {}.type
         return gson.fromJson(json, type)
     }

@@ -33,9 +33,8 @@ class YoutubeViewModel(
     private val youTubeClient: YouTubeClient) : AndroidViewModel(application) {
 
     private val firebaseDataRepository = FirebaseDataRepository(application)
-    private var currentBoundStreamId: String? = null
 
-    fun setCurrentBoundStreamId(currentBoundStreamId: String?) {
+    fun setCurrentBoundStreamId(currentBoundStreamId: String) {
         val liveStream = _liveStreams.value.firstOrNull { x -> x.id == currentBoundStreamId }
         val ingestionInfo = liveStream?.cdn?.ingestionInfo
 
@@ -60,6 +59,9 @@ class YoutubeViewModel(
     fun setCurrentBroadcast(updatedBroadcast: LiveBroadcastItem.EditBroadcast) {
         _currentBroadcast.value = updatedBroadcast
         _liveURL.value = "\thttps://youtube.com/live/" + updatedBroadcast.broadcastId
+
+        //Logd("MatchRepository::setCurrentBroadcastId::: ${updatedBroadcast.broadcastId}")
+        MatchRepository.currentBroadcastId = updatedBroadcast.broadcastId
     }
 
     private var _liveStreams = MutableStateFlow<List<LiveStream>>(mutableListOf())
@@ -89,10 +91,11 @@ class YoutubeViewModel(
 //    }
 
     fun completeLive() {
-        currentBoundStreamId?.let {
-            this.youTubeClient.completeLive(it) { status ->
-                _liveStreamStatus.value = status
-            }
+        val broadcastId = MatchRepository.currentBroadcastId
+        //Logd("YoutubeViewModel::broadcastId:: $broadcastId")
+        this.youTubeClient.completeLive(broadcastId) { status ->
+            //Logd("YoutubeViewModel::complete::Status: $status")
+            _liveStreamStatus.value = status
         }
     }
 

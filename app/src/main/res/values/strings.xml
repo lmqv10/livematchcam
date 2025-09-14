@@ -160,7 +160,7 @@
 
     <string name="confirm_stop_message">Stop streaming.\n Confirm?</string>
     <string name="confirm_start_message">Start streaming.\n Confirm?</string>
-
+    <string name="switch_end_stream">End Stream</string>
     <string name="confirm_create_live_stream">Create Or Update Event. Confirm?</string>
     <string name="confirm_delete_live_stream">Delete Event. Confirm?</string>
 
@@ -197,5 +197,5 @@
     <string name="zoom_none">None</string>
     <string name="zoom_out">Out</string>
 
-
+    <string name="warning_schedule_start_time">Cannot schedule event in the past!\nPlease check the date and time!</string>
 </resources>

@@ -16,7 +16,7 @@ class VolleyScoreViewModel: ViewModel() {
 
     fun initScore(currentScore: VolleyScore) {
         if (_liveScore.value != currentScore) {
-            Logd("VolleyScoreViewModel::initScore::$currentScore")
+            //Logd("VolleyScoreViewModel::initScore::$currentScore")
             _liveScore.value = currentScore
         }
     }

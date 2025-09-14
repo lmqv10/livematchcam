@@ -50,23 +50,34 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
                 Quadruple(accountGoogle, accountKey, streamName, sport)
             }.collect { (accountGoogle, accountKey, streamName, sport) ->
                 //Logd("$instanceId :: FirebaseMatchSyncStrategy::collect:: $key")
-                FirebaseDataService.authenticateAccount(accountGoogle, accountKey, {
-                    _isRealtimeDatabaseAvailable.value = true
+                try {
+                    FirebaseDataService.authenticateAccount(accountGoogle, accountKey, {
+                        //Logd("$instanceId :: $accountGoogle - $accountKey")
+                        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = true")
+                        _isRealtimeDatabaseAvailable.postValue(true)
 
-                    FirebaseDataService.attachMatchValueEventListener(streamName) { match ->
-                        //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify Match Update")
-                        onMatchUpdated(match)
-                    }
+                        FirebaseDataService.attachMatchValueEventListener(streamName) { match ->
+                            //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify Match Update")
+                            onMatchUpdated(match)
+                        }
 
-                    FirebaseDataService.attachEventInfoValueEventListener(streamName, sport) { eventInfo ->
-                        //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify EventInfo Update")
-                        onEventInfoUpdated(eventInfo)
-                    }
+                        FirebaseDataService.attachEventInfoValueEventListener(streamName, sport) { eventInfo ->
+                            //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify EventInfo Update")
+                            onEventInfoUpdated(eventInfo)
+                        }
 
-                }, {
-                    //Logd("$instanceId: FirebaseMatchSyncStrategy::auth Failed")
-                    _isRealtimeDatabaseAvailable.value = false
-                })
+                    }, {
+                        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = false")
+                        //Logd("$instanceId: FirebaseMatchSyncStrategy::auth Failed")
+                        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = false")
+                        _isRealtimeDatabaseAvailable.postValue(false)
+                    })
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    //Logd("$instanceId :: _isRealtimeDatabaseAvailable.exception")
+                    _isRealtimeDatabaseAvailable.postValue(false)
+                }
+
             }
         }
     }
@@ -74,7 +85,8 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
     override fun dispose() {
         //Logd("$instanceId: FirebaseMatchSyncStrategy::dispose")
         syncJob.cancel()
-        _isRealtimeDatabaseAvailable.value = false
+        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = false")
+        _isRealtimeDatabaseAvailable.postValue(false)
         FirebaseDataService.detachMatchValueEventListener()
         FirebaseDataService.detachEventInfoValueEventListener()
 

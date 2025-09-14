@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.BaseAdapter
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -44,6 +45,7 @@ import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.preferences.SchedulesPreferences
 import it.lmqv.livematchcam.preferences.toThumbnailAsset
 import it.lmqv.livematchcam.services.youtube.LiveStreamContentData
+import java.time.ZonedDateTime
 
 class YoutubeStreamFragment : Fragment() {
 
@@ -90,7 +92,7 @@ class YoutubeStreamFragment : Fragment() {
         this.dateTimePickerDialog = DateTimePickerDialog(
             context = requireContext(),
             onConfirm = { calendar ->
-                schedulesPrefs.set(scheduleTime = calendar)
+                schedulesPrefs.set(scheduledStartTime = calendar)
             },
             onCancel = { }
         )
@@ -150,13 +152,13 @@ class YoutubeStreamFragment : Fragment() {
 
 
         launchOnStarted {
-            schedulesPrefs.currentSchedule.collect { currentSchedule ->
+            schedulesPrefs.currentKeyScheduleData.collect { currentSchedule ->
                 try {
                     val schedule = currentSchedule.value
                     //toast("currentSchedule.key ${currentSchedule.key}")
                     //Logd("currentSchedule: $schedule")
 
-                    dateTimePickerDialog.setDate(schedule.scheduleTime)
+                    dateTimePickerDialog.setDate(schedule.scheduleStartTime)
 
                     var thumbnailAssets = schedule.toThumbnailAsset(requireContext())
                     val thumbnail = requireContext().createThumbnail(thumbnailAssets)
@@ -185,7 +187,7 @@ class YoutubeStreamFragment : Fragment() {
                         liveStreamContentData = LiveStreamContentData(
                             requireContext().convertBitmapToFIle(thumbnail),
                             schedule.title,
-                            schedule.scheduleTime,
+                            schedule.scheduleStartTime,
                             schedule.liveStreamId!!,
                             broadcastId
                         )
@@ -307,26 +309,31 @@ class YoutubeStreamFragment : Fragment() {
     {
         if (liveStreamContentData != null) {
             binding.ivCreateLiveStream.setOnClickListener {
-                val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
-                dialogView.findViewById<TextView>(R.id.dialog_message).text = getString(R.string.confirm_create_live_stream)
+                var eventScheduledStartTime = liveStreamContentData.scheduledStartTime
+                val now = ZonedDateTime.now()
+                val minimumStartTime = now.minusMinutes((now.minute % 5).toLong())
+                if (minimumStartTime.isAfter(eventScheduledStartTime)) {
+                    toast(getString(R.string.warning_schedule_start_time), Toast.LENGTH_LONG, R.drawable.ic_warning)
+                } else {
+                    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_warning, null)
+                    dialogView.findViewById<TextView>(R.id.dialog_message).text = getString(R.string.confirm_create_live_stream)
 
-                AlertDialog.Builder(requireContext())
-                    .setView(dialogView)
-                    .setPositiveButton("OK") { dialog, _ ->
-
-                        youtubeViewModel.addOrUpdateBroadcastEvent(liveStreamContentData) { broadcastId ->
-                            schedulesPrefs.add(broadcastId)
-                            youtubeViewModel.loadLiveBroadcast()
-                            CoroutineScope(Dispatchers.Main).launch {
-                                (binding.spinnerBroadcast.adapter as BaseAdapter).notifyDataSetChanged()
+                    AlertDialog.Builder(requireContext())
+                        .setView(dialogView)
+                        .setPositiveButton("OK") { dialog, _ ->
+                            youtubeViewModel.addOrUpdateBroadcastEvent(liveStreamContentData) { broadcastId ->
+                                schedulesPrefs.add(broadcastId)
+                                youtubeViewModel.loadLiveBroadcast()
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    (binding.spinnerBroadcast.adapter as BaseAdapter).notifyDataSetChanged()
+                                }
                             }
+                            dialog.dismiss()
                         }
-
-                        dialog.dismiss()
-                    }
-                    .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-                    .create()
-                    .show()
+                        .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
             }
         } else {
             binding.ivCreateLiveStream.setOnClickListener { }

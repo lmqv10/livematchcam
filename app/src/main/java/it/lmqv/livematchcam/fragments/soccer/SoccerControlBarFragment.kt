@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
+import it.lmqv.livematchcam.extensions.Loge
 
 class SoccerControlBarFragment() : BaseControlBarFragment() {
     companion object {
@@ -117,7 +118,7 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    Logd("SoccerControlBar::Exception:: ${e.message.toString()}")
+                    Loge("SoccerControlBar::Exception:: ${e.message.toString()}")
                 }
             }
         }

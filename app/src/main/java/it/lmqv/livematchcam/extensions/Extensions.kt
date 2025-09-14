@@ -3,10 +3,7 @@ package it.lmqv.livematchcam.extensions
 import android.app.Activity
 import android.content.Context
 import android.graphics.drawable.LayerDrawable
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -14,7 +11,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -40,7 +36,7 @@ fun Activity.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @Drawabl
     customToast(this, message, duration, iconResId)
 }
 
-fun Fragment.toast(message: String, duration: Int = Toast.LENGTH_LONG, @DrawableRes iconResId: Int = R.drawable.ic_confirm) {
+fun Fragment.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @DrawableRes iconResId: Int = R.drawable.ic_confirm) {
     customToast(this.requireActivity(), message, duration, iconResId)
 }
 
@@ -84,6 +80,14 @@ fun View.hideKeyboard() {
     clearFocus()
 }
 
+fun Fragment.hideKeyboard() {
+    view?.let { v ->
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        imm?.hideSoftInputFromWindow(v.windowToken, 0)
+        v.clearFocus()
+    }
+}
+
 fun View.setEnabledRecursively(enabled: Boolean) {
     this.isEnabled = enabled
     this.isClickable = enabled
@@ -97,19 +101,11 @@ fun View.setEnabledRecursively(enabled: Boolean) {
     }
 }
 
-fun Fragment.hideKeyboard() {
-    view?.let { v ->
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        imm?.hideSoftInputFromWindow(v.windowToken, 0)
-        v.clearFocus()
-    }
-}
-
-fun MenuItem.setColor(context: Context, @ColorRes color: Int) {
+/*fun MenuItem.setColor(context: Context, @ColorRes color: Int) {
     val spannableString = SpannableString(title.toString())
     spannableString.setSpan(ForegroundColorSpan(ContextCompat.getColor(context, color)), 0, spannableString.length, 0)
     title = spannableString
-}
+}*/
 
 /*fun MenuItem.updateMenuColor(context: Context, currentItem: MenuItem?): MenuItem {
     currentItem?.setColor(context, R.color.black)

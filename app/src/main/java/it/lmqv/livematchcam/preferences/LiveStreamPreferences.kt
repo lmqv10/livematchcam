@@ -13,7 +13,6 @@ import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
 import it.lmqv.livematchcam.adapters.LiveBroadcastItem
-import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.loadBitmapFromUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,14 +27,13 @@ data class ThumbnailAssets(
     var logoGuest: Bitmap? = null,
     var calendar: ZonedDateTime = ZonedDateTime.now())
 
-
 data class ScheduleData(
     var backgroundFilePath: String = "",
     var logoHome: String = "",
     var logoGuest: String = "",
     var title: String = "",
     var liveStreamId: String? = null,
-    var scheduleTime: ZonedDateTime = ZonedDateTime.now())
+    var scheduleStartTime: ZonedDateTime = ZonedDateTime.now())
 
 data class KeyScheduleData(
     val key: String,
@@ -47,7 +45,7 @@ suspend fun ScheduleData.toThumbnailAsset(context: Context) : ThumbnailAssets {
         BitmapFactory.decodeFile(this.backgroundFilePath),
         context.loadBitmapFromUrl(this.logoHome),
         context.loadBitmapFromUrl(this.logoGuest),
-        this.scheduleTime
+        this.scheduleStartTime
     )
 }
 
@@ -70,100 +68,100 @@ class SchedulesPreferences(context: Context) {
         .registerTypeAdapter(ZonedDateTime::class.java, zonedDateTimeAdapter)
         .create()
 
-    private val newScheduleKey : String = "new_schedule"
+    private val keyNewSchedule : String = "new_schedule"
 
-    private val _currentSchedule = MutableStateFlow<KeyScheduleData>(KeyScheduleData(newScheduleKey, ScheduleData()))
-    val currentSchedule: StateFlow<KeyScheduleData> = _currentSchedule
+    private val _currentKeyScheduleData = MutableStateFlow<KeyScheduleData>(KeyScheduleData(keyNewSchedule, ScheduleData()))
+    val currentKeyScheduleData: StateFlow<KeyScheduleData> = _currentKeyScheduleData
+
+    fun isEditing() : Boolean {
+        return _currentKeyScheduleData.value.key != keyNewSchedule
+    }
 
     fun set(backgroundFilePath: String? = null,
-        scheduleTime: ZonedDateTime? = null,
+        scheduledStartTime: ZonedDateTime? = null,
         logoHome: String? = null,
         logoGuest: String? = null,
         title: String? = null,
         liveStreamId: String? = null) {
 
-        var current = _currentSchedule.value
-        var currentSchedule = current.value
-        var updated = currentSchedule.copy(
-            backgroundFilePath = backgroundFilePath ?: currentSchedule.backgroundFilePath,
-            scheduleTime = scheduleTime ?: currentSchedule.scheduleTime,
-            logoHome = logoHome ?: currentSchedule.logoHome,
-            logoGuest = logoGuest ?: currentSchedule.logoGuest,
-            title = title ?: currentSchedule.title,
-            liveStreamId = liveStreamId ?: currentSchedule.liveStreamId,
-        )
-        _currentSchedule.value = KeyScheduleData(current.key, updated)
-        saveMatch(_currentSchedule.value)
-    }
-
-    fun isEditing() : Boolean {
-        return _currentSchedule.value.key != newScheduleKey
+        var current = _currentKeyScheduleData.value
+        //Logd("== set: ${current.key}")
+        updateSchedule(current.key, backgroundFilePath, scheduledStartTime, logoHome, logoGuest, title, liveStreamId)
     }
 
     fun load(broadcastItem: LiveBroadcastItem.EditBroadcast) {
-        try {
-            var scheduleData = getAll().find { x -> x.key == broadcastItem.broadcastId }
-            var currentSchedule = _currentSchedule.value.value
-            var updatedScheduledData = ScheduleData(
-                backgroundFilePath = scheduleData?.value?.backgroundFilePath ?: currentSchedule.backgroundFilePath,
-                scheduleTime = broadcastItem.scheduledStartTime, // ?: scheduleData?.value?.scheduleTime ?: currentSchedule.scheduleTime,
-                logoHome = scheduleData?.value?.logoHome ?: currentSchedule.logoHome,
-                logoGuest = scheduleData?.value?.logoGuest ?: currentSchedule.logoGuest,
-                title = scheduleData?.value?.title ?: currentSchedule.title,
-                liveStreamId = scheduleData?.value?.liveStreamId ?: currentSchedule.liveStreamId)
+        //Logd("== load(broadcastItem: ${broadcastItem.broadcastId}")
 
-            //Logd("== Created $updatedScheduledData -> ${gson.toJson(updatedScheduledData)}")
-            _currentSchedule.value = KeyScheduleData(broadcastItem.broadcastId, updatedScheduledData)
-            saveMatch(_currentSchedule.value)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Loge(e.message.toString())
-        }
+        updateSchedule(broadcastItem.broadcastId,
+            scheduledStartTime = broadcastItem.scheduledStartTime,
+            title = broadcastItem.title,
+            liveStreamId = broadcastItem.boundStreamId)
     }
 
     fun load() {
-        try {
-            var newScheduledData = getAll().first { x -> x.key == newScheduleKey }
-            //Logd("== Loaded Add $newScheduledData -> ${gson.toJson(newScheduledData)}")
-            _currentSchedule.value = newScheduledData
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Loge(e.message.toString())
-        }
+        //Logd("== updateSchedule: new scheduled")
+        var newScheduledData = getAll().first { x -> x.key == keyNewSchedule }
+        _currentKeyScheduleData.value = newScheduledData
     }
 
     fun getAll(): List<KeyScheduleData> {
-        val json = prefs.getString(prefSchedulesKey, null) ?: return emptyList()
+        val json = prefs.getString(prefSchedulesKey, null) ?: return listOf(KeyScheduleData(keyNewSchedule, ScheduleData()))
         val type = object : TypeToken<List<KeyScheduleData>>() {}.type
+
+        //Logd("== source: $json")
+        //var parsed : List<KeyScheduleData> = gson.fromJson(json, type)
+        //parsed.forEach { x -> Logd("== found: ${x.key} - ${x.value}") }
         return gson.fromJson(json, type)
     }
 
     fun cleanupMatches(broadcastsItems: List<LiveBroadcastItem>) {
-
         val broadcastIds = broadcastsItems
             .filterIsInstance<LiveBroadcastItem.EditBroadcast>()
             .map { it.broadcastId }
             .toSet()
 
-        if (broadcastIds.size > 0)
+        if (broadcastIds.isNotEmpty())
         {
             val schedules = getAll()
             val cleanup = schedules
-                .filter { x -> x.key == newScheduleKey || x.key in broadcastIds }
+                .filter { x -> x.key == keyNewSchedule || x.key in broadcastIds }
 
             //Logd("== cleanupMatches ${gson.toJson(cleanup)}")
-
             prefs.edit { putString(prefSchedulesKey, gson.toJson(cleanup)) }
         }
     }
 
-    /*fun clear() {
-        prefs.edit { clear() }
-    }*/
-
     fun add(broadcastId: String) {
-        var scheduleData =  _currentSchedule.value.value
+        var scheduleData =  _currentKeyScheduleData.value.value
         saveMatch(KeyScheduleData(broadcastId, scheduleData))
+    }
+
+    private fun updateSchedule(
+        broadcastId: String,
+        backgroundFilePath: String? = null,
+        scheduledStartTime: ZonedDateTime? = null,
+        logoHome: String? = null,
+        logoGuest: String? = null,
+        title: String? = null,
+        liveStreamId: String? = null) {
+
+        var keyScheduleData = getAll().find { x -> x.key == broadcastId }
+        if(keyScheduleData != null)
+        {
+            var scheduleDataValue = keyScheduleData.value
+            //Logd("== Source ScheduleData: $scheduleDataValue")
+            var updatedScheduledData = scheduleDataValue.copy(
+                backgroundFilePath = backgroundFilePath ?: scheduleDataValue.backgroundFilePath,
+                scheduleStartTime = scheduledStartTime ?: scheduleDataValue.scheduleStartTime,
+                logoHome = logoHome ?: scheduleDataValue.logoHome,
+                logoGuest = logoGuest ?: scheduleDataValue.logoGuest,
+                title = title ?: scheduleDataValue.title,
+                liveStreamId = liveStreamId ?: scheduleDataValue.liveStreamId)
+
+            //Logd("== Updated ${gson.toJson(updatedScheduledData)}")
+            _currentKeyScheduleData.value = KeyScheduleData(broadcastId, updatedScheduledData)
+            saveMatch(_currentKeyScheduleData.value)
+        }
     }
 
     private fun saveMatch(item: KeyScheduleData) {

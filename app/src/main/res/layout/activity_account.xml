@@ -43,33 +43,31 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="9"
-                android:gravity="left"
+                android:gravity="start"
                 android:padding="5dp"
                 android:textSize="18sp"
                 android:hint="@string/google_sign_in"/>
 
             <ImageView
                 android:id="@+id/google_sign_in"
+                style="@style/largeImageViewStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:tint="@color/primary"
                 android:layout_gravity="center_vertical"
                 android:padding="10dp"
-                android:src="@drawable/login"
-                android:background="@drawable/score_board_secondary_background" />
+                android:src="@drawable/login"/>
 
             <ImageView
                 android:visibility="gone"
+                style="@style/largeImageViewStyle"
                 android:id="@+id/google_sign_out"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                app:tint="@color/primary"
                 android:layout_gravity="center_vertical"
                 android:padding="10dp"
-                android:src="@drawable/logout"
-                android:background="@drawable/score_board_secondary_background" />
+                android:src="@drawable/logout" />
 
         </LinearLayout>
 
@@ -92,47 +90,15 @@
                 android:text="@string/account_key"
                 android:textColor="@color/appColorSecondary" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/account_key"
+                style="@style/editTextView"
+                android:gravity="start"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="10">
-
-                <EditText
-                    android:id="@+id/account_key"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="9"
-                    android:gravity="left"
-                    android:textIsSelectable="true"
-                    android:textSize="18sp"
-                    android:hint="@string/account_key_placeholder"
-                    android:textColor="@color/black" />
-
-                <ImageButton
-                    android:id="@+id/connect"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:tint="@color/primary"
-                    android:layout_gravity="center_vertical"
-                    android:padding="10dp"
-                    android:src="@drawable/cloud_check"
-                    android:background="@drawable/score_board_secondary_background" />
-
-                <ImageButton
-                    android:visibility="gone"
-                    android:id="@+id/disconnect"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:tint="@color/primary"
-                    android:layout_gravity="center_vertical"
-                    android:padding="10dp"
-                    android:src="@drawable/cloud_cross"
-                    android:background="@drawable/score_board_secondary_background" />
-
-            </LinearLayout>
+                app:drawableStartCompat="@drawable/cloud_cross"
+                android:drawablePadding="5dp"
+                android:hint="@string/account_key_placeholder" />
 
             <View
                 android:layout_width="match_parent"
@@ -141,6 +107,7 @@
                 android:layout_marginVertical="8dp"/>
 
             <LinearLayout
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
