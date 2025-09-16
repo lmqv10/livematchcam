@@ -16,7 +16,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 27
         versionCode = 1
-        versionName = "3.0.1"
+        versionName = "3.1"
     }
 
     buildTypes {
