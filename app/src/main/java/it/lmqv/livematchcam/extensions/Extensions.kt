@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.extensions
 
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.graphics.drawable.LayerDrawable
@@ -12,9 +13,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
+import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.api.client.util.DateTime
+import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
 import it.lmqv.livematchcam.R
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -23,6 +26,25 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import kotlin.reflect.full.memberProperties
+
+
+fun ImageObjectFilterRender.animateAlpha(
+    from: Float,
+    to: Float,
+    duration: Long,
+    onEnd: (() -> Unit)? = null) {
+    ValueAnimator.ofFloat(from, to).apply {
+        this.duration = duration
+        addUpdateListener {
+            val alpha = it.animatedValue as Float
+            this@animateAlpha.setAlpha(alpha)
+        }
+        if (onEnd != null) {
+            doOnEnd { onEnd() }
+        }
+        start()
+    }
+}
 
 /*fun Service.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @DrawableRes iconResId: Int = R.drawable.ic_confirm) {
     customToast(this, message, duration, iconResId)

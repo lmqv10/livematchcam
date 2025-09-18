@@ -47,12 +47,12 @@ data class EventInfoData(
     var score: Map<String, Any?>? = null
 )
 
-/*data class Banners (
-    val spotBannerURL: String = "",
+data class Banners (
+    val spotBannerUrls: List<String> = listOf(),
     val spotBannerVisible: Boolean = false,
-    val mainBannerURL: String = "",
+    val mainBannerURL: List<String> = listOf(),
     val mainBannerVisible: Boolean = false
-)*/
+)
 
 interface IScore {
     val command: String

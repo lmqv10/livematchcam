@@ -1,8 +1,11 @@
 package it.lmqv.livematchcam.fragments
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,6 +17,7 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.core.animation.doOnEnd
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -32,8 +36,8 @@ import it.lmqv.livematchcam.views.SwipeSurfaceView
 import it.lmqv.livematchcam.databinding.FragmentCameraBinding
 import it.lmqv.livematchcam.dialogs.StartStreamingDialog
 import it.lmqv.livematchcam.dialogs.StopStreamingDialog
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
+import it.lmqv.livematchcam.extensions.animateAlpha
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
@@ -47,6 +51,7 @@ import it.lmqv.livematchcam.handlers.zoom.NoDebounceExtraSmoothZoomLevelHandler
 import it.lmqv.livematchcam.utils.KeyDescription
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
+import it.lmqv.livematchcam.utils.BannerBitmapRotator
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -61,7 +66,8 @@ import kotlinx.coroutines.launch
 open class CameraFragment: Fragment(), ConnectChecker,
     IScoreBoardFragment.OnUpdateCallback,
     StatusFragment.OnZoomButtonClickListener,
-    SwipeSurfaceView.OnSwipeGesture {
+    SwipeSurfaceView.OnSwipeGesture,
+    BannerBitmapRotator.BitmapRotationListener{
 
     companion object {
         fun getInstance(): CameraFragment = CameraFragment()
@@ -82,6 +88,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
     private var spotBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
     private var mainBannerFilter: ImageObjectFilterRender = ImageObjectFilterRender()
     private lateinit var sportCollectJob : Job
+    private lateinit var bannerBitmapRotator: BannerBitmapRotator
 
     private var _binding: FragmentCameraBinding? = null
     private val binding get() = _binding!!
@@ -170,6 +177,8 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         this.zoomLevelHandler = NoDebounceExtraSmoothZoomLevelHandler(requireContext(), genericStream.videoSource)
         this.offsetDegreeHandler = ManualZoomLevelHandler(requireContext())
+        this.bannerBitmapRotator = BannerBitmapRotator(requireContext(), lifecycleScope)
+        this.bannerBitmapRotator.setBitmapRotationListener(this@CameraFragment)
 
         return binding.root
     }
@@ -328,33 +337,12 @@ open class CameraFragment: Fragment(), ConnectChecker,
             ) { url, visible -> Pair(url, visible)
             }.collect { (url, visible) ->
                 launchOnStarted {
-                    //Logd("spotBannerURL : $spotBannerURL")
-                    if (url.isNotEmpty() && visible)
-                    {
-                        val bitmap = Coil.imageLoader(requireContext()).execute(
-                            ImageRequest.Builder(requireContext())
-                                .data(url)
-                                .build()
-                        ).drawable?.toBitmap()?.copy(Bitmap.Config.ARGB_8888, true)
+                    bannerBitmapRotator.stop()
+                    spotBannerFilter.setAlpha(0.0f)
 
-                        bitmap.apply {
-                            val maxFactor = 20f
-                            val defaultScaleX = ((bitmap?.width?.times(100) ?: 0) / width).toFloat()
-                            val defaultScaleY = ((bitmap?.height?.times(100) ?: 0) / height).toFloat()
-
-                            val factorX = maxFactor / defaultScaleX
-                            val scaleX = factorX * defaultScaleX
-                            val scaleY = factorX * defaultScaleY
-
-                            spotBannerFilter.apply {
-                                setImage(bitmap)
-                                setScale(scaleX, scaleY)
-                                setAlpha(0.75f)
-                                setPosition(100f - scaleX, 0f)
-                            }
-                        }
-                    } else {
-                        spotBannerFilter.setAlpha(0.0f)
+                    if (visible) {
+                        bannerBitmapRotator.setUrls(listOf(url))
+                        bannerBitmapRotator.start()
                     }
                 }
             }
@@ -385,11 +373,13 @@ open class CameraFragment: Fragment(), ConnectChecker,
                             val scaleX = factorX * defaultScaleX
                             val scaleY = factorX * defaultScaleY
 
-                            mainBannerFilter.apply {
-                                setImage(bitmap)
-                                setScale(scaleX, scaleY)
-                                setAlpha(0.75f)
-                                setPosition((100f - scaleX) / 2, (100f - scaleY) / 2)
+                            mainBannerFilter.animateAlpha(0.75f, 0f, 500L) {
+                                mainBannerFilter.apply {
+                                    setImage(bitmap)
+                                    setScale(scaleX, scaleY)
+                                    setPosition((100f - scaleX) / 2, (100f - scaleY) / 2)
+                                    animateAlpha(0f, 0.75f, 500L)
+                                }
                             }
                         }
                     } else {
@@ -411,6 +401,29 @@ open class CameraFragment: Fragment(), ConnectChecker,
                 this.offsetDegreeHandler.manualZoomLevel(ManualZoomLevel.Out)
             }
         }*/
+    }
+
+    override fun onBitmapAvailable(bitmap: Bitmap) {
+        val maxFactor = 20f
+        var padding = 2f
+        val defaultScaleX = (bitmap.width.times(100) / width).toFloat()
+        val defaultScaleY = (bitmap.height.times(100) / height).toFloat()
+
+        val factorX = maxFactor / defaultScaleX
+
+        val scaleX = factorX * defaultScaleX
+        val scaleY = factorX * defaultScaleY
+
+        val targetAlpha = 0.75f
+        val duration = 250L
+        spotBannerFilter.animateAlpha(targetAlpha, 0f, duration) {
+            spotBannerFilter.apply {
+                setScale(scaleX, scaleY)
+                setImage(bitmap)
+                setPosition(100f - padding - scaleX, 0f + padding)
+                animateAlpha(0f, targetAlpha, duration)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -468,6 +481,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
         this.sportCollectJob.cancel()
         genericStream.release()
         callback.remove()
+        bannerBitmapRotator.stop()
     }
 
     private fun prepare() {

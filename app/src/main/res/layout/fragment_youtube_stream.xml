@@ -1,388 +1,231 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="5dp"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:weightSum="2"
     tools:context=".fragments.YoutubeStreamFragment">
 
-    <ImageView
-        android:id="@+id/you_tube"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_margin="5dp"
-        android:clickable="false"
-        android:src="@drawable/youtube_logo"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
-
     <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginVertical="5dp"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@+id/you_tube"
-        tools:layout_editor_absoluteX="10dp">
+        android:layout_margin="10dp"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/you_tube"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:clickable="false"
+            android:src="@drawable/youtube_logo"
+            tools:ignore="ContentDescription" />
 
         <TextView
-            android:visibility="gone"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"
             android:text="@string/broadcasts"
             android:textColor="@color/appColorSecondary"
             app:layout_constraintStart_toStartOf="parent"
             tools:ignore="MissingConstraints" />
 
-        <LinearLayout
+        <Spinner
+            android:id="@+id/spinner_broadcast"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal"
-            android:weightSum="100">
+            android:minHeight="48dp"
+            android:spinnerMode="dialog"/>
 
-            <LinearLayout
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginVertical="3dp"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/score_board_primary_background">
+
+            <ImageView
+                android:id="@+id/iv_thumbnail"
                 android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/preview_missing"
+                app:layout_constraintDimensionRatio="16:9"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
+
+            <it.lmqv.livematchcam.views.AnimateImageVIew
+                android:id="@+id/iv_remove_background"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="40"
-                android:orientation="vertical"
-                android:layout_marginHorizontal="10dp">
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/description_placeholder"
+                android:src="@drawable/ic_eraser"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.50"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/iv_thumbnail"
+                app:layout_constraintVertical_bias="0.95" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="3dp"
-                    android:text="@string/broadcasts"
-                    android:textColor="@color/appColorSecondary"
-                    app:layout_constraintStart_toStartOf="parent"
-                    tools:ignore="MissingConstraints" />
-
-                <Spinner
-                    android:id="@+id/spinner_broadcast"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="48dp"
-                    android:spinnerMode="dialog"/>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@android:color/darker_gray"
-                    android:layout_marginVertical="3dp"/>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/score_board_primary_background">
-
-                    <ImageView
-                        android:id="@+id/iv_thumbnail"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/preview_missing"
-                        app:layout_constraintDimensionRatio="16:9"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.0"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                    <it.lmqv.livematchcam.views.AnimateImageVIew
-                        android:id="@+id/iv_remove_background"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:contentDescription="@string/description_placeholder"
-                        android:src="@drawable/ic_eraser"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.50"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/iv_thumbnail"
-                        app:layout_constraintVertical_bias="0.95" />
-
-                    <it.lmqv.livematchcam.views.AnimateImageVIew
-                        android:id="@+id/iv_logo_home"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginStart="35dp"
-                        android:contentDescription="@string/description_placeholder"
-                        android:src="@drawable/ic_no_logo"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.50" />
-
-                    <it.lmqv.livematchcam.views.AnimateImageVIew
-                        android:id="@+id/iv_date_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:contentDescription="@string/description_placeholder"
-                        android:src="@drawable/ic_calendar"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.50"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/iv_thumbnail"
-                        app:layout_constraintVertical_bias="0.15" />
-
-                    <it.lmqv.livematchcam.views.AnimateImageVIew
-                        android:id="@+id/iv_logo_guest"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginEnd="35dp"
-                        android:contentDescription="@string/description_placeholder"
-                        android:src="@drawable/ic_no_logo"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.50" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-<!--
-                <LinearLayout
-                    android:id="@+id/container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:weightSum="3"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="5dp"
-                    android:paddingVertical="10dp"
-                    android:background="@drawable/score_board_primary_background">
-
-                    <LinearLayout
-                        android:id="@+id/container_home"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:baselineAligned="false"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/labelTextView"
-                            android:layout_height="wrap_content"
-                            android:layout_width="match_parent"
-                            android:gravity="center_horizontal"
-                            android:text="@string/logo_left"
-                            android:textSize="12sp"
-                            android:textColor="@color/appColorSecondary"
-                            android:padding="3dp"
-                            app:layout_constraintStart_toStartOf="parent"
-                            tools:ignore="MissingConstraints" />
-
-                        <ImageView
-                            android:id="@+id/iv_logo_home"
-                            style="@style/smallImageViewStyle"
-                            android:layout_gravity="center_horizontal"
-                            android:contentDescription="@string/description_placeholder"
-                            android:src="@drawable/shield"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"/>
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/container_date"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:baselineAligned="false"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/labelTextView"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/label_datetime"
-                            android:textSize="12sp"
-                            android:gravity="center_horizontal"
-                            android:textColor="@color/appColorSecondary"
-                            android:padding="3dp"
-                            app:layout_constraintStart_toStartOf="parent"
-                            tools:ignore="MissingConstraints" />
-
-                        <ImageView
-                            android:id="@+id/iv_date_time"
-                            style="@style/smallImageViewStyle"
-                            android:layout_gravity="center_horizontal"
-                            android:contentDescription="@string/description_placeholder"
-                            android:src="@drawable/ic_calendar"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"/>
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/container_guest"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:baselineAligned="false"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/labelTextView"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/logo_right"
-                            android:textSize="12sp"
-                            android:gravity="center_horizontal"
-                            android:textColor="@color/appColorSecondary"
-                            android:padding="3dp"
-                            app:layout_constraintStart_toStartOf="parent"
-                            tools:ignore="MissingConstraints" />
-
-                        <ImageView
-                            android:id="@+id/iv_logo_guest"
-                            style="@style/smallImageViewStyle"
-                            android:layout_gravity="center_horizontal"
-                            android:contentDescription="@string/description_placeholder"
-                            android:src="@drawable/shield"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"/>
-
-                    </LinearLayout>
-                </LinearLayout>
--->
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:background="@drawable/alpha_background"
-                android:padding="10dp"
-                android:layout_weight="60"
+            <it.lmqv.livematchcam.views.AnimateImageVIew
+                android:id="@+id/iv_logo_home"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:baselineAligned="false"
-                android:orientation="vertical">
+                android:layout_gravity="center_horizontal"
+                android:layout_marginStart="50dp"
+                android:contentDescription="@string/description_placeholder"
+                android:src="@drawable/ic_no_logo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.50" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
+            <it.lmqv.livematchcam.views.AnimateImageVIew
+                android:id="@+id/iv_date_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/description_placeholder"
+                android:src="@drawable/ic_calendar"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.50"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/iv_thumbnail"
+                app:layout_constraintVertical_bias="0.15" />
 
-                    <TextView
-                        android:id="@+id/text_label_title"
-                        style="@style/labelTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_event_title"
-                        android:textColor="@color/appColorSecondary"
-                        android:padding="3dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        tools:ignore="MissingConstraints" />
+            <it.lmqv.livematchcam.views.AnimateImageVIew
+                android:id="@+id/iv_logo_guest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginEnd="50dp"
+                android:contentDescription="@string/description_placeholder"
+                android:src="@drawable/ic_no_logo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.50" />
 
-                    <TextView
-                        android:id="@+id/text_title"
-                        style="@style/editTextView"
-                        android:gravity="start"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/description_placeholder"
-                        android:layout_marginEnd="50dp"
-                        app:layout_constraintEnd_toStartOf="@+id/iv_title_clear"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/text_label_title"
-                        tools:ignore="MissingConstraints" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <it.lmqv.livematchcam.views.AnimateImageVIew
-                        android:id="@+id/iv_title_clear"
-                        style="@style/smallImageViewStyle"
-                        android:contentDescription="@string/description_placeholder"
-                        android:src="@drawable/ic_eraser"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/text_label_title"
-                        tools:ignore="MissingConstraints" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <!--
-                <TextView
-                    style="@style/labelTextView"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:text="@string/label_datetime"
-                    android:textColor="@color/appColorSecondary"
-                    android:padding="3dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    tools:ignore="MissingConstraints" />
-
-                <TextView
-                    android:id="@+id/text_date"
-                    style="@style/editTextView"
-                    android:gravity="start"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/date_placeholder"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_title_clear"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/text_label_title"
-                    tools:ignore="MissingConstraints" />
-                -->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/text_label_livestream"
-                        style="@style/labelTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/live_stream"
-                        android:textColor="@color/appColorSecondary"
-                        android:padding="3dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        tools:ignore="MissingConstraints" />
-
-                    <Spinner
-                        android:id="@+id/spinner_livestream"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/text_label_livestream"
-                        android:spinnerMode="dialog" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:layout_marginVertical="5dp"
-                    android:layout_marginEnd="10dp"
-                    android:orientation="horizontal">
-
-                    <it.lmqv.livematchcam.views.AnimateImageVIew
-                        android:id="@+id/iv_delete_live_stream"
-                        style="@style/largeImageViewStyle"
-                        android:layout_gravity="end"
-                        android:layout_marginEnd="10dp"
-                        android:contentDescription="@string/description_placeholder"
-                        android:src="@drawable/ic_trash_bin"/>
-
-                    <it.lmqv.livematchcam.views.AnimateImageVIew
-                        android:id="@+id/iv_create_live_stream"
-                        style="@style/largeImageViewStyle"
-                        android:layout_gravity="end"
-                        android:contentDescription="@string/description_placeholder"
-                        android:src="@drawable/ic_save"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-        </LinearLayout>
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/alpha_background"
+        android:layout_margin="10dp"
+        android:padding="10dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_label_title"
+                style="@style/labelTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_event_title"
+                android:textColor="@color/appColorSecondary"
+                android:padding="3dp"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="MissingConstraints" />
+
+            <TextView
+                android:id="@+id/text_title"
+                style="@style/editTextView"
+                android:gravity="start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/description_placeholder"
+                android:layout_marginEnd="50dp"
+                app:layout_constraintEnd_toStartOf="@+id/iv_title_clear"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_label_title"
+                tools:ignore="MissingConstraints" />
+
+            <it.lmqv.livematchcam.views.AnimateImageVIew
+                android:id="@+id/iv_title_clear"
+                style="@style/smallImageViewStyle"
+                android:contentDescription="@string/description_placeholder"
+                android:src="@drawable/ic_eraser"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_label_title"
+                tools:ignore="MissingConstraints" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_label_livestream"
+                style="@style/labelTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/live_stream"
+                android:textColor="@color/appColorSecondary"
+                android:padding="3dp"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="MissingConstraints" />
+
+            <Spinner
+                android:id="@+id/spinner_livestream"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_label_livestream"
+                android:spinnerMode="dialog" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="end"
+            android:layout_gravity="bottom"
+            android:layout_marginVertical="5dp"
+            android:layout_marginEnd="10dp"
+            android:orientation="horizontal">
+
+            <it.lmqv.livematchcam.views.AnimateImageVIew
+                android:id="@+id/iv_delete_live_stream"
+                style="@style/largeImageViewStyle"
+                android:layout_gravity="end|bottom"
+                android:layout_marginEnd="10dp"
+                android:contentDescription="@string/description_placeholder"
+                android:src="@drawable/ic_trash_bin"/>
+
+            <it.lmqv.livematchcam.views.AnimateImageVIew
+                android:id="@+id/iv_create_live_stream"
+                style="@style/largeImageViewStyle"
+                android:layout_gravity="end|bottom"
+                android:contentDescription="@string/description_placeholder"
+                android:src="@drawable/ic_save"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

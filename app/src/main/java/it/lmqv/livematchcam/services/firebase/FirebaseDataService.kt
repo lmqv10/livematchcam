@@ -130,7 +130,6 @@ object FirebaseDataService {
         }
     }
 
-
     fun detachEventInfoValueEventListener () {
         if (this.eventInfoValueEventListener != null) {
             //Logd("FirebaseDataService::detachEventInfoValueEventListener $eventInfoKeyRef")
