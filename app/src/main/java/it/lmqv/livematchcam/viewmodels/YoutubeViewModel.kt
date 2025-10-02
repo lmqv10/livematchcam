@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.api.services.youtube.model.Channel
 import com.google.api.services.youtube.model.LiveBroadcast
 import com.google.api.services.youtube.model.LiveStream
 import it.lmqv.livematchcam.adapters.LiveBroadcastItem
@@ -68,6 +69,13 @@ class YoutubeViewModel(
     val liveStreams: StateFlow<List<LiveStream>> = _liveStreams
     fun loadLiveStreams() {
         _liveStreams.value = this.youTubeClient.getLiveStreams()
+    }
+
+    private var _channels = MutableStateFlow<List<Channel>>(mutableListOf())
+    val channels: StateFlow<List<Channel>> = _channels
+
+    fun loadChannels() {
+        _channels.value = this.youTubeClient.getChannels()
     }
 
     fun addOrUpdateBroadcastEvent(

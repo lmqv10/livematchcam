@@ -3,10 +3,10 @@ package it.lmqv.livematchcam.services.firebase
 import it.lmqv.livematchcam.factories.Sports
 
 /*data class Accounts(
-    val accounts: Map<String, Account>
+    val accounts: Map<String, FirebaseAccount>
 )*/
 
-data class Account(
+data class FirebaseAccount(
     val guid: String = "",
     val name: String = "",
     val admin: String = "",
@@ -38,8 +38,8 @@ data class Match(
 )
 
 data class EventInfo(
-    var sport: Sports = Sports.SOCCER,
-    var score: IScore = SoccerScore()
+    var sport: Sports = Sports.VOLLEY,
+    var score: IScore = VolleyScore()
 )
 
 data class EventInfoData(

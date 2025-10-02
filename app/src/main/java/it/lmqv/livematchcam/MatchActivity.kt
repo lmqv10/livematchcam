@@ -38,8 +38,9 @@ import it.lmqv.livematchcam.extensions.dpToPx
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.services.CounterService
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
-import it.lmqv.livematchcam.viewmodels.AccountViewModel
+import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
+import it.lmqv.livematchcam.viewmodels.PiccoAccountViewModel
 import it.lmqv.livematchcam.views.AnimateImageVIew
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,8 @@ interface INavigateDrawerActivity {
 
 class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
-    private val accountViewModel: AccountViewModel by viewModels()
+    //private val googleAccountViewModel: GoogleAccountViewModel by viewModels()
+    private val accountViewModel: PiccoAccountViewModel by viewModels()
     private val floatingActionsViewModel: FloatingActionsViewModel by viewModels()
 
     private lateinit var binding: ActivityMatchBinding
@@ -64,6 +66,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
     private lateinit var navController: NavController
 
     private val topLevelsFragments = setOf(
+        R.id.firebaseConfigurationFragment,
         R.id.serverConfigurationFragment,
         R.id.youtubeConfigurationFragment,
         R.id.youtubeStreamFragment
@@ -152,7 +155,8 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
         headerView = binding.matchNavView.getHeaderView(0)
         headerView.setOnClickListener {
-            startActivity(Intent(this, AccountActivity::class.java))
+            //startActivity(Intent(this, AccountActivity::class.java))
+            startActivity(Intent(this, PiccoAccountActivity::class.java))
             binding.matchDrawerLayout.closeDrawers()
         }
 
@@ -200,20 +204,25 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 accountViewModel.authState.collectLatest { state ->
                     if (accountViewModel.isLogged()) {
+                        var accountName = accountViewModel.accountName()
+                        toast(getString(R.string.logged_in, accountName))
+
                         YouTubeClientProvider
-                            .initialize(this@MatchActivity, accountViewModel.accountName()) { message ->
+                            .initialize(this@MatchActivity, accountName) { message ->
                                 CoroutineScope(Dispatchers.Main).launch {
                                     toast(message, Toast.LENGTH_SHORT)
                                 }
                             }
 
-                        binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = true
-                        binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = true
+                        binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = true
+                        //binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = true
+                        //binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = true
 
                         binding.matchNavView.getHeaderView(0)
-                            .findViewById<TextView>(R.id.textAccountEmail).text = accountViewModel.accountName()
+                            .findViewById<TextView>(R.id.textAccountEmail).text = accountName
                     } else {
 
+                        binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = false
                         binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = false
                         binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = false
 

@@ -50,6 +50,7 @@ import it.lmqv.livematchcam.databinding.ActivityYouTubeBinding
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.repositories.accountDataStore
 import it.lmqv.livematchcam.utils.KeyDescription
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +60,19 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
+
+object OAuthConfig {
+    //const val CLIENT_ID = "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com"
+    //const val REDIRECT_URI = "it.lmqv.livematchcam:/oauth2redirect"
+    //const val AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
+    //const val TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
+    //const val SCOPE = "https://www.googleapis.com/auth/youtube"
+    const val AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
+    const val TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
+    const val REDIRECT_URI = "it.lmqv.livematchcam:/oauth2redirect"
+    const val CLIENT_ID = "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com"
+    const val YOUTUBE_SCOPE = "https://www.googleapis.com/auth/youtube"
+}
 
 class YouTubeActivity : AppCompatActivity() {
 
@@ -88,40 +102,64 @@ class YouTubeActivity : AppCompatActivity() {
 
         val fab: FloatingActionButton = binding.fab
         fab.setOnClickListener { view ->
+            //toast("oAuthHandler")
             oAuthHandler()
         }
 
         binding.fab2.setOnClickListener { view ->
+            //toast("getUserChannelInfo")
             CoroutineScope(Dispatchers.IO).launch {
-                getUserChannelInfo(accessToken)
+                try {
+                    accessToken = GoogleAuthUtil.getToken(
+                        this@YouTubeActivity,
+                        "calcio.lecco.2010@gmail.com",
+                        //"paolodito@gmail.com",
+                        "oauth2:https://www.googleapis.com/auth/youtube"
+                    )
+
+                    CoroutineScope(Dispatchers.Main).launch {
+                        toast("accessToken $accessToken")
+                    }
+
+                    getUserChannelInfo(accessToken)
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+
+                    CoroutineScope(Dispatchers.Main).launch {
+                        toast("exception ${e.message}")
+                    }
+
+                }
             }
         }
+
         binding.fab3.setOnClickListener { view ->
             CoroutineScope(Dispatchers.IO).launch {
-                scheduleYouTube()
-                //streamsListYouTube()
-                //broadcastListYouTube()
+                //scheduleYouTube()
+                streamsListYouTube()
+                broadcastListYouTube()
             }
         }
 
-        connectionsClient = Nearby.getConnectionsClient(this)
+        //connectionsClient = Nearby.getConnectionsClient(this)
 
         // Set OnClickListeners for buttons
-        binding.buttonDiscovery.setOnClickListener {
-            startDiscovery()
-        }
+//        binding.buttonDiscovery.setOnClickListener {
+//            startDiscovery()
+//        }
+//
+//        binding.buttonAdvertise.setOnClickListener {
+//            startAdvertising()
+//        }
+//
+//        binding.buttonSend.setOnClickListener {
+//            // Example: sending a message to a connected device (replace endpointId with actual ID)
+//            //val endpointId = "YourEndpointIdHere"
+//            sendMessage("Hello from me!")
+//        }
 
-        binding.buttonAdvertise.setOnClickListener {
-            startAdvertising()
-        }
-
-        binding.buttonSend.setOnClickListener {
-            // Example: sending a message to a connected device (replace endpointId with actual ID)
-            //val endpointId = "YourEndpointIdHere"
-            sendMessage("Hello from me!")
-        }
-
-        checkPermissions()
+        //checkPermissions()
     }
 
     private fun checkPermissions() {
@@ -211,23 +249,42 @@ class YouTubeActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-
+    override fun onStart() {
         val account = GoogleSignIn.getLastSignedInAccount(this)
         if (account != null) {
-            // User is already signed in
-            //val email = account.email
-            //val displayName = account.displayName
             accountName = account.account?.name ?: ""
-            //val idToken = account.serverAuthCode
+
             CoroutineScope(Dispatchers.IO).launch {
                 accessToken = getAccessToken(account, this@YouTubeActivity).toString()
-                streamsListYouTube()
-                broadcastListYouTube()
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    toast("accessToken $accessToken")
+                }
             }
+            toast("User is signed in $accountName")
         } else {
-            //toast("User is not signed in")
+            toast("User is not signed in")
         }
+        super.onStart()
+    }
+    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+
+//        val account = GoogleSignIn.getLastSignedInAccount(this)
+//        if (account != null) {
+//            // User is already signed in
+//            //val email = account.email
+//            //val displayName = account.displayName
+//            accountName = account.account?.name ?: ""
+//            //val idToken = account.serverAuthCode
+////            CoroutineScope(Dispatchers.IO).launch {
+////                accessToken = getAccessToken(account, this@YouTubeActivity).toString()
+////                streamsListYouTube()
+////                broadcastListYouTube()
+////            }
+//            toast("User is signed in $accountName")
+//        } else {
+//            toast("User is not signed in")
+//        }
 
         return super.onCreateView(name, context, attrs)
     }
@@ -404,7 +461,9 @@ class YouTubeActivity : AppCompatActivity() {
             val account = task.result
             CoroutineScope(Dispatchers.IO).launch {
                 accessToken = getAccessToken(account, this@YouTubeActivity).toString()
-                toast("accessToken::" + accessToken)
+                CoroutineScope(Dispatchers.Main).launch {
+                    toast("accessToken::" + accessToken)
+                }
                 //Logd("TOKEN::" + accessToken)
             }
             //_AccessToken = account.idToken!!
@@ -413,15 +472,26 @@ class YouTubeActivity : AppCompatActivity() {
 
             // Exchange the serverAuthCode for an access token using your backend or library.
         } else {
-            // Handle sign-in failure.
-            toast(task.exception?.message.toString())
+            CoroutineScope(Dispatchers.Main).launch {
+                // Handle sign-in failure.
+                toast(task.exception?.message.toString())
+            }
         }
     }
 
-    private fun getUserChannelInfo(accessToken: String) {
+    private fun getUserChannelInfo(_accessToken: String) {
         try {
             // Define the API endpoint
             val url = "https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&mine=true"
+
+            // https://accounts.google.com/o/oauth2/v2/auth?
+            // client_id=.apps.googleusercontent.com
+            // &redirect_uri=com.rankedin.video%3A%2Fsportcam.app%2Foauth2redirect
+            // &response_type=code
+            // &access_type=offline
+            // &scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube
+            // &display=touch
+            // &prompt=select_account
 
             // Create an HTTP client
             val client = OkHttpClient()
@@ -450,16 +520,23 @@ class YouTubeActivity : AppCompatActivity() {
                     val title = snippet.getString("title")
                     val description = snippet.getString("description")
                     val subscriberCount = statistics.getString("subscriberCount")
-
-                    toast("Channel Title: $title" + " -Description: $description" + " -Subscribers: $subscriberCount")
+                    CoroutineScope(Dispatchers.Main).launch {
+                        toast("Channel Title: $title" + " -Description: $description" + " -Subscribers: $subscriberCount")
+                    }
                 } else {
                     //Logd("No channel information found.")
                 }
             } else {
+                CoroutineScope(Dispatchers.Main).launch {
+                    toast("Error: ${response.code} - ${response.message}")
+                }
                 Logd("Error: ${response.code} - ${response.message}")
             }
         } catch (e : Exception) {
-            Logd("Error: ${e.message}")
+            CoroutineScope(Dispatchers.Main).launch {
+                toast("Error: ${e.message}")
+            }
+            Loge("Error: ${e.message}")
         }
 
     }
@@ -469,16 +546,22 @@ class YouTubeActivity : AppCompatActivity() {
             account.account?.let {
                 GoogleAuthUtil.getToken(
                     context,
-                    it,
+                    it.name,
                     "oauth2:https://www.googleapis.com/auth/youtube"
                 )
             }
         } catch (e: UserRecoverableAuthException) {
             // Handle by prompting the user to grant permissions
             Loge("User action required: ${e.intent}")
+            CoroutineScope(Dispatchers.Main).launch {
+                toast("User action required: ${e.intent}")
+            }
             null
         } catch (e: Exception) {
             Loge("Failed to get token: ${e.message}")
+            CoroutineScope(Dispatchers.Main).launch {
+                toast("Failed to get token: ${e.message}")
+            }
             null
         }
     }

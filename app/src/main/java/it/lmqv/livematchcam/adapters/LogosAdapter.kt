@@ -13,7 +13,9 @@ data class LogoItem(val imageURL: String)
 
 class LogosAdapter(
         context: Context,
-        private val items: List<LogoItem>
+        private var items: List<LogoItem>,
+        private val onClick: (LogoItem) -> Unit,
+        private val onLongClick: (LogosAdapter, LogoItem) -> Unit
     ) : BaseAdapter() {
 
     private val inflater = LayoutInflater.from(context)
@@ -43,7 +45,20 @@ class LogosAdapter(
             error(R.drawable.preview_missing)
         }
 
+        viewHolder.imageView.setOnClickListener {
+            onClick(item)
+        }
+
+        viewHolder.imageView.setOnLongClickListener {
+            onLongClick(this, item)
+            true
+        }
         return view
+    }
+
+    fun updateItems(newItems: List<LogoItem>) {
+        items = newItems.toMutableList()
+        notifyDataSetChanged()
     }
 
     private data class ViewHolder(val imageView: ImageView)

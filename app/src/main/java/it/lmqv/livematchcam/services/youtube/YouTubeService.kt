@@ -7,6 +7,7 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.DateTime
 import com.google.api.services.youtube.YouTube
+import com.google.api.services.youtube.model.Channel
 import com.google.api.services.youtube.model.LiveBroadcast
 import com.google.api.services.youtube.model.LiveBroadcastContentDetails
 import com.google.api.services.youtube.model.LiveBroadcastSnippet
@@ -16,7 +17,6 @@ import com.google.api.services.youtube.model.MonitorStreamInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.internal.notify
 import java.io.File
 import java.time.ZonedDateTime
 import java.util.Date
@@ -74,6 +74,22 @@ class YouTubeClient private constructor(
         ): YouTubeClient {
             var youTube = YouTubeFactory.getInstance(context, accountName)
             return YouTubeClient(youTube, notify)
+        }
+    }
+
+    fun getChannels() : List<Channel> {
+        try {
+            val response = this.youTube
+                .channels()
+                .list("id,snippet")
+                .apply { mine = true }
+                .execute()
+            return response.items
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+            notify(e.message.toString())
+            return listOf()
         }
     }
 

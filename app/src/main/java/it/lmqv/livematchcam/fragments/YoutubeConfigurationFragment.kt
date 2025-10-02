@@ -6,12 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import it.lmqv.livematchcam.INavigateDrawerActivity
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.utils.SyncStrategy
 import it.lmqv.livematchcam.databinding.FragmentYoutubeConfigurationBinding
+import it.lmqv.livematchcam.extensions.launchOnStarted
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.MatchSyncStrategyRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,17 +67,21 @@ class YoutubeConfigurationFragment : Fragment() {
 
         actionsViewModel.setEmptyActions()
 
+        launchOnStarted {
+            MatchRepository.isRealtimeDatabaseAvailable.collect { isAvailable ->
+                if (isAvailable) {
+                    actionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
+                } else {
+                    actionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
+                }
+            }
+        }
+
         syncScope.launch {
             try {
                 val args: YoutubeConfigurationFragmentArgs by navArgs()
                 val syncStrategy: SyncStrategy = args.syncStrategy
-                MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)?.collect { isAvailable ->
-                    if (isAvailable) {
-                        actionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
-                    } else {
-                        actionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
-                    }
-                }
+                MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)
             }
             catch (e: Exception) {
                 e.printStackTrace()

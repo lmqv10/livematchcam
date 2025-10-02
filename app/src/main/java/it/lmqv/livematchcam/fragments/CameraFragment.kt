@@ -197,11 +197,12 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         launchOnStarted {
             MatchRepository.isRealtimeDatabaseAvailable.collect { isAvailable ->
-                if (isAvailable) {
+                /*if (isAvailable) {
                     binding.mainBannerContainer.visibility = View.VISIBLE
                 } else {
                     binding.mainBannerContainer.visibility = View.GONE
-                }
+                }*/
+                binding.mainBannerContainer.visibility = View.GONE
             }
         }
 

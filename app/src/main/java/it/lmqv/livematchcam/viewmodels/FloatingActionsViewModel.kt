@@ -51,14 +51,14 @@ class FloatingActionsViewModel : ViewModel() {
 
     private fun getBaseActions(navigator : INavigateDrawerActivity?) : List<FloatingAction>{
         return listOf(
-            FloatingAction(
-                id = "UVCStreamActivity",
-                iconRes = R.drawable.ic_uvc_camera,
-                contentDescription = "usb",
-                onClick = {
-                    navigator?.navigateAsStartActivity(UVCStreamActivity::class.java)
-                }
-            ),
+//            FloatingAction(
+//                id = "UVCStreamActivity",
+//                iconRes = R.drawable.ic_uvc_camera,
+//                contentDescription = "usb",
+//                onClick = {
+//                    navigator?.navigateAsStartActivity(UVCStreamActivity::class.java)
+//                }
+//            ),
             FloatingAction(
                 id = "StreamActivity",
                 iconRes = R.drawable.play_stream,

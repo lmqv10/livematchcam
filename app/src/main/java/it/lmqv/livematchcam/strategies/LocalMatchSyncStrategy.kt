@@ -6,10 +6,14 @@ import androidx.lifecycle.asFlow
 import it.lmqv.livematchcam.services.firebase.EventInfo
 import it.lmqv.livematchcam.services.firebase.Match
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.UUID
 
 class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
     override val instanceId: String? = UUID.randomUUID().toString()
+
+    //override val isRealtimeDatabaseAvailable: Boolean = false
+    //override var presetKeys: List<String> = emptyList()
 
     private lateinit var onMatchUpdated: (Match) -> Unit
     private lateinit var onEventInfoUpdated: (EventInfo) -> Unit
@@ -21,7 +25,9 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
 
     override suspend fun initialize(
         onMatchUpdated: (Match) -> Unit,
-        onEventInfoUpdated: (EventInfo) -> Unit
+        onEventInfoUpdated: (EventInfo) -> Unit,
+        onPresetKeys: (List<String>) -> Unit,
+        onRealtimeDatabaseAvailability: (Boolean) -> Unit
     ) {
         //Logd("$instanceId: LocalMatchSyncStrategy::initialize::start")
         this.onMatchUpdated = onMatchUpdated
@@ -57,6 +63,9 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
         this.onEventInfoUpdated(eventInfo)
     }
 
-    private val _isRealtimeDatabaseAvailable = MutableLiveData(false)
-    override val isRealtimeDatabaseAvailable: Flow<Boolean> = _isRealtimeDatabaseAvailable.asFlow()
+//    private val _isRealtimeDatabaseAvailable = MutableLiveData(false)
+//    override val isRealtimeDatabaseAvailable: Flow<Boolean> = _isRealtimeDatabaseAvailable.asFlow()
+//
+//    private val _presetKeys = MutableStateFlow(emptyList<String>())
+//    override val presetKeys: Flow<List<String>> = _presetKeys
 }

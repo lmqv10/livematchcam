@@ -61,7 +61,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.59" />
+        app:layout_constraintGuide_percent="0.65" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_source"
@@ -107,6 +107,7 @@
         tools:ignore="ContentDescription" />
 
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/main_banner_container"
         android:orientation="vertical"
         android:layout_width="wrap_content"

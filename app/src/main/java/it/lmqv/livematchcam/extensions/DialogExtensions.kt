@@ -192,7 +192,7 @@ fun Context.showQRCode(content: String) {
         }
         qrCodeImageView.setImageBitmap(bitmap)
     } catch (e: Exception) {
-        Logd("Exception:: ${e.message.toString()}")
+        Loge("Exception:: ${e.message.toString()}")
         e.printStackTrace()
     }
     dialog.show()

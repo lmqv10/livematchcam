@@ -28,6 +28,7 @@
     <string name="live_url">Live URL</string>
     <string name="rtmp_server">RTMP Server</string>
     <string name="server">Server Configuration</string>
+    <string name="firebase_custom">Picco Lecco</string>
     <string name="broadcasts">Add or Update Match</string>
     <string name="thumbnail">Thumbnail</string>
     <string name="account">Account</string>
@@ -163,13 +164,17 @@
     <string name="switch_end_stream">End Stream</string>
     <string name="confirm_create_live_stream">Create Or Update Event. Confirm?</string>
     <string name="confirm_delete_live_stream">Delete Event. Confirm?</string>
+    <string name="confirm_delete_item">Delete Item. Confirm?</string>
 
     <string name="reset_match_data_message">Reset match data.\n Confirm?</string>
 
     <string name="google_nearby">Near By</string>
-    <string name="google_sign_in">Google Sign in</string>
+    <string name="google_sign_in">Sign in</string>
+    <string name="account_sign_in">user@team</string>
     <string name="account_key_placeholder">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</string>
     <string name="sign_out">Sign out</string>
+    <string name="logged_in">Authenticated as %1s</string>
+    <string name="logged_out">User not authenticated</string>
 
 
     <string name="permission_tip" translatable="false">You have already denied permission access. Go to the Settings page to turn on permissions</string>

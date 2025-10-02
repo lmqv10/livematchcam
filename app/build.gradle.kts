@@ -16,7 +16,8 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 27
         versionCode = 1
-        versionName = "3.1"
+        versionName = "3.2"
+        manifestPlaceholders["appAuthRedirectScheme"] = "it.lmqv.livematchcam"
     }
 
     buildTypes {
@@ -124,6 +125,7 @@ dependencies {
     //implementation(libs.compose.compiler)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation(libs.appauth)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

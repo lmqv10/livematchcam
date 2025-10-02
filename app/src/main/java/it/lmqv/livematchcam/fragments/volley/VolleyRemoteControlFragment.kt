@@ -13,7 +13,6 @@ import androidx.lifecycle.lifecycleScope
 import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyRemoteControlBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
@@ -291,7 +290,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             volleyScoreViewModel.liveScore.collectLatest { liveScore ->
-                Logd("VolleyControlBar::liveScore.collectLatest::$liveScore")
+                //Logd("VolleyControlBar::liveScore.collectLatest::$liveScore")
                 MatchRepository.setScore(liveScore)
             }
         }

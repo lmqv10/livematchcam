@@ -45,4 +45,13 @@ class RecentsLogosPreferences(context: Context) {
         val json = gson.toJson(limited)
         prefs.edit { putString(key, json) }
     }
+
+    fun removeRecent(itemKey: String): List<KeyDescription<String>>  {
+        val current = getRecents().toMutableList()
+        current.removeAll { it.key == itemKey }
+        val updated = current.take(maxItems)
+        val json = gson.toJson(updated)
+        prefs.edit { putString(key, json) }
+        return getRecents()
+    }
 }

@@ -1,3 +1,4 @@
+/*
 package it.lmqv.livematchcam.services.auth
 
 import android.app.Application
@@ -9,36 +10,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @Suppress("DEPRECATION")
-class GoogleAuthService(private val context: Application): IAuthService {
-
-    private val googleSignInClient: GoogleSignInClient
-
-    companion object {
-        private const val GOOGLE_APIS_AUTH_YOUTUBE: String = "https://www.googleapis.com/auth/youtube"
-        private const val CLIENT_ID: String = "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com"
-    }
+class LocalAuthService(private val context: Application): IAuthService {
 
     private val _authState = MutableStateFlow<AuthResult>(AuthResult.Unauthenticated)
     override val authState: StateFlow<AuthResult> = _authState
 
     init {
-        //Logd("===================== GoogleAuthService::Init")
-        val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(Scope(GOOGLE_APIS_AUTH_YOUTUBE))
-            .requestServerAuthCode(CLIENT_ID, true)
-            .build()
-
-        googleSignInClient = GoogleSignIn.getClient(context.applicationContext, googleSignInOptions)
-
         this.updateLastSignedInAccount()
     }
 
     override fun updateLastSignedInAccount() {
         //Logd("===================== GoogleAuthService::updateLastSignedInAccount")
         val account = GoogleSignIn.getLastSignedInAccount(context)
-        if (account != null && account.email != null) {
-            _authState.value = AuthResult.Authenticated(Account(account.email!!))
+        if (account != null) {
+            _authState.value = AuthResult.Authenticated(account)
         } else {
             _authState.value = AuthResult.Unauthenticated
         }
@@ -51,18 +36,17 @@ class GoogleAuthService(private val context: Application): IAuthService {
         try {
             //Logd("===================== GoogleAuthService::handleSignInResult")
             val account = task.getResult(ApiException::class.java)
-            _authState.value = AuthResult.Authenticated(Account(account.email!!))
+            _authState.value = AuthResult.Authenticated(account.account.name)
         } catch (e: ApiException) {
             _authState.value = AuthResult.Error(e)
         }
     }
 
     override fun signOut(onComplete: (() -> Unit)?) {
-        //Logd("===================== GoogleAuthService::signOut")
-        googleSignInClient.signOut().addOnCompleteListener {
-            _authState.value = AuthResult.Unauthenticated
-            onComplete?.invoke()
-        }
+        Logd("===================== LocalAuthService::signOut")
+        _authState.value = AuthResult.Unauthenticated
+        onComplete?.invoke()
     }
 
 }
+*/

@@ -21,15 +21,15 @@ import kotlinx.coroutines.launch
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(AccountViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(GoogleAccountViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AccountViewModel(application, authService) as T
+            return GoogleAccountViewModel(application, authService) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }*/
 
-class AccountViewModel(private val application: Application) : AndroidViewModel(application)  {
+class GoogleAccountViewModel(private val application: Application) : AndroidViewModel(application)  {
 
     private var firebaseAccountRepository: AccountRepository = AccountRepository(application)
     private val authService = GoogleAuthService(application)
@@ -50,9 +50,9 @@ class AccountViewModel(private val application: Application) : AndroidViewModel(
         authService.signOut(onComplete)
     }
 
-    //private val _account = MutableStateFlow<Account?>(null)
-    //val account: StateFlow<Account?> = _account
-    /*fun setAccount(account: Account?) {
+    //private val _account = MutableStateFlow<FirebaseAccount?>(null)
+    //val account: StateFlow<FirebaseAccount?> = _account
+    /*fun setAccount(account: FirebaseAccount?) {
         viewModelScope.launch(Dispatchers.IO) {
             if (_account.value != account) {
                 _account.value = account
@@ -84,7 +84,7 @@ class AccountViewModel(private val application: Application) : AndroidViewModel(
     {
         val state = authState.value
         return when (state) {
-            is AuthResult.Authenticated -> state.account.account?.name ?: state.account.email
+            is AuthResult.Authenticated -> state.account.name
             is AuthResult.Unauthenticated, is AuthResult.Error -> application.getString(R.string.google_sign_in)
         }
     }
@@ -93,7 +93,7 @@ class AccountViewModel(private val application: Application) : AndroidViewModel(
     {
         val state = authState.value
         return when (state) {
-            is AuthResult.Authenticated -> state.account.email
+            is AuthResult.Authenticated -> state.account.name
             is AuthResult.Unauthenticated, is AuthResult.Error -> null
         }
     }
@@ -103,18 +103,18 @@ class AccountViewModel(private val application: Application) : AndroidViewModel(
             authService.authState.collectLatest { state ->
                 when (state) {
                     is AuthResult.Authenticated -> {
-                        var account = state.account.account
-                        val name = account?.name
+                        var name = state.account.name
+                        //val name = account?.name
                         //_account.value = account
-                        firebaseAccountRepository.setAccountGoogle(name)
+                        firebaseAccountRepository.setAccountName(name)
                     }
                     is AuthResult.Unauthenticated -> {
                         //_account.value = null
-                        firebaseAccountRepository.setAccountGoogle(null)
+                        firebaseAccountRepository.setAccountName(null)
                     }
                     is AuthResult.Error -> {
                         //_account.value = null
-                        firebaseAccountRepository.setAccountGoogle(null)
+                        firebaseAccountRepository.setAccountName(null)
                     }
                 }
             }

@@ -18,7 +18,7 @@ import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showQRCode
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
-import it.lmqv.livematchcam.viewmodels.AccountViewModel
+import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +37,7 @@ class YoutubeFragment : Fragment() {
     private val youtubeViewModel: YoutubeViewModel by activityViewModels {
         YoutubeViewModelFactory(requireActivity().application, YouTubeClientProvider.get())
     }
-    private val accountViewModel: AccountViewModel by activityViewModels()
+    private val googleAccountViewModel: GoogleAccountViewModel by activityViewModels()
 
     private var _binding: FragmentYoutubeBinding? = null
     private val binding get() = _binding!!
@@ -75,7 +75,7 @@ class YoutubeFragment : Fragment() {
         }
 
         launchOnStarted {
-            accountViewModel.authState.collectLatest { state ->
+            googleAccountViewModel.authState.collectLatest { state ->
                 when (state) {
                     is AuthResult.Authenticated -> {
                         CoroutineScope(Dispatchers.IO).launch {

@@ -29,7 +29,7 @@ import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.services.auth.AuthResult
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
-import it.lmqv.livematchcam.viewmodels.AccountViewModel
+import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
@@ -58,7 +58,7 @@ class YoutubeStreamFragment : Fragment() {
         YoutubeViewModelFactory(requireActivity().application, YouTubeClientProvider.get())
     }
 
-    private val accountViewModel: AccountViewModel by activityViewModels()
+    private val googleAccountViewModel: GoogleAccountViewModel by activityViewModels()
     private val actionsViewModel: FloatingActionsViewModel by activityViewModels()
 
     private lateinit var schedulesPrefs: SchedulesPreferences
@@ -283,7 +283,7 @@ class YoutubeStreamFragment : Fragment() {
         }
 
         launchOnStarted {
-            accountViewModel.authState.collectLatest { state ->
+            googleAccountViewModel.authState.collectLatest { state ->
                 when (state) {
                     is AuthResult.Authenticated -> {
                         CoroutineScope(Dispatchers.IO).launch {

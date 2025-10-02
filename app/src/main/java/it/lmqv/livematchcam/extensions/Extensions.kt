@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import android.widget.SpinnerAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorInt
@@ -19,12 +20,14 @@ import androidx.fragment.app.Fragment
 import com.google.api.client.util.DateTime
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
 import it.lmqv.livematchcam.R
+import it.lmqv.livematchcam.repositories.KeyDescription
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import kotlin.math.max
 import kotlin.reflect.full.memberProperties
 
 
@@ -53,6 +56,13 @@ fun ImageObjectFilterRender.animateAlpha(
 /*fun Context.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @DrawableRes iconResId: Int = R.drawable.ic_confirm) {
     customToast(this, message, duration, iconResId)
 }*/
+
+fun SpinnerAdapter.getItemPositionByKey(key: String): Int {
+    val itemsList = List(this.count) { index ->
+        this.getItem(index)!! as KeyDescription
+    }
+    return max(0, itemsList.indexOfFirst { it.key == key })
+}
 
 fun Activity.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @DrawableRes iconResId: Int = R.drawable.ic_confirm) {
     customToast(this, message, duration, iconResId)

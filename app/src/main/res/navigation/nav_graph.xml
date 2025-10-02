@@ -15,6 +15,16 @@
     </fragment>
 
     <fragment
+        android:id="@+id/firebaseConfigurationFragment"
+        android:name="it.lmqv.livematchcam.fragments.FirebaseConfigurationFragment"
+        android:label="@string/firebase_custom">
+        <argument
+            android:name="syncStrategy"
+            app:argType="it.lmqv.livematchcam.utils.SyncStrategy"
+            android:defaultValue="FIREBASE" />
+    </fragment>
+
+    <fragment
         android:id="@+id/youtubeConfigurationFragment"
         android:name="it.lmqv.livematchcam.fragments.YoutubeConfigurationFragment"
         android:label="@string/youtube">

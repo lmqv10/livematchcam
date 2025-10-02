@@ -30,10 +30,10 @@ object MatchRepository {
                 syncStrategy = strategy
                 syncStrategy.initialize(
                     onMatchUpdated = { match -> notifyMatchChanges(match) },
-                    onEventInfoUpdated = { eventInfo -> notifyEventInfoChanges(eventInfo) }
+                    onEventInfoUpdated = { eventInfo -> notifyEventInfoChanges(eventInfo) },
+                    onPresetKeys = { presetKeys -> _presetKeys.value = presetKeys },
+                    onRealtimeDatabaseAvailability = { availability -> _isRealtimeDatabaseAvailable.value = availability }
                 )
-
-                //isRealtimeDatabaseAvailable = syncStrategy.isRealtimeDatabaseAvailable
                 //Logd("$instanceId :: MatchRepository::onSyncStrategy::isRealtimeDatabaseAvailable >> ${isRealtimeDatabaseAvailable.last()}")
             }
         }
@@ -47,6 +47,9 @@ object MatchRepository {
 
     private var _isRealtimeDatabaseAvailable = MutableStateFlow<Boolean>(false)
     var isRealtimeDatabaseAvailable = _isRealtimeDatabaseAvailable
+
+    private var _presetKeys = MutableStateFlow<List<String>>(emptyList())
+    var presetKeys = _presetKeys
 
     private val _homeTeam = MutableLiveData(currentMatch.homeTeam)
     val homeTeam: LiveData<String> = _homeTeam

@@ -7,7 +7,6 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -16,30 +15,26 @@ import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import it.lmqv.livematchcam.databinding.ActivityAccountBinding
+import it.lmqv.livematchcam.databinding.ActivityPiccoAccountBinding
 import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.showEditStringDialog
-import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
+import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.viewmodels.PiccoAccountViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
-class AccountActivity : AppCompatActivity() {
+class PiccoAccountActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityAccountBinding
-    private val googleAccountViewModel: GoogleAccountViewModel by viewModels()
-
-    private val signInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            googleAccountViewModel.handleSignInResult(result.data)
-        }
-    }
+    private lateinit var binding: ActivityPiccoAccountBinding
+    private val piccoAccountViewModel: PiccoAccountViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityAccountBinding.inflate(layoutInflater)
+        binding = ActivityPiccoAccountBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -76,43 +71,40 @@ class AccountActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.arrow_left) // Opzionale: icona personalizzata
 
-        binding.googleSignIn.setOnClickListener { _ ->
-            signInLauncher.launch(googleAccountViewModel.getSignInIntent())
-        }
+        binding.accountName.setOnClickListener {
+            val sourceName = binding.accountName.text.toString()
+            showEditStringDialog(R.string.account, sourceName, arrayOf()) { updatedAccountName ->
+                binding.accountName.text = updatedAccountName
 
-        binding.googleSignOut.setOnClickListener { _ ->
-            googleAccountViewModel.signOut()
-        }
+                if (updatedAccountName.isNotEmpty()) {
+                    piccoAccountViewModel.signIn(updatedAccountName)
+                    toast(getString(R.string.logged_in, updatedAccountName))
+                } else {
+                    piccoAccountViewModel.signOut {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            toast(getString(R.string.logged_out))
+                        }
+                    }
+                }
 
-        binding.accountKey.setOnClickListener {
-            val sourceKey = binding.accountKey.text.toString()
-            showEditStringDialog(R.string.account_key, sourceKey, arrayOf()) { updatedAccountKey ->
-                binding.accountKey.text = updatedAccountKey
-                googleAccountViewModel.setAccountKey(updatedAccountKey)
-                binding.accountKey.hideKeyboard()
+                binding.accountName.hideKeyboard()
             }
         }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(
-                    googleAccountViewModel.authState,
-                    googleAccountViewModel.firebaseAccountKey
+                    piccoAccountViewModel.authState,
+                    piccoAccountViewModel.firebaseAccountKey
                 ) { state, accountKey -> Pair(state, accountKey) }
                 .collect { (state, accountKey) ->
+                    val accountName = piccoAccountViewModel.accountName()
 
-                    val isLogged = googleAccountViewModel.isLogged()
-                    val accountDesc = googleAccountViewModel.accountDesc()
-
-                    binding.accountName.text = accountDesc
-                    binding.googleSignIn.isVisible = !isLogged
-                    binding.googleSignOut.isVisible = isLogged
-                    binding.authorizedAccount.isVisible = isLogged
-
+                    binding.accountName.text = accountName ?: ""
                     binding.accountKey.text = accountKey ?: ""
 
                     val isConnected =
-                        !accountDesc.isNullOrEmpty() && !accountKey.isNullOrEmpty()
+                        !accountName.isNullOrEmpty() && !accountKey.isNullOrEmpty()
 
                     val resIcon = if (isConnected) R.drawable.cloud_check else R.drawable.cloud_cross
                     TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.accountKey, resIcon, 0, 0, 0)

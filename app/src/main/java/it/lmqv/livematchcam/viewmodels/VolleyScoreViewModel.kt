@@ -74,10 +74,10 @@ class VolleyScoreViewModel: ViewModel() {
                 this[lastIndex] = updatedScore
             }
         }
-        Logd("VolleyScoreViewModel::notifyUpdateSetScore::$updatedSets")
+        //Logd("VolleyScoreViewModel::notifyUpdateSetScore::$updatedSets")
 
         var updatedScore = _liveScore.value.copy(sets = updatedSets)
-        Logd("VolleyScoreViewModel::notifyUpdateScore::$updatedScore")
+        //Logd("VolleyScoreViewModel::notifyUpdateScore::$updatedScore")
 
         _liveScore.value = updatedScore
 

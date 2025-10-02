@@ -1,8 +1,6 @@
 package it.lmqv.livematchcam.strategies
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asFlow
 import it.lmqv.livematchcam.services.firebase.EventInfo
 import it.lmqv.livematchcam.services.firebase.EventInfoData
 import it.lmqv.livematchcam.services.firebase.FirebaseDataService
@@ -15,7 +13,6 @@ import it.lmqv.livematchcam.repositories.MatchRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -28,21 +25,27 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
 
     private lateinit var onMatchUpdated: (Match) -> Unit
     private lateinit var onEventInfoUpdated: (EventInfo) -> Unit
+    private lateinit var onPresetKeys: (List<String>) -> Unit
+    private lateinit var onRealtimeDatabaseAvailability: (Boolean) -> Unit
 
     private val syncJob = SupervisorJob()
     private val syncScope = CoroutineScope(syncJob + Dispatchers.IO)
 
     override suspend fun initialize(
         onMatchUpdated: (Match) -> Unit,
-        onEventInfoUpdated: (EventInfo) -> Unit
+        onEventInfoUpdated: (EventInfo) -> Unit,
+        onPresetKeys: (List<String>) -> Unit,
+        onRealtimeDatabaseAvailability: (Boolean) -> Unit
     ) {
         //Logd("$instanceId :: FirebaseMatchSyncStrategy::initialize")
         this.onMatchUpdated = onMatchUpdated
         this.onEventInfoUpdated = onEventInfoUpdated
+        this.onPresetKeys = onPresetKeys
+        this.onRealtimeDatabaseAvailability = onRealtimeDatabaseAvailability
 
         syncScope.launch {
             combine(
-                firebaseAccountRepository.accountGoogle,
+                firebaseAccountRepository.accountName,
                 firebaseAccountRepository.accountKey,
                 firebaseDataRepository.streamName,
                 MatchRepository.sport
@@ -51,10 +54,13 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
             }.collect { (accountGoogle, accountKey, streamName, sport) ->
                 //Logd("$instanceId :: FirebaseMatchSyncStrategy::collect:: $key")
                 try {
-                    FirebaseDataService.authenticateAccount(accountGoogle, accountKey, {
+                    FirebaseDataService.authenticateAccount(accountGoogle, accountKey, { firebaseAccount ->
                         //Logd("$instanceId :: $accountGoogle - $accountKey")
                         //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = true")
-                        _isRealtimeDatabaseAvailable.postValue(true)
+                        onPresetKeys(firebaseAccount.matches.keys.toList())
+
+                        onRealtimeDatabaseAvailability(true)
+                        //_isRealtimeDatabaseAvailable.postValue(true)
 
                         FirebaseDataService.attachMatchValueEventListener(streamName) { match ->
                             //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify Match Update")
@@ -67,15 +73,14 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
                         }
 
                     }, {
-                        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = false")
-                        //Logd("$instanceId: FirebaseMatchSyncStrategy::auth Failed")
-                        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = false")
-                        _isRealtimeDatabaseAvailable.postValue(false)
+                        //_isRealtimeDatabaseAvailable.postValue(false)
+                        onRealtimeDatabaseAvailability(false)
                     })
                 } catch (e: Exception) {
                     e.printStackTrace()
                     //Logd("$instanceId :: _isRealtimeDatabaseAvailable.exception")
-                    _isRealtimeDatabaseAvailable.postValue(false)
+                    //_isRealtimeDatabaseAvailable.postValue(false)
+                    onRealtimeDatabaseAvailability(false)
                 }
 
             }
@@ -85,15 +90,17 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
     override fun dispose() {
         //Logd("$instanceId: FirebaseMatchSyncStrategy::dispose")
         syncJob.cancel()
-        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = false")
-        _isRealtimeDatabaseAvailable.postValue(false)
         FirebaseDataService.detachMatchValueEventListener()
         FirebaseDataService.detachEventInfoValueEventListener()
+
+        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = false")
+        //_isRealtimeDatabaseAvailable.postValue(false)
+        this.onRealtimeDatabaseAvailability(false)
 
         //Logd("$instanceId: LocalMatchSyncStrategy::reset to manual match")
         this.onMatchUpdated(Match())
         this.onEventInfoUpdated(EventInfo())
-
+        this.onPresetKeys(emptyList<String>())
     }
 
     override fun updateMatch(match: Match) {
@@ -108,6 +115,9 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
         FirebaseDataService.updateEventInfoValue(eventInfoData)
     }
 
-    private val _isRealtimeDatabaseAvailable = MutableLiveData(false)
-    override val isRealtimeDatabaseAvailable: Flow<Boolean> = _isRealtimeDatabaseAvailable.asFlow()
+//    private val _isRealtimeDatabaseAvailable = MutableLiveData(false)
+//    override val isRealtimeDatabaseAvailable: Flow<Boolean> = _isRealtimeDatabaseAvailable.asFlow()
+//
+//    private val _presetKeys = MutableStateFlow(emptyList<String>())
+//    override val presetKeys: Flow<List<String>> = _presetKeys
 }
