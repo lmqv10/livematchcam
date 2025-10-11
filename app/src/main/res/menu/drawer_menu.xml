@@ -12,13 +12,11 @@
         android:title="@string/firebase_custom" />
 
     <item
-        android:visible="false"
         android:id="@+id/youtubeConfigurationFragment"
         android:icon="@drawable/ic_youtube"
         android:title="@string/youtube" />
 
     <item
-        android:visible="false"
         android:id="@+id/youtubeStreamFragment"
         android:icon="@drawable/add"
         android:title="@string/youtube_stream" />

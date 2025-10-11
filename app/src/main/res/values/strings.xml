@@ -28,7 +28,7 @@
     <string name="live_url">Live URL</string>
     <string name="rtmp_server">RTMP Server</string>
     <string name="server">Server Configuration</string>
-    <string name="firebase_custom">Picco Lecco</string>
+    <string name="firebase_custom">Firebase</string>
     <string name="broadcasts">Add or Update Match</string>
     <string name="thumbnail">Thumbnail</string>
     <string name="account">Account</string>
@@ -169,7 +169,7 @@
     <string name="reset_match_data_message">Reset match data.\n Confirm?</string>
 
     <string name="google_nearby">Near By</string>
-    <string name="google_sign_in">Sign in</string>
+    <string name="sign_in">Sign in</string>
     <string name="account_sign_in">user@team</string>
     <string name="account_key_placeholder">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</string>
     <string name="sign_out">Sign out</string>
@@ -196,7 +196,7 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
     <string name="youtube">YouTube</string>
-    <string name="youtube_stream">Next Match</string>
+    <string name="youtube_stream">Next Matches</string>
 
     <string name="zoom_in">In</string>
     <string name="zoom_none">None</string>

@@ -6,11 +6,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.view.ContextThemeWrapper
+import android.view.Display
 import android.view.Menu
+import android.view.Surface
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -38,9 +41,9 @@ import it.lmqv.livematchcam.extensions.dpToPx
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.services.CounterService
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
-import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
-import it.lmqv.livematchcam.viewmodels.PiccoAccountViewModel
+import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
+import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
 import it.lmqv.livematchcam.views.AnimateImageVIew
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,8 +58,8 @@ interface INavigateDrawerActivity {
 
 class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
-    //private val googleAccountViewModel: GoogleAccountViewModel by viewModels()
-    private val accountViewModel: PiccoAccountViewModel by viewModels()
+    private val googleAccountViewModel: GoogleAccountViewModel by viewModels()
+    private val firebaseAccountViewModel: FirebaseAccountViewModel by viewModels()
     private val floatingActionsViewModel: FloatingActionsViewModel by viewModels()
 
     private lateinit var binding: ActivityMatchBinding
@@ -89,7 +92,9 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
         binding = ActivityMatchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        binding.tvVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
+
+        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (Build.VERSION.SDK_INT >= VERSION_CODES.R) {
@@ -144,19 +149,17 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
             }
         )
 
-        if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        /*if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
             overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.slide_in, R.anim.slide_out)
         } else {
             @Suppress("DEPRECATION")
             overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
-        }
-
-        binding.tvVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
+        }*/
 
         headerView = binding.matchNavView.getHeaderView(0)
         headerView.setOnClickListener {
-            //startActivity(Intent(this, AccountActivity::class.java))
-            startActivity(Intent(this, PiccoAccountActivity::class.java))
+            startActivity(Intent(this, AccountActivity::class.java))
+            //startActivity(Intent(this, FirebaseAccountActivity::class.java))
             binding.matchDrawerLayout.closeDrawers()
         }
 
@@ -202,10 +205,22 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                accountViewModel.authState.collectLatest { state ->
-                    if (accountViewModel.isLogged()) {
-                        var accountName = accountViewModel.accountName()
-                        toast(getString(R.string.logged_in, accountName))
+                firebaseAccountViewModel.authState.collectLatest { state ->
+                    if (firebaseAccountViewModel.isLogged()) {
+                        binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = true
+                    } else {
+                        binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = false
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                googleAccountViewModel.authState.collectLatest { state ->
+                    if (googleAccountViewModel.isLogged()) {
+                        var accountName = googleAccountViewModel.accountName()
+                        //toast(getString(R.string.logged_in, accountName))
 
                         YouTubeClientProvider
                             .initialize(this@MatchActivity, accountName) { message ->
@@ -214,20 +229,18 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                                 }
                             }
 
-                        binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = true
-                        //binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = true
-                        //binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = true
+                        binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = true
+                        binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = true
 
                         binding.matchNavView.getHeaderView(0)
                             .findViewById<TextView>(R.id.textAccountEmail).text = accountName
                     } else {
 
-                        binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = false
                         binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = false
                         binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = false
 
                         binding.matchNavView.getHeaderView(0)
-                            .findViewById<TextView>(R.id.textAccountEmail).text = getString(R.string.google_sign_in)
+                            .findViewById<TextView>(R.id.textAccountEmail).text = getString(R.string.sign_in)
                     }
                 }
             }
@@ -237,7 +250,8 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onResume() {
         super.onResume()
-        accountViewModel.updateLastSignedInAccount()
+        googleAccountViewModel.updateLastSignedInAccount()
+        firebaseAccountViewModel.updateLastSignedInAccount()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

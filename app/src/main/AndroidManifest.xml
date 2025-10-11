@@ -56,7 +56,7 @@ uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
             android:exported="true"
             android:immersive="true"
             android:launchMode="singleTask"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
             android:theme="@style/SplashScreen"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi">
@@ -72,7 +72,8 @@ uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
             android:exported="true"
             android:immersive="true"
             android:launchMode="singleTask"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi">
             <intent-filter>
@@ -86,33 +87,39 @@ uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
         <activity
             android:name=".StreamActivity"
             android:exported="true"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <activity
             android:name=".UVCStreamActivity"
             android:exported="true"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <activity
             android:name=".RemoteScoreActivity"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <activity
             android:name=".AccountActivity"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <activity
-            android:name=".PiccoAccountActivity"
-            android:screenOrientation="landscape"
+            android:name=".FirebaseAccountActivity"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <activity
             android:name=".YouTubeActivity"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
         <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">

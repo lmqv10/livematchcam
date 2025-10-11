@@ -85,7 +85,7 @@ class GoogleAccountViewModel(private val application: Application) : AndroidView
         val state = authState.value
         return when (state) {
             is AuthResult.Authenticated -> state.account.name
-            is AuthResult.Unauthenticated, is AuthResult.Error -> application.getString(R.string.google_sign_in)
+            is AuthResult.Unauthenticated, is AuthResult.Error -> application.getString(R.string.sign_in)
         }
     }
 

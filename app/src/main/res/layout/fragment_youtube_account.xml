@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="60dp"
+        android:contentDescription="@string/description_placeholder"
+        android:src="@drawable/youtube_logo"
+        android:layout_marginBottom="10dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/account"
+        android:textColor="@color/appColorSecondary" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <TextView
+            android:id="@+id/yt_account_name"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="8"
+            android:gravity="start|center_vertical"
+            android:padding="5dp"
+            android:textSize="18sp"
+            android:hint="@string/sign_in"
+            android:drawablePadding="5dp"
+            app:drawableStartCompat="@drawable/ic_youtube"
+        />
+
+        <ImageView
+            android:id="@+id/yt_sign_in"
+            style="@style/largeImageViewStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:layout_gravity="center_vertical"
+            android:padding="10dp"
+            android:src="@drawable/login"/>
+
+        <ImageView
+            android:visibility="gone"
+            style="@style/largeImageViewStyle"
+            android:id="@+id/yt_sign_out"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:padding="10dp"
+            android:src="@drawable/logout" />
+    </LinearLayout>
+
+</LinearLayout>

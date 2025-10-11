@@ -26,7 +26,7 @@ class SportInfoFragment : Fragment() {
     private lateinit var sportCollectJob : Job
 
     private val cardItems = listOf(
-        //CardItem(sport = Sports.SOCCER, description = R.string.sport_soccer, icon = R.drawable.sport_soccer),
+        CardItem(sport = Sports.SOCCER, description = R.string.sport_soccer, icon = R.drawable.sport_soccer),
         CardItem(sport = Sports.VOLLEY, description = R.string.sport_volley, icon = R.drawable.sport_volley)
     )
 

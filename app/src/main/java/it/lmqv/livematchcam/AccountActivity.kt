@@ -13,28 +13,30 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.core.widget.TextViewCompat
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import it.lmqv.livematchcam.databinding.ActivityAccountBinding
 import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.showEditStringDialog
+import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.fragments.YoutubeAccountFragment
+import it.lmqv.livematchcam.fragments.YoutubeFragment
+import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlin.getValue
 
 class AccountActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAccountBinding
-    private val googleAccountViewModel: GoogleAccountViewModel by viewModels()
+    private val firebaseAccountViewModel: FirebaseAccountViewModel by viewModels()
 
-    private val signInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            googleAccountViewModel.handleSignInResult(result.data)
-        }
-    }
+    private val youtubeAccountFragment = YoutubeAccountFragment.newInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +44,7 @@ class AccountActivity : AppCompatActivity() {
         binding = ActivityAccountBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -76,47 +78,49 @@ class AccountActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.arrow_left) // Opzionale: icona personalizzata
 
-        binding.googleSignIn.setOnClickListener { _ ->
-            signInLauncher.launch(googleAccountViewModel.getSignInIntent())
-        }
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.youtubeAccountContainer, youtubeAccountFragment)
+            .commit()
 
-        binding.googleSignOut.setOnClickListener { _ ->
-            googleAccountViewModel.signOut()
-        }
+        binding.accountName.setOnClickListener {
+            val sourceName = binding.accountName.text.toString()
+            showEditStringDialog(R.string.account, sourceName, arrayOf()) { updatedAccountName ->
+                binding.accountName.text = updatedAccountName
 
-        binding.accountKey.setOnClickListener {
-            val sourceKey = binding.accountKey.text.toString()
-            showEditStringDialog(R.string.account_key, sourceKey, arrayOf()) { updatedAccountKey ->
-                binding.accountKey.text = updatedAccountKey
-                googleAccountViewModel.setAccountKey(updatedAccountKey)
-                binding.accountKey.hideKeyboard()
+                if (updatedAccountName.isNotEmpty()) {
+                    firebaseAccountViewModel.signIn(updatedAccountName)
+                    toast(getString(R.string.logged_in, updatedAccountName))
+                } else {
+                    firebaseAccountViewModel.signOut {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            toast(getString(R.string.logged_out))
+                        }
+                    }
+                }
+
+                binding.accountName.hideKeyboard()
             }
         }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(
-                    googleAccountViewModel.authState,
-                    googleAccountViewModel.firebaseAccountKey
+                    firebaseAccountViewModel.authState,
+                    firebaseAccountViewModel.firebaseAccountKey
                 ) { state, accountKey -> Pair(state, accountKey) }
-                .collect { (state, accountKey) ->
+                    .collect { (state, accountKey) ->
+                        val accountName = firebaseAccountViewModel.accountName()
 
-                    val isLogged = googleAccountViewModel.isLogged()
-                    val accountDesc = googleAccountViewModel.accountDesc()
+                        binding.accountName.text = accountName ?: ""
+                        binding.accountKey.text = accountKey ?: ""
 
-                    binding.accountName.text = accountDesc
-                    binding.googleSignIn.isVisible = !isLogged
-                    binding.googleSignOut.isVisible = isLogged
-                    binding.authorizedAccount.isVisible = isLogged
+                        val isConnected =
+                            !accountName.isNullOrEmpty() && !accountKey.isNullOrEmpty()
 
-                    binding.accountKey.text = accountKey ?: ""
-
-                    val isConnected =
-                        !accountDesc.isNullOrEmpty() && !accountKey.isNullOrEmpty()
-
-                    val resIcon = if (isConnected) R.drawable.cloud_check else R.drawable.cloud_cross
-                    TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.accountKey, resIcon, 0, 0, 0)
-                }
+                        val resIcon = if (isConnected) R.drawable.cloud_check else R.drawable.cloud_cross
+                        TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.accountKey, resIcon, 0, 0, 0)
+                    }
             }
         }
     }

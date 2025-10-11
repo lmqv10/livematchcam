@@ -10,34 +10,32 @@ import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.isVisible
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import it.lmqv.livematchcam.databinding.ActivityPiccoAccountBinding
+import it.lmqv.livematchcam.databinding.ActivityFirebaseAccountBinding
 import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.viewmodels.PiccoAccountViewModel
+import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
-class PiccoAccountActivity : AppCompatActivity() {
+class FirebaseAccountActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityPiccoAccountBinding
-    private val piccoAccountViewModel: PiccoAccountViewModel by viewModels()
+    private lateinit var binding: ActivityFirebaseAccountBinding
+    private val firebaseAccountViewModel: FirebaseAccountViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityPiccoAccountBinding.inflate(layoutInflater)
+        binding = ActivityFirebaseAccountBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -77,10 +75,10 @@ class PiccoAccountActivity : AppCompatActivity() {
                 binding.accountName.text = updatedAccountName
 
                 if (updatedAccountName.isNotEmpty()) {
-                    piccoAccountViewModel.signIn(updatedAccountName)
+                    firebaseAccountViewModel.signIn(updatedAccountName)
                     toast(getString(R.string.logged_in, updatedAccountName))
                 } else {
-                    piccoAccountViewModel.signOut {
+                    firebaseAccountViewModel.signOut {
                         CoroutineScope(Dispatchers.Main).launch {
                             toast(getString(R.string.logged_out))
                         }
@@ -94,11 +92,11 @@ class PiccoAccountActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(
-                    piccoAccountViewModel.authState,
-                    piccoAccountViewModel.firebaseAccountKey
+                    firebaseAccountViewModel.authState,
+                    firebaseAccountViewModel.firebaseAccountKey
                 ) { state, accountKey -> Pair(state, accountKey) }
                 .collect { (state, accountKey) ->
-                    val accountName = piccoAccountViewModel.accountName()
+                    val accountName = firebaseAccountViewModel.accountName()
 
                     binding.accountName.text = accountName ?: ""
                     binding.accountKey.text = accountKey ?: ""

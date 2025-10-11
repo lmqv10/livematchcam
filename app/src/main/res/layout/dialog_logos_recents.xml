@@ -54,6 +54,7 @@
             app:layout_constraintStart_toStartOf="parent"/>
 
         <ImageView
+            android:visibility="gone"
             style="@style/defaultImageViewStyle"
             android:id="@+id/cancelButton"
             android:src="@drawable/ic_cancel"

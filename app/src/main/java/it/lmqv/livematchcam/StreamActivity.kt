@@ -1,6 +1,6 @@
 package it.lmqv.livematchcam
 
-import android.content.pm.ActivityInfo
+import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -10,16 +10,25 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import it.lmqv.livematchcam.fragments.CameraFragment
-import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
 
 class StreamActivity : AppCompatActivity() {
 
     private val cameraFragment = CameraFragment.getInstance()
 
+    private val displayListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) {}
+        override fun onDisplayRemoved(displayId: Int) {}
+
+        override fun onDisplayChanged(displayId: Int) {
+            val rotation = windowManager.defaultDisplay.rotation
+            cameraFragment.setRotation(rotation)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_live_stream)
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -46,6 +55,15 @@ class StreamActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             )
         }
+
+        val dm = getSystemService(DisplayManager::class.java)
+        dm.registerDisplayListener(displayListener, null)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val dm = getSystemService(DisplayManager::class.java)
+        dm.unregisterDisplayListener(displayListener)
     }
 
     override fun onStart() {

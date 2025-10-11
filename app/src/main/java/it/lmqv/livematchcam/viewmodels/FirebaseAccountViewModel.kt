@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class PiccoAccountViewModel(private val application: Application) : AndroidViewModel(application)  {
+class FirebaseAccountViewModel(private val application: Application) : AndroidViewModel(application)  {
 
     private var firebaseAccountRepository: AccountRepository = AccountRepository(application)
 

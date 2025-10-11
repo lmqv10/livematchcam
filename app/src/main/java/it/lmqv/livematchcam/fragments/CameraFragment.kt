@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
@@ -118,7 +119,6 @@ open class CameraFragment: Fragment(), ConnectChecker,
     private var job: Job? = null
 
     private var serverURI: String? = null
-
 
     //Bitrate adapter used to change the bitrate on fly depend of the bandwidth.
     private val bitrateAdapter = BitrateAdapter {
@@ -483,6 +483,18 @@ open class CameraFragment: Fragment(), ConnectChecker,
         genericStream.release()
         callback.remove()
         bannerBitmapRotator.stop()
+    }
+
+    fun setRotation(updatedRotation: Int) {
+        val rotate = when (updatedRotation) {
+            Surface.ROTATION_90 -> { rotation = 0; true }
+            Surface.ROTATION_270 -> { rotation = 180; true }
+            else -> { false }
+        }
+
+        if (rotate) {
+            recreate()
+        }
     }
 
     private fun prepare() {
