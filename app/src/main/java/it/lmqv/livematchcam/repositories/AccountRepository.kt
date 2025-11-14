@@ -26,9 +26,9 @@ class AccountRepository(private val context: Context) {
     // Lecco: "846af82686b3429a85e9a2d9a14ed79a"
     // Picco: "99261ce7d8b94fc395301f57d9e61ffd"
     val accountKey: Flow<String> = context.accountDataStore
-        .data.map { preferences -> "846af82686b3429a85e9a2d9a14ed79a" }
+        //.data.map { preferences -> "846af82686b3429a85e9a2d9a14ed79a" }
         //.data.map { preferences -> "99261ce7d8b94fc395301f57d9e61ffd" }
-        //.data.map { preferences -> preferences[ACCOUNT_KEY] ?: "" }
+        .data.map { preferences -> preferences[ACCOUNT_KEY] ?: "" }
 
     suspend fun setAccountKey(account: String?) {
         context.accountDataStore.edit { preferences -> preferences[ACCOUNT_KEY] = account ?: "" }

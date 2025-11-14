@@ -3,6 +3,7 @@ package it.lmqv.livematchcam
 import android.app.Application
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.repositories.MatchRepository
 
 class LiveMatchApp : Application() {
@@ -15,6 +16,8 @@ class LiveMatchApp : Application() {
             Log.d("FirebaseInit", "Firebase initialized successfully.")
         }
 
-        MatchRepository.init(this)
+        Logd("LiveMatchApp::MatchRepository.init()")
+        MatchRepository.init()
+        //MatchRepository.init(this)
     }
 }

@@ -27,6 +27,7 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -50,6 +51,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.getValue
+import androidx.core.content.edit
+import androidx.core.view.GravityCompat
+import coil.request.ImageRequest
+import it.lmqv.livematchcam.repositories.MatchRepository
 
 interface INavigateDrawerActivity {
     fun navigateAsDrawerSelection(@IdRes destinationId: Int)
@@ -67,6 +72,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
     private lateinit var headerView: View
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var navController: NavController
+    private var navControllerState: Bundle? = null
 
     private val topLevelsFragments = setOf(
         R.id.firebaseConfigurationFragment,
@@ -88,6 +94,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //toast("CameraFragment::onCreate")
 
         binding = ActivityMatchBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -124,31 +131,6 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
             supportActionBar!!.setDisplayShowTitleEnabled(false) // Hide default title if needed
         }
 
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
-
-        appBarConfiguration = AppBarConfiguration(
-            topLevelsFragments,
-            binding.matchDrawerLayout
-        )
-
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
-        NavigationUI.setupWithNavController(binding.matchNavView, navController)
-
-        onBackPressedDispatcher.addCallback(this,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    val currentId = navController.currentDestination?.id
-                    if (currentId in topLevelsFragments) {
-                        finish()
-                    } else {
-                        navController.popBackStack()
-                    }
-                }
-            }
-        )
-
         /*if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
             overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.slide_in, R.anim.slide_out)
         } else {
@@ -160,12 +142,10 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
         headerView.setOnClickListener {
             startActivity(Intent(this, AccountActivity::class.java))
             //startActivity(Intent(this, FirebaseAccountActivity::class.java))
-            binding.matchDrawerLayout.closeDrawers()
+            binding.matchDrawerLayout.post {
+                binding.matchDrawerLayout.closeDrawer(GravityCompat.START, true)
+            }
         }
-
-        requestPermissions()
-
-        startService(Intent(this, CounterService::class.java))
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -180,6 +160,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                                 ContextThemeWrapper(this@MatchActivity, R.style.AppTheme),
                                 null, 0, R.style.defaultImageViewStyle
                             ).apply {
+                                id = action.id
                                 setImageResource(action.iconRes)
                                 contentDescription = action.contentDescription
                                 setOnClickListener { action.onClick() }
@@ -216,11 +197,53 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
         }
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                MatchRepository.firebaseAccountData.collectLatest { firebaseAccountData ->
+                    var firebaseMenuItem = binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment)
+
+                    var title = firebaseAccountData.title
+                    if (title.isEmpty()) {
+                        firebaseMenuItem.title = ContextCompat.getString(this@MatchActivity, R.string.firebase_custom)
+                    } else {
+                        firebaseMenuItem.title = title
+                    }
+
+                    var sourceLogoUrl = firebaseAccountData.logoURL
+                    if (sourceLogoUrl.isEmpty()) {
+                        firebaseMenuItem.icon = ContextCompat.getDrawable(this@MatchActivity, R.drawable.ic_link)
+                    } else {
+                        val drawable = coil.ImageLoader(this@MatchActivity)
+                            .execute(
+                                ImageRequest.Builder(this@MatchActivity)
+                                    .data(sourceLogoUrl)
+                                    .placeholder(R.drawable.refresh)
+                                    .error(R.drawable.ic_link)
+                                    .allowHardware(false)
+                                    .build()
+                            )
+                            .drawable
+
+                        if (drawable != null) {
+                            firebaseMenuItem.icon = drawable
+                        }
+                    }
+
+                    var settings = firebaseAccountData.settings
+
+                    binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = settings.youTubeEnabled
+                    binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = settings.youTubeEnabled
+
+                    floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData, this@MatchActivity as? INavigateDrawerActivity)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 googleAccountViewModel.authState.collectLatest { state ->
                     if (googleAccountViewModel.isLogged()) {
                         var accountName = googleAccountViewModel.accountName()
-                        //toast(getString(R.string.logged_in, accountName))
+                        toast(getString(R.string.logged_in, accountName))
 
                         YouTubeClientProvider
                             .initialize(this@MatchActivity, accountName) { message ->
@@ -245,13 +268,121 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                 }
             }
         }
+
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
+//        try {
+
+        if (savedInstanceState != null) {
+            navControllerState = savedInstanceState.getBundle("nav_state")
+            navController.restoreState(navControllerState)
+        } else {
+
+            val prefs = getSharedPreferences("nav_state", MODE_PRIVATE)
+            val lastDest = prefs.getInt("last_dest", R.id.serverConfigurationFragment)
+
+            if (lastDest != R.id.serverConfigurationFragment) {
+                navController.navigate(lastDest)
+            }
+        }
+
+//        } catch (err: Exception) {
+//            err.printStackTrace()
+//            savedInstanceState?.clear()
+//            getSharedPreferences("nav_state", MODE_PRIVATE).edit {
+//                clear()
+//            }
+//        }
+
+        appBarConfiguration = AppBarConfiguration(
+            topLevelsFragments,
+            binding.matchDrawerLayout
+        )
+
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
+        NavigationUI.setupWithNavController(binding.matchNavView, navController)
+
+        binding.matchNavView.itemIconTintList = null
+        //binding.matchNavView.itemTextColor = null
+
+        binding.matchNavView.setNavigationItemSelectedListener { menuItem ->
+            val destinationId = menuItem.itemId
+            navController.navigate(destinationId, null,
+                NavOptions.Builder()
+                    .setPopUpTo(navController.graph.startDestinationId, false)
+                    .build())
+
+            getSharedPreferences("nav_state", MODE_PRIVATE)
+                .edit {
+                    putInt(
+                        "last_dest",
+                        navController.currentDestination?.id ?: R.id.serverConfigurationFragment
+                    )
+                }
+
+            binding.matchDrawerLayout.post {
+                binding.matchDrawerLayout.closeDrawer(GravityCompat.START, true)
+            }
+            true
+        }
+
+        onBackPressedDispatcher.addCallback(this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val currentId = navController.currentDestination?.id
+                    if (currentId in topLevelsFragments) {
+                        finish()
+                    } else {
+                        navController.popBackStack()
+                    }
+                }
+            }
+        )
+
+        requestPermissions()
+
+        startService(Intent(this, CounterService::class.java))
     }
 
+    override fun onStart() {
+        super.onStart()
+        //toast("CameraFragment::onStart")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        navControllerState = navController.saveState()
+
+//        getSharedPreferences("nav_state", MODE_PRIVATE)
+//            .edit {
+//                putInt(
+//                    "last_dest",
+//                    navController.currentDestination?.id ?: R.id.serverConfigurationFragment
+//                )
+//            }
+        //toast("MatchActivity::OnPause")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        navControllerState?.let {
+            outState.putBundle("nav_state", it)
+        }
+        //toast("MatchActivity::OnSaveInstanceState")
+    }
 
     override fun onResume() {
         super.onResume()
+        //toast("MatchActivity::onResume")
         googleAccountViewModel.updateLastSignedInAccount()
         firebaseAccountViewModel.updateLastSignedInAccount()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        //toast("MatchActivity::onDestroy")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

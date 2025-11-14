@@ -20,7 +20,7 @@ object MatchSyncStrategyRepository {
     fun initialize(context: Context, syncStrategy: SyncStrategy) {
         try {
             if (currentSyncStrategyKind == null || currentSyncStrategyKind != syncStrategy) {
-                //Logd("MatchViewModel::onSyncStrategy:: change strategy:: $currentSyncStrategyKind to $syncStrategy")
+                Logd("MatchViewModel::onSyncStrategy:: change strategy:: $currentSyncStrategyKind to $syncStrategy")
                 this.currentSyncStrategyKind = syncStrategy
 
                 this._syncStrategy.value.dispose()

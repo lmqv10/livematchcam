@@ -31,6 +31,7 @@ class MatchInfoFragment : Fragment() {
             .replace(R.id.sportsContainer, sportInfoFragment)
             .commit()
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,

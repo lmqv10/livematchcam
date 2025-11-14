@@ -1,15 +1,11 @@
 package it.lmqv.livematchcam.fragments
 
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +14,6 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
-import androidx.core.animation.doOnEnd
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -96,7 +91,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     val genericStream: GenericStream by lazy {
         GenericStream(requireContext(), this).apply {
-            //getGlInterface().autoHandleOrientation = true
+            getGlInterface().autoHandleOrientation = true
             getStreamClient().setBitrateExponentialFactor(0.5f)
         }
     }
@@ -195,16 +190,16 @@ open class CameraFragment: Fragment(), ConnectChecker,
             }
         }
 
-        launchOnStarted {
-            MatchRepository.isRealtimeDatabaseAvailable.collect { isAvailable ->
-                /*if (isAvailable) {
-                    binding.mainBannerContainer.visibility = View.VISIBLE
-                } else {
-                    binding.mainBannerContainer.visibility = View.GONE
-                }*/
-                binding.mainBannerContainer.visibility = View.GONE
-            }
-        }
+//        launchOnStarted {
+//            MatchRepository.isRealtimeDatabaseAvailable.collect { isAvailable ->
+//                /*if (isAvailable) {
+//                    binding.mainBannerContainer.visibility = View.VISIBLE
+//                } else {
+//                    binding.mainBannerContainer.visibility = View.GONE
+//                }*/
+//                binding.mainBannerContainer.visibility = View.GONE
+//            }
+//        }
 
         statusViewModel.angleDegrees.observe(viewLifecycleOwner) { degrees ->
             val offset = this.offsetDegreeHandler.getOffsetByDegrees(degrees)
@@ -429,6 +424,8 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //toast("CameraFragment::onCreate")
+
         genericStream.getStreamClient().setReTries(10)
 
         callback = object : OnBackPressedCallback(true) {
@@ -459,7 +456,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     override fun onStart() {
         super.onStart()
-
+        //toast("CameraFragment::onStart")
         prepare()
 
         this.scoreBoardFragment.setOnUpdate(this)
@@ -477,25 +474,36 @@ open class CameraFragment: Fragment(), ConnectChecker,
         _binding = null
     }
 
+    override fun onPause() {
+        super.onPause()
+        //toast("CameraFragment::OnPause")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //toast("CameraFragment::onResume")
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        //toast("CameraFragment::onDestroy")
         this.sportCollectJob.cancel()
         genericStream.release()
         callback.remove()
         bannerBitmapRotator.stop()
     }
 
-    fun setRotation(updatedRotation: Int) {
-        val rotate = when (updatedRotation) {
-            Surface.ROTATION_90 -> { rotation = 0; true }
-            Surface.ROTATION_270 -> { rotation = 180; true }
-            else -> { false }
-        }
-
-        if (rotate) {
-            recreate()
-        }
-    }
+//    fun setRotation(updatedRotation: Int) {
+//        val rotate = when (updatedRotation) {
+//            Surface.ROTATION_90 -> { rotation = 0; true }
+//            Surface.ROTATION_270 -> { rotation = 180; true }
+//            else -> { false }
+//        }
+//
+//        if (rotate) {
+//            recreate()
+//        }
+//    }
 
     private fun prepare() {
         val prepared = try {

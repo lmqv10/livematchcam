@@ -1,11 +1,9 @@
 package it.lmqv.livematchcam.strategies
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asFlow
 import it.lmqv.livematchcam.services.firebase.EventInfo
+import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
 import it.lmqv.livematchcam.services.firebase.Match
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import it.lmqv.livematchcam.services.firebase.Stream
 import java.util.UUID
 
 class NoMatchSyncStrategy() : IMatchSyncStrategy {
@@ -15,8 +13,8 @@ class NoMatchSyncStrategy() : IMatchSyncStrategy {
     override suspend fun initialize(
         onMatchUpdated: (Match) -> Unit,
         onEventInfoUpdated: (EventInfo) -> Unit,
-        onPresetKeys: (List<String>) -> Unit,
-        onRealtimeDatabaseAvailability: (Boolean) -> Unit
+        onFirebaseAccountData: (FirebaseAccountDataContract) -> Unit,
+        //onRealtimeDatabaseAvailability: (Boolean) -> Unit
     ) {
         //Logd("$instanceId: NoMatchSyncStrategy::initialize")
     }

@@ -13,7 +13,7 @@
     <string name="hint_home_team">AAA</string>
     <string name="hint_title">ddddd - dd mmmm yyyy - Ore: hh:mm</string>
     <string name="hint_away_team">BBB</string>
-    <string name="hint_protocol">rtmp://yourendpoint/streamname</string>
+    <string name="hint_protocol">rtmp://yourendpoint/…</string>
     <string name="hint_live">https://youtube.com/live/xxxxxxxxxxx</string>
     <string name="hint_key">xxxx-xxxx-xxxx-xxxx-xxxx</string>
     <string name="hint_sport">Sport</string>
@@ -26,11 +26,13 @@
     <string name="auto_zoom">auto zoom</string>
     <string name="streaming_url">Streaming URL</string>
     <string name="live_url">Live URL</string>
-    <string name="rtmp_server">RTMP Server</string>
-    <string name="server">Server Configuration</string>
+    <string name="rtmp_server">RTMP</string>
+    <string name="firebase_match">Stream Match</string>
+    <string name="server">Server</string>
     <string name="firebase_custom">Firebase</string>
     <string name="broadcasts">Add or Update Match</string>
     <string name="thumbnail">Thumbnail</string>
+    <string name="streamer">Streamer</string>
     <string name="account">Account</string>
     <string name="account_key">Account Key</string>
     <string name="match">Teams Configuration</string>
@@ -129,7 +131,7 @@
     <string name="live_name_placeholder">xxxxxxxxxxxxx</string>
     <string name="live_id_placeholder">xxxxxxxxxxxxx</string>
     <string name="server_placeholder">rtmp://&#8230;</string>
-    <string name="title_placeholder">Event Title</string>
+    <string name="title_placeholder">Title</string>
     <string name="label_event_title">Title</string>
     <string name="label_datetime">Date</string>
     <string name="date_placeholder">01/01/2025 10:00</string>

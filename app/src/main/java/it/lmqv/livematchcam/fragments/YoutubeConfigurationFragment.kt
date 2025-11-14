@@ -29,7 +29,7 @@ class YoutubeConfigurationFragment : Fragment() {
         fun newInstance() = YoutubeConfigurationFragment()
     }
 
-    private val actionsViewModel: FloatingActionsViewModel by activityViewModels()
+    private val floatingActionsViewModel: FloatingActionsViewModel by activityViewModels()
 
     private var _binding: FragmentYoutubeConfigurationBinding? = null
     private val binding get() = _binding!!
@@ -65,15 +65,16 @@ class YoutubeConfigurationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        actionsViewModel.setEmptyActions()
+        //floatingActionsViewModel.setEmptyActions()
 
         launchOnStarted {
-            MatchRepository.isRealtimeDatabaseAvailable.collect { isAvailable ->
-                if (isAvailable) {
-                    actionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
-                } else {
-                    actionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
-                }
+            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
+//                if (firebaseAccountData.settings.remoteScoreAvailable) {
+//                    floatingActionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
+//                } else {
+//                    floatingActionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
+//                }
+                floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData, (activity as? INavigateDrawerActivity))
             }
         }
 

@@ -11,22 +11,27 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import coil.request.ImageRequest
+import it.lmqv.livematchcam.MatchActivity
 import it.lmqv.livematchcam.databinding.ActivityAccountBinding
 import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.fragments.YoutubeAccountFragment
 import it.lmqv.livematchcam.fragments.YoutubeFragment
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlin.getValue
@@ -103,8 +108,30 @@ class AccountActivity : AppCompatActivity() {
             }
         }
 
+        binding.accountKey.setOnClickListener {
+            val sourceKey = binding.accountKey.text.toString()
+            showEditStringDialog(R.string.account_key, sourceKey, arrayOf()) { updatedAccountKey ->
+                binding.accountKey.text = updatedAccountKey
+                firebaseAccountViewModel.setAccountKey(updatedAccountKey)
+                binding.accountKey.hideKeyboard()
+            }
+        }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                MatchRepository.firebaseAccountData.collectLatest { firebaseAccountData ->
+                    var settings = firebaseAccountData.settings
+                    if (settings.youTubeEnabled) {
+                        binding.youtubeAccountContainer.visibility = View.VISIBLE
+                    } else {
+                        binding.youtubeAccountContainer.visibility = View.GONE
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 combine(
                     firebaseAccountViewModel.authState,
                     firebaseAccountViewModel.firebaseAccountKey

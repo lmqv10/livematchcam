@@ -57,11 +57,11 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 
         launchOnStarted {
             combine(
-                MatchRepository.isRealtimeDatabaseAvailable,
+                MatchRepository.firebaseAccountData,
                 MatchRepository.homePrimaryColorHex,
                 MatchRepository.homeLogo) {
-                    available, color, logo -> Triple(available, color, logo)
-            }.collect { (isAvailable, colorHex, logoURL) ->
+                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
+            }.collect { (firebaseAccountData, colorHex, logoURL) ->
                 //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
                 if (logoURL.isNotEmpty()) {
                     binding.homeColor.load(logoURL) {
@@ -74,7 +74,7 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
                 }
 
                 binding.homeColor.setOnClickListener {
-                    if (isAvailable) {
+                    if (firebaseAccountData.remoteScoreAvailable) {
                         requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
                             MatchRepository.setHomeLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()
@@ -90,11 +90,11 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 
         launchOnStarted {
             combine(
-                MatchRepository.isRealtimeDatabaseAvailable,
+                MatchRepository.firebaseAccountData,
                 MatchRepository.guestPrimaryColorHex,
                 MatchRepository.guestLogo) {
-                    available, color, logo -> Triple(available, color, logo)
-            }.collect { (isAvailable, colorHex, logoURL) ->
+                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
+            }.collect { (firebaseAccountData, colorHex, logoURL) ->
                 //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
                 if (logoURL.isNotEmpty()) {
                     binding.guestColor.load(logoURL) {
@@ -107,7 +107,7 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
                 }
 
                 binding.guestColor.setOnClickListener {
-                    if (isAvailable) {
+                    if (firebaseAccountData.remoteScoreAvailable) {
                         requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
                             MatchRepository.setGuestLogo(updatedTeamLogo)
                             requireActivity().hideSystemUI()

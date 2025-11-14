@@ -5,7 +5,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.factories.Sports
 
 object FirebaseDataService {
@@ -23,9 +22,9 @@ object FirebaseDataService {
         (isAdministrator || isAuthorizedUser)
         && currentAccountKey.isNotEmpty()
 
-    fun authenticateAccount(accountGoogle: String,
+    fun authenticateAccount(accountName: String,
                             accountKey: String,
-                            successCallback: (FirebaseAccount) -> Unit,
+                            successCallback: (FirebaseAccount, ) -> Unit,
                             failureCallback: () -> Unit) {
         if (accountKey.isNotEmpty()) {
             ////Logd("authenticateAccount:: $accountKey")
@@ -36,8 +35,8 @@ object FirebaseDataService {
 
                         if (firebaseAccount != null) {
                             ////Logd("account:: $account")
-                            isAdministrator = firebaseAccount.admin == accountGoogle
-                            isAuthorizedUser = firebaseAccount.users.contains(accountGoogle)
+                            isAdministrator = firebaseAccount.admin == accountName
+                            isAuthorizedUser = firebaseAccount.users.contains(accountName)
 
                             //Logd("isAdministrator $isAdministrator")
                             //Logd("isAuthorizedUser $isAuthorizedUser")

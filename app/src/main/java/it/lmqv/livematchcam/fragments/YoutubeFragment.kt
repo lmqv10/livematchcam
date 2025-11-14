@@ -14,8 +14,10 @@ import it.lmqv.livematchcam.adapters.BroadcastsAdapter
 import it.lmqv.livematchcam.adapters.LiveBroadcastItem
 import it.lmqv.livematchcam.services.auth.AuthResult
 import it.lmqv.livematchcam.databinding.FragmentYoutubeBinding
+import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showQRCode
+import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
@@ -55,6 +57,21 @@ class YoutubeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         launchOnStarted {
+            googleAccountViewModel.authState.collectLatest { state ->
+                when (state) {
+                    is AuthResult.Authenticated -> {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            youtubeViewModel.loadLiveStreams()
+                            youtubeViewModel.loadLiveBroadcast()
+                        }
+                    }
+                    is AuthResult.Error -> { }
+                    AuthResult.Unauthenticated -> { }
+                }
+            }
+        }
+
+        launchOnResumed {
             youtubeViewModel.liveBroadcasts.collect { liveBroadcasts ->
                 var liveBroadcastItems = liveBroadcasts
                     .map { x -> LiveBroadcastItem.EditBroadcast(x) }
@@ -74,28 +91,7 @@ class YoutubeFragment : Fragment() {
             }
         }
 
-        launchOnStarted {
-            googleAccountViewModel.authState.collectLatest { state ->
-                when (state) {
-                    is AuthResult.Authenticated -> {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            youtubeViewModel.loadLiveStreams()
-                            youtubeViewModel.loadLiveBroadcast()
-                        }
-                    }
-                    is AuthResult.Error -> { }
-                    AuthResult.Unauthenticated -> { }
-                }
-            }
-        }
-
-        launchOnStarted {
-            youtubeViewModel.liveURL.collect { liveURL ->
-                binding.liveUrl.text = liveURL
-            }
-        }
-
-        launchOnStarted {
+        launchOnResumed {
             youtubeViewModel.currentBroadcast.collect { currentBroadcast ->
                 if (currentBroadcast != null) {
                     //Logd("youtubeFragment:currentBroadcast.collect::${currentBroadcast.broadcastId}")
@@ -110,7 +106,13 @@ class YoutubeFragment : Fragment() {
             }
         }
 
-        launchOnStarted {
+        launchOnResumed {
+            youtubeViewModel.liveURL.collect { liveURL ->
+                binding.liveUrl.text = liveURL
+            }
+        }
+
+        launchOnResumed {
             MatchRepository.RTMPServerURI.collect { streamURL ->
                 binding.serverUrl.text = streamURL
             }
@@ -130,10 +132,10 @@ class YoutubeFragment : Fragment() {
         }
 
         binding.refresh.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                youtubeViewModel.loadLiveBroadcast()
+                CoroutineScope(Dispatchers.IO).launch {
+                    youtubeViewModel.loadLiveBroadcast()
+                }
             }
-        }
     }
 
     override fun onDestroyView() {

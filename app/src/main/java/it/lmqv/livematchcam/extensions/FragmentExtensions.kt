@@ -28,3 +28,17 @@ fun Fragment.launchOnStarted(delegate: suspend () -> Unit) {
         }
     }
 }
+fun Fragment.launchOnCreated(delegate: suspend () -> Unit) {
+    this.lifecycleScope.launch {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
+            delegate()
+        }
+    }
+}
+fun Fragment.launchOnResumed(delegate: suspend () -> Unit) {
+    this.lifecycleScope.launch {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            delegate()
+        }
+    }
+}

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="action_remote_control" type="id"/>
+    <item name="action_uvc_stream" type="id"/>
+    <item name="action_camera_stream" type="id"/>
+</resources>

@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import it.lmqv.livematchcam.adapters.BroadcastsAdapter
 import it.lmqv.livematchcam.extensions.convertBitmapToFIle
 import it.lmqv.livematchcam.extensions.createThumbnail
+import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.extensions.saveBitmapToFile
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.preferences.SchedulesPreferences
@@ -59,7 +60,7 @@ class YoutubeStreamFragment : Fragment() {
     }
 
     private val googleAccountViewModel: GoogleAccountViewModel by activityViewModels()
-    private val actionsViewModel: FloatingActionsViewModel by activityViewModels()
+    private val floatingActionsViewModel: FloatingActionsViewModel by activityViewModels()
 
     private lateinit var schedulesPrefs: SchedulesPreferences
     private lateinit var dateTimePickerDialog: DateTimePickerDialog
@@ -104,54 +105,22 @@ class YoutubeStreamFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.ivThumbnail.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            launcher.launch(intent)
-        }
-
-        binding.textTitle.setOnClickListener {
-            val sourceTitle = binding.textTitle.text.toString()
-            requireContext().showEditStringDialog(R.string.label_event_title, sourceTitle, arrayOf()) { updatedTitle ->
-                schedulesPrefs.set(title = updatedTitle)
-                this.hideKeyboard()
-            }
-        }
-
-        binding.ivDateTime.setOnClickListener {
-            dateTimePickerDialog.show()
-        }
-
-        binding.ivLogoHome.setOnClickListener {
-            var dialog = LogosRecentsDialog(requireContext(), "") { selectedLogoUrl ->
-                lifecycleScope.launch {
-                    schedulesPrefs.set(logoHome = selectedLogoUrl)
-                }
-            }
-            dialog.show()
-        }
-
-        binding.ivLogoGuest.setOnClickListener {
-            var dialog = LogosRecentsDialog(requireContext(), "") { selectedLogoUrl ->
-                lifecycleScope.launch {
-                    schedulesPrefs.set(logoGuest = selectedLogoUrl)
-                }
-            }
-            dialog.show()
-        }
-
-        binding.ivTitleClear.setOnClickListener {
-            schedulesPrefs.set(title = "")
-        }
-
-        binding.ivDeleteLiveStream.visibility = View.GONE
-        binding.ivCreateLiveStream.visibility = View.INVISIBLE
-        binding.ivRemoveBackground.visibility = View.GONE
-        binding.ivLogoHome.visibility = View.GONE
-        binding.ivLogoGuest.visibility = View.GONE
-        binding.ivDateTime.visibility = View.GONE
-
-
         launchOnStarted {
+            googleAccountViewModel.authState.collectLatest { state ->
+                when (state) {
+                    is AuthResult.Authenticated -> {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            youtubeViewModel.loadLiveStreams()
+                            youtubeViewModel.loadLiveBroadcast()
+                        }
+                    }
+                    is AuthResult.Error -> { }
+                    AuthResult.Unauthenticated -> { }
+                }
+            }
+        }
+
+        launchOnResumed {
             schedulesPrefs.currentKeyScheduleData.collect { currentSchedule ->
                 try {
                     val schedule = currentSchedule.value
@@ -224,7 +193,7 @@ class YoutubeStreamFragment : Fragment() {
             }
         }
 
-        launchOnStarted {
+        launchOnResumed {
             youtubeViewModel.liveStreams.collect { liveStreams ->
                 var liveStreamsItems = liveStreams
                     .map { x ->
@@ -248,7 +217,7 @@ class YoutubeStreamFragment : Fragment() {
             }
         }
 
-        launchOnStarted {
+        launchOnResumed {
             youtubeViewModel.liveBroadcasts.collect { liveBroadcasts ->
                 //Logd("== liveBroadcasts.collect: ${liveBroadcasts.size}")
 
@@ -282,22 +251,53 @@ class YoutubeStreamFragment : Fragment() {
             }
         }
 
-        launchOnStarted {
-            googleAccountViewModel.authState.collectLatest { state ->
-                when (state) {
-                    is AuthResult.Authenticated -> {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            youtubeViewModel.loadLiveStreams()
-                            youtubeViewModel.loadLiveBroadcast()
-                        }
-                    }
-                    is AuthResult.Error -> { }
-                    AuthResult.Unauthenticated -> { }
-                }
+        binding.ivThumbnail.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            launcher.launch(intent)
+        }
+
+        binding.textTitle.setOnClickListener {
+            val sourceTitle = binding.textTitle.text.toString()
+            requireContext().showEditStringDialog(R.string.label_event_title, sourceTitle, arrayOf()) { updatedTitle ->
+                schedulesPrefs.set(title = updatedTitle)
+                this.hideKeyboard()
             }
         }
 
-        actionsViewModel.setEmptyActions()
+        binding.ivDateTime.setOnClickListener {
+            dateTimePickerDialog.show()
+        }
+
+        binding.ivLogoHome.setOnClickListener {
+            var dialog = LogosRecentsDialog(requireContext(), "") { selectedLogoUrl ->
+                lifecycleScope.launch {
+                    schedulesPrefs.set(logoHome = selectedLogoUrl)
+                }
+            }
+            dialog.show()
+        }
+
+        binding.ivLogoGuest.setOnClickListener {
+            var dialog = LogosRecentsDialog(requireContext(), "") { selectedLogoUrl ->
+                lifecycleScope.launch {
+                    schedulesPrefs.set(logoGuest = selectedLogoUrl)
+                }
+            }
+            dialog.show()
+        }
+
+        binding.ivTitleClear.setOnClickListener {
+            schedulesPrefs.set(title = "")
+        }
+
+        binding.ivDeleteLiveStream.visibility = View.GONE
+        binding.ivCreateLiveStream.visibility = View.INVISIBLE
+        binding.ivRemoveBackground.visibility = View.GONE
+        binding.ivLogoHome.visibility = View.GONE
+        binding.ivLogoGuest.visibility = View.GONE
+        binding.ivDateTime.visibility = View.GONE
+
+        floatingActionsViewModel.setNoActions()
     }
 
     override fun onDestroyView() {

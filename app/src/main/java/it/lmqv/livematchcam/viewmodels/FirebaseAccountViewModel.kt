@@ -20,15 +20,26 @@ class FirebaseAccountViewModel(private val application: Application) : AndroidVi
     private val _authState = MutableStateFlow<AuthResult>(AuthResult.Unauthenticated)
     val authState: StateFlow<AuthResult> = _authState
 
-    private val _firebaseAccountKey = MutableStateFlow<String?>(null)
-    val firebaseAccountKey: StateFlow<String?> = _firebaseAccountKey.asStateFlow()
-//    fun setAccountKey(accountKey: String?) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            if (_firebaseAccountKey.value != accountKey) {
-//                firebaseAccountRepository.setAccountKey(accountKey)
-//            }
+//    private val _logoURL = MutableStateFlow<String>("")
+//    val logoURL: StateFlow<String> = _logoURL
+//    fun setLogo(updatedLogoUrl: String) {
+//        if (_logoURL.value != updatedLogoUrl) {
+//            _logoURL.value = updatedLogoUrl
 //        }
 //    }
+
+//    private val _title = MutableStateFlow<String>("")
+//    val title: StateFlow<String> = _title
+
+    private val _firebaseAccountKey = MutableStateFlow<String?>(null)
+    val firebaseAccountKey: StateFlow<String?> = _firebaseAccountKey.asStateFlow()
+    fun setAccountKey(accountKey: String?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (_firebaseAccountKey.value != accountKey) {
+                firebaseAccountRepository.setAccountKey(accountKey)
+            }
+        }
+    }
 
     fun updateLastSignedInAccount() {
         viewModelScope.launch(Dispatchers.IO) {

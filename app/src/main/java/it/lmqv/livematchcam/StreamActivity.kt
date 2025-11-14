@@ -9,24 +9,27 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.fragments.CameraFragment
 
 class StreamActivity : AppCompatActivity() {
 
     private val cameraFragment = CameraFragment.getInstance()
 
-    private val displayListener = object : DisplayManager.DisplayListener {
-        override fun onDisplayAdded(displayId: Int) {}
-        override fun onDisplayRemoved(displayId: Int) {}
-
-        override fun onDisplayChanged(displayId: Int) {
-            val rotation = windowManager.defaultDisplay.rotation
-            cameraFragment.setRotation(rotation)
-        }
-    }
+//    private val displayListener = object : DisplayManager.DisplayListener {
+//        override fun onDisplayAdded(displayId: Int) {}
+//        override fun onDisplayRemoved(displayId: Int) {}
+//
+//        override fun onDisplayChanged(displayId: Int) {
+//            //val rotation = this@StreamActivity.display.rotation
+//            val rotation = windowManager.defaultDisplay.rotation
+//            cameraFragment.setRotation(rotation)
+//        }
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //toast("StreamActivity::onCreate")
         setContentView(R.layout.activity_live_stream)
         //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
@@ -56,23 +59,35 @@ class StreamActivity : AppCompatActivity() {
             )
         }
 
-        val dm = getSystemService(DisplayManager::class.java)
-        dm.registerDisplayListener(displayListener, null)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        val dm = getSystemService(DisplayManager::class.java)
-        dm.unregisterDisplayListener(displayListener)
+        //val dm = getSystemService(DisplayManager::class.java)
+        //dm.registerDisplayListener(displayListener, null)
     }
 
     override fun onStart() {
         super.onStart()
+        //toast("StreamActivity::onStart")
 
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.container, cameraFragment)
             .commit()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //toast("StreamActivity::OnPause")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //toast("StreamActivity::onResume")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        //toast("StreamActivity::onDestroy")
+        //val dm = getSystemService(DisplayManager::class.java)
+        //dm.unregisterDisplayListener(displayListener)
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {

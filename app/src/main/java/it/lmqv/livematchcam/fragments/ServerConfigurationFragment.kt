@@ -12,6 +12,8 @@ import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.utils.SyncStrategy
 import it.lmqv.livematchcam.databinding.FragmentServerConfigurationBinding
+import it.lmqv.livematchcam.extensions.launchOnStarted
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.MatchSyncStrategyRepository
 import kotlin.getValue
 
@@ -22,7 +24,7 @@ class ServerConfigurationFragment : Fragment() {
         fun newInstance() = ServerConfigurationFragment()
     }
 
-    private val actionsViewModel: FloatingActionsViewModel by activityViewModels()
+    private val floatingActionsViewModel: FloatingActionsViewModel by activityViewModels()
 
     private var _binding: FragmentServerConfigurationBinding? = null
     private val binding get() = _binding!!
@@ -59,7 +61,17 @@ class ServerConfigurationFragment : Fragment() {
         val syncStrategy: SyncStrategy = args.syncStrategy
         MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)
 
-        actionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
+        //floatingActionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
+        launchOnStarted {
+            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
+//                if (firebaseAccountData.settings.remoteScoreAvailable) {
+//                    floatingActionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
+//                } else {
+//                    floatingActionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
+//                }
+                floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData, (activity as? INavigateDrawerActivity))
+            }
+        }
     }
     
     override fun onDestroyView() {

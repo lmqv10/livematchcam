@@ -13,13 +13,36 @@ data class FirebaseAccount(
     val logo: String = "",
     val users: List<String> = emptyList(),
     val channels: List<String> = emptyList(),
-    val matches: Map<String, Match> = emptyMap()
+    val matches: Map<String, Match> = emptyMap(),
+    val streams: List<Stream> = emptyList(),
+    var settings : Settings = Settings()
 )
 
-/*data class Event(
+data class Stream(
+    val description: String = "",
+    val logo: String = "",
+    val server: String = "",
+    val key: String = "",
+    val owners: List<String> = emptyList()
+)
+
+data class FirebaseAccountDataContract(
+    val logoURL: String = "",
+    val title: String = "",
+    val streams: List<Stream> = emptyList(),
+    val settings : Settings = Settings(),
+    val remoteScoreAvailable: Boolean = false
+)
+
+data class Settings(
+    val youTubeEnabled: Boolean = true,
+    val uvcEnabled: Boolean = false
+)
+
+/*TODO data class Event(
     val match: Match = Match(),
     var eventInfo: EventInfo = EventInfo()
-    TODO var banners: Banners = Banners()
+    var banners: Banners = Banners()
 )*/
 
 data class Match(

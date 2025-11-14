@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/serverConfigurationFragment"
-        android:icon="@drawable/ic_edit_server"
+        android:icon="@drawable/ic_server"
         android:title="@string/rtmp_server" />
 
     <item

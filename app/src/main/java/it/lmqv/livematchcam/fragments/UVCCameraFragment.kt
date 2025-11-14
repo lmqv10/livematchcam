@@ -73,7 +73,7 @@ class UVCCameraFragment: Fragment(), ConnectChecker,
         GenericStream(requireContext(), this,
             this.uvcSonyCameraSource,
             MicrophoneSource()).apply {
-            //getGlInterface().autoHandleOrientation = true
+            getGlInterface().autoHandleOrientation = true
             getStreamClient().setBitrateExponentialFactor(0.5f)
         }
     }

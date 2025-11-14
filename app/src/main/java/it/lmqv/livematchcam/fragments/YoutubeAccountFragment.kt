@@ -45,9 +45,9 @@ class YoutubeAccountFragment : Fragment() {
         fun newInstance() = YoutubeAccountFragment()
     }
 
-    private val youtubeViewModel: YoutubeViewModel by activityViewModels {
-        YoutubeViewModelFactory(requireActivity().application, YouTubeClientProvider.get())
-    }
+//    private val youtubeViewModel: YoutubeViewModel by activityViewModels {
+//        YoutubeViewModelFactory(requireActivity().application, YouTubeClientProvider.get())
+//    }
     private val googleAccountViewModel: GoogleAccountViewModel by activityViewModels()
 
     private val signInLauncher = registerForActivityResult(
@@ -83,11 +83,11 @@ class YoutubeAccountFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            combine(
+            /*combine(
                 googleAccountViewModel.authState,
                 googleAccountViewModel.firebaseAccountKey
-            ) { state, accountKey -> Pair(state, accountKey) }
-            .collect { (state, accountKey) ->
+            ) { state, accountKey -> Pair(state, accountKey) }*/
+            googleAccountViewModel.authState.collect { state ->
                 val isLogged = googleAccountViewModel.isLogged()
                 val accountDesc = googleAccountViewModel.accountDesc()
 

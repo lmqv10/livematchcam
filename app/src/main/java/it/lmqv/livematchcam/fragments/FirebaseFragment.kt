@@ -8,14 +8,23 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import coil.load
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.adapters.KeyDescriptionAdapter
+import it.lmqv.livematchcam.adapters.BaseStreamItem
+import it.lmqv.livematchcam.adapters.StreamsAdapter
 import it.lmqv.livematchcam.databinding.FragmentFirebaseBinding
-import it.lmqv.livematchcam.extensions.getItemPositionByKey
+import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.launchOnStarted
-import it.lmqv.livematchcam.repositories.KeyDescription
+import it.lmqv.livematchcam.extensions.showEditStringDialog
+import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import it.lmqv.livematchcam.viewmodels.FirebaseViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.getValue
+import kotlin.math.max
 
 class FirebaseFragment : Fragment() {
 
@@ -25,6 +34,7 @@ class FirebaseFragment : Fragment() {
     }
 
     private val firebaseViewModel: FirebaseViewModel by activityViewModels()
+    private val firebaseAccountViewModel: FirebaseAccountViewModel by activityViewModels()
 
     private var _binding: FragmentFirebaseBinding? = null
     private val binding get() = _binding!!
@@ -40,32 +50,38 @@ class FirebaseFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        launchOnStarted {
-//            firebaseViewModel.serverURI.collect { serverURI ->
-//                MatchRepository.setRTMPServer(serverURI)
-//            }
-//        }
-
         launchOnStarted {
-            firebaseViewModel.servers.collect { servers ->
-                //Logd("$servers")
-                binding.spinnerServers.adapter = KeyDescriptionAdapter(requireContext(), servers, R.drawable.ic_server)
+            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
+                var sourceLogoUrl = firebaseAccountData.logoURL
+                if (sourceLogoUrl.isEmpty()) {
+                    binding.accountLogo.setImageResource(R.drawable.ic_link)
+                } else {
+                    binding.accountLogo.load(sourceLogoUrl) {
+                        placeholder(R.drawable.refresh)
+                        error(R.drawable.ic_link)
+                        allowHardware(false)
+                    }
+                }
             }
         }
 
         launchOnStarted {
-            firebaseViewModel.keys.collect { keys ->
-                //Logd("$keys")
-                binding.spinnerKeys.adapter = KeyDescriptionAdapter(requireContext(), keys, R.drawable.ic_key)
-            }
-        }
+            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
+                var streams = firebaseAccountData.streams
+                var streamItems = streams
+                    .map { x -> BaseStreamItem.MatchStream(x.logo, x.description, x.server, x.key) }
 
-        launchOnStarted {
-            firebaseViewModel.currentServer.collect { currentServer ->
-                if (currentServer != null) {
-                    //Logd("$currentServer")
-                    val selectedPosition = binding.spinnerServers.adapter.getItemPositionByKey(currentServer)
-                    binding.spinnerServers.setSelection(selectedPosition)
+                binding.spinnerStreams.adapter = StreamsAdapter(requireActivity(), streamItems)
+                binding.spinnerStreams.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                        lifecycleScope.launch {
+                            val selectedStream =
+                                parent.getItemAtPosition(position) as BaseStreamItem.MatchStream
+                            firebaseViewModel.setCurrentServer(selectedStream.server)
+                            firebaseViewModel.setCurrentKey(selectedStream.key)
+                        }
+                    }
+                    override fun onNothingSelected(parent: AdapterView<*>) { }
                 }
             }
         }
@@ -73,33 +89,40 @@ class FirebaseFragment : Fragment() {
         launchOnStarted {
             firebaseViewModel.currentKey.collect { currentKey ->
                 if (currentKey != null) {
-                    //Logd("$currentKey")
-                    val selectedPosition = binding.spinnerKeys.adapter.getItemPositionByKey(currentKey)
-                    binding.spinnerKeys.setSelection(selectedPosition)
+                    var adapter = binding.spinnerStreams.adapter
+                    val itemsList = List(adapter.count) { index ->
+                        adapter.getItem(index)!! as BaseStreamItem.MatchStream
+                    }
+                    var selectedPosition = max(0, itemsList.indexOfFirst { it.key == currentKey })
+                    binding.spinnerStreams.setSelection(selectedPosition)
                 }
             }
         }
 
-        binding.spinnerServers.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                //Logd("spinnerServers $position")
-                lifecycleScope.launch {
-                    val selectedServer = (parent.getItemAtPosition(position) as KeyDescription).key
-                    firebaseViewModel.setCurrentServer(selectedServer)
-                }
+        launchOnStarted {
+            firebaseAccountViewModel.firebaseAccountKey.collect { accountKey ->
+                binding.accountName.text = firebaseAccountViewModel.accountName() ?: ""
             }
-            override fun onNothingSelected(parent: AdapterView<*>) { }
         }
 
-        binding.spinnerKeys.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                //Logd("spinnerKeys $position")
-                lifecycleScope.launch {
-                    val selectedKey = (parent.getItemAtPosition(position) as KeyDescription).key
-                    firebaseViewModel.setCurrentKey(selectedKey)
+        binding.accountName.setOnClickListener {
+            val sourceName = binding.accountName.text.toString()
+            requireContext().showEditStringDialog(R.string.account, sourceName, arrayOf()) { updatedAccountName ->
+                binding.accountName.text = updatedAccountName
+
+                if (updatedAccountName.isNotEmpty()) {
+                    firebaseAccountViewModel.signIn(updatedAccountName)
+                    toast(getString(R.string.logged_in, updatedAccountName))
+                } else {
+                    firebaseAccountViewModel.signOut {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            toast(getString(R.string.logged_out))
+                        }
+                    }
                 }
+
+                binding.accountName.hideKeyboard()
             }
-            override fun onNothingSelected(parent: AdapterView<*>) { }
         }
     }
 

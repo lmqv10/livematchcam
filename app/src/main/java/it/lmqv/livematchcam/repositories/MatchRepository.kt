@@ -1,8 +1,8 @@
 package it.lmqv.livematchcam.repositories
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.toArgbHex
 import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.services.firebase.IScore
@@ -10,6 +10,7 @@ import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.strategies.IMatchSyncStrategy
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.services.firebase.EventInfo
+import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
 import it.lmqv.livematchcam.services.firebase.ScoreFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,17 +23,17 @@ import java.util.UUID
 object MatchRepository {
     val instanceId: String? = UUID.randomUUID().toString()
 
-    fun init(context: Context) {
+    fun init() {
         //Logd("$instanceId :: MatchRepository::init::start")
         CoroutineScope(Dispatchers.IO).launch {
             MatchSyncStrategyRepository.syncStrategy.collectLatest { strategy ->
-                //Logd("$instanceId :: MatchRepository::onSyncStrategy::initialize >> ${strategy}")
+                Logd("$instanceId :: MatchRepository::onSyncStrategy::initialize >> ${strategy}")
                 syncStrategy = strategy
                 syncStrategy.initialize(
                     onMatchUpdated = { match -> notifyMatchChanges(match) },
                     onEventInfoUpdated = { eventInfo -> notifyEventInfoChanges(eventInfo) },
-                    onPresetKeys = { presetKeys -> _presetKeys.value = presetKeys },
-                    onRealtimeDatabaseAvailability = { availability -> _isRealtimeDatabaseAvailable.value = availability }
+                    onFirebaseAccountData = { firebaseAccountDataContract -> _firebaseAccountData.value = firebaseAccountDataContract },
+                    //onRealtimeDatabaseAvailability = { availability -> _isRealtimeDatabaseAvailable.value = availability }
                 )
                 //Logd("$instanceId :: MatchRepository::onSyncStrategy::isRealtimeDatabaseAvailable >> ${isRealtimeDatabaseAvailable.last()}")
             }
@@ -45,11 +46,11 @@ object MatchRepository {
     private var currentMatch = Match()
     private var currentEventInfo = EventInfo()
 
-    private var _isRealtimeDatabaseAvailable = MutableStateFlow<Boolean>(false)
-    var isRealtimeDatabaseAvailable = _isRealtimeDatabaseAvailable
+//    private var _isRealtimeDatabaseAvailable = MutableStateFlow<Boolean>(false)
+//    var isRealtimeDatabaseAvailable = _isRealtimeDatabaseAvailable
 
-    private var _presetKeys = MutableStateFlow<List<String>>(emptyList())
-    var presetKeys = _presetKeys
+    private var _firebaseAccountData = MutableStateFlow<FirebaseAccountDataContract>(FirebaseAccountDataContract())
+    var firebaseAccountData: StateFlow<FirebaseAccountDataContract>  = _firebaseAccountData
 
     private val _homeTeam = MutableLiveData(currentMatch.homeTeam)
     val homeTeam: LiveData<String> = _homeTeam

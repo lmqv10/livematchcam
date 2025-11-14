@@ -8,10 +8,7 @@ import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.services.auth.AuthResult
 import it.lmqv.livematchcam.repositories.AccountRepository
 import it.lmqv.livematchcam.services.auth.GoogleAuthService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -31,7 +28,7 @@ import kotlinx.coroutines.launch
 
 class GoogleAccountViewModel(private val application: Application) : AndroidViewModel(application)  {
 
-    private var firebaseAccountRepository: AccountRepository = AccountRepository(application)
+    //private var firebaseAccountRepository: AccountRepository = AccountRepository(application)
     private val authService = GoogleAuthService(application)
 
     val authState: StateFlow<AuthResult> = authService.authState
@@ -61,15 +58,15 @@ class GoogleAccountViewModel(private val application: Application) : AndroidView
         }
     }*/
 
-    private val _firebaseAccountKey = MutableStateFlow<String?>(null)
-    val firebaseAccountKey: StateFlow<String?> = _firebaseAccountKey.asStateFlow()
-    fun setAccountKey(accountKey: String?) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (_firebaseAccountKey.value != accountKey) {
-                firebaseAccountRepository.setAccountKey(accountKey)
-            }
-        }
-    }
+//    private val _firebaseAccountKey = MutableStateFlow<String?>(null)
+//    val firebaseAccountKey: StateFlow<String?> = _firebaseAccountKey.asStateFlow()
+//    fun setAccountKey(accountKey: String?) {
+//        viewModelScope.launch(Dispatchers.IO) {
+//            if (_firebaseAccountKey.value != accountKey) {
+//                firebaseAccountRepository.setAccountKey(accountKey)
+//            }
+//        }
+//    }
 
     fun isLogged() : Boolean
     {
@@ -106,27 +103,27 @@ class GoogleAccountViewModel(private val application: Application) : AndroidView
                         var name = state.account.name
                         //val name = account?.name
                         //_account.value = account
-                        firebaseAccountRepository.setAccountName(name)
+                        //firebaseAccountRepository.setAccountName(name)
                     }
                     is AuthResult.Unauthenticated -> {
                         //_account.value = null
-                        firebaseAccountRepository.setAccountName(null)
+                        //firebaseAccountRepository.setAccountName(null)
                     }
                     is AuthResult.Error -> {
                         //_account.value = null
-                        firebaseAccountRepository.setAccountName(null)
+                        //firebaseAccountRepository.setAccountName(null)
                     }
                 }
             }
         }
 
-        viewModelScope.launch {
-            firebaseAccountRepository.accountKey.collect { accountKey ->
-                if (_firebaseAccountKey.value != accountKey) {
-                    _firebaseAccountKey.value = accountKey
-                }
-            }
-        }
+//        viewModelScope.launch {
+//            firebaseAccountRepository.accountKey.collect { accountKey ->
+//                if (_firebaseAccountKey.value != accountKey) {
+//                    _firebaseAccountKey.value = accountKey
+//                }
+//            }
+//        }
     }
 
 }

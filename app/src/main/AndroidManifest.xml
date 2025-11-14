@@ -110,12 +110,12 @@ uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
-        <activity
-            android:name=".FirebaseAccountActivity"
-            android:screenOrientation="sensorLandscape"
-            android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
-            tools:ignore="DiscouragedApi" />
+<!--        <activity-->
+<!--            android:name=".FirebaseAccountActivity"-->
+<!--            android:screenOrientation="sensorLandscape"-->
+<!--            android:configChanges="orientation|screenSize"-->
+<!--            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"-->
+<!--            tools:ignore="DiscouragedApi" />-->
         <activity
             android:name=".YouTubeActivity"
             android:screenOrientation="sensorLandscape"

@@ -51,8 +51,9 @@ https://i.pinimg.com/originals/d8/6d/81/d86d816c89cc355af1bd2ef96ca96d62.png
 https://cdn.verovolley.com/wp-content/uploads/elementor/thumbs/cropped-logo-vero-volley-png-quadrato-1-qgzs9a903nsl3fis33qoyl3bwl7z2ugng6i5acp60o.png
 https://live2sport.com/image/Volleyball_W_Italy_Picco_Lecco.png
 https://www.nowpadova.com/images/2020/01/23/AVIST_large.jpg
-
-
+https://www.pallavolopicco.it/wp-content/uploads/2024/01/SCRITTA-PICCO-SITO.jpg
+https://www.pallavolopicco.it/wp-content/uploads/2024/01/LOGO-PICCO-PNG.png
+https://www.pallavolopicco.it/wp-content/uploads/2024/01/LOGO-PICCO-PNG.png
 
 /*navController.addOnDestinationChangedListener { controller, destination, arguments ->
     try {
