@@ -36,7 +36,7 @@ data class FirebaseAccountDataContract(
 
 data class Settings(
     val youTubeEnabled: Boolean = true,
-    val uvcEnabled: Boolean = false
+    val uvcEnabled: Boolean = true
 )
 
 /*TODO data class Event(

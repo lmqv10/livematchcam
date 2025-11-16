@@ -29,8 +29,6 @@ class YoutubeConfigurationFragment : Fragment() {
         fun newInstance() = YoutubeConfigurationFragment()
     }
 
-    private val floatingActionsViewModel: FloatingActionsViewModel by activityViewModels()
-
     private var _binding: FragmentYoutubeConfigurationBinding? = null
     private val binding get() = _binding!!
 
@@ -64,19 +62,6 @@ class YoutubeConfigurationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        //floatingActionsViewModel.setEmptyActions()
-
-        launchOnStarted {
-            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
-//                if (firebaseAccountData.settings.remoteScoreAvailable) {
-//                    floatingActionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
-//                } else {
-//                    floatingActionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
-//                }
-                floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData, (activity as? INavigateDrawerActivity))
-            }
-        }
 
         syncScope.launch {
             try {

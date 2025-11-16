@@ -73,13 +73,9 @@ class FirebaseAccountViewModel(private val application: Application) : AndroidVi
         return authState.value is AuthResult.Authenticated
     }
 
-    fun accountDesc() : String?
+    fun hasAccountKey() : Boolean
     {
-        val state = authState.value
-        return when (state) {
-            is AuthResult.Authenticated -> state.account.name
-            is AuthResult.Unauthenticated, is AuthResult.Error -> application.getString(R.string.account_sign_in)
-        }
+        return _firebaseAccountKey.value?.isNotEmpty() ?: false
     }
 
     fun accountName() : String?

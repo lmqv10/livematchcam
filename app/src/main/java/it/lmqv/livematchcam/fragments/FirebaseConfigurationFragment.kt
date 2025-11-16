@@ -11,6 +11,8 @@ import it.lmqv.livematchcam.INavigateDrawerActivity
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentFirebaseConfigurationBinding
 import it.lmqv.livematchcam.extensions.launchOnCreated
+import it.lmqv.livematchcam.extensions.launchOnResumed
+import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.utils.SyncStrategy
@@ -23,8 +25,6 @@ class FirebaseConfigurationFragment : Fragment() {
         @JvmStatic
         fun newInstance() = FirebaseConfigurationFragment()
     }
-
-    private val floatingActionsViewModel: FloatingActionsViewModel by activityViewModels()
 
     private var _binding: FragmentFirebaseConfigurationBinding? = null
     private val binding get() = _binding!!
@@ -61,14 +61,19 @@ class FirebaseConfigurationFragment : Fragment() {
         val syncStrategy: SyncStrategy = args.syncStrategy
         MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)
 
-        launchOnCreated {
+        launchOnResumed {
             MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
                 var streams = firebaseAccountData.streams
                 if (streams.isEmpty()) {
-                    floatingActionsViewModel.setNoActions()
+                    childFragmentManager
+                        .beginTransaction()
+                        .hide(matchInfoFragment)
+                        .commit()
                 } else {
-                    //floatingActionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
-                    floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData, (activity as? INavigateDrawerActivity))
+                    childFragmentManager
+                        .beginTransaction()
+                        .show(matchInfoFragment)
+                        .commit()
                 }
             }
         }

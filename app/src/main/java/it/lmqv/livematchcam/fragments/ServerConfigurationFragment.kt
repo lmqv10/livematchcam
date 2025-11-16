@@ -5,15 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
-import it.lmqv.livematchcam.INavigateDrawerActivity
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.utils.SyncStrategy
 import it.lmqv.livematchcam.databinding.FragmentServerConfigurationBinding
-import it.lmqv.livematchcam.extensions.launchOnStarted
-import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.MatchSyncStrategyRepository
 import kotlin.getValue
 
@@ -23,8 +18,6 @@ class ServerConfigurationFragment : Fragment() {
         @JvmStatic
         fun newInstance() = ServerConfigurationFragment()
     }
-
-    private val floatingActionsViewModel: FloatingActionsViewModel by activityViewModels()
 
     private var _binding: FragmentServerConfigurationBinding? = null
     private val binding get() = _binding!!
@@ -60,18 +53,6 @@ class ServerConfigurationFragment : Fragment() {
         val args: ServerConfigurationFragmentArgs by navArgs()
         val syncStrategy: SyncStrategy = args.syncStrategy
         MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)
-
-        //floatingActionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
-        launchOnStarted {
-            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
-//                if (firebaseAccountData.settings.remoteScoreAvailable) {
-//                    floatingActionsViewModel.setWithRemoteScoreActions((activity as? INavigateDrawerActivity))
-//                } else {
-//                    floatingActionsViewModel.setOnlyStreamActions((activity as? INavigateDrawerActivity))
-//                }
-                floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData, (activity as? INavigateDrawerActivity))
-            }
-        }
     }
     
     override fun onDestroyView() {

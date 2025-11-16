@@ -1,5 +1,6 @@
 
 STEP 2
+- Gestione ACCOUNT/MENU/FRAGMENT ...
 - Migliorare la vista dell'Account UI
 - Migliorare la vista remote control
 - Gestione del secondo colore di maglietta

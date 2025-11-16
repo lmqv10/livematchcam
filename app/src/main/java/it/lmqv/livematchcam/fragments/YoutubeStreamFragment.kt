@@ -30,7 +30,6 @@ import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.services.auth.AuthResult
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
-import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -60,7 +59,6 @@ class YoutubeStreamFragment : Fragment() {
     }
 
     private val googleAccountViewModel: GoogleAccountViewModel by activityViewModels()
-    private val floatingActionsViewModel: FloatingActionsViewModel by activityViewModels()
 
     private lateinit var schedulesPrefs: SchedulesPreferences
     private lateinit var dateTimePickerDialog: DateTimePickerDialog
@@ -124,9 +122,6 @@ class YoutubeStreamFragment : Fragment() {
             schedulesPrefs.currentKeyScheduleData.collect { currentSchedule ->
                 try {
                     val schedule = currentSchedule.value
-                    //toast("currentSchedule.key ${currentSchedule.key}")
-                    //Logd("currentSchedule: $schedule")
-
                     dateTimePickerDialog.setDate(schedule.scheduleStartTime)
 
                     var thumbnailAssets = schedule.toThumbnailAsset(requireContext())
@@ -219,8 +214,6 @@ class YoutubeStreamFragment : Fragment() {
 
         launchOnResumed {
             youtubeViewModel.liveBroadcasts.collect { liveBroadcasts ->
-                //Logd("== liveBroadcasts.collect: ${liveBroadcasts.size}")
-
                 var broadcastItems = liveBroadcasts
                     .sortedBy { x -> x.snippet.scheduledStartTime.value }
                     .filter { x -> x.status.lifeCycleStatus == "ready" }
@@ -235,7 +228,7 @@ class YoutubeStreamFragment : Fragment() {
                 binding.spinnerBroadcast.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                         val broadcastItem = parent.getItemAtPosition(position) as LiveBroadcastItem
-                        //toast("== onItemSelectedListener $broadcastItem")
+
                         when (broadcastItem) {
                             is LiveBroadcastItem.EditBroadcast -> {
                                 schedulesPrefs.load(broadcastItem)
@@ -296,8 +289,6 @@ class YoutubeStreamFragment : Fragment() {
         binding.ivLogoHome.visibility = View.GONE
         binding.ivLogoGuest.visibility = View.GONE
         binding.ivDateTime.visibility = View.GONE
-
-        floatingActionsViewModel.setNoActions()
     }
 
     override fun onDestroyView() {
@@ -361,7 +352,6 @@ class YoutubeStreamFragment : Fragment() {
                     .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
                     .create()
                     .show()
-                //}
             }
         } else {
             binding.ivDeleteLiveStream.setOnClickListener { }

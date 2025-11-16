@@ -4,16 +4,12 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.view.ContextThemeWrapper
-import android.view.Display
 import android.view.Menu
-import android.view.Surface
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -55,6 +51,7 @@ import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import coil.request.ImageRequest
 import it.lmqv.livematchcam.repositories.MatchRepository
+import kotlinx.coroutines.flow.combine
 
 interface INavigateDrawerActivity {
     fun navigateAsDrawerSelection(@IdRes destinationId: Int)
@@ -75,8 +72,8 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
     //private var navControllerState: Bundle? = null
 
     private val topLevelsFragments = setOf(
-        R.id.firebaseConfigurationFragment,
         R.id.serverConfigurationFragment,
+        R.id.firebaseConfigurationFragment,
         R.id.youtubeConfigurationFragment,
         R.id.youtubeStreamFragment
     )
@@ -101,6 +98,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
         binding.tvVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
 
+        floatingActionsViewModel.setNavigator(this)
         //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -151,10 +149,10 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 floatingActionsViewModel.actions.collect { actions ->
                     var actionsContainer = binding.floatingActionContainer
+                    actionsContainer.visibility = View.GONE
                     actionsContainer.removeAllViews()
-                    if (actions.isNotEmpty()) {
-                        actionsContainer.visibility = View.VISIBLE
 
+                    if (actions.isNotEmpty()) {
                         actions.forEachIndexed { index, action ->
                             val imageView = AnimateImageVIew(
                                 ContextThemeWrapper(this@MatchActivity, R.style.AppTheme),
@@ -177,8 +175,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                                 actionsContainer.addView(space)
                             }
                         }
-                    } else {
-                        actionsContainer.visibility = View.GONE
+                        actionsContainer.visibility = View.VISIBLE
                     }
                 }
             }
@@ -186,19 +183,28 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                firebaseAccountViewModel.authState.collectLatest { state ->
-                    if (firebaseAccountViewModel.isLogged()) {
-                        binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = true
-                    } else {
-                        binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = false
-                    }
-                }
-            }
-        }
+                combine(
+                    MatchRepository.firebaseAccountData,
+                    firebaseAccountViewModel.authState
+                ) { firebaseAccountData, authState -> Pair(firebaseAccountData, authState) }
+                    .collectLatest { (firebaseAccountData, authState) ->
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                MatchRepository.firebaseAccountData.collectLatest { firebaseAccountData ->
+                    //firebaseAccountViewModel.authState.collectLatest { state ->
+//                    var streams = firebaseAccountData.streams
+//                    var isAvailable = firebaseAccountViewModel.isLogged() && streams.isNotEmpty()
+//
+//                    binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = isAvailable
+//
+//                    binding.floatingActionContainer.isEnabled = isAvailable
+//                    binding.floatingActionContainer.isFocusable = isAvailable
+//                    binding.floatingActionContainer.isClickable = isAvailable
+//                }
+//            }
+//        }
+//
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.CREATED) {
+//                MatchRepository.firebaseAccountData.collectLatest { firebaseAccountData ->
                     var firebaseMenuItem = binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment)
 
                     var title = firebaseAccountData.title
@@ -229,11 +235,13 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                     }
 
                     var settings = firebaseAccountData.settings
+                    val isLogged = googleAccountViewModel.isLogged()
+                    binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = settings.youTubeEnabled && isLogged
+                    binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = settings.youTubeEnabled && isLogged
 
-                    binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = settings.youTubeEnabled
-                    binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = settings.youTubeEnabled
+                    binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = firebaseAccountViewModel.hasAccountKey()
 
-                    floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData, this@MatchActivity as? INavigateDrawerActivity)
+                    floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData)
                 }
             }
         }
@@ -273,16 +281,14 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-//        if (savedInstanceState != null) {
-//            navControllerState = savedInstanceState.getBundle("nav_state")
-//            navController.restoreState(navControllerState)
-//        } else {
         if (savedInstanceState == null) {
             val prefs = getSharedPreferences("nav_state", MODE_PRIVATE)
             val lastDest = prefs.getInt("last_dest", R.id.serverConfigurationFragment)
 
-            if (lastDest != R.id.serverConfigurationFragment) {
+            if (navController.graph.findNode(lastDest) != null &&
+                lastDest != R.id.serverConfigurationFragment) {
                 navController.navigate(lastDest)
+                floatingActionsViewModel.setMenuItem(lastDest)
             }
         }
 
@@ -299,6 +305,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
         binding.matchNavView.setNavigationItemSelectedListener { menuItem ->
             val destinationId = menuItem.itemId
+
             navController.navigate(destinationId, null,
                 NavOptions.Builder()
                     .setPopUpTo(navController.graph.startDestinationId, false)
@@ -314,7 +321,9 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
             binding.matchDrawerLayout.post {
                 binding.matchDrawerLayout.closeDrawer(GravityCompat.START, true)
+                floatingActionsViewModel.setMenuItem(destinationId)
             }
+
             true
         }
 
