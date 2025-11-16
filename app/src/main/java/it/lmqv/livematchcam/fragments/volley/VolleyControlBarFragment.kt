@@ -50,47 +50,76 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+//        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
+//            binding.homeTeam.text = homeTeam
+//        }
+//        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
+//            binding.awayTeam.text = guestTeam
+//        }
         MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
-            binding.homeTeam.text = homeTeam
+            binding.homeTeamControl.setTeamName(homeTeam)
         }
         MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
-            binding.awayTeam.text = guestTeam
+            binding.guestTeamControl.setTeamName(guestTeam)
         }
 
+//        launchOnStarted {
+//            combine(
+//                MatchRepository.homePrimaryColorHex,
+//                MatchRepository.homeLogo) {
+//                    color, logo -> Pair(color, logo)
+//            }.collect { (colorHex, logoURL) ->
+//                if (logoURL.isNotEmpty()) {
+//                    binding.homeColor.load(logoURL) {
+//                        placeholder(R.drawable.shirt_white)
+//                        error(R.drawable.shirt_white)
+//                        allowHardware(false)
+//                    }
+//                } else {
+//                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
+//                }
+//            }
+//        }
+
+//        launchOnStarted {
+//            combine(
+//                MatchRepository.guestPrimaryColorHex,
+//                MatchRepository.guestLogo) {
+//                    color, logo -> Pair(color, logo)
+//            }.collect { (colorHex, logoURL) ->
+//                //binding.awayColor.isClickable = logoURL.isNullOrEmpty()
+//                if (logoURL.isNotEmpty()) {
+//                    binding.awayColor.load(logoURL) {
+//                        placeholder(R.drawable.shirt_white)
+//                        error(R.drawable.shirt_white)
+//                        allowHardware(false)
+//                    }
+//                } else {
+//                    binding.awayColor.setShirtByColor(colorHex.toColorInt())
+//                }
+//            }
+//        }
+
+
         launchOnStarted {
-            combine(
-                MatchRepository.homePrimaryColorHex,
-                MatchRepository.homeLogo) {
-                    color, logo -> Pair(color, logo)
-            }.collect { (colorHex, logoURL) ->
-                if (logoURL.isNotEmpty()) {
-                    binding.homeColor.load(logoURL) {
-                        placeholder(R.drawable.shirt_white)
-                        error(R.drawable.shirt_white)
-                        allowHardware(false)
-                    }
-                } else {
-                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
-                }
+            MatchRepository.homeLogo.collect { logoUrl ->
+                binding.homeTeamControl.setLogoUrl(logoUrl)
+            }
+        }
+        launchOnStarted {
+            MatchRepository.guestLogo.collect { logoUrl ->
+                binding.guestTeamControl.setLogoUrl(logoUrl)
             }
         }
 
         launchOnStarted {
-            combine(
-                MatchRepository.guestPrimaryColorHex,
-                MatchRepository.guestLogo) {
-                    color, logo -> Pair(color, logo)
-            }.collect { (colorHex, logoURL) ->
-                //binding.awayColor.isClickable = logoURL.isNullOrEmpty()
-                if (logoURL.isNotEmpty()) {
-                    binding.awayColor.load(logoURL) {
-                        placeholder(R.drawable.shirt_white)
-                        error(R.drawable.shirt_white)
-                        allowHardware(false)
-                    }
-                } else {
-                    binding.awayColor.setShirtByColor(colorHex.toColorInt())
-                }
+            MatchRepository.homePrimaryColorHex.collect { primaryColor ->
+                binding.homeTeamControl.setPrimaryColor(primaryColor.toColorInt())
+            }
+        }
+        launchOnStarted {
+            MatchRepository.guestPrimaryColorHex.collect { primaryColor ->
+                binding.guestTeamControl.setPrimaryColor(primaryColor.toColorInt())
             }
         }
 
@@ -166,33 +195,53 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
             volleyScoreViewModel.incrementAwayScore()
         }
 
-        binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
-                MatchRepository.setHomePrimaryColorHex(color)
-            }
+        binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
+            MatchRepository.setHomeTeam(updatedTeamName)
+        }
+        binding.homeTeamControl.onLogoURLChanged = { updatedLogoUrl ->
+            MatchRepository.setHomeLogo(updatedLogoUrl)
+        }
+        binding.homeTeamControl.onPrimaryColorsChanged = { updatedColor ->
+            MatchRepository.setHomePrimaryColorHex(updatedColor)
         }
 
-        binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
-                MatchRepository.setGuestPrimaryColorHex(color)
-            }
+        binding.guestTeamControl.onTeamNameChanged = { updatedTeamName ->
+            MatchRepository.setGuestTeam(updatedTeamName)
+        }
+        binding.guestTeamControl.onLogoURLChanged = { updatedLogoUrl ->
+            MatchRepository.setGuestLogo(updatedLogoUrl)
+        }
+        binding.guestTeamControl.onPrimaryColorsChanged = { updatedColor ->
+            MatchRepository.setGuestPrimaryColorHex(updatedColor)
         }
 
-        binding.homeTeam.setOnClickListener {
-            var teamName = binding.homeTeam.text.toString()
-            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                MatchRepository.setHomeTeam(updatedTeamName)
-                requireActivity().hideSystemUI()
-            }
-        }
-
-        binding.awayTeam.setOnClickListener {
-            var teamName = binding.awayTeam.text.toString()
-            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                MatchRepository.setGuestTeam(updatedTeamName)
-                requireActivity().hideSystemUI()
-            }
-        }
+//        binding.homeColor.setOnClickListener {
+//            requireContext().showColorPickerDialog { color ->
+//                MatchRepository.setHomePrimaryColorHex(color)
+//            }
+//        }
+//
+//        binding.awayColor.setOnClickListener {
+//            requireContext().showColorPickerDialog { color ->
+//                MatchRepository.setGuestPrimaryColorHex(color)
+//            }
+//        }
+//
+//        binding.homeTeam.setOnClickListener {
+//            var teamName = binding.homeTeam.text.toString()
+//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
+//                MatchRepository.setHomeTeam(updatedTeamName)
+//                requireActivity().hideSystemUI()
+//            }
+//        }
+//
+//        binding.awayTeam.setOnClickListener {
+//            var teamName = binding.awayTeam.text.toString()
+//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
+//                MatchRepository.setGuestTeam(updatedTeamName)
+//                requireActivity().hideSystemUI()
+//            }
+//        }
 
         binding.matchLeagueDescription.setOnClickListener {
             requireContext().showEditStringDialog(R.string.match_league, this.currentDescription, filters = arrayOf<InputFilter>()) { updatedMatchLeague ->

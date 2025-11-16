@@ -1,6 +1,7 @@
 package it.lmqv.livematchcam.views
 
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
@@ -30,18 +31,19 @@ class TeamControlView @JvmOverloads constructor(
         orientation = VERTICAL
         _binding = ViewTeamControlBinding.inflate(LayoutInflater.from(context), this, true)
 
-        /*context.theme
+        context.theme
             .obtainStyledAttributes(attrs, R.styleable.TeamControlView, 0, 0)
             .apply {
                 try {
-                    binding.textTeamName.text = getString(R.styleable.TeamControlView_teamName) ?: ""
-                    binding.imageLogo.tag = getString(R.styleable.TeamControlView_logoURL) ?: ""
-                    binding.primaryColor.setFillAndBorder(getColor(R.styleable.TeamControlView_primaryColor, Color.BLACK))
-                    binding.secondaryColor.setFillAndBorder(getColor(R.styleable.TeamControlView_secondaryColor, Color.BLACK))
+                    binding.textTeamName.setTextColor(getColor(R.styleable.TeamControlView_textColor, Color.BLACK))
+//                    binding.textTeamName.text = getString(R.styleable.TeamControlView_teamName) ?: ""
+//                    binding.imageLogo.tag = getString(R.styleable.TeamControlView_logoURL) ?: ""
+//                    binding.primaryColor.setFillAndBorder(getColor(R.styleable.TeamControlView_primaryColor, Color.BLACK))
+//                    binding.secondaryColor.setFillAndBorder(getColor(R.styleable.TeamControlView_secondaryColor, Color.BLACK))
                 } finally {
                     recycle()
                 }
-            }*/
+            }
 
         binding.textTeamName.setOnClickListener {
             val sourceTeamName = binding.textTeamName.text.toString()

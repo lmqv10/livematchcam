@@ -45,7 +45,7 @@
     <string name="offset_strategy">Offset Strategy</string>
     <string name="video_resolution">Video Resolution</string>
     <string name="date_time">Select Scheduled Date and Time</string>
-    <string name="start_period_time">Select Start minute and Seconds</string>
+    <string name="start_period_time">Update Match Time</string>
     <string name="video_fps">fps</string>
     <string name="choose_color">Choose shirt color</string>
     <string name="choose_logo">Insert or choose logo URL</string>

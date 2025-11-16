@@ -14,6 +14,7 @@ import it.lmqv.livematchcam.adapters.BaseStreamItem
 import it.lmqv.livematchcam.adapters.StreamsAdapter
 import it.lmqv.livematchcam.databinding.FragmentFirebaseBinding
 import it.lmqv.livematchcam.extensions.hideKeyboard
+import it.lmqv.livematchcam.extensions.launchOnCreated
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
@@ -22,6 +23,7 @@ import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import it.lmqv.livematchcam.viewmodels.FirebaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlin.getValue
 import kotlin.math.max
@@ -50,8 +52,14 @@ class FirebaseFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        launchOnStarted {
-            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
+        launchOnCreated {
+            combine(
+                MatchRepository.firebaseAccountData,
+                firebaseAccountViewModel.firebaseAccountKey,
+                firebaseViewModel.currentKey
+            ) { firebaseAccountData, firebaseAccountKey, currentKey -> Triple(firebaseAccountData, firebaseAccountKey, currentKey) }
+                .collect { (firebaseAccountData, firebaseAccountKey, currentKey) ->
+
                 var sourceLogoUrl = firebaseAccountData.logoURL
                 if (sourceLogoUrl.isEmpty()) {
                     binding.accountLogo.setImageResource(R.drawable.ic_link)
@@ -62,11 +70,9 @@ class FirebaseFragment : Fragment() {
                         allowHardware(false)
                     }
                 }
-            }
-        }
 
-        launchOnStarted {
-            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
+                binding.accountName.text = firebaseAccountViewModel.accountName() ?: ""
+
                 var streams = firebaseAccountData.streams
                 var streamItems = streams
                     .map { x -> BaseStreamItem.MatchStream(x.logo, x.description, x.server, x.key) }
@@ -83,11 +89,7 @@ class FirebaseFragment : Fragment() {
                     }
                     override fun onNothingSelected(parent: AdapterView<*>) { }
                 }
-            }
-        }
 
-        launchOnStarted {
-            firebaseViewModel.currentKey.collect { currentKey ->
                 if (currentKey != null) {
                     var adapter = binding.spinnerStreams.adapter
                     val itemsList = List(adapter.count) { index ->
@@ -96,12 +98,6 @@ class FirebaseFragment : Fragment() {
                     var selectedPosition = max(0, itemsList.indexOfFirst { it.key == currentKey })
                     binding.spinnerStreams.setSelection(selectedPosition)
                 }
-            }
-        }
-
-        launchOnStarted {
-            firebaseAccountViewModel.firebaseAccountKey.collect { accountKey ->
-                binding.accountName.text = firebaseAccountViewModel.accountName() ?: ""
             }
         }
 

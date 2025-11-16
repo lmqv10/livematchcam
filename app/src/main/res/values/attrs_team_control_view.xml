@@ -1,8 +1,9 @@
 <resources>
-    <!--declare-styleable name="TeamControlView">
-        <attr name="teamName" format="string" />
-        <attr name="logoURL" format="string" />
-        <attr name="primaryColor" format="color" />
-        <attr name="secondaryColor" format="color" />
-    </declare-styleable-->
+    <declare-styleable name="TeamControlView">
+        <attr name="textColor" format="color" />
+<!--        <attr name="teamName" format="string" />-->
+<!--        <attr name="logoURL" format="string" />-->
+<!--        <attr name="primaryColor" format="color" />-->
+<!--        <attr name="secondaryColor" format="color" />-->
+    </declare-styleable>
 </resources>

@@ -52,85 +52,107 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+//        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
+//            binding.homeTeam.text = homeTeam
+//        }
+//        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
+//            binding.awayTeam.text = guestTeam
+//        }
+
         MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
-            binding.homeTeam.text = homeTeam
+            binding.homeTeamControl.setTeamName(homeTeam)
         }
         MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
-            binding.awayTeam.text = guestTeam
+            binding.guestTeamControl.setTeamName(guestTeam)
         }
-
-        /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
-        }
-        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
-        }*/
 
         launchOnStarted {
-            combine(
-                MatchRepository.firebaseAccountData,
-                MatchRepository.homePrimaryColorHex,
-                MatchRepository.homeLogo) {
-                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
-            }.collect { (firebaseAccountData, colorHex, logoURL) ->
-                //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
-                if (logoURL.isNotEmpty()) {
-                    binding.homeColor.load(logoURL) {
-                        placeholder(R.drawable.shirt_white)
-                        error(R.drawable.shirt_white)
-                        allowHardware(false)
-                    }
-                } else {
-                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
-                }
-
-                binding.homeColor.setOnClickListener {
-                    if (firebaseAccountData.remoteScoreAvailable) {
-                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-                            MatchRepository.setHomeLogo(updatedTeamLogo)
-                            requireActivity().hideSystemUI()
-                        }
-                    } else {
-                        requireContext().showColorPickerDialog { color ->
-                            MatchRepository.setHomePrimaryColorHex(color)
-                        }
-                    }
-                }
+            MatchRepository.homeLogo.collect { logoUrl ->
+                binding.homeTeamControl.setLogoUrl(logoUrl)
+            }
+        }
+        launchOnStarted {
+            MatchRepository.guestLogo.collect { logoUrl ->
+                binding.guestTeamControl.setLogoUrl(logoUrl)
             }
         }
 
         launchOnStarted {
-            combine(
-                MatchRepository.firebaseAccountData,
-                MatchRepository.guestPrimaryColorHex,
-                MatchRepository.guestLogo) {
-                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
-            }.collect { (firebaseAccountData, colorHex, logoURL) ->
-                //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
-                if (logoURL.isNotEmpty()) {
-                    binding.guestColor.load(logoURL) {
-                        placeholder(R.drawable.shirt_white)
-                        error(R.drawable.shirt_white)
-                        allowHardware(false)
-                    }
-                } else {
-                    binding.guestColor.setShirtByColor(colorHex.toColorInt())
-                }
-
-                binding.guestColor.setOnClickListener {
-                    if (firebaseAccountData.remoteScoreAvailable) {
-                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-                            MatchRepository.setGuestLogo(updatedTeamLogo)
-                            requireActivity().hideSystemUI()
-                        }
-                    } else {
-                        requireContext().showColorPickerDialog { color ->
-                            MatchRepository.setGuestPrimaryColorHex(color)
-                        }
-                    }
-                }
+            MatchRepository.homePrimaryColorHex.collect { primaryColor ->
+                binding.homeTeamControl.setPrimaryColor(primaryColor.toColorInt())
             }
         }
+        launchOnStarted {
+            MatchRepository.guestPrimaryColorHex.collect { primaryColor ->
+                binding.guestTeamControl.setPrimaryColor(primaryColor.toColorInt())
+            }
+        }
+
+//        launchOnStarted {
+//            combine(
+//                MatchRepository.firebaseAccountData,
+//                MatchRepository.homePrimaryColorHex,
+//                MatchRepository.homeLogo) {
+//                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
+//            }.collect { (firebaseAccountData, colorHex, logoURL) ->
+//                //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
+//                if (logoURL.isNotEmpty()) {
+//                    binding.homeColor.load(logoURL) {
+//                        placeholder(R.drawable.shirt_white)
+//                        error(R.drawable.shirt_white)
+//                        allowHardware(false)
+//                    }
+//                } else {
+//                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
+//                }
+//
+//                binding.homeColor.setOnClickListener {
+//                    if (firebaseAccountData.remoteScoreAvailable) {
+//                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
+//                            MatchRepository.setHomeLogo(updatedTeamLogo)
+//                            requireActivity().hideSystemUI()
+//                        }
+//                    } else {
+//                        requireContext().showColorPickerDialog { color ->
+//                            MatchRepository.setHomePrimaryColorHex(color)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        launchOnStarted {
+//            combine(
+//                MatchRepository.firebaseAccountData,
+//                MatchRepository.guestPrimaryColorHex,
+//                MatchRepository.guestLogo) {
+//                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
+//            }.collect { (firebaseAccountData, colorHex, logoURL) ->
+//                //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
+//                if (logoURL.isNotEmpty()) {
+//                    binding.guestColor.load(logoURL) {
+//                        placeholder(R.drawable.shirt_white)
+//                        error(R.drawable.shirt_white)
+//                        allowHardware(false)
+//                    }
+//                } else {
+//                    binding.guestColor.setShirtByColor(colorHex.toColorInt())
+//                }
+//
+//                binding.guestColor.setOnClickListener {
+//                    if (firebaseAccountData.remoteScoreAvailable) {
+//                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
+//                            MatchRepository.setGuestLogo(updatedTeamLogo)
+//                            requireActivity().hideSystemUI()
+//                        }
+//                    } else {
+//                        requireContext().showColorPickerDialog { color ->
+//                            MatchRepository.setGuestPrimaryColorHex(color)
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             MatchRepository.score.collectLatest { scoreInstance ->
@@ -352,21 +374,41 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             }
         }*/
 
-        binding.homeTeam.setOnClickListener {
-            var teamName = binding.homeTeam.text.toString()
-            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                MatchRepository.setHomeTeam(updatedTeamName)
-                requireActivity().hideSystemUI()
-            }
+        binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
+            MatchRepository.setHomeTeam(updatedTeamName)
+        }
+        binding.homeTeamControl.onLogoURLChanged = { updatedLogoUrl ->
+            MatchRepository.setHomeLogo(updatedLogoUrl)
+        }
+        binding.homeTeamControl.onPrimaryColorsChanged = { updatedColor ->
+            MatchRepository.setHomePrimaryColorHex(updatedColor)
         }
 
-        binding.awayTeam.setOnClickListener {
-            var teamName = binding.awayTeam.text.toString()
-            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                MatchRepository.setGuestTeam(updatedTeamName)
-                requireActivity().hideSystemUI()
-            }
+        binding.guestTeamControl.onTeamNameChanged = { updatedTeamName ->
+            MatchRepository.setGuestTeam(updatedTeamName)
         }
+        binding.guestTeamControl.onLogoURLChanged = { updatedLogoUrl ->
+            MatchRepository.setGuestLogo(updatedLogoUrl)
+        }
+        binding.guestTeamControl.onPrimaryColorsChanged = { updatedColor ->
+            MatchRepository.setGuestPrimaryColorHex(updatedColor)
+        }
+
+//        binding.homeTeam.setOnClickListener {
+//            var teamName = binding.homeTeam.text.toString()
+//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
+//                MatchRepository.setHomeTeam(updatedTeamName)
+//                requireActivity().hideSystemUI()
+//            }
+//        }
+//
+//        binding.awayTeam.setOnClickListener {
+//            var teamName = binding.awayTeam.text.toString()
+//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
+//                MatchRepository.setGuestTeam(updatedTeamName)
+//                requireActivity().hideSystemUI()
+//            }
+//        }
 
         binding.matchLeague.setOnClickListener {
             requireContext().showEditStringDialog(R.string.match_league, this.currentDescription, filters = arrayOf<InputFilter>()) { updatedMatchLeague ->

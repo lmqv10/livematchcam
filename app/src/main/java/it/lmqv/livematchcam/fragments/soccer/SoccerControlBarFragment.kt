@@ -6,18 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import coil.load
-import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentSoccerControlBarBinding
 import it.lmqv.livematchcam.dialogs.TimePickerDialog
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.formatTime
-import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.parseTimeToSeconds
-import it.lmqv.livematchcam.extensions.setShirtByColor
-import it.lmqv.livematchcam.extensions.showColorPickerDialog
-import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.services.firebase.SoccerScore
 import it.lmqv.livematchcam.fragments.BaseControlBarFragment
 import it.lmqv.livematchcam.viewmodels.Command
@@ -26,7 +19,6 @@ import it.lmqv.livematchcam.services.CounterService
 import it.lmqv.livematchcam.viewmodels.CounterViewModel
 import it.lmqv.livematchcam.viewmodels.SoccerScoreViewModel
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
 import it.lmqv.livematchcam.extensions.Loge
@@ -53,48 +45,76 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         //Logd("SoccerControlBarFragment::matchViewModelID: ${matchViewModel.instanceId}")
-        MatchRepository.homeTeam.observe(viewLifecycleOwner) { team ->
-            binding.homeTeam.text = team
+//        MatchRepository.homeTeam.observe(viewLifecycleOwner) { team ->
+//            binding.homeTeam.text = team
+//        }
+        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
+            binding.homeTeamControl.setTeamName(homeTeam)
         }
-        MatchRepository.guestTeam.observe(viewLifecycleOwner) { team ->
-            binding.awayTeam.text = team
+//        MatchRepository.guestTeam.observe(viewLifecycleOwner) { team ->
+//            binding.awayTeam.text = team
+//        }
+        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
+            binding.guestTeamControl.setTeamName(guestTeam)
         }
 
         launchOnStarted {
-            combine(
-                MatchRepository.homePrimaryColorHex,
-                MatchRepository.homeLogo) {
-                    color, logo -> Pair(color, logo)
-            }.collect { (colorHex, logoURL) ->
-                if (logoURL.isNotEmpty()) {
-                    binding.homeColor.load(logoURL) {
-                        placeholder(R.drawable.shirt_white)
-                        error(R.drawable.shirt_white)
-                        allowHardware(false)
-                    }
-                } else {
-                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
-                }
+            MatchRepository.homeLogo.collect { logoUrl ->
+                binding.homeTeamControl.setLogoUrl(logoUrl)
+            }
+        }
+        launchOnStarted {
+            MatchRepository.guestLogo.collect { logoUrl ->
+                binding.guestTeamControl.setLogoUrl(logoUrl)
             }
         }
 
         launchOnStarted {
-            combine(
-                MatchRepository.guestPrimaryColorHex,
-                MatchRepository.guestLogo) {
-                    color, logo -> Pair(color, logo)
-            }.collect { (colorHex, logoURL) ->
-                if (logoURL.isNotEmpty()) {
-                    binding.awayColor.load(logoURL) {
-                        placeholder(R.drawable.shirt_white)
-                        error(R.drawable.shirt_white)
-                        allowHardware(false)
-                    }
-                } else {
-                    binding.awayColor.setShirtByColor(colorHex.toColorInt())
-                }
+            MatchRepository.homePrimaryColorHex.collect { primaryColor ->
+                binding.homeTeamControl.setPrimaryColor(primaryColor.toColorInt())
             }
         }
+        launchOnStarted {
+            MatchRepository.guestPrimaryColorHex.collect { primaryColor ->
+                binding.guestTeamControl.setPrimaryColor(primaryColor.toColorInt())
+            }
+        }
+
+//        launchOnStarted {
+//            combine(
+//                MatchRepository.homePrimaryColorHex,
+//                MatchRepository.homeLogo) {
+//                    color, logo -> Pair(color, logo)
+//            }.collect { (colorHex, logoURL) ->
+//                if (logoURL.isNotEmpty()) {
+//                    binding.homeColor.load(logoURL) {
+//                        placeholder(R.drawable.shirt_white)
+//                        error(R.drawable.shirt_white)
+//                        allowHardware(false)
+//                    }
+//                } else {
+//                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
+//                }
+//            }
+//        }
+
+//        launchOnStarted {
+//            combine(
+//                MatchRepository.guestPrimaryColorHex,
+//                MatchRepository.guestLogo) {
+//                    color, logo -> Pair(color, logo)
+//            }.collect { (colorHex, logoURL) ->
+//                if (logoURL.isNotEmpty()) {
+//                    binding.awayColor.load(logoURL) {
+//                        placeholder(R.drawable.shirt_white)
+//                        error(R.drawable.shirt_white)
+//                        allowHardware(false)
+//                    }
+//                } else {
+//                    binding.awayColor.setShirtByColor(colorHex.toColorInt())
+//                }
+//            }
+//        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             MatchRepository.score.collectLatest { scoreInstance ->
@@ -146,35 +166,55 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
             soccerScoreViewModel.incrementGuestScore()
         }
 
-        binding.homeColor.setOnClickListener {
-            launchOnStarted {
-                requireContext().showColorPickerDialog { color ->
-                    MatchRepository.setHomePrimaryColorHex(color)
-                }
-            }
+        binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
+            MatchRepository.setHomeTeam(updatedTeamName)
+        }
+        binding.homeTeamControl.onLogoURLChanged = { updatedLogoUrl ->
+            MatchRepository.setHomeLogo(updatedLogoUrl)
+        }
+        binding.homeTeamControl.onPrimaryColorsChanged = { updatedColor ->
+            MatchRepository.setHomePrimaryColorHex(updatedColor)
         }
 
-        binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
-                MatchRepository.setGuestPrimaryColorHex(color)
-            }
+        binding.guestTeamControl.onTeamNameChanged = { updatedTeamName ->
+            MatchRepository.setGuestTeam(updatedTeamName)
+        }
+        binding.guestTeamControl.onLogoURLChanged = { updatedLogoUrl ->
+            MatchRepository.setGuestLogo(updatedLogoUrl)
+        }
+        binding.guestTeamControl.onPrimaryColorsChanged = { updatedColor ->
+            MatchRepository.setGuestPrimaryColorHex(updatedColor)
         }
 
-        binding.homeTeam.setOnClickListener {
-            var teamName = binding.homeTeam.text.toString()
-            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                MatchRepository.setHomeTeam(updatedTeamName)
-                requireActivity().hideSystemUI()
-            }
-        }
+//        binding.homeColor.setOnClickListener {
+//            launchOnStarted {
+//                requireContext().showColorPickerDialog { color ->
+//                    MatchRepository.setHomePrimaryColorHex(color)
+//                }
+//            }
+//        }
 
-        binding.awayTeam.setOnClickListener {
-            var teamName = binding.awayTeam.text.toString()
-            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-                MatchRepository.setGuestTeam(updatedTeamName)
-                requireActivity().hideSystemUI()
-            }
-        }
+//        binding.awayColor.setOnClickListener {
+//            requireContext().showColorPickerDialog { color ->
+//                MatchRepository.setGuestPrimaryColorHex(color)
+//            }
+//        }
+
+//        binding.homeTeam.setOnClickListener {
+//            var teamName = binding.homeTeam.text.toString()
+//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
+//                MatchRepository.setHomeTeam(updatedTeamName)
+//                requireActivity().hideSystemUI()
+//            }
+//        }
+
+//        binding.awayTeam.setOnClickListener {
+//            var teamName = binding.awayTeam.text.toString()
+//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
+//                MatchRepository.setGuestTeam(updatedTeamName)
+//                requireActivity().hideSystemUI()
+//            }
+//        }
 
         binding.changePeriod.setOnClickListener {
             soccerScoreViewModel.nextPeriod()

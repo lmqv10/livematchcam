@@ -527,8 +527,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
         }
     }
 
-    private fun recreate()
-    {
+    private fun recreate() {
         if (genericStream.isOnPreview) {
             //Logd("stopPreview")
             genericStream.stopPreview()

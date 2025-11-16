@@ -72,7 +72,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
     private lateinit var headerView: View
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var navController: NavController
-    private var navControllerState: Bundle? = null
+    //private var navControllerState: Bundle? = null
 
     private val topLevelsFragments = setOf(
         R.id.firebaseConfigurationFragment,
@@ -273,13 +273,11 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-//        try {
-
-        if (savedInstanceState != null) {
-            navControllerState = savedInstanceState.getBundle("nav_state")
-            navController.restoreState(navControllerState)
-        } else {
-
+//        if (savedInstanceState != null) {
+//            navControllerState = savedInstanceState.getBundle("nav_state")
+//            navController.restoreState(navControllerState)
+//        } else {
+        if (savedInstanceState == null) {
             val prefs = getSharedPreferences("nav_state", MODE_PRIVATE)
             val lastDest = prefs.getInt("last_dest", R.id.serverConfigurationFragment)
 
@@ -287,14 +285,6 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                 navController.navigate(lastDest)
             }
         }
-
-//        } catch (err: Exception) {
-//            err.printStackTrace()
-//            savedInstanceState?.clear()
-//            getSharedPreferences("nav_state", MODE_PRIVATE).edit {
-//                clear()
-//            }
-//        }
 
         appBarConfiguration = AppBarConfiguration(
             topLevelsFragments,
@@ -353,7 +343,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onPause() {
         super.onPause()
-        navControllerState = navController.saveState()
+        //navControllerState = navController.saveState()
 
 //        getSharedPreferences("nav_state", MODE_PRIVATE)
 //            .edit {
@@ -367,9 +357,9 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        navControllerState?.let {
-            outState.putBundle("nav_state", it)
-        }
+//        navControllerState?.let {
+//            outState.putBundle("nav_state", it)
+//        }
         //toast("MatchActivity::OnSaveInstanceState")
     }
 

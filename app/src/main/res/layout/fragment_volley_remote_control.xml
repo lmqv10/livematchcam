@@ -17,31 +17,31 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:orientation="horizontal"
-            android:layout_marginBottom="5dp"
-            android:weightSum="4">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="30dp"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:layout_marginBottom="5dp"-->
+<!--            android:weightSum="4">-->
 
-            <ImageView
-                android:id="@+id/home_color"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:gravity="start"
-                android:src="@drawable/shirt_layers"
-                android:contentDescription="@string/description_placeholder" />
+<!--            <ImageView-->
+<!--                android:id="@+id/home_color"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:gravity="start"-->
+<!--                android:src="@drawable/shirt_layers"-->
+<!--                android:contentDescription="@string/description_placeholder" />-->
 
-            <TextView
-                android:id="@+id/home_team"
-                android:layout_width="0dp"
-                android:layout_weight="3"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textColor="@color/black"
-                android:text="@string/home_team"/>
-        </LinearLayout>
+<!--            <TextView-->
+<!--                android:id="@+id/home_team"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_weight="3"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:gravity="center"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:text="@string/home_team"/>-->
+<!--        </LinearLayout>-->
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -75,6 +75,12 @@
                 android:layout_gravity="center_vertical"
                 android:contentDescription="@string/description_placeholder" />
         </LinearLayout>
+
+        <it.lmqv.livematchcam.views.TeamControlView
+            android:layout_marginTop="5dp"
+            android:id="@+id/homeTeamControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <LinearLayout
@@ -165,31 +171,31 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:orientation="horizontal"
-            android:layout_marginBottom="5dp"
-            android:weightSum="4">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="30dp"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:layout_marginBottom="5dp"-->
+<!--            android:weightSum="4">-->
 
-            <TextView
-                android:id="@+id/away_team"
-                android:layout_width="0dp"
-                android:layout_weight="3"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textColor="@color/black"
-                android:text="@string/away_team"/>
+<!--            <TextView-->
+<!--                android:id="@+id/away_team"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_weight="3"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:gravity="center"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:text="@string/away_team"/>-->
 
-            <ImageView
-                android:id="@+id/guest_color"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:gravity="start"
-                android:src="@drawable/shirt_layers"
-                android:contentDescription="@string/description_placeholder" />
-        </LinearLayout>
+<!--            <ImageView-->
+<!--                android:id="@+id/guest_color"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:gravity="start"-->
+<!--                android:src="@drawable/shirt_layers"-->
+<!--                android:contentDescription="@string/description_placeholder" />-->
+<!--        </LinearLayout>-->
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -223,42 +229,47 @@
                 tools:ignore="ContentDescription"/>
         </LinearLayout>
 
+        <it.lmqv.livematchcam.views.TeamControlView
+            android:layout_marginTop="5dp"
+            android:id="@+id/guestTeamControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/spot_banner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="5dp"
         android:background="@drawable/alpha_background"
-        app:layout_constraintTop_toBottomOf="@+id/controls_match"
-        app:layout_constraintLeft_toLeftOf="parent">
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/control_home">
 
         <ImageView
             android:id="@+id/spot_banner_preview"
-            android:src="@drawable/preview_missing"
             android:layout_width="100dp"
             android:layout_height="50dp"
+            android:src="@drawable/preview_missing"
             tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/spot_banner_trash"
-            android:src="@drawable/ic_trash_bin"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="10dp"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/ic_trash_bin"
             tools:ignore="ContentDescription" />
 
         <Switch
-                android:id="@+id/spot_banner_switch"
-                android:text="@string/spot_banner"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="5dp"
-                android:gravity="center"
-                tools:ignore="UseSwitchCompatOrMaterialXml" />
+            android:id="@+id/spot_banner_switch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="@string/spot_banner"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     </LinearLayout>
 

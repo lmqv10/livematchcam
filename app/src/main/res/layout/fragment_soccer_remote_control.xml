@@ -16,30 +16,30 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="4">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:weightSum="4">-->
 
-            <ImageView
-                android:id="@+id/home_color"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:gravity="start"
-                android:src="@drawable/shirt_layers" />
+<!--            <ImageView-->
+<!--                android:id="@+id/home_color"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:gravity="start"-->
+<!--                android:src="@drawable/shirt_layers" />-->
 
-            <TextView
-                android:id="@+id/home_team"
-                android:layout_width="0dp"
-                android:layout_weight="3"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="25sp"
-                android:textColor="@color/black"
-                android:text="@string/home_team"/>
-        </LinearLayout>
+<!--            <TextView-->
+<!--                android:id="@+id/home_team"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_weight="3"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center"-->
+<!--                android:textSize="25sp"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:text="@string/home_team"/>-->
+<!--        </LinearLayout>-->
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -73,18 +73,27 @@
                 android:layout_gravity="center_vertical"
                 tools:ignore="ContentDescription"/>
         </LinearLayout>
+
+        <it.lmqv.livematchcam.views.TeamControlView
+            android:layout_marginTop="5dp"
+            android:id="@+id/homeTeamControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/controls_bar"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/TRANSPARENT"
         android:gravity="center"
-        android:padding="4dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp">
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/control_home"
+        app:layout_constraintEnd_toStartOf="@+id/control_away"
+        app:layout_constraintStart_toEndOf="@+id/control_home"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/change_period"
@@ -98,14 +107,16 @@
             android:layout_width="75dp"
             android:layout_height="75dp"
             android:layout_marginHorizontal="50dp">
+
             <ImageView
                 android:id="@+id/stop_time"
-                android:visibility="gone"
                 android:layout_width="75dp"
                 android:layout_height="75dp"
                 android:layout_gravity="center_vertical"
                 android:src="@drawable/time_pause"
+                android:visibility="gone"
                 tools:ignore="ContentDescription" />
+
             <ImageView
                 android:id="@+id/start_time"
                 android:layout_width="75dp"
@@ -116,15 +127,25 @@
 
         </FrameLayout>
 
-        <ImageView
-            android:id="@+id/reset_time"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/time_reset"
-            app:tint="@color/image_tint_secondary_selector"
-            tools:ignore="ContentDescription" />
+<!--        <ImageView-->
+<!--            android:id="@+id/reset_time"-->
+<!--            android:layout_width="50dp"-->
+<!--            android:layout_height="50dp"-->
+<!--            android:layout_gravity="center_vertical"-->
+<!--            android:src="@drawable/time_reset"-->
+<!--            app:tint="@color/image_tint_secondary_selector"-->
+<!--            tools:ignore="ContentDescription" />-->
 
+        <TextView
+            android:id="@+id/match_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/alpha_background"
+            android:gravity="center"
+            android:padding="4dp"
+            android:text="@string/time_placeholder"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -135,30 +156,30 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="4">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:weightSum="4">-->
 
-            <TextView
-                android:id="@+id/away_team"
-                android:layout_width="0dp"
-                android:layout_weight="3"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="25sp"
-                android:textColor="@color/black"
-                android:text="@string/away_team"/>
+<!--            <TextView-->
+<!--                android:id="@+id/away_team"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_weight="3"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center"-->
+<!--                android:textSize="25sp"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:text="@string/away_team"/>-->
 
-            <ImageView
-                android:id="@+id/guest_color"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:gravity="start"
-                android:src="@drawable/shirt_layers" />
-        </LinearLayout>
+<!--            <ImageView-->
+<!--                android:id="@+id/guest_color"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:gravity="start"-->
+<!--                android:src="@drawable/shirt_layers" />-->
+<!--        </LinearLayout>-->
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -191,6 +212,12 @@
                 android:layout_gravity="center_vertical"
                 tools:ignore="ContentDescription"/>
         </LinearLayout>
+
+        <it.lmqv.livematchcam.views.TeamControlView
+            android:layout_marginTop="5dp"
+            android:id="@+id/guestTeamControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
