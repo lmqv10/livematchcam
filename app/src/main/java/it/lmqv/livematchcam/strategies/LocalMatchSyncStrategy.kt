@@ -55,6 +55,7 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
                                             x.owners.contains(accountName)
                                 }
                         var firebaseAccountDataContract = FirebaseAccountDataContract(
+                            firebaseAccount.guid,
                             firebaseAccount.logo,
                             firebaseAccount.name,
                             ownedStreams,

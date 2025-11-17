@@ -36,6 +36,8 @@ import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.animateAlpha
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
+import it.lmqv.livematchcam.extensions.launchOnCreated
+import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.extensions.toast
@@ -44,10 +46,12 @@ import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.NoDebounceExtraSmoothZoomLevelHandler
+import it.lmqv.livematchcam.repositories.FirebaseDataRepository
 import it.lmqv.livematchcam.utils.KeyDescription
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.utils.BannerBitmapRotator
+import it.lmqv.livematchcam.viewmodels.StreamConfigurationViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -73,6 +77,7 @@ open class CameraFragment: Fragment(), ConnectChecker,
     private lateinit var offsetDegreeHandler: IOffsetDegreeHandler
 
     private val statusFragment = StatusFragment.newInstance()
+    private val streamConfigurationViewModel: StreamConfigurationViewModel by activityViewModels()
     private val statusViewModel: StatusViewModel by activityViewModels()
     private val youtubeViewModel: YoutubeViewModel by activityViewModels {
         YoutubeViewModelFactory(requireActivity().application, YouTubeClientProvider.get())
@@ -385,6 +390,26 @@ open class CameraFragment: Fragment(), ConnectChecker,
             }
         }
 
+        launchOnResumed {
+            combine(
+                streamConfigurationViewModel.fps,
+                streamConfigurationViewModel.resolution
+            ) { fps, resolution ->
+                Pair(fps, resolution)
+            }.collect { (fps, resolution) ->
+                if (fps != null && resolution != null) {
+                    this.fps = fps
+                    this.height = resolution
+                    this.width = if (resolution == 1080) { 1920 } else { 1280 }
+
+                    if (genericStream.isOnPreview) {
+                        toast("Set ${this.width}x${this.height}p@${this.fps}fps")
+                        recreate()
+                    }
+                }
+            }
+        }
+
         /*matchViewModel.score.observe(viewLifecycleOwner) { iScore ->
             val command = iScore?.command
             if (command == Command.ZOOM_IN.toString()) {
@@ -456,15 +481,15 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
     override fun onStart() {
         super.onStart()
-        //toast("CameraFragment::onStart")
-        prepare()
 
+        prepare()
+//
         this.scoreBoardFragment.setOnUpdate(this)
 
-        genericStream.getGlInterface().clearFilters()
-        genericStream.getGlInterface().addFilter(0, this.scoreBoardFilter)
-        genericStream.getGlInterface().addFilter(1, this.spotBannerFilter)
-        genericStream.getGlInterface().addFilter(2, this.mainBannerFilter)
+//        genericStream.getGlInterface().clearFilters()
+//        genericStream.getGlInterface().addFilter(0, this.scoreBoardFilter)
+//        genericStream.getGlInterface().addFilter(1, this.spotBannerFilter)
+//        genericStream.getGlInterface().addFilter(2, this.mainBannerFilter)
 
         refresh()
     }
@@ -510,10 +535,10 @@ open class CameraFragment: Fragment(), ConnectChecker,
             val screenWidth = width
             val screenHeight = height
 
-            statusViewModel.setSourceResolution(height)
-            statusViewModel.setSourceFps(fps)
+            statusViewModel.setSourceResolution(this.height)
+            statusViewModel.setSourceFps(this.fps)
 
-            genericStream.prepareVideo(screenWidth, screenHeight, vBitrate, rotation = rotation, fps = fps) &&
+            genericStream.prepareVideo(screenWidth, screenHeight, vBitrate, rotation = rotation, fps = this.fps) &&
                     genericStream.prepareAudio(sampleRate, isStereo, aBitrate)
             true
         } catch (e: IllegalArgumentException) {
@@ -742,8 +767,8 @@ open class CameraFragment: Fragment(), ConnectChecker,
 
         val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
         val optionsVideoResolutions = listOf(
-            KeyDescription(1080, "1080p"),
-            KeyDescription(720, "720p")
+            KeyDescription(1080, "1920x1080p"),
+            KeyDescription(720, "1280x720p")
         )
 
         val adapterVideoResolutions = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionsVideoResolutions)
@@ -755,11 +780,13 @@ open class CameraFragment: Fragment(), ConnectChecker,
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
                 var selectedItemValue = selectedItem.key
-                if (height != selectedItemValue) {
-                    height = selectedItemValue
-                    width = if (height == 1080) { 1920 } else { 1280 }
+                if (this@CameraFragment.height != selectedItemValue) {
+                    //height = selectedItemValue
+                    //width = if (height == 1080) { 1920 } else { 1280 }
+
+                    streamConfigurationViewModel.setResolution(selectedItemValue)
                     //Logd("change Resolutions:${width}x${height}")
-                    recreate()
+                    //recreate()
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
@@ -784,10 +811,11 @@ open class CameraFragment: Fragment(), ConnectChecker,
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
                 var selectedItemValue = selectedItem.key
-                if (fps != selectedItemValue) {
-                    fps = selectedItemValue
+                if (this@CameraFragment.fps != selectedItemValue) {
+                    //this.fps = selectedItemValue
                     //Logd("change Fps:$fps")
-                    recreate()
+                    streamConfigurationViewModel.setFps(selectedItemValue)
+                    //recreate()
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }

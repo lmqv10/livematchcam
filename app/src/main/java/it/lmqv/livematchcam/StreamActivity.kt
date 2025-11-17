@@ -1,6 +1,5 @@
 package it.lmqv.livematchcam
 
-import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -9,7 +8,6 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.fragments.CameraFragment
 
 class StreamActivity : AppCompatActivity() {
@@ -31,7 +29,6 @@ class StreamActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //toast("StreamActivity::onCreate")
         setContentView(R.layout.activity_live_stream)
-        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 

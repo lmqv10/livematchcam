@@ -1,34 +1,25 @@
 package it.lmqv.livematchcam
 
-import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.core.widget.TextViewCompat
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import coil.request.ImageRequest
-import it.lmqv.livematchcam.MatchActivity
 import it.lmqv.livematchcam.databinding.ActivityAccountBinding
 import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.fragments.YoutubeAccountFragment
-import it.lmqv.livematchcam.fragments.YoutubeFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
-import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -86,6 +77,7 @@ class AccountActivity : AppCompatActivity() {
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.youtubeAccountContainer, youtubeAccountFragment)
+            .hide(youtubeAccountFragment)
             .commit()
 
         binding.accountName.setOnClickListener {
@@ -117,14 +109,22 @@ class AccountActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+         lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 MatchRepository.firebaseAccountData.collectLatest { firebaseAccountData ->
                     var settings = firebaseAccountData.settings
+//                    var guid = md5(firebaseAccountData.guid)
+//                    var blackList = mutableListOf (
+//                        "4c5fa624caf169096501319def233cc9",
+//                        "380d9d52ddb191dd75761827ec6a784e"
+//                    )
+
+                    //if (blackList.contains(guid) || firebaseAccountData.guid.isEmpty()) {
                     if (settings.youTubeEnabled) {
-                        binding.youtubeAccountContainer.visibility = View.VISIBLE
-                    } else {
-                        binding.youtubeAccountContainer.visibility = View.GONE
+                        supportFragmentManager
+                            .beginTransaction()
+                            .show(youtubeAccountFragment)
+                            .commit()
                     }
                 }
             }

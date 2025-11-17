@@ -125,7 +125,8 @@
     <string name="camera_uvc">CameraUVC</string>
     <string name="bitmap">Bitmap</string>
 
-    <string name="account_placeholder">-</string>
+    <string name="youtube_account_placeholder">youtube account</string>
+    <string name="firebase_account_placeholder">firebase account</string>
     <string name="description_placeholder">&#8230;</string>
     <string name="warning_placeholder">Confirm?</string>
     <string name="live_name_placeholder">xxxxxxxxxxxxx</string>

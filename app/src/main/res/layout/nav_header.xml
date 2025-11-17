@@ -29,8 +29,24 @@
     <TextView
         android:id="@+id/textAccountEmail"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/account_placeholder"
+        android:layout_height="18dp"
+        android:text="@string/youtube_account_placeholder"
         android:textColor="@android:color/white"
-        android:textSize="12sp" />
+        android:drawablePadding="5dp"
+        android:textSize="12sp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:drawableStartCompat="@drawable/ic_youtube" />
+
+    <TextView
+        android:id="@+id/textFirebaseAccountEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/firebase_account_placeholder"
+        android:textColor="@android:color/white"
+        android:drawablePadding="5dp"
+        android:textSize="12sp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:drawableStartCompat="@drawable/ic_link"/>
 </LinearLayout>

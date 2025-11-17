@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 import kotlin.getValue
 import androidx.core.content.edit
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import coil.request.ImageRequest
 import it.lmqv.livematchcam.repositories.MatchRepository
 import kotlinx.coroutines.flow.combine
@@ -189,22 +190,14 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                 ) { firebaseAccountData, authState -> Pair(firebaseAccountData, authState) }
                     .collectLatest { (firebaseAccountData, authState) ->
 
-                    //firebaseAccountViewModel.authState.collectLatest { state ->
-//                    var streams = firebaseAccountData.streams
-//                    var isAvailable = firebaseAccountViewModel.isLogged() && streams.isNotEmpty()
-//
-//                    binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = isAvailable
-//
-//                    binding.floatingActionContainer.isEnabled = isAvailable
-//                    binding.floatingActionContainer.isFocusable = isAvailable
-//                    binding.floatingActionContainer.isClickable = isAvailable
-//                }
-//            }
-//        }
-//
-//        lifecycleScope.launch {
-//            repeatOnLifecycle(Lifecycle.State.CREATED) {
-//                MatchRepository.firebaseAccountData.collectLatest { firebaseAccountData ->
+                    if (firebaseAccountViewModel.isLogged()) {
+                        binding.matchNavView.getHeaderView(0)
+                            .findViewById<TextView>(R.id.textFirebaseAccountEmail).text = firebaseAccountViewModel.accountName()
+                    } else {
+                        binding.matchNavView.getHeaderView(0)
+                            .findViewById<TextView>(R.id.textFirebaseAccountEmail).text = getString(R.string.sign_in)
+                    }
+
                     var firebaseMenuItem = binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment)
 
                     var title = firebaseAccountData.title
@@ -238,6 +231,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                     val isLogged = googleAccountViewModel.isLogged()
                     binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = settings.youTubeEnabled && isLogged
                     binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = settings.youTubeEnabled && isLogged
+                    binding.matchNavView.getHeaderView(0).findViewById<TextView>(R.id.textAccountEmail).isVisible = settings.youTubeEnabled && isLogged
 
                     binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = firebaseAccountViewModel.hasAccountKey()
 
@@ -259,16 +253,16 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                                     toast(message, Toast.LENGTH_SHORT)
                                 }
                             }
-
-                        binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = true
-                        binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = true
+//
+//                        binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = true
+//                        binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = true
 
                         binding.matchNavView.getHeaderView(0)
                             .findViewById<TextView>(R.id.textAccountEmail).text = accountName
                     } else {
 
-                        binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = false
-                        binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = false
+//                        binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = false
+//                        binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = false
 
                         binding.matchNavView.getHeaderView(0)
                             .findViewById<TextView>(R.id.textAccountEmail).text = getString(R.string.sign_in)

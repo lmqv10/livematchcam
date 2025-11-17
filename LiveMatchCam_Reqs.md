@@ -10,7 +10,8 @@ STEP 2
 - Se autenticato aprire su Youtube
 - Unificare la CameraFragmente e la UVCCameraFragment per le parti comuni.
 - Valutare anche il goLive() soprattutto UI!!!
-- 
+- Gestione flag YouTubeEnabled (on Firebase or...)
+
 To be verify
 -- remote commands "nearby"
 -- remote configurations
@@ -34,6 +35,7 @@ Funzionalità Per gli sponsor:
  Pulsante 'TimeOut' per trasmettere un'immagine pubblicitaria con filigrana di 20 secondi.
 
 
+
 Licenze per Società:
  Le licenze sono declinate per società, non per singolo utente.
 Periodo di Validità:
@@ -55,6 +57,17 @@ https://www.nowpadova.com/images/2020/01/23/AVIST_large.jpg
 https://www.pallavolopicco.it/wp-content/uploads/2024/01/SCRITTA-PICCO-SITO.jpg
 https://www.pallavolopicco.it/wp-content/uploads/2024/01/LOGO-PICCO-PNG.png
 https://www.pallavolopicco.it/wp-content/uploads/2024/01/LOGO-PICCO-PNG.png
+
+Masseroni
+3a1fcfd8b3664b72b5b745760819bd8c
+Lecco
+846af82686b3429a85e9a2d9a14ed79a
+Picco
+99261ce7d8b94fc395301f57d9e61ffd
+    -> MD5: 4c5fa624caf169096501319def233cc9
+Arosio
+f67fee1fd18f3ce57855964b806a4f3a 
+    -> MD5: 380d9d52ddb191dd75761827ec6a784e
 
 /*navController.addOnDestinationChangedListener { controller, destination, arguments ->
     try {

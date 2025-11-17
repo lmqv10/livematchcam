@@ -27,6 +27,7 @@ data class Stream(
 )
 
 data class FirebaseAccountDataContract(
+    val guid: String = "",
     val logoURL: String = "",
     val title: String = "",
     val streams: List<Stream> = emptyList(),
@@ -35,8 +36,8 @@ data class FirebaseAccountDataContract(
 )
 
 data class Settings(
-    val youTubeEnabled: Boolean = true,
-    val uvcEnabled: Boolean = true
+    val youTubeEnabled: Boolean = false,
+    val uvcEnabled: Boolean = false
 )
 
 /*TODO data class Event(
