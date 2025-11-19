@@ -92,7 +92,7 @@ data class SoccerScore (
 ) : IScore
 
 data class VolleyScore(
-    val sets: MutableList<SetScore> = mutableListOf(SetScore()),
+    val sets: List<SetScore> = listOf(SetScore()),
     val league: String = "",
     override val command: String = ""
 ) : IScore

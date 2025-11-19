@@ -48,9 +48,9 @@ class VolleyScoreViewModel: ViewModel() {
     }
 
     fun addNewSet() {
-        var updatedSets = _liveScore.value.sets.toMutableList()
-        updatedSets.add(SetScore())
-        _liveScore.value = _liveScore.value.copy(sets = updatedSets)
+        _liveScore.value = _liveScore.value.copy(
+            sets = _liveScore.value.sets.toMutableList().apply { add(SetScore()) }
+        )
     }
 
     fun removeLastSet() {
