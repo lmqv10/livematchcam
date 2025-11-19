@@ -36,7 +36,6 @@ import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.animateAlpha
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
-import it.lmqv.livematchcam.extensions.launchOnCreated
 import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
@@ -46,7 +45,6 @@ import it.lmqv.livematchcam.handlers.offset.IOffsetDegreeHandler
 import it.lmqv.livematchcam.handlers.offset.ManualZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.NoDebounceExtraSmoothZoomLevelHandler
-import it.lmqv.livematchcam.repositories.FirebaseDataRepository
 import it.lmqv.livematchcam.utils.KeyDescription
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider

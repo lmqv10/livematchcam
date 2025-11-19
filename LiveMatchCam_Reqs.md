@@ -90,3 +90,15 @@ f67fee1fd18f3ce57855964b806a4f3a
         Log.e("LM_NAV_DEBUG", "Error reading back stack", e)
     }
 }*/
+
+/*
+    val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    val ids = cameraManager.cameraIdList
+    for (cameraId in ids) {
+        val cameraFacing = cameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.LENS_FACING)
+        if (cameraFacing != null && cameraFacing == CameraMetadata.LENS_FACING_BACK) {
+        var characteristics = cameraManager.getCameraCharacteristics(cameraId)
+        val maxZoom = characteristics.secureGet(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM) ?: 1f
+    }
+}
+*/

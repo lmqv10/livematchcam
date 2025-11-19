@@ -86,7 +86,7 @@ class StatusFragment : Fragment(),
 
         this.launchOnStarted {
             settingsRepository.initialZoom.collect { zoom ->
-                binding.initialZoom.text = singleDecimalFormat(zoom)
+                binding.initialZoom.text = singleDecimalFormat(zoom, "x")
                 rotationSensorService.initialize()
             }
         }

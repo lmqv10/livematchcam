@@ -179,9 +179,9 @@ fun Int.toArgbHex(): String {
 }
 
 
-fun singleDecimalFormat(value:Float) : String {
-    val formatter = DecimalFormat("#.0")
-    return formatter.format(value)
+fun singleDecimalFormat(value: Float, suffix: String = "") : String {
+    val formatter = DecimalFormat("0.0")
+    return formatter.format(value) + suffix
 }
 
 fun degreeFormat(value:Int) : String {
