@@ -233,7 +233,8 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                     binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = settings.youTubeEnabled && isLogged
                     binding.matchNavView.getHeaderView(0).findViewById<TextView>(R.id.textAccountEmail).isVisible = settings.youTubeEnabled && isLogged
 
-                    binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = firebaseAccountViewModel.hasAccountKey()
+                    var hasStreams = firebaseAccountData.streams.isNotEmpty()
+                    binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = firebaseAccountViewModel.hasAccountKey() && hasStreams
 
                     floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData)
                 }
