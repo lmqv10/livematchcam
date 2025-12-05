@@ -58,6 +58,8 @@
     <string name="new_schedule">Schedule a match</string>
     <string name="select_thumbnail">Select a Thumbnail and a Live Stream</string>
 
+    <string name="notification_text">Streaming service is running</string>
+
     <string name="match_league">Match Description</string>
     <string name="team_name">Team Name</string>
     <string name="home_team">Team 1</string>

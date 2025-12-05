@@ -2,6 +2,7 @@ package it.lmqv.livematchcam.extensions
 
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.app.Service
 import android.content.Context
 import android.graphics.drawable.LayerDrawable
 import android.view.LayoutInflater
@@ -49,9 +50,9 @@ fun ImageObjectFilterRender.animateAlpha(
     }
 }
 
-/*fun Service.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @DrawableRes iconResId: Int = R.drawable.ic_confirm) {
+fun Service.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @DrawableRes iconResId: Int = R.drawable.ic_confirm) {
     customToast(this, message, duration, iconResId)
-}*/
+}
 
 /*fun Context.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @DrawableRes iconResId: Int = R.drawable.ic_confirm) {
     customToast(this, message, duration, iconResId)

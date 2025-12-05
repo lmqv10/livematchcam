@@ -18,8 +18,17 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!--
-uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!--needed by background Rtp service to keep service alive-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <!--  Android 14 background compatibility-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
+
+    <!--uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
@@ -29,8 +38,7 @@ uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <!--
-uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!--uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /
     -->
@@ -51,11 +59,11 @@ uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_settings" />
+
         <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:immersive="true"
-            android:launchMode="singleTask"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/SplashScreen"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
@@ -67,71 +75,88 @@ uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MatchActivity"
             android:exported="true"
             android:immersive="true"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi">
-            <intent-filter>
+            <!--intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
-
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/device_filter" />
+                android:resource="@xml/device_filter" /-->
         </activity>
+
         <activity
             android:name=".StreamActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
+
         <activity
             android:name=".UVCStreamActivity"
             android:exported="true"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
-            tools:ignore="DiscouragedApi" />
+            tools:ignore="DiscouragedApi"/>
+
         <activity
             android:name=".RemoteScoreActivity"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
+
         <activity
             android:name=".AccountActivity"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
+
 <!--        <activity-->
 <!--            android:name=".FirebaseAccountActivity"-->
 <!--            android:screenOrientation="sensorLandscape"-->
 <!--            android:configChanges="orientation|screenSize"-->
 <!--            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"-->
 <!--            tools:ignore="DiscouragedApi" />-->
+
         <activity
             android:name=".YouTubeActivity"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
-        <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
+
+        <activity
+            android:name=".UsbActivity"
+            android:screenOrientation="sensorLandscape"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/ActivityTransparent"
+            tools:ignore="DiscouragedApi">
+
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="${appAuthRedirectScheme}" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/default_device_filter" />
         </activity>
-        <!--
-receiver
+
+        <!--receiver
             android:name=".UsbPermissionReceiver"
             android:exported="true"
             android:permission="no.permission.BROADCAST_USB_PERMISSION">
@@ -140,9 +165,13 @@ receiver
             </intent-filter>
         </receiver
         -->
-        <service
-            android:name=".services.CounterService"
+
+        <service android:name=".services.CounterService"
             android:exported="false" />
+
+        <service android:name="it.lmqv.livematchcam.services.stream.StreamService"
+            android:foregroundServiceType="mediaProjection|microphone|camera" />
+
     </application>
 
 </manifest>

@@ -1,9 +1,7 @@
 package it.lmqv.livematchcam.handlers.zoom
 
 import android.content.Context
-import com.pedro.encoder.input.sources.video.Camera1Source
-import com.pedro.encoder.input.sources.video.Camera2Source
-import com.pedro.encoder.input.sources.video.VideoSource
+import it.lmqv.livematchcam.services.stream.IVideoSourceZoomHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,7 +14,7 @@ import kotlin.math.sign
 
 class SmoothZoomLevelHandler(
     context: Context,
-    private val videoSource: VideoSource) : ZoomLevelHandler(context, videoSource),
+    private val zoomHandler: IVideoSourceZoomHandler) : ZoomLevelHandler(context, zoomHandler),
     IZoomLevelHandler {
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -38,10 +36,7 @@ class SmoothZoomLevelHandler(
                 while (start < end && startZoomLevel < upper) {
                     start += offset
                     startZoomLevel += (offset * signOffset)
-                    when (videoSource) {
-                        is Camera1Source -> { videoSource.setZoom(startZoomLevel.toInt()) }
-                        is Camera2Source -> { videoSource.setZoom(startZoomLevel) }
-                    }
+                    zoomHandler.setZoom(startZoomLevel)
                     delay(50)
                 }
             }

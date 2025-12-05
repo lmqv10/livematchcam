@@ -10,6 +10,7 @@ import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -51,6 +52,7 @@ import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import coil.request.ImageRequest
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.repositories.MatchRepository
 import kotlinx.coroutines.flow.combine
 
@@ -92,7 +94,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //toast("CameraFragment::onCreate")
+        Logd("MatchActivity::onCreate")
 
         binding = ActivityMatchBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -342,11 +344,12 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onStart() {
         super.onStart()
-        //toast("CameraFragment::onStart")
+        Logd("MatchActivity::onStart")
     }
 
     override fun onPause() {
         super.onPause()
+        Logd("MatchActivity::onPause")
         //navControllerState = navController.saveState()
 
 //        getSharedPreferences("nav_state", MODE_PRIVATE)
@@ -361,27 +364,45 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        Logd("MatchActivity::OnSaveInstanceState")
 //        navControllerState?.let {
 //            outState.putBundle("nav_state", it)
 //        }
-        //toast("MatchActivity::OnSaveInstanceState")
     }
 
     override fun onResume() {
         super.onResume()
-        //toast("MatchActivity::onResume")
+        Logd("MatchActivity::onResume")
         googleAccountViewModel.updateLastSignedInAccount()
         firebaseAccountViewModel.updateLastSignedInAccount()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        //toast("MatchActivity::onDestroy")
+        Logd("MatchActivity::onDestroy")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
+
+// TODO - Add Preferences Menu
+//        val menuItem = menu.findItem(R.id.menu_settings)
+//        val drawable = menuItem.icon
+//        drawable?.let {
+//            it.setTint(ContextCompat.getColor(this, R.color.primary))
+//            menuItem.icon = it
+//        }
         return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

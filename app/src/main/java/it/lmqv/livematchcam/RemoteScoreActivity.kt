@@ -1,6 +1,5 @@
 package it.lmqv.livematchcam
 
-import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -13,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.databinding.ActivityRemoteScoreBinding
 import it.lmqv.livematchcam.factories.SportsFactory
+import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
 import it.lmqv.livematchcam.fragments.IRemoteControlFragment
 import it.lmqv.livematchcam.fragments.IScoreBoardFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
@@ -25,7 +25,7 @@ class RemoteScoreActivity : AppCompatActivity(),
 
     private lateinit var binding: ActivityRemoteScoreBinding
     private lateinit var remoteControlFragment: IRemoteControlFragment
-    private lateinit var scoreBoardFragment: IScoreBoardFragment
+    private lateinit var scoreBoardFragment: IScoreBoardFragment<BaseScoreBoardFragment>
 
     private lateinit var sportCollectJob : Job
 
@@ -35,7 +35,6 @@ class RemoteScoreActivity : AppCompatActivity(),
         binding = ActivityRemoteScoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

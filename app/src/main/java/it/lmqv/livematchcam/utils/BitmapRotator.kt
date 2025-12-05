@@ -9,20 +9,21 @@ import java.io.IOException
 import androidx.core.graphics.scale
 import coil.Coil
 import coil.request.ImageRequest
+import it.lmqv.livematchcam.services.stream.filters.RotatorDescriptor
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class BannerBitmapRotator(
+class BitmapRotator(
     private val context: Context,
-    private val scope: CoroutineScope,
-    private var intervalMillis: Long = 4000L,
-    targetWidthDp: Int = 50
+    private val rotatorDescriptor: RotatorDescriptor = RotatorDescriptor()
 ) {
     interface BitmapRotationListener {
         fun onBitmapAvailable(bitmap: Bitmap)
     }
 
-    private var targetWidth: Int = dpToPx(targetWidthDp)
+    private val scope = CoroutineScope(Dispatchers.Default)
+    private var targetWidth: Int = dpToPx(rotatorDescriptor.targetWidthDp)
 
     private val bitmapCache = mutableMapOf<String, Bitmap>()
     private var urls: List<String> = emptyList()
@@ -45,26 +46,13 @@ class BannerBitmapRotator(
                     stop()
                 }
             }
-            handler.postDelayed(this, intervalMillis)
+            handler.postDelayed(this, rotatorDescriptor.intervalMillis)
         }
     }
 
     fun setBitmapRotationListener(listener: BitmapRotationListener) {
         this.listener = listener
     }
-
-//    fun setInterval(intervalMillis: Long) {
-//        this.intervalMillis = intervalMillis
-//        if (timer != null) {
-//            stop()
-//            start()
-//        }
-//    }
-
-//    fun setBitmapSize(widthDp: Int, heightDp: Int) {
-//        this.targetWidth = dpToPx(widthDp)
-//        this.targetHeight = dpToPx(heightDp)
-//    }
 
     fun setUrls(urlList: List<String>) {
         this.urls = urlList
@@ -74,9 +62,16 @@ class BannerBitmapRotator(
     }
 
     fun start() {
-        if (urls.isEmpty() || isRunning) return
-        isRunning = true
-        handler.post(rotationRunnable)
+        //if (urls.isEmpty() || isRunning) return
+        if (!isRunning) {
+            isRunning = true
+            handler.post(rotationRunnable)
+        }
+    }
+
+    fun stop() {
+        isRunning = false
+        handler.removeCallbacks(rotationRunnable)
     }
 
     private fun preloadBitmaps() {
@@ -107,11 +102,6 @@ class BannerBitmapRotator(
             return it.scale(targetWidth, targetHeight)
                 .copy(Bitmap.Config.ARGB_8888, true)
         }
-    }
-
-    fun stop() {
-        isRunning = false
-        handler.removeCallbacks(rotationRunnable)
     }
 
     private fun dpToPx(dp: Int): Int {

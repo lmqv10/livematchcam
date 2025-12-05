@@ -1,20 +1,8 @@
 package it.lmqv.livematchcam.handlers.zoom
 
 import android.content.Context
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraManager
-import android.hardware.camera2.CameraMetadata
-import android.os.Build
-import android.util.Range
-import com.pedro.common.secureGet
-import com.pedro.encoder.input.sources.video.Camera1Source
-import com.pedro.encoder.input.sources.video.Camera2Source
-import com.pedro.encoder.input.sources.video.ScreenSource
-import com.pedro.encoder.input.sources.video.VideoSource
-import com.pedro.encoder.input.video.CameraHelper.Facing
-import com.pedro.extrasources.CameraUvcSource
-import com.pedro.extrasources.CameraXSource
 import it.lmqv.livematchcam.repositories.SettingsRepository
+import it.lmqv.livematchcam.services.stream.IVideoSourceZoomHandler
 import it.lmqv.livematchcam.utils.Debouncer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +21,7 @@ interface IZoomLevelHandler {
 
 abstract class ZoomLevelHandler(
     context: Context,
-    videoSource: VideoSource) : IZoomLevelHandler {
+    zoomHandler: IVideoSourceZoomHandler) : IZoomLevelHandler {
 
     private val debounceMs = 300L
     private val updateDebounce = Debouncer(debounceMs)
@@ -52,24 +40,24 @@ abstract class ZoomLevelHandler(
     private var zoomJob: Job? = null
 
     init {
-        when (videoSource) {
-            is Camera1Source -> {
-                val rangeInt = videoSource.getZoomRange()
-                this.current = videoSource.getZoom().toFloat()
-                this.lower = rangeInt.lower.toFloat()
-                this.upper = rangeInt.upper.toFloat()
-            }
-            is Camera2Source -> {
-                val rangeFloat = videoSource.getZoomRange()
-                this.current = videoSource.getZoom()
-                this.lower = rangeFloat.lower
-                this.upper = rangeFloat.upper
+//        when (videoSource) {
+//            is Camera1Source -> {
+//                val rangeInt = videoSource.getZoomRange()
+//                this.current = videoSource.getZoom().toFloat()
+//                this.lower = rangeInt.lower.toFloat()
+//                this.upper = rangeInt.upper.toFloat()
+//            }
+//            is Camera2Source -> {
+//            }
+//        }
+        val rangeFloat = zoomHandler.getZoomRange()
+        this.current = zoomHandler.getZoom()
+        this.lower = rangeFloat.lower
+        this.upper = rangeFloat.upper
 
-                if (this.current < this.lower) {
-                    this.lower = 0.5f
-                    this.current = 0.5f
-                }
-            }
+        if (this.current < this.lower) {
+            this.lower = 0.5f
+            this.current = 0.5f
         }
 
         this.currentCameraZoom = this.current

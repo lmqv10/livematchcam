@@ -1,14 +1,10 @@
 package it.lmqv.livematchcam.handlers.zoom
 
 import android.content.Context
-import com.pedro.encoder.input.sources.video.Camera1Source
-import com.pedro.encoder.input.sources.video.Camera2Source
-import com.pedro.encoder.input.sources.video.VideoSource
-import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.services.stream.IVideoSourceZoomHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.min
@@ -17,7 +13,7 @@ import kotlin.math.sign
 
 class NoDebounceExtraSmoothZoomLevelHandler(
     context: Context,
-    private val videoSource: VideoSource) : ZoomLevelHandler(context, videoSource),
+    private val zoomHandler: IVideoSourceZoomHandler) : ZoomLevelHandler(context, zoomHandler),
     IZoomLevelHandler {
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -49,15 +45,7 @@ class NoDebounceExtraSmoothZoomLevelHandler(
                     while (start < end && startZoomLevel < upper) {
                         start += smoothOffset
                         startZoomLevel += (smoothOffset * signOffset)
-                        when (videoSource) {
-                            is Camera1Source -> {
-                                videoSource.setZoom(startZoomLevel.toInt())
-                            }
-
-                            is Camera2Source -> {
-                                videoSource.setZoom(startZoomLevel)
-                            }
-                        }
+                        zoomHandler.setZoom(startZoomLevel)
                         ///delay(0)
                     }
                     //Logd("Job:: Stop")

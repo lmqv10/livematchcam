@@ -1,54 +1,99 @@
 package it.lmqv.livematchcam
 
-import android.Manifest.permission.CAMERA
-import android.Manifest.permission.RECORD_AUDIO
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.PermissionChecker
-import com.jiangdg.ausbc.utils.ToastUtils
+import it.lmqv.livematchcam.databinding.ActivityUvcStreamBinding
 import it.lmqv.livematchcam.fragments.UVCCameraFragment
-import it.lmqv.livematchcam.handlers.offset.ManualZoomLevel
+
+//object PermissionManager {
+//
+//    fun check(context: ComponentActivity,
+//          onGranted: () -> Unit, onDenied: () -> Unit)
+//        : ActivityResultLauncher<Array<String>> {
+//        return context.registerForActivityResult(
+//            ActivityResultContracts.RequestMultiplePermissions()
+//        ) { permissions ->
+//            val granted = permissions.all { it.value }
+//            if (granted) {
+//                onGranted()
+//                context.toast("Permessi concessi")
+//            } else {
+//                onDenied()
+//                context.toast("Permessi negati")
+//            }
+//        }
+//    }
+//}
 
 class UVCStreamActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityUvcStreamBinding
+
     private val cameraFragment = UVCCameraFragment.getInstance()
+
+//    private val permissionLauncher =
+//        registerForActivityResult(
+//            ActivityResultContracts.RequestMultiplePermissions()
+//        ) { permissions ->
+//            val granted = permissions.all { it.value }
+//            if (granted) {
+//                //openCamera()
+//                toast("Permessi concessi")
+//            } else {
+//                toast("Permessi negati")
+//            }
+//        }
+
+    //private val cameraFragment = CameraFragment.getInstance()
+
     //private lateinit var usbManager: UsbManager
     //private val ACTION_USB_PERMISSION = "it.lmqv.livematchcam.USB_PERMISSION"
 
-    /*private val usbReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                ACTION_USB_PERMISSION -> {
-                    synchronized(this) {
-                        val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-                        if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                            device?.let {
-                                openUsbDevice(it)
-                            }
-                        } else {
-                            Toast.makeText(context, "Permesso USB negato", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-        }
-    }*/
+//    private val usbReceiver = object : BroadcastReceiver() {
+//        override fun onReceive(context: Context, intent: Intent) {
+//
+//            val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+//
+//            when (intent.action) {
+//                UsbManager.ACTION_USB_DEVICE_ATTACHED ->
+//                    toast("Device attached ${device?.deviceName} - " +
+//                            "${device?.deviceClass} - " +
+//                            "${device?.deviceProtocol}" +
+//                            "${device?.deviceSubclass}")
+//
+//                UsbManager.ACTION_USB_DEVICE_DETACHED ->
+//                    toast("Device detached")
+//            }
+//            /*when (intent?.action) {
+//                ACTION_USB_PERMISSION -> {
+//                    synchronized(this) {
+//                        val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+//                        if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+//                            device?.let {
+//                                openUsbDevice(it)
+//                            }
+//                        } else {
+//                            Toast.makeText(context, "Permesso USB negato", Toast.LENGTH_SHORT).show()
+//                        }
+//                    }
+//                }
+//            }*/
+//        }
+//    }
     //private lateinit var usbReceiver: UsbPermissionReceiver
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_live_stream)
-        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
+        binding = ActivityUvcStreamBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -76,34 +121,37 @@ class UVCStreamActivity : AppCompatActivity() {
             )
         }
 
-        val hasCameraPermission = PermissionChecker.checkSelfPermission(this, CAMERA)
-        val hasStoragePermission =
-            PermissionChecker.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE)
-        if (hasCameraPermission != PermissionChecker.PERMISSION_GRANTED || hasStoragePermission != PermissionChecker.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, CAMERA)) {
-                ToastUtils.show(R.string.permission_tip)
-            }
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(CAMERA, WRITE_EXTERNAL_STORAGE, RECORD_AUDIO),
-                REQUEST_CAMERA
-            )
-            return
-        }
+//        val hasCameraPermission = PermissionChecker.checkSelfPermission(this, CAMERA)
+//        val hasStoragePermission =
+//            PermissionChecker.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE)
+//        if (hasCameraPermission != PermissionChecker.PERMISSION_GRANTED || hasStoragePermission != PermissionChecker.PERMISSION_GRANTED) {
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, CAMERA)) {
+//                ToastUtils.show(R.string.permission_tip)
+//            }
+//            ActivityCompat.requestPermissions(
+//                this,
+//                arrayOf(CAMERA, WRITE_EXTERNAL_STORAGE, RECORD_AUDIO),
+//                REQUEST_CAMERA
+//            )
+//            return
+//        }
 
+//        permissionLauncher.launch(
+//            arrayOf(CAMERA, WRITE_EXTERNAL_STORAGE, RECORD_AUDIO)
+//        )
+//        PermissionManager
+//            .check(this, {
+//                toast("Granted")
+//            }, {
+//                toast("Denied")
+//            })
+//            .launch(
+//            arrayOf(CAMERA, WRITE_EXTERNAL_STORAGE, RECORD_AUDIO)
+//        )
         /*usbReceiver = UsbPermissionReceiver()
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         registerReceiver(usbReceiver, filter, Context.RECEIVER_EXPORTED)
-
-        usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
-
-        val usbDevices = usbManager.deviceList
-        if (usbDevices.isNotEmpty()) {
-            for (device in usbDevices.values) {
-                requestUsbPermission(device)
-            }
-        }*/
-
+        */
     }
 
     /*private fun requestUsbPermission(device: UsbDevice) {
@@ -189,11 +237,37 @@ class UVCStreamActivity : AppCompatActivity() {
 
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.container, cameraFragment)
+            .replace(binding.uvcContainer.id, cameraFragment)
             .commit()
+
+
+//        var usbManager = getSystemService(USB_SERVICE) as UsbManager
+//        val usbDevices = usbManager.deviceList
+//        if (usbDevices.isNotEmpty()) {
+//            for (device in usbDevices.values) {
+//                toast("Device found ${device.deviceName} ! " +
+//                        "class: ${device.deviceClass} - " +
+//                        "subclass: ${device.deviceSubclass}")
+//            }
+//        } else {
+//            toast("no devices")
+//        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+//        val filter = IntentFilter().apply {
+//            addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+//            addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+//        }
+//        registerReceiver(usbReceiver, filter)
     }
 
 
+    override fun onPause() {
+        super.onPause()
+       // unregisterReceiver(usbReceiver)
+    }
     /*override fun onBackPressed() {
         AlertDialog.Builder(this)
             .setMessage("Are you sure you want to exit?")
@@ -202,8 +276,8 @@ class UVCStreamActivity : AppCompatActivity() {
             .show()
     }*/
 
-    companion object {
-        private const val REQUEST_CAMERA = 0
-        private const val REQUEST_STORAGE = 1
-    }
+//    companion object {
+//        private const val REQUEST_CAMERA = 0
+//        private const val REQUEST_STORAGE = 1
+//    }
 }

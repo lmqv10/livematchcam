@@ -8,9 +8,13 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import it.lmqv.livematchcam.databinding.ActivityStreamBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.fragments.CameraFragment
 
 class StreamActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityStreamBinding
 
     private val cameraFragment = CameraFragment.getInstance()
 
@@ -27,8 +31,10 @@ class StreamActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //toast("StreamActivity::onCreate")
-        setContentView(R.layout.activity_live_stream)
+        Logd("StreamActivity::onCreate")
+
+        binding = ActivityStreamBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -62,7 +68,7 @@ class StreamActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        //toast("StreamActivity::onStart")
+        Logd("StreamActivity::onStart")
 
         supportFragmentManager
             .beginTransaction()
@@ -72,17 +78,17 @@ class StreamActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        //toast("StreamActivity::OnPause")
+        Logd("StreamActivity::OnPause")
     }
 
     override fun onResume() {
         super.onResume()
-        //toast("StreamActivity::onResume")
+        Logd("StreamActivity::onResume")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        //toast("StreamActivity::onDestroy")
+        Logd("StreamActivity::onDestroy")
         //val dm = getSystemService(DisplayManager::class.java)
         //dm.unregisterDisplayListener(displayListener)
     }
