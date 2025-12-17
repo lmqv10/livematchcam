@@ -22,7 +22,6 @@ class BitmapRotator(
         fun onBitmapAvailable(bitmap: Bitmap)
     }
 
-    private val scope = CoroutineScope(Dispatchers.Default)
     private var targetWidth: Int = dpToPx(rotatorDescriptor.targetWidthDp)
 
     private val bitmapCache = mutableMapOf<String, Bitmap>()
@@ -76,7 +75,7 @@ class BitmapRotator(
 
     private fun preloadBitmaps() {
         for (url in urls) {
-            scope.launch {
+            CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val bitmap = loadAndResizeBitmap(url)
                     if (bitmap != null) {

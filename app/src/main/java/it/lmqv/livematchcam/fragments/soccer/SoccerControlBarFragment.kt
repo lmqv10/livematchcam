@@ -15,7 +15,7 @@ import it.lmqv.livematchcam.services.firebase.SoccerScore
 import it.lmqv.livematchcam.fragments.BaseControlBarFragment
 import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.repositories.MatchRepository
-import it.lmqv.livematchcam.services.CounterService
+import it.lmqv.livematchcam.services.counter.CounterService
 import it.lmqv.livematchcam.viewmodels.CounterViewModel
 import it.lmqv.livematchcam.viewmodels.SoccerScoreViewModel
 import kotlinx.coroutines.flow.collectLatest

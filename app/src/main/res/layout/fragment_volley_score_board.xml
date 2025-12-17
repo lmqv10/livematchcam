@@ -1,6 +1,8 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="@dimen/volley_score_board_width"
+    android:background="@color/TRANSPARENT"
     android:layout_height="wrap_content">
 
     <LinearLayout
@@ -10,7 +12,9 @@
         android:background="@color/TRANSPARENT"
         android:padding="2dp">
     </LinearLayout>
+
     <LinearLayout
+        android:id="@+id/score_board"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -20,6 +24,7 @@
         android:layout_marginStart="7dp">
 
         <LinearLayout
+            android:id="@+id/home_bar"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal">
@@ -27,7 +32,7 @@
             <LinearLayout
                 android:id="@+id/home_color_bar"
                 android:layout_width="5dp"
-                android:layout_height="24dp"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:background="@color/TRANSPARENT"
                 android:layout_marginEnd="2dp"/>
@@ -35,25 +40,24 @@
             <GridLayout
                 android:layout_width="@dimen/volley_score_board_team"
                 android:layout_height="wrap_content"
-                android:columnCount="3">
+                android:columnCount="4">
 
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
                     android:layout_columnWeight="1">
-
                     <ImageView
                         android:id="@+id/home_shirt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
+                        android:contentDescription="@string/description_placeholder"
                         android:src="@drawable/shirt_layers" />
-
                     <ImageView
                         android:id="@+id/home_logo"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_gravity="center_vertical"
+                        android:contentDescription="@string/description_placeholder"
                         android:src="@drawable/shield" />
                 </FrameLayout>
 
@@ -64,16 +68,17 @@
                     android:layout_columnWeight="2"
                     android:textColor="@color/BLACK"
                     android:text="@string/hint_home_team"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/text_size_big"
                     android:gravity="center" />
 
-                <!--ImageView
-                    android:id="@+id/home_serve"
-                    android:layout_width="0dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_columnWeight="1"
-                    android:src="@drawable/sport_volley" /-->
+<!--                <ImageView-->
+<!--                    android:id="@+id/home_serve"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="16dp"-->
+<!--                    android:layout_gravity="center_vertical"-->
+<!--                    android:layout_columnWeight="1"-->
+<!--                    android:contentDescription="@string/description_placeholder"-->
+<!--                    android:src="@drawable/sport_volley" />-->
 
                 <!--TextView
                     android:id="@+id/home_score_sets"
@@ -87,68 +92,85 @@
                     android:text="@string/score_placeholder" /-->
             </GridLayout>
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/home_sets_bar"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
 
                 <TextView
                     android:id="@+id/home_score_1set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:visibility="gone"
                     android:id="@+id/home_score_2set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/home_score_1set"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:visibility="gone"
                     android:id="@+id/home_score_3set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/home_score_2set"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:visibility="gone"
                     android:id="@+id/home_score_4set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/home_score_3set"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:visibility="gone"
                     android:id="@+id/home_score_5set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
-            </LinearLayout>
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/home_score_4set"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
 
+        <View style="@style/dividerStyle"/>
+
         <LinearLayout
+            android:id="@+id/away_bar"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal">
@@ -156,7 +178,7 @@
             <LinearLayout
                 android:id="@+id/away_color_bar"
                 android:layout_width="5dp"
-                android:layout_height="24dp"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:background="@color/TRANSPARENT"
                 android:layout_marginEnd="2dp"/>
@@ -168,21 +190,22 @@
 
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
                     android:layout_columnWeight="1">
 
                     <ImageView
                         android:id="@+id/away_shirt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
+                        android:contentDescription="@string/description_placeholder"
                         android:src="@drawable/shirt_layers" />
 
                     <ImageView
                         android:id="@+id/away_logo"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_gravity="center_vertical"
+                        android:contentDescription="@string/description_placeholder"
                         android:src="@drawable/shield" />
                 </FrameLayout>
 
@@ -193,16 +216,18 @@
                     android:layout_columnWeight="2"
                     android:textColor="@color/BLACK"
                     android:text="@string/hint_away_team"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/text_size_big"
                     android:gravity="center" />
 
-                <!--ImageView
-                    android:id="@+id/away_serve"
-                    android:layout_width="0dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_columnWeight="1"
-                    android:src="@drawable/sport_volley" /-->
+<!--                <ImageView-->
+<!--                    android:visibility="invisible"-->
+<!--                    android:id="@+id/away_serve"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="16dp"-->
+<!--                    android:layout_gravity="center_vertical"-->
+<!--                    android:layout_columnWeight="1"-->
+<!--                    android:contentDescription="@string/description_placeholder"-->
+<!--                    android:src="@drawable/sport_volley" />-->
 
                 <!--TextView
                     android:id="@+id/away_score_sets"
@@ -217,75 +242,91 @@
 
             </GridLayout>
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/away_sets_bar"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
 
                 <TextView
                     android:id="@+id/away_score_1set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:visibility="gone"
                     android:id="@+id/away_score_2set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/away_score_1set"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:visibility="gone"
                     android:id="@+id/away_score_3set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/away_score_2set"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:visibility="gone"
                     android:id="@+id/away_score_4set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/away_score_3set"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:visibility="gone"
                     android:id="@+id/away_score_5set"
                     android:layout_width="24dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp"
                     android:gravity="center"
-                    android:textSize="18sp"
+                    android:text="@string/score_placeholder"
+                    android:textSize="@dimen/text_size_big"
                     android:textColor="@color/black"
-                    android:text="@string/score_placeholder" />
-            </LinearLayout>
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/away_score_4set"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
 
         <TextView
+            android:visibility="gone"
             android:id="@+id/match_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/BLACK"
             android:text=""
-            android:textSize="11sp"
-            android:gravity="center" />
+            android:paddingHorizontal="2dp"
+            android:textSize="16sp"
+            android:gravity="start" />
 
     </LinearLayout>
 

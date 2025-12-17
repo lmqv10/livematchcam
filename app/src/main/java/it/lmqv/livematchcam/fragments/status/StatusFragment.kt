@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.fragments
+package it.lmqv.livematchcam.fragments.status
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -28,11 +28,13 @@ import it.lmqv.livematchcam.extensions.singleDecimalFormat
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import kotlinx.coroutines.launch
 
-class StatusFragment : Fragment(),
+interface IStatusFragment //<T> where T: Fragment
+
+class StatusFragment : Fragment(), IStatusFragment,
     RotationSensorService.OnRotationListener {
 
     companion object {
-        fun newInstance() = StatusFragment()
+        fun getInstance() = StatusFragment()
     }
 
     interface OnZoomButtonClickListener {

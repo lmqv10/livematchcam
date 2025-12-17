@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.Service
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.LayoutInflater
 import android.view.View
@@ -15,9 +16,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import coil.imageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.google.api.client.util.DateTime
 import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
 import it.lmqv.livematchcam.R
@@ -132,6 +137,20 @@ fun View.setEnabledRecursively(enabled: Boolean) {
             getChildAt(i).setEnabledRecursively(enabled)
         }
     }
+}
+
+suspend fun loadDrawableOffscreen(
+    context: Context,
+    data: Any?,
+    @DrawableRes icon: Int
+): Drawable? {
+    val request = ImageRequest.Builder(context)
+        .data(data)
+        .allowHardware(false)
+        .build()
+
+    return (context.imageLoader.execute(request) as? SuccessResult)?.drawable
+        ?: AppCompatResources.getDrawable(context, icon)
 }
 
 /*fun MenuItem.setColor(context: Context, @ColorRes color: Int) {

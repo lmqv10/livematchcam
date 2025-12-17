@@ -2,7 +2,7 @@ package it.lmqv.livematchcam.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import it.lmqv.livematchcam.services.helpers.CounterServiceConnector
+import it.lmqv.livematchcam.services.counter.CounterServiceConnector
 
 class CounterViewModel(application: Application) : AndroidViewModel(application) {
     private val serviceConnector = CounterServiceConnector(application)

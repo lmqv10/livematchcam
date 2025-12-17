@@ -6,7 +6,6 @@ import it.lmqv.livematchcam.INavigateDrawerActivity
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.RemoteScoreActivity
 import it.lmqv.livematchcam.StreamActivity
-import it.lmqv.livematchcam.UVCStreamActivity
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -74,13 +73,13 @@ class FloatingActionsViewModel : ViewModel() {
                 onClick = {
                     navigator?.navigateAsStartActivity(RemoteScoreActivity::class.java)
                 }
-            ),  FloatingAction(
-                id = R.id.action_uvc_stream,
-                iconRes = R.drawable.ic_uvc_camera,
-                contentDescription = "usb",
-                onClick = {
-                    navigator?.navigateAsStartActivity(UVCStreamActivity::class.java)
-                }
+//            ),  FloatingAction(
+//                id = R.id.action_uvc_stream,
+//                iconRes = R.drawable.ic_uvc_camera,
+//                contentDescription = "usb",
+//                onClick = {
+//                    navigator?.navigateAsStartActivity(UVCStreamActivity::class.java)
+//                }
             ), FloatingAction(
                 id = R.id.action_camera_stream,
                 iconRes = R.drawable.play_stream,
@@ -89,7 +88,7 @@ class FloatingActionsViewModel : ViewModel() {
                     navigator?.navigateAsStartActivity(StreamActivity::class.java)
                 }
             ))
-            .filter { x -> this.uvcEnabled || x.id != R.id.action_uvc_stream }
+            //.filter { x -> this.uvcEnabled || x.id != R.id.action_uvc_stream }
             .filter { x -> this.remoteScoreAvailability || x.id != R.id.action_remote_control }
             .filter { x -> this.currentMenuItemId != R.id.firebaseConfigurationFragment ||
                         (this.currentMenuItemId == R.id.firebaseConfigurationFragment &&

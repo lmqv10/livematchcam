@@ -44,6 +44,10 @@ object MatchRepository {
     private lateinit var syncStrategy: IMatchSyncStrategy
 
     private var currentMatch = Match()
+
+    private var _match = MutableStateFlow<Match>(currentMatch)
+    var match: StateFlow<Match> = _match
+
     private var currentEventInfo = EventInfo()
 
 //    private var _isRealtimeDatabaseAvailable = MutableStateFlow<Boolean>(false)
@@ -182,6 +186,7 @@ object MatchRepository {
         try {
             //Logd("$instanceId :: MatchRepository::notifyMatchChanges:: $updatedMatch")
             currentMatch = updatedMatch
+            _match.value = updatedMatch
 
             if (_homeTeam.value != currentMatch.homeTeam) {
                 _homeTeam.value = currentMatch.homeTeam

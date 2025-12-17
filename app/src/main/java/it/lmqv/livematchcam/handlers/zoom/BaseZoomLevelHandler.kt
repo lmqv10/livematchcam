@@ -51,7 +51,11 @@ abstract class ZoomLevelHandler(
 //            }
 //        }
         val rangeFloat = zoomHandler.getZoomRange()
+        //Logd("ZoomLevelHandler:: ${rangeFloat.lower} - ${rangeFloat.upper}")
+
         this.current = zoomHandler.getZoom()
+        //Logd("ZoomLevelHandler:: $current")
+
         this.lower = rangeFloat.lower
         this.upper = rangeFloat.upper
 

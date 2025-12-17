@@ -52,7 +52,6 @@ class NoDebounceExtraSmoothZoomLevelHandler(
                 }
             }
         }
-        //Logd("Current:: ${currentCameraZoom}")
         return this.currentCameraZoom
     }
 }

@@ -37,7 +37,7 @@ import androidx.navigation.ui.NavigationUI
 import it.lmqv.livematchcam.databinding.ActivityMatchBinding
 import it.lmqv.livematchcam.extensions.dpToPx
 import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.services.CounterService
+import it.lmqv.livematchcam.services.counter.CounterService
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
@@ -94,7 +94,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Logd("MatchActivity::onCreate")
+        //Logd("MatchActivity::onCreate")
 
         binding = ActivityMatchBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -344,12 +344,12 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onStart() {
         super.onStart()
-        Logd("MatchActivity::onStart")
+        //Logd("MatchActivity::onStart")
     }
 
     override fun onPause() {
         super.onPause()
-        Logd("MatchActivity::onPause")
+        //Logd("MatchActivity::onPause")
         //navControllerState = navController.saveState()
 
 //        getSharedPreferences("nav_state", MODE_PRIVATE)
@@ -364,7 +364,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Logd("MatchActivity::OnSaveInstanceState")
+        //Logd("MatchActivity::OnSaveInstanceState")
 //        navControllerState?.let {
 //            outState.putBundle("nav_state", it)
 //        }

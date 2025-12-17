@@ -1,25 +1,25 @@
-package it.lmqv.livematchcam.fragments
+package it.lmqv.livematchcam.fragments.status
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import it.lmqv.livematchcam.databinding.FragmentUvcStatusBinding
 import it.lmqv.livematchcam.extensions.bitrateFormat
 import it.lmqv.livematchcam.extensions.fpsFormat
 import it.lmqv.livematchcam.extensions.resolutionFormat
-import it.lmqv.livematchcam.viewmodels.UVCStatusViewModel
+import it.lmqv.livematchcam.viewmodels.StatusViewModel
 
-class UVCStatusFragment : Fragment() {
+class UVCStatusFragment : Fragment(), IStatusFragment {
 
     companion object {
-        fun newInstance() = UVCStatusFragment()
+        fun getInstance() = UVCStatusFragment()
     }
 
-    private val statusViewModel: UVCStatusViewModel by activityViewModels()
+    private val statusViewModel: StatusViewModel by activityViewModels()
     private var _binding: FragmentUvcStatusBinding? = null
     private val binding get() = _binding!!
 

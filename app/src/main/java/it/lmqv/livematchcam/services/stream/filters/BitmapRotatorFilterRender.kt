@@ -8,14 +8,23 @@ import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.animateAlpha
 import it.lmqv.livematchcam.services.stream.IVideoStreamData
 import it.lmqv.livematchcam.utils.BitmapRotator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 class BitmapRotatorFilterRender(
     var context: Context,
+    val sourceDescriptor: SourceDescriptor,
     val filterDescriptor: FilterDescriptor = FilterDescriptor(),
     val rotatorDescriptor: RotatorDescriptor = RotatorDescriptor(),
     var animationDescriptor: AnimationDescriptor = AnimationDescriptor()
 ) : BitmapObjectFilterRender(),
     BitmapRotator.BitmapRotationListener {
+
+    private var sourceJob : Job
+    private val sourceScope = CoroutineScope(Dispatchers.Default)
 
     private var bitmapRotator: BitmapRotator = BitmapRotator(context, rotatorDescriptor)
     private var isVisible: Boolean = false
@@ -24,23 +33,28 @@ class BitmapRotatorFilterRender(
 
     init {
         bitmapRotator.setBitmapRotationListener(this)
-    }
 
-    fun setIsVisible(isVisible: Boolean) {
-        this.isVisible = isVisible
-        Logd("BitmapRotatorFilterRender:: setIsVisible ${this.isVisible}")
-
-        if (!isVisible) {
-            stop()
-        } else {
-            start()
+        sourceJob = sourceScope.launch {
+            combine(
+                sourceDescriptor.url,
+                sourceDescriptor.isVisible
+            ) { url, visible -> Pair(url, visible)
+            }.collect { (url, visible) ->
+                bitmapRotator.setUrls(listOf(url))
+                isVisible = visible
+                if (!isVisible) {
+                    stop()
+                } else {
+                    start()
+                }
+            }
         }
-
     }
 
-    fun setUrls(urls : List<String>) {
-        Logd("BitmapRotatorFilterRender:: setUrls")
-        bitmapRotator.setUrls(urls)
+    override fun release() {
+        super.release()
+        Logd("BitmapRotatorFilterRender::release")
+        sourceJob.cancel()
     }
 
     fun start() {

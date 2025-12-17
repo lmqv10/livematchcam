@@ -10,6 +10,21 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="5dp"
+        android:text="@string/video_source"
+        android:textColor="@color/appColorSecondary"/>
+
+    <Spinner
+        android:id="@+id/video_source"
+        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dialog" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
         android:text="@string/video_resolution"
         android:textColor="@color/appColorSecondary"/>
 

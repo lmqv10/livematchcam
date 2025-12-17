@@ -102,13 +102,13 @@
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
 
-        <activity
-            android:name=".UVCStreamActivity"
-            android:exported="true"
-            android:screenOrientation="sensorLandscape"
-            android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
-            tools:ignore="DiscouragedApi"/>
+<!--        <activity-->
+<!--            android:name=".UVCStreamActivity"-->
+<!--            android:exported="true"-->
+<!--            android:screenOrientation="sensorLandscape"-->
+<!--            android:configChanges="orientation|screenSize"-->
+<!--            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"-->
+<!--            tools:ignore="DiscouragedApi"/>-->
 
         <activity
             android:name=".RemoteScoreActivity"
@@ -166,7 +166,7 @@
         </receiver
         -->
 
-        <service android:name=".services.CounterService"
+        <service android:name=".services.counter.CounterService"
             android:exported="false" />
 
         <service android:name="it.lmqv.livematchcam.services.stream.StreamService"

@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
@@ -22,9 +23,17 @@ import com.pedro.library.util.FpsListener
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.StreamActivity
 import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.factories.FiltersFactory
+import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.StreamConfigurationRepository
+import it.lmqv.livematchcam.services.firebase.Quadruple
 import it.lmqv.livematchcam.services.stream.filters.BitmapObjectFilterRender
+import it.lmqv.livematchcam.services.stream.filters.IScoreboardViewFilterRender
+import it.lmqv.livematchcam.services.stream.sources.UvcSonyCameraSource
+import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -40,6 +49,16 @@ import kotlinx.coroutines.launch
 //interface IPreviewEventListener {
 //    fun onPreviewStarted()
 //}
+
+object VideoSourceFactory {
+    fun get(videoSourceKind: VideoSourceKind, context: Context) : VideoSource {
+        return when (videoSourceKind) {
+            VideoSourceKind.CAMERA2 -> Camera2Source(context)
+            VideoSourceKind.UVC_SONY -> UvcSonyCameraSource()
+            //VideoSourceKind.UVC_CAMERA -> CameraUvcSource()
+        }
+    }
+}
 
 class StreamService: Service(),
     IVideoSourceZoomHandler,
@@ -60,22 +79,28 @@ class StreamService: Service(),
     private val _streamingElapsedTime = MutableStateFlow<Int>(0)
     val streamingElapsedTime: StateFlow<Int> = _streamingElapsedTime
 
+    private val _videoSourceZoomHandler = MutableStateFlow<IVideoSourceZoomHandler?>(null)
+    val videoSourceZoomHandler: StateFlow<IVideoSourceZoomHandler?> = _videoSourceZoomHandler
+
     private lateinit var genericStream: GenericStream
     private lateinit var streamConfigurationRepository: StreamConfigurationRepository
     private var notificationManager: NotificationManager? = null
     private var connectCheckerCallback: ConnectChecker? = null
     //private var previewEventListenerCallback: IPreviewEventListener? = null
     private var fpsListenerCallback: FpsListener.Callback? = null
-    private var zoomHandler: IVideoSourceZoomHandler? = null
+    private var videoSourceKind: VideoSourceKind? = null
 
     private var prepared = false
     private var videoStreamData : IVideoStreamData = CameraVideoStreamData()
     private var audioStreamData : IAudioStreamData = AudioStreamData()
     private var microphoneSource = MicrophoneSource()
     private var surfaceView: SurfaceView? = null
-    private var filters: List<BitmapObjectFilterRender> = listOf()
+    //private var filters: List<BitmapObjectFilterRender> = listOf()
 
-    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val streamServiceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private lateinit var streamConfigurationJob : Job
+    private var matchRepositoryJob : Job? = null
+    private var scoreRepositoryJob : Job? = null
 
     private val bitrateAdapter = BitrateAdapter {
         genericStream.setVideoBitrateOnFly(it)
@@ -112,28 +137,35 @@ class StreamService: Service(),
             getGlInterface().forceOrientation(OrientationForced.LANDSCAPE)
             getStreamClient().setBitrateExponentialFactor(0.5f)
             getStreamClient().setReTries(10)
+            setFpsListener(this@StreamService)
         }
 
-        serviceScope.launch() {
+        this.streamConfigurationJob = streamServiceScope.launch {
             combine(
+                MatchRepository.sport,
                 streamConfigurationRepository.fps,
-                streamConfigurationRepository.resolution
-            ) { fps, resolution -> Pair(fps, resolution) }
+                streamConfigurationRepository.resolution,
+                streamConfigurationRepository.videoSourceKind
+            ) { sport, fps, resolution, videoSourceKind -> Quadruple(sport, fps, resolution, videoSourceKind) }
             .distinctUntilChanged()
-            .collect { (fps, resolutionHeight) ->
+            .collect { (sport, fps, resolutionHeight, videoSourceKind) ->
+
+                Logd("StreamService :: streamConfigurationRepository :: ${this@StreamService.videoSourceKind} vs $videoSourceKind")
+                if (this@StreamService.videoSourceKind != videoSourceKind) {
+                    this@StreamService.videoSourceKind = videoSourceKind
+                    var videoSource = VideoSourceFactory.get(videoSourceKind, baseContext)
+                    this@StreamService.changeVideoSource(videoSource)
+                }
 
                 Logd("StreamService :: streamConfigurationRepository :: ${videoStreamData.height}p@${videoStreamData.fps}fps vs ${resolutionHeight}p@${fps}fps")
-
-                if (videoStreamData.height != resolutionHeight
-                    || videoStreamData.fps != fps) {
-
+                if (videoStreamData.height != resolutionHeight || videoStreamData.fps != fps) {
                     videoStreamData.width = if (resolutionHeight == 1080) { 1920 } else { 1280 }
                     videoStreamData.height = resolutionHeight
                     videoStreamData.fps = fps
 
                     if (!genericStream.isStreaming && genericStream.isOnPreview && this@StreamService.surfaceView != null) {
                         Logd("StreamService :: streamConfigurationRepository :: change resolution! .. preparePreview()")
-                        this@StreamService.preparePreview(this@StreamService.surfaceView!!, this@StreamService.filters)
+                        this@StreamService.preparePreview(this@StreamService.surfaceView!!, sport)
                     }
                 } else {
                     Logd("StreamService :: streamConfigurationRepository :: No changes")
@@ -162,7 +194,10 @@ class StreamService: Service(),
     override fun onDestroy() {
         super.onDestroy()
         Logd("StreamService :: onDestroy")
-        stopStream()
+        this.streamConfigurationJob.cancel()
+        this.matchRepositoryJob?.cancel()
+        this.scoreRepositoryJob?.cancel()
+        this.stopStream()
         genericStream.release()
     }
 
@@ -217,15 +252,15 @@ class StreamService: Service(),
     }
 
     override fun getZoomRange(): Range<Float> {
-        return this.zoomHandler?.getZoomRange() ?: Range(1f, 1f)
+        return this.videoSourceZoomHandler.value?.getZoomRange() ?: Range(1f, 1f)
     }
 
     override fun getZoom(): Float {
-        return this.zoomHandler?.getZoom() ?: 0f
+        return this.videoSourceZoomHandler.value?.getZoom() ?: 0f
     }
 
     override fun setZoom(level: Float) {
-        this.zoomHandler?.setZoom(level)
+        this.videoSourceZoomHandler.value?.setZoom(level)
     }
 
     fun toggleMicrophoneAudio() : Boolean {
@@ -259,9 +294,15 @@ class StreamService: Service(),
         }
     }
 
+    fun getVideoSourceKind(): VideoSourceKind? {
+        return this.videoSourceKind
+    }
+
     fun changeVideoSource(videoSource: VideoSource) {
         try {
             if (genericStream.videoSource::class != videoSource::class) {
+                Logd("StreamService :: streamConfigurationRepository :: Change VideoSource to $videoSourceKind")
+
                 when (videoSource) {
                     is Camera2Source -> {
                         with(videoSource) {
@@ -273,8 +314,15 @@ class StreamService: Service(),
                         }
                     }
                 }
+
                 genericStream.changeVideoSource(videoSource)
-                zoomHandler = VideoSourceZoomHandler(genericStream.videoSource)
+
+                Logd("StreamService :: initialize and notify zoomHandler")
+                _videoSourceZoomHandler.value = VideoSourceZoomHandler(genericStream.videoSource)
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    toast("Ready for $videoSourceKind")
+                }
             }
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
@@ -318,32 +366,37 @@ class StreamService: Service(),
         }
     }
 
-    fun preparePreview(surfaceView: SurfaceView,
-         filters: List<BitmapObjectFilterRender> = listOf()) {
-        Logd("StreamService :: preparePreview")
+    fun preparePreview(surfaceView: SurfaceView, sport: Sports) {
+        try {
+            Logd("StreamService :: preparePreview")
+            this.surfaceView = surfaceView
 
-        this.surfaceView = surfaceView
-        this.filters = filters
+            this.stopPreview()
 
-        this.stopPreview()
+            var filters = FiltersFactory.get(sport, applicationContext)
 
-        genericStream.getGlInterface().clearFilters()
-        filters.forEachIndexed { index, filter ->
-            genericStream.getGlInterface().addFilter(index, filter)
-        }
-
-        this.prepare()
-
-        if (!genericStream.isOnPreview && this.surfaceView != null) {
-            genericStream.getGlInterface().setPreviewResolution(videoStreamData.width, videoStreamData.height)
-
+            genericStream.getGlInterface().clearFilters()
             filters.forEachIndexed { index, filter ->
-                filter.setVideoStreamData(videoStreamData)
+                genericStream.getGlInterface().addFilter(index, filter)
             }
 
-            genericStream.startPreview(this.surfaceView!!, true)
+            this.prepare()
 
-            //this.onPreviewStarted()
+            if (!genericStream.isOnPreview && this.surfaceView != null) {
+                genericStream.getGlInterface().setPreviewResolution(videoStreamData.width, videoStreamData.height)
+
+                filters.forEachIndexed { index, filter ->
+                    filter.setVideoStreamData(videoStreamData)
+                }
+
+                genericStream.startPreview(this.surfaceView!!, true)
+
+                prepareMatchDataListeners(filters)
+            }
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+            Loge("preparePreview:: Exception ${e.message.toString()}")
         }
     }
 
@@ -368,6 +421,30 @@ class StreamService: Service(),
         job = null
         timeElapsedInSeconds = 0
         _streamingElapsedTime.value = timeElapsedInSeconds
+    }
+
+    private fun prepareMatchDataListeners(filters: List<BitmapObjectFilterRender>) {
+        this.matchRepositoryJob?.cancel()
+        this.scoreRepositoryJob?.cancel()
+
+        var scoreBoardFilterInstance = filters.firstOrNull { it is IScoreboardViewFilterRender }
+        if (scoreBoardFilterInstance != null) {
+            var scoreBoardFilterRender = scoreBoardFilterInstance as IScoreboardViewFilterRender
+            this.matchRepositoryJob = this.streamServiceScope.launch {
+                MatchRepository.match.collect { match ->
+                    Logd("StreamService :: MatchRepository.match.collect :: $match")
+                    scoreBoardFilterRender.match(match)
+                }
+            }
+            this.scoreRepositoryJob = this.streamServiceScope.launch {
+                MatchRepository.score.collect { score ->
+                    Logd("StreamService :: MatchRepository.score.collect :: $score")
+                    scoreBoardFilterRender.score(score)
+                }
+            }
+        } else {
+            Logd("StreamService :: prepareListeners :: not required")
+        }
     }
 
     private fun keepAliveTrick() {

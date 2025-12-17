@@ -4,8 +4,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.launchOnStarted
-import it.lmqv.livematchcam.services.CounterService
+import it.lmqv.livematchcam.services.counter.CounterService
 import it.lmqv.livematchcam.viewmodels.CounterViewModel
 
 interface IScoreBoardFragment<T> where T : Fragment {
@@ -32,6 +33,7 @@ abstract class BaseScoreBoardFragment : Fragment(), IScoreBoardFragment<BaseScor
 
         launchOnStarted {
             counterViewModel.counterState.collect { state ->
+                Logd("BaseScoreBoardFragment:: counterViewModel.counterState $state")
                 var seconds = 0
                 when (state) {
                     is CounterService.CounterState.Running -> seconds = state.seconds

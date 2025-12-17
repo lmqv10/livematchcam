@@ -10,10 +10,6 @@ import it.lmqv.livematchcam.converters.toLogoItems
 import it.lmqv.livematchcam.databinding.DialogLogosRecentsBinding
 import it.lmqv.livematchcam.utils.KeyDescription
 import it.lmqv.livematchcam.preferences.RecentsLogosPreferences
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 
 class LogosRecentsDialog (
     context: Context,
@@ -23,7 +19,6 @@ class LogosRecentsDialog (
     private var recentLogosManager = RecentsLogosPreferences(context)
 
     private lateinit var binding: DialogLogosRecentsBinding
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,10 +66,5 @@ class LogosRecentsDialog (
                 )
                 dialog.show()
             })
-    }
-
-    override fun dismiss() {
-        super.dismiss()
-        scope.cancel()
     }
 }

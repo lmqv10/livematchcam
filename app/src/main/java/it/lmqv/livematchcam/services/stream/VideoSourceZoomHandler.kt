@@ -5,12 +5,6 @@ import com.pedro.encoder.input.sources.video.Camera1Source
 import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.VideoSource
 
-interface IVideoSourceZoomHandler {
-    fun getZoomRange(): Range<Float>
-    fun getZoom(): Float
-    fun setZoom(level: Float)
-}
-
 class VideoSourceZoomHandler(val videoSource: VideoSource): IVideoSourceZoomHandler {
 
     override fun getZoomRange(): Range<Float> {
@@ -34,7 +28,7 @@ class VideoSourceZoomHandler(val videoSource: VideoSource): IVideoSourceZoomHand
             is Camera2Source -> {
                 videoSource.getZoom()
             }
-            else -> 0f
+            else -> 1f
         }
     }
 

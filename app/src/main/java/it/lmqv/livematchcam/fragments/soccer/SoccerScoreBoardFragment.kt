@@ -14,6 +14,7 @@ import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
 import kotlinx.coroutines.flow.combine
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.lifecycleScope
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.services.firebase.SoccerScore
 import it.lmqv.livematchcam.repositories.MatchRepository
@@ -155,6 +156,7 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
     }
 
     override fun onTickTimer(timeElapsedInSeconds: Int) {
+        Logd("onTickTimer:: $timeElapsedInSeconds")
         binding.matchTime.text = formatTime(timeElapsedInSeconds)
     }
 }

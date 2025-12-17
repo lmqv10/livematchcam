@@ -1,6 +1,7 @@
 package it.lmqv.livematchcam.services.stream.filters
 
 import com.pedro.encoder.utils.gl.TranslateTo
+import kotlinx.coroutines.flow.StateFlow
 
 data class AnimationDescriptor(
     val targetAlpha: Float = 0.75f,
@@ -15,4 +16,9 @@ data class RotatorDescriptor(
 data class FilterDescriptor(
     val maxFactor: Float = 25f,
     val translateTo : TranslateTo = TranslateTo.TOP_LEFT
+)
+
+data class SourceDescriptor(
+    val url : StateFlow<String>,
+    val isVisible : StateFlow<Boolean>
 )

@@ -6,41 +6,107 @@
     android:layout_height="wrap_content"
     android:maxWidth="@dimen/status_width"
     android:background="@drawable/alpha_background"
-    tools:context=".fragments.StatusFragment"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".fragments.status.StatusFragment">
 
     <LinearLayout
-        android:layout_width="100dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:minHeight="40dp"
-        android:weightSum="5">
+        android:layout_margin="3dp"
+        android:background="@drawable/secondary_background"
+        android:weightSum="4">
 
-        <TextView
-            android:id="@+id/bitrate"
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/description_placeholder"
+            android:src="@drawable/ic_cloud_upload" />
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="3"
             android:layout_height="wrap_content"
-            android:textColor="@color/primary"
-            android:background="@color/secondary_dark"
-            android:padding="3dp"
-            android:gravity="end"
-            android:layout_gravity="center_vertical"
-            android:textSize="11sp"
-            android:text="@string/bitrate_placeholder" />
+            android:orientation="vertical"
+            android:weightSum="3">
 
-        <TextView
-            android:id="@+id/fps"
+            <TextView
+                android:id="@+id/bitrate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primary"
+                android:padding="3dp"
+                android:gravity="end"
+                android:layout_gravity="center_vertical"
+                android:textSize="11sp"
+                android:text="@string/bitrate_placeholder" />
+
+            <TextView
+                android:id="@+id/fps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primary"
+                android:padding="3dp"
+                android:gravity="end"
+                android:layout_gravity="center_vertical"
+                android:textSize="11sp"
+                android:text="@string/fps_placeholder" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/alpha_background"
+        android:layout_margin="3dp"
+        android:weightSum="4">
+
+        <ImageView
             android:layout_width="0dp"
-            android:layout_weight="2"
-            android:layout_height="wrap_content"
-            android:textColor="@color/primary"
-            android:background="@color/secondary_dark"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_margin="2dp"
             android:padding="3dp"
-            android:gravity="end"
             android:layout_gravity="center_vertical"
-            android:textSize="11sp"
-            android:text="@string/fps_placeholder" />
+            android:contentDescription="@string/description_placeholder"
+            android:src="@drawable/ic_device_camera" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:weightSum="3">
+
+            <TextView
+                android:id="@+id/sourceResolution"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primary"
+                android:padding="3dp"
+                android:gravity="center_horizontal"
+                android:background="@drawable/alpha_background"
+                android:layout_gravity="center_vertical"
+                android:textSize="11sp"
+                android:text="@string/resolution_placeholder" />
+
+            <TextView
+                android:id="@+id/sourceFps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textColor="@color/primary"
+                android:padding="3dp"
+                android:gravity="center_horizontal"
+                android:background="@drawable/alpha_background"
+                android:layout_gravity="center_vertical"
+                android:textSize="11sp"
+                android:text="@string/fps_placeholder" />
+        </LinearLayout>
     </LinearLayout>
 
     <Switch
@@ -168,7 +234,7 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <!--LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -200,7 +266,7 @@
             android:layout_gravity="center_vertical"
             android:textSize="11sp"
             android:text="@string/fps_placeholder" />
-    </LinearLayout>
+    </LinearLayout-->
 
     <LinearLayout
         android:layout_width="match_parent"

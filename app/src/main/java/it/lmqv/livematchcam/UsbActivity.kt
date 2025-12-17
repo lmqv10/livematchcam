@@ -24,6 +24,7 @@ class UsbActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         //Logd("UsbActivity::onCreate")
+        @Suppress("DEPRECATION")
         val device = intent?.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
         //Logd("UsbActivity::device ${device}")
         checkPermissionAndFinish(device)

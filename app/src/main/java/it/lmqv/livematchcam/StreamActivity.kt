@@ -1,22 +1,69 @@
 package it.lmqv.livematchcam
 
+import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.pedro.common.ConnectChecker
+import com.pedro.library.util.FpsListener
 import it.lmqv.livematchcam.databinding.ActivityStreamBinding
 import it.lmqv.livematchcam.extensions.Logd
-import it.lmqv.livematchcam.fragments.CameraFragment
+import it.lmqv.livematchcam.extensions.formatHourTime
+import it.lmqv.livematchcam.extensions.hideSystemUI
+import it.lmqv.livematchcam.extensions.launchOnCreated
+import it.lmqv.livematchcam.extensions.launchOnResumed
+import it.lmqv.livematchcam.extensions.launchOnStarted
+import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.factories.SportsFactory
+import it.lmqv.livematchcam.fragments.status.StatusContainerFragment
+import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.services.stream.IStreamService
+import it.lmqv.livematchcam.services.stream.StreamServiceConnector
+import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
+import it.lmqv.livematchcam.utils.KeyDescription
+import it.lmqv.livematchcam.viewmodels.StreamConfigurationViewModel
+import it.lmqv.livematchcam.viewmodels.VideoSourceKind
+import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
+import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
+import kotlin.getValue
 
-class StreamActivity : AppCompatActivity() {
+class StreamActivity : AppCompatActivity(),
+    ConnectChecker,
+    FpsListener.Callback {
 
     private lateinit var binding: ActivityStreamBinding
 
-    private val cameraFragment = CameraFragment.getInstance()
+    private val statusContainerFragment = StatusContainerFragment.getInstance()
+
+    private lateinit var streamServiceConnector : StreamServiceConnector
+    private lateinit var streamService : IStreamService
+
+    private val streamConfigurationViewModel: StreamConfigurationViewModel by viewModels()
+    private val youtubeViewModel: YoutubeViewModel by viewModels {
+        YoutubeViewModelFactory(application, YouTubeClientProvider.get())
+    }
+
+    //private lateinit var spotBannerFilter: BitmapRotatorFilterRender
+    //private lateinit var mainBannerFilter: BitmapRotatorFilterRender
+
+    private lateinit var callback: OnBackPressedCallback
 
 //    private val displayListener = object : DisplayManager.DisplayListener {
 //        override fun onDisplayAdded(displayId: Int) {}
@@ -64,26 +111,217 @@ class StreamActivity : AppCompatActivity() {
 
         //val dm = getSystemService(DisplayManager::class.java)
         //dm.registerDisplayListener(displayListener, null)
+
+        binding.bStartStop.setOnClickListener {
+            streamService.toggleStreaming({
+                binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
+            },
+                { shouldEnd ->
+                    if (shouldEnd) { youtubeViewModel.completeLive() }
+                    binding.bStartStop.setImageResource(R.drawable.stream_icon)
+                })
+        }
+
+        binding.microphone.setOnClickListener {
+            if (streamService.toggleMicrophoneAudio() == true) {
+                binding.microphone.setImageResource(R.drawable.microphone_off)
+            } else {
+                binding.microphone.setImageResource(R.drawable.microphone_on)
+            }
+        }
+
+        binding.changeResolutionStrategy.setOnClickListener {
+            this.changeVideoSettingsDialog()
+        }
+//
+//        binding.mainBannerSwitch.setOnCheckedChangeListener { _, isChecked ->
+//            MatchRepository.setMainBannerVisible(isChecked)
+//        }
+//
+//        lifecycleScope.launch {
+//            MatchRepository.mainBannerVisible.collect { isVisible ->
+//                binding.mainBannerSwitch.isChecked = isVisible
+//                if (isVisible) {
+//                    binding.mainBannerTip.text = resources.getString(R.string.show_banner)
+//                } else {
+//                    binding.mainBannerTip.text = resources.getString(R.string.hide_banner)
+//                }
+//            }
+//        }
+//
+//        lifecycleScope.launch {
+//            MatchRepository.mainBannerURL.collect { spotBannerURL ->
+//                var isEnabled = spotBannerURL.isNotEmpty()
+//                binding.mainBannerSwitch.isEnabled = isEnabled
+//            }
+//        }
+
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        if (audioManager.isMicrophoneMute) {
+            binding.microphone.setImageResource(R.drawable.microphone_off)
+        } else {
+            binding.microphone.setImageResource(R.drawable.microphone_on)
+        }
+
+        launchOnCreated {
+            MatchRepository.sport.collectLatest { sport ->
+                Logd("StreamActivity :: MatchRepository.sport $sport")
+
+                var sportFragmentFactory = SportsFactory.get(sport)
+//                val scoreBoardFragment = sportFragmentFactory.getScoreBoard()
+//
+//                supportFragmentManager.beginTransaction()
+//                    .replace(
+//                        binding.scoreBoardPlaceholder.id,
+//                        scoreBoardFragment as Fragment,
+//                        "ScoreBoardFragmentTag"
+//                    ).commit()
+//
+//                var scoreBoardFilter = ScoreBoardFilterRender(scoreBoardFragment,
+//                    filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT))
+
+                var controlBarFragment = sportFragmentFactory.getControlBar()
+                supportFragmentManager.beginTransaction()
+                    .replace(
+                        binding.controlBarContainer.id,
+                        controlBarFragment as Fragment,
+                        "ControlBarFragmentTag"
+                    ).commit()
+
+                this.streamServiceConnector = StreamServiceConnector(this)
+                this.streamServiceConnector.setOnServiceConnected { streamService ->
+                    Logd("StreamActivity :: setOnServiceConnected")
+                    this.streamService = streamService
+
+                    this.streamService.setConnectCheckerCallback(this)
+                    this.streamService.setFpsListenerCallback(this)
+
+                    if (this.streamService.isStreaming() == true) {
+                        binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
+                        Logd("StreamActivity :: setOnServiceConnected :: isStreaming!")
+                    } else {
+                        binding.bStartStop.setImageResource(R.drawable.stream_icon)
+                        Logd("StreamActivity :: setOnServiceConnected :: PreparePreview")
+
+//                        spotBannerFilter = BitmapRotatorFilterRender(this,
+//                            filterDescriptor = FilterDescriptor(maxFactor = 25f, translateTo = TranslateTo.TOP_RIGHT),
+//                            rotatorDescriptor = RotatorDescriptor())
+//
+//                        mainBannerFilter = BitmapRotatorFilterRender(this,
+//                            filterDescriptor = FilterDescriptor(maxFactor = 70f, translateTo = TranslateTo.CENTER),
+//                            rotatorDescriptor = RotatorDescriptor(targetWidthDp = 300))
+
+//                        var scoreBoardRendererFilter = SoccerScoreboardViewFilterRender(applicationContext,
+//                            filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT))
+
+//                        var filters = listOf<BitmapObjectFilterRender>(
+//                            //scoreBoardRendererFilter
+//                            //scoreBoardFilter
+//                        )
+
+//                        var videoSourceKind = streamService.getVideoSourceKind()
+//                        if (videoSourceKind != null && videoSourceKind == VideoSourceKind.CAMERA2)
+//                        {
+//                            filters.add(spotBannerFilter)
+//                            filters.add(mainBannerFilter)
+//                        }
+
+                        this.streamService.preparePreview(binding.surfaceView, sport)
+                    }
+
+                    launchOnResumed {
+                        this.streamService.videoSourceZoomHandler.collect { videoSourceZoomHandler ->
+                            if (videoSourceZoomHandler != null) {
+                                //Logd("StreamActivity :: videoSourceZoomHandler")
+                                this.statusContainerFragment.setVideoSourceZoomHandler(videoSourceZoomHandler)
+                            }
+                        }
+                    }
+
+                    launchOnResumed {
+                        this.streamService.streamingElapsedTime.collect { timeElapsedInSeconds ->
+                            binding.streamingTime.text = formatHourTime(timeElapsedInSeconds)
+                        }
+                    }
+
+                    launchOnResumed {
+                        MatchRepository.RTMPServerURI.collect { configuredServerURI ->
+                            configuredServerURI?.let {
+                                binding.bStartStop.isClickable = true
+                            }
+                            Logd("StreamActivity :: RTMPServerURI $configuredServerURI")
+                            this.streamService.setEndpoint(configuredServerURI)
+                        }
+                    }
+
+//                    var testUrls  =listOf(
+//                        "https://avisbiella.it/wp-content/uploads/2022/01/Logo_AVIS.png",
+//                        "https://www.nowpadova.com/images/2020/01/23/AVIST_large.jpg"
+//                    )
+
+                    lifecycleScope.launch {
+                        combine(
+                            MatchRepository.spotBannerURL,
+                            MatchRepository.spotBannerVisible
+                        ) { url, visible -> Pair(url, visible)
+                        }.collect { (url, visible) ->
+                            launchOnStarted {
+                                //spotBannerFilter.setUrls(testUrls)
+//                                spotBannerFilter.setUrls(listOf(url))
+//                                spotBannerFilter.setIsVisible(visible)
+                            }
+                        }
+                    }
+
+                    lifecycleScope.launch {
+                        combine(
+                            MatchRepository.mainBannerURL,
+                            MatchRepository.mainBannerVisible
+                        ) { url, visible ->
+                            Pair(url, visible)
+                        }.collect { (url, visible) ->
+                            launchOnStarted {
+                                //mainBannerFilter.setUrls(testUrls)
+//                                mainBannerFilter.setUrls(listOf(url))
+//                                mainBannerFilter.setIsVisible(visible)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        supportFragmentManager.beginTransaction()
+            .replace(binding.statusContainer.id,
+                this.statusContainerFragment)
+            .commit()
     }
 
     override fun onStart() {
         super.onStart()
         Logd("StreamActivity::onStart")
 
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.container, cameraFragment)
-            .commit()
+        callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                streamService.stopStreamWithConfirm {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        }
+        this.onBackPressedDispatcher.addCallback(this, callback)
     }
 
     override fun onPause() {
         super.onPause()
         Logd("StreamActivity::OnPause")
+        this.streamServiceConnector.unbindService()
     }
 
     override fun onResume() {
         super.onResume()
         Logd("StreamActivity::onResume")
+        this.streamServiceConnector.bindService()
     }
 
     override fun onDestroy() {
@@ -91,6 +329,10 @@ class StreamActivity : AppCompatActivity() {
         Logd("StreamActivity::onDestroy")
         //val dm = getSystemService(DisplayManager::class.java)
         //dm.unregisterDisplayListener(displayListener)
+        //this.spotBannerFilter.stop()
+        //this.mainBannerFilter.stop()
+        this.callback.remove()
+        this.streamServiceConnector.stopService()
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
@@ -125,11 +367,145 @@ class StreamActivity : AppCompatActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
-    /*override fun onBackPressed() {
-        AlertDialog.Builder(this)
-            .setMessage("Are you sure you want to exit?")
-            .setPositiveButton("Yes") { _, _ -> finish() }
-            .setNegativeButton("No", null)
-            .show()
-    }*/
+    override fun onFps(fps: Int) {
+       //Logd("StreamActivity :: onFps: $fps")
+        this.statusContainerFragment.setFps(fps)
+    }
+
+    override fun onConnectionStarted(url: String) {
+        toast("Streaming Started on $url")
+    }
+
+    override fun onConnectionSuccess() {
+        //toast("Connected on ${streamServiceConnector.getEndpoint()}")
+        toast("Connected")
+    }
+
+    override fun onConnectionFailed(reason: String) {
+        toast("Connection failed! $reason")
+    }
+
+    override fun onNewBitrate(bitrate: Long) {
+        this.statusContainerFragment.setBitrate(bitrate)
+    }
+
+    override fun onDisconnect() {
+        this.statusContainerFragment.setBitrate(0)
+        //binding.bStartStop.setImageResource(R.drawable.stream_icon)
+        toast("Disconnected")
+    }
+
+    override fun onAuthError() {
+        //binding.bStartStop.setImageResource(R.drawable.stream_icon)
+        toast("Auth error")
+    }
+
+    override fun onAuthSuccess() {
+        toast("Auth success")
+    }
+
+    private fun changeVideoSettingsDialog() {
+        val inflater = LayoutInflater.from(this)
+        val dialogView = inflater.inflate(R.layout.dialog_change_video_settings, null)
+
+        val spinnerVideoSource = dialogView.findViewById<Spinner>(R.id.video_source)
+        val optionsVideoSource = VideoSourceKind.entries
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            optionsVideoSource
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinnerVideoSource.adapter = adapter
+        spinnerVideoSource.isEnabled = !this.streamService.isStreaming()
+        spinnerVideoSource.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    val selected = parent.getItemAtPosition(position) as VideoSourceKind
+
+                    val current = streamConfigurationViewModel.videoSourceKind.value
+                    if (current != selected) {
+                        streamConfigurationViewModel.setVideoSourceKind(selected)
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
+        val defaultIndex = optionsVideoSource.indexOf(
+            streamConfigurationViewModel.videoSourceKind.value
+        )
+        spinnerVideoSource.setSelection(defaultIndex)
+
+        val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
+        val optionsVideoResolutions = listOf(
+            KeyDescription(1080, "1920x1080p"),
+            KeyDescription(720, "1280x720p")
+        )
+
+        val adapterVideoResolutions = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoResolutions)
+        adapterVideoResolutions.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerVideoResolutions.isEnabled = !this.streamService.isStreaming()
+        spinnerVideoResolutions.adapter = adapterVideoResolutions
+        @Suppress("UNCHECKED_CAST")
+        spinnerVideoResolutions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
+                var selectedItemValue = selectedItem.key
+                val height = this@StreamActivity.streamConfigurationViewModel.resolution.value
+                if (height != selectedItemValue) {
+                    this@StreamActivity.streamConfigurationViewModel.setResolution(selectedItemValue)
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+        val defaultResolution = optionsVideoResolutions.indexOfFirst {
+            it.key == this@StreamActivity.streamConfigurationViewModel.resolution.value
+        }
+        spinnerVideoResolutions.setSelection(defaultResolution)
+
+        val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.video_fps)
+        val optionsVideoFps = listOf(
+            KeyDescription(20, "20fps"),
+            KeyDescription(25, "25fps"),
+            KeyDescription(30, "30fps"),
+            //KeyDescription(60, "60fps")
+        )
+
+        val adapterVideoFps = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoFps)
+        adapterVideoFps.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerVideoFps.isEnabled = !this.streamService.isStreaming()
+        spinnerVideoFps.adapter = adapterVideoFps
+        @Suppress("UNCHECKED_CAST")
+        spinnerVideoFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
+                var selectedItemValue = selectedItem.key
+                var fps = this@StreamActivity.streamConfigurationViewModel.fps.value
+                if (fps != selectedItemValue) {
+                    this@StreamActivity.streamConfigurationViewModel.setFps(selectedItemValue)
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+        val defaultVideoFps = optionsVideoFps.indexOfFirst { it.key == this@StreamActivity.streamConfigurationViewModel.fps.value }
+        spinnerVideoFps.setSelection(defaultVideoFps)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                hideSystemUI()
+            }
+            .create()
+
+        dialog.setOnShowListener {
+            hideSystemUI()
+        }
+
+        dialog.show()
+    }
 }

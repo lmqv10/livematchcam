@@ -21,7 +21,7 @@ import androidx.core.graphics.toColorInt
 import it.lmqv.livematchcam.dialogs.TimePickerDialog
 import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.parseTimeToSeconds
-import it.lmqv.livematchcam.services.CounterService
+import it.lmqv.livematchcam.services.counter.CounterService
 import it.lmqv.livematchcam.viewmodels.CounterViewModel
 
 class SoccerRemoteControlFragment : BaseRemoteControlFragment() {

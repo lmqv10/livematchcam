@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.sources
+package it.lmqv.livematchcam.services.stream.sources
 
 import android.graphics.SurfaceTexture
 import android.hardware.usb.UsbDevice

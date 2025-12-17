@@ -1,13 +1,20 @@
-package it.lmqv.livematchcam.services
+package it.lmqv.livematchcam.services.counter
 
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 class CounterService : Service() {
     private val binder = CounterBinder()
@@ -18,7 +25,7 @@ class CounterService : Service() {
     private val _counterState = MutableStateFlow<CounterState>(CounterState.Stopped)
     val counterState: StateFlow<CounterState> = _counterState.asStateFlow()
 
-    private val scope = CoroutineScope(Dispatchers.Default  + SupervisorJob())
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     override fun onDestroy() {
         super.onDestroy()
