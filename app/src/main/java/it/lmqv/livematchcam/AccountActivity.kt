@@ -17,7 +17,7 @@ import it.lmqv.livematchcam.databinding.ActivityAccountBinding
 import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.fragments.YoutubeAccountFragment
+import it.lmqv.livematchcam.fragments.youtube.YoutubeAccountFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +40,6 @@ class AccountActivity : AppCompatActivity() {
         binding = ActivityAccountBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

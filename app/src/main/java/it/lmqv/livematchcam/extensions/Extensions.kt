@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.Service
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.LayoutInflater
@@ -19,12 +20,14 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.scale
 import androidx.fragment.app.Fragment
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.google.api.client.util.DateTime
-import com.pedro.encoder.input.gl.render.filters.`object`.ImageObjectFilterRender
+import com.pedro.encoder.input.gl.render.filters.`object`.BaseObjectFilterRender
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.repositories.KeyDescription
 import java.text.DecimalFormat
@@ -37,7 +40,7 @@ import kotlin.math.max
 import kotlin.reflect.full.memberProperties
 
 
-fun ImageObjectFilterRender.animateAlpha(
+fun BaseObjectFilterRender.animateAlpha(
     from: Float,
     to: Float,
     duration: Long,
@@ -142,15 +145,22 @@ fun View.setEnabledRecursively(enabled: Boolean) {
 suspend fun loadDrawableOffscreen(
     context: Context,
     data: Any?,
-    @DrawableRes icon: Int
+    @DrawableRes icon: Int = 0
 ): Drawable? {
     val request = ImageRequest.Builder(context)
-        .data(data)
-        .allowHardware(false)
-        .build()
+        .data(data).allowHardware(false).build()
 
     return (context.imageLoader.execute(request) as? SuccessResult)?.drawable
         ?: AppCompatResources.getDrawable(context, icon)
+}
+
+suspend fun loadBitmapOffscreen(context: Context,
+    data: Any?,
+targetWidth: Int) : Bitmap? {
+    return loadDrawableOffscreen(context, data)?.toBitmap()?.let {
+        return it.scale(targetWidth, targetWidth * it.height / it.width)
+            .copy(Bitmap.Config.ARGB_8888, true)
+    }
 }
 
 /*fun MenuItem.setColor(context: Context, @ColorRes color: Int) {

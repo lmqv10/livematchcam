@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/serverConfigurationFragment"
-        android:name="it.lmqv.livematchcam.fragments.ServerConfigurationFragment"
+        android:name="it.lmqv.livematchcam.fragments.server.ServerConfigurationFragment"
         android:label="@string/server">
         <argument
             android:name="syncStrategy"
@@ -16,7 +16,7 @@
 
     <fragment
         android:id="@+id/firebaseConfigurationFragment"
-        android:name="it.lmqv.livematchcam.fragments.FirebaseConfigurationFragment"
+        android:name="it.lmqv.livematchcam.fragments.firebase.FirebaseConfigurationFragment"
         android:label="@string/firebase_custom">
         <argument
             android:name="syncStrategy"
@@ -26,7 +26,7 @@
 
     <fragment
         android:id="@+id/youtubeConfigurationFragment"
-        android:name="it.lmqv.livematchcam.fragments.YoutubeConfigurationFragment"
+        android:name="it.lmqv.livematchcam.fragments.youtube.YoutubeConfigurationFragment"
         android:label="@string/youtube">
         <argument
             android:name="syncStrategy"
@@ -36,7 +36,7 @@
 
     <fragment
         android:id="@+id/youtubeStreamFragment"
-        android:name="it.lmqv.livematchcam.fragments.YoutubeStreamFragment"
+        android:name="it.lmqv.livematchcam.fragments.youtube.YoutubeStreamFragment"
         android:label="@string/youtube_stream">
         <argument
             android:name="syncStrategy"

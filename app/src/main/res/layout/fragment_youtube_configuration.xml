@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:baselineAligned="false"
     android:orientation="horizontal"
-    tools:context=".fragments.YoutubeConfigurationFragment">
+    tools:context=".fragments.youtube.YoutubeConfigurationFragment">
 
     <FrameLayout
         android:id="@+id/youtubeContainer"

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
-    tools:context=".fragments.volley.VolleyControlBarFragment">
+    tools:context=".fragments.sports.volley.VolleyControlBarFragment">
 
     <LinearLayout
         android:id="@+id/control_home"

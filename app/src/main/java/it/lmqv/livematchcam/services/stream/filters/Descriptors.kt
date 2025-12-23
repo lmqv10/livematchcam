@@ -8,9 +8,13 @@ data class AnimationDescriptor(
     val duration: Long = 250L
 )
 
+data class DimensionDescriptor(
+    val targetWidthDp: Int = 250
+)
+
 data class RotatorDescriptor(
     val targetWidthDp: Int = 50,
-    var intervalMillis: Long = 4000L,
+    val intervalMillis: Long = 4000L,
 )
 
 data class FilterDescriptor(

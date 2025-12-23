@@ -5,18 +5,17 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import it.lmqv.livematchcam.BuildConfig
 import kotlinx.coroutines.launch
 
-const val DEBUG: Boolean = true
-
 fun Loge(message: String) {
-    if (DEBUG) {
+    if (BuildConfig.DEBUG) {
         Log.e("LMCAM", message)
     }
 }
 
 fun Logd(message: String) {
-    if (DEBUG) {
+    if (BuildConfig.DEBUG) {
         Log.d("LMCAM", message)
     }
 }

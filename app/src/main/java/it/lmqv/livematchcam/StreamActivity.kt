@@ -17,7 +17,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.pedro.common.ConnectChecker
 import com.pedro.library.util.FpsListener
 import it.lmqv.livematchcam.databinding.ActivityStreamBinding
@@ -26,7 +25,6 @@ import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnCreated
 import it.lmqv.livematchcam.extensions.launchOnResumed
-import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.fragments.status.StatusContainerFragment
@@ -40,8 +38,6 @@ import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
 import kotlin.getValue
 
 class StreamActivity : AppCompatActivity(),
@@ -59,9 +55,6 @@ class StreamActivity : AppCompatActivity(),
     private val youtubeViewModel: YoutubeViewModel by viewModels {
         YoutubeViewModelFactory(application, YouTubeClientProvider.get())
     }
-
-    //private lateinit var spotBannerFilter: BitmapRotatorFilterRender
-    //private lateinit var mainBannerFilter: BitmapRotatorFilterRender
 
     private lateinit var callback: OnBackPressedCallback
 
@@ -168,18 +161,6 @@ class StreamActivity : AppCompatActivity(),
                 Logd("StreamActivity :: MatchRepository.sport $sport")
 
                 var sportFragmentFactory = SportsFactory.get(sport)
-//                val scoreBoardFragment = sportFragmentFactory.getScoreBoard()
-//
-//                supportFragmentManager.beginTransaction()
-//                    .replace(
-//                        binding.scoreBoardPlaceholder.id,
-//                        scoreBoardFragment as Fragment,
-//                        "ScoreBoardFragmentTag"
-//                    ).commit()
-//
-//                var scoreBoardFilter = ScoreBoardFilterRender(scoreBoardFragment,
-//                    filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT))
-
                 var controlBarFragment = sportFragmentFactory.getControlBar()
                 supportFragmentManager.beginTransaction()
                     .replace(
@@ -202,30 +183,6 @@ class StreamActivity : AppCompatActivity(),
                     } else {
                         binding.bStartStop.setImageResource(R.drawable.stream_icon)
                         Logd("StreamActivity :: setOnServiceConnected :: PreparePreview")
-
-//                        spotBannerFilter = BitmapRotatorFilterRender(this,
-//                            filterDescriptor = FilterDescriptor(maxFactor = 25f, translateTo = TranslateTo.TOP_RIGHT),
-//                            rotatorDescriptor = RotatorDescriptor())
-//
-//                        mainBannerFilter = BitmapRotatorFilterRender(this,
-//                            filterDescriptor = FilterDescriptor(maxFactor = 70f, translateTo = TranslateTo.CENTER),
-//                            rotatorDescriptor = RotatorDescriptor(targetWidthDp = 300))
-
-//                        var scoreBoardRendererFilter = SoccerScoreboardViewFilterRender(applicationContext,
-//                            filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT))
-
-//                        var filters = listOf<BitmapObjectFilterRender>(
-//                            //scoreBoardRendererFilter
-//                            //scoreBoardFilter
-//                        )
-
-//                        var videoSourceKind = streamService.getVideoSourceKind()
-//                        if (videoSourceKind != null && videoSourceKind == VideoSourceKind.CAMERA2)
-//                        {
-//                            filters.add(spotBannerFilter)
-//                            filters.add(mainBannerFilter)
-//                        }
-
                         this.streamService.preparePreview(binding.surfaceView, sport)
                     }
 
@@ -249,42 +206,8 @@ class StreamActivity : AppCompatActivity(),
                             configuredServerURI?.let {
                                 binding.bStartStop.isClickable = true
                             }
-                            Logd("StreamActivity :: RTMPServerURI $configuredServerURI")
+                            //Logd("StreamActivity :: RTMPServerURI $configuredServerURI")
                             this.streamService.setEndpoint(configuredServerURI)
-                        }
-                    }
-
-//                    var testUrls  =listOf(
-//                        "https://avisbiella.it/wp-content/uploads/2022/01/Logo_AVIS.png",
-//                        "https://www.nowpadova.com/images/2020/01/23/AVIST_large.jpg"
-//                    )
-
-                    lifecycleScope.launch {
-                        combine(
-                            MatchRepository.spotBannerURL,
-                            MatchRepository.spotBannerVisible
-                        ) { url, visible -> Pair(url, visible)
-                        }.collect { (url, visible) ->
-                            launchOnStarted {
-                                //spotBannerFilter.setUrls(testUrls)
-//                                spotBannerFilter.setUrls(listOf(url))
-//                                spotBannerFilter.setIsVisible(visible)
-                            }
-                        }
-                    }
-
-                    lifecycleScope.launch {
-                        combine(
-                            MatchRepository.mainBannerURL,
-                            MatchRepository.mainBannerVisible
-                        ) { url, visible ->
-                            Pair(url, visible)
-                        }.collect { (url, visible) ->
-                            launchOnStarted {
-                                //mainBannerFilter.setUrls(testUrls)
-//                                mainBannerFilter.setUrls(listOf(url))
-//                                mainBannerFilter.setIsVisible(visible)
-                            }
                         }
                     }
                 }
@@ -329,8 +252,6 @@ class StreamActivity : AppCompatActivity(),
         Logd("StreamActivity::onDestroy")
         //val dm = getSystemService(DisplayManager::class.java)
         //dm.unregisterDisplayListener(displayListener)
-        //this.spotBannerFilter.stop()
-        //this.mainBannerFilter.stop()
         this.callback.remove()
         this.streamServiceConnector.stopService()
     }

@@ -12,9 +12,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.databinding.ActivityRemoteScoreBinding
 import it.lmqv.livematchcam.factories.SportsFactory
-import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
-import it.lmqv.livematchcam.fragments.IRemoteControlFragment
-import it.lmqv.livematchcam.fragments.IScoreBoardFragment
+import it.lmqv.livematchcam.fragments.sports.BaseScoreBoardFragment
+import it.lmqv.livematchcam.fragments.sports.IRemoteControlFragment
+import it.lmqv.livematchcam.fragments.sports.IScoreBoardFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest

@@ -12,6 +12,7 @@ import android.util.Range
 import android.view.SurfaceView
 import androidx.core.app.NotificationCompat
 import com.pedro.common.ConnectChecker
+import com.pedro.encoder.input.gl.render.filters.`object`.BaseObjectFilterRender
 import com.pedro.encoder.input.sources.OrientationForced
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.Camera2Source
@@ -30,8 +31,8 @@ import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.StreamConfigurationRepository
 import it.lmqv.livematchcam.services.firebase.Quadruple
-import it.lmqv.livematchcam.services.stream.filters.BitmapObjectFilterRender
 import it.lmqv.livematchcam.services.stream.filters.IScoreboardViewFilterRender
+import it.lmqv.livematchcam.services.stream.filters.IOverlayObjectFilterRender
 import it.lmqv.livematchcam.services.stream.sources.UvcSonyCameraSource
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.CoroutineScope
@@ -89,13 +90,14 @@ class StreamService: Service(),
     //private var previewEventListenerCallback: IPreviewEventListener? = null
     private var fpsListenerCallback: FpsListener.Callback? = null
     private var videoSourceKind: VideoSourceKind? = null
+    private var sport: Sports? = null
 
     private var prepared = false
     private var videoStreamData : IVideoStreamData = CameraVideoStreamData()
     private var audioStreamData : IAudioStreamData = AudioStreamData()
     private var microphoneSource = MicrophoneSource()
-    private var surfaceView: SurfaceView? = null
-    //private var filters: List<BitmapObjectFilterRender> = listOf()
+    private lateinit var surfaceView: SurfaceView
+    //private var filters: List<OverlayObjectFilterRender> = listOf()
 
     private val streamServiceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private lateinit var streamConfigurationJob : Job
@@ -158,15 +160,14 @@ class StreamService: Service(),
                 }
 
                 Logd("StreamService :: streamConfigurationRepository :: ${videoStreamData.height}p@${videoStreamData.fps}fps vs ${resolutionHeight}p@${fps}fps")
-                if (videoStreamData.height != resolutionHeight || videoStreamData.fps != fps) {
+                if (!genericStream.isStreaming && genericStream.isOnPreview &&
+                    (this@StreamService.sport != sport || videoStreamData.height != resolutionHeight || videoStreamData.fps != fps)) {
                     videoStreamData.width = if (resolutionHeight == 1080) { 1920 } else { 1280 }
                     videoStreamData.height = resolutionHeight
                     videoStreamData.fps = fps
-
-                    if (!genericStream.isStreaming && genericStream.isOnPreview && this@StreamService.surfaceView != null) {
-                        Logd("StreamService :: streamConfigurationRepository :: change resolution! .. preparePreview()")
-                        this@StreamService.preparePreview(this@StreamService.surfaceView!!, sport)
-                    }
+                    this@StreamService.sport = sport
+                    Logd("StreamService :: streamConfigurationRepository :: change resolution or sport! .. preparePreview()")
+                    this@StreamService.preparePreview(this@StreamService.surfaceView, sport)
                 } else {
                     Logd("StreamService :: streamConfigurationRepository :: No changes")
                 }
@@ -368,31 +369,27 @@ class StreamService: Service(),
 
     fun preparePreview(surfaceView: SurfaceView, sport: Sports) {
         try {
-            Logd("StreamService :: preparePreview")
-            this.surfaceView = surfaceView
-
+            Logd("StreamService :: preparePreview $sport")
             this.stopPreview()
 
-            var filters = FiltersFactory.get(sport, applicationContext)
+            this.surfaceView = surfaceView
 
+            genericStream.getGlInterface().setPreviewResolution(videoStreamData.width, videoStreamData.height)
             genericStream.getGlInterface().clearFilters()
+
+            var filters = FiltersFactory.get(sport, applicationContext)
             filters.forEachIndexed { index, filter ->
+                //Logd("StreamService :: addFilter $filter")
                 genericStream.getGlInterface().addFilter(index, filter)
-            }
-
-            this.prepare()
-
-            if (!genericStream.isOnPreview && this.surfaceView != null) {
-                genericStream.getGlInterface().setPreviewResolution(videoStreamData.width, videoStreamData.height)
-
-                filters.forEachIndexed { index, filter ->
+                if (filter is IOverlayObjectFilterRender) {
+                    //Logd("StreamService :: filter $filter setVideoStreamData $videoStreamData")
                     filter.setVideoStreamData(videoStreamData)
                 }
-
-                genericStream.startPreview(this.surfaceView!!, true)
-
-                prepareMatchDataListeners(filters)
             }
+            this.prepareMatchDataListeners(filters)
+
+            this.prepare()
+            genericStream.startPreview(this.surfaceView, true)
         }
         catch (e: Exception) {
             e.printStackTrace()
@@ -423,7 +420,7 @@ class StreamService: Service(),
         _streamingElapsedTime.value = timeElapsedInSeconds
     }
 
-    private fun prepareMatchDataListeners(filters: List<BitmapObjectFilterRender>) {
+    private fun prepareMatchDataListeners(filters: List<BaseObjectFilterRender>) {
         this.matchRepositoryJob?.cancel()
         this.scoreRepositoryJob?.cancel()
 
@@ -432,18 +429,18 @@ class StreamService: Service(),
             var scoreBoardFilterRender = scoreBoardFilterInstance as IScoreboardViewFilterRender
             this.matchRepositoryJob = this.streamServiceScope.launch {
                 MatchRepository.match.collect { match ->
-                    Logd("StreamService :: MatchRepository.match.collect :: $match")
+                    //Logd("StreamService :: MatchRepository.match.collect :: $match")
                     scoreBoardFilterRender.match(match)
                 }
             }
             this.scoreRepositoryJob = this.streamServiceScope.launch {
                 MatchRepository.score.collect { score ->
-                    Logd("StreamService :: MatchRepository.score.collect :: $score")
+                    //Logd("StreamService :: MatchRepository.score.collect :: $score")
                     scoreBoardFilterRender.score(score)
                 }
             }
-        } else {
-            Logd("StreamService :: prepareListeners :: not required")
+        //} else {
+        //    Logd("StreamService :: prepareListeners :: not required")
         }
     }
 

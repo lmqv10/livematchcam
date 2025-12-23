@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.fragments.volley
+package it.lmqv.livematchcam.fragments.sports.volley
 
 import android.os.Bundle
 import android.text.InputFilter
@@ -9,23 +9,20 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyControlBarBinding
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
-import it.lmqv.livematchcam.extensions.setShirtByColor
-import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.services.firebase.VolleyScore
-import it.lmqv.livematchcam.fragments.BaseControlBarFragment
+import it.lmqv.livematchcam.fragments.sports.BaseControlBarFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
+import it.lmqv.livematchcam.extensions.Logd
 
 class VolleyControlBarFragment() : BaseControlBarFragment() {
     companion object {
@@ -50,56 +47,12 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
-//            binding.homeTeam.text = homeTeam
-//        }
-//        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
-//            binding.awayTeam.text = guestTeam
-//        }
         MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
             binding.homeTeamControl.setTeamName(homeTeam)
         }
         MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
             binding.guestTeamControl.setTeamName(guestTeam)
         }
-
-//        launchOnStarted {
-//            combine(
-//                MatchRepository.homePrimaryColorHex,
-//                MatchRepository.homeLogo) {
-//                    color, logo -> Pair(color, logo)
-//            }.collect { (colorHex, logoURL) ->
-//                if (logoURL.isNotEmpty()) {
-//                    binding.homeColor.load(logoURL) {
-//                        placeholder(R.drawable.shirt_white)
-//                        error(R.drawable.shirt_white)
-//                        allowHardware(false)
-//                    }
-//                } else {
-//                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
-//                }
-//            }
-//        }
-
-//        launchOnStarted {
-//            combine(
-//                MatchRepository.guestPrimaryColorHex,
-//                MatchRepository.guestLogo) {
-//                    color, logo -> Pair(color, logo)
-//            }.collect { (colorHex, logoURL) ->
-//                //binding.awayColor.isClickable = logoURL.isNullOrEmpty()
-//                if (logoURL.isNotEmpty()) {
-//                    binding.awayColor.load(logoURL) {
-//                        placeholder(R.drawable.shirt_white)
-//                        error(R.drawable.shirt_white)
-//                        allowHardware(false)
-//                    }
-//                } else {
-//                    binding.awayColor.setShirtByColor(colorHex.toColorInt())
-//                }
-//            }
-//        }
-
 
         launchOnStarted {
             MatchRepository.homeLogo.collect { logoUrl ->
@@ -125,7 +78,7 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             MatchRepository.score.collectLatest { scoreInstance ->
-                //Logd("VolleyControlBar::score.collectLatest:: $scoreInstance")
+                Logd("VolleyControlBar::score.collectLatest:: $scoreInstance")
                 try {
                     val score = scoreInstance as VolleyScore
                     volleyScoreViewModel.initScore(score)
@@ -145,7 +98,7 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             volleyScoreViewModel.liveScore.collectLatest { liveScore ->
-                //Logd("VolleyControlBar::liveScore.collectLatest::$liveScore")
+                Logd("VolleyControlBar::liveScore.collectLatest::$liveScore")
                 MatchRepository.setScore(liveScore)
             }
         }
@@ -214,34 +167,6 @@ class VolleyControlBarFragment() : BaseControlBarFragment() {
         binding.guestTeamControl.onPrimaryColorsChanged = { updatedColor ->
             MatchRepository.setGuestPrimaryColorHex(updatedColor)
         }
-
-//        binding.homeColor.setOnClickListener {
-//            requireContext().showColorPickerDialog { color ->
-//                MatchRepository.setHomePrimaryColorHex(color)
-//            }
-//        }
-//
-//        binding.awayColor.setOnClickListener {
-//            requireContext().showColorPickerDialog { color ->
-//                MatchRepository.setGuestPrimaryColorHex(color)
-//            }
-//        }
-//
-//        binding.homeTeam.setOnClickListener {
-//            var teamName = binding.homeTeam.text.toString()
-//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-//                MatchRepository.setHomeTeam(updatedTeamName)
-//                requireActivity().hideSystemUI()
-//            }
-//        }
-//
-//        binding.awayTeam.setOnClickListener {
-//            var teamName = binding.awayTeam.text.toString()
-//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-//                MatchRepository.setGuestTeam(updatedTeamName)
-//                requireActivity().hideSystemUI()
-//            }
-//        }
 
         binding.matchLeagueDescription.setOnClickListener {
             requireContext().showEditStringDialog(R.string.match_league, this.currentDescription, filters = arrayOf<InputFilter>()) { updatedMatchLeague ->

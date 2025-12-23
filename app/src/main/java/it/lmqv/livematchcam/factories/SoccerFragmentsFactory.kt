@@ -1,8 +1,8 @@
 package it.lmqv.livematchcam.factories
 
-import it.lmqv.livematchcam.fragments.soccer.SoccerControlBarFragment
-import it.lmqv.livematchcam.fragments.soccer.SoccerRemoteControlFragment
-import it.lmqv.livematchcam.fragments.soccer.SoccerScoreBoardFragment
+import it.lmqv.livematchcam.fragments.sports.soccer.SoccerControlBarFragment
+import it.lmqv.livematchcam.fragments.sports.soccer.SoccerRemoteControlFragment
+import it.lmqv.livematchcam.fragments.sports.soccer.SoccerScoreBoardFragment
 
 class SoccerFragmentsFactory : ISportsComponentsFactory {
 

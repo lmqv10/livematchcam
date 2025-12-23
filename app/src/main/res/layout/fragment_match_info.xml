@@ -7,7 +7,7 @@
     android:background="@drawable/alpha_background"
     android:layout_margin="10dp"
     android:padding="10dp"
-    tools:context=".fragments.MatchInfoFragment">
+    tools:context=".fragments.sports.MatchInfoFragment">
 
     <LinearLayout
         android:id="@+id/match_info"

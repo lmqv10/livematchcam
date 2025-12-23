@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.fragments
+package it.lmqv.livematchcam.fragments.sports
 
 import androidx.fragment.app.Fragment
 

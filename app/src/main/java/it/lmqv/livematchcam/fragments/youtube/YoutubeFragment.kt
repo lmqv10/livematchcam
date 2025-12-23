@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.fragments
+package it.lmqv.livematchcam.fragments.youtube
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -17,7 +17,6 @@ import it.lmqv.livematchcam.databinding.FragmentYoutubeBinding
 import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showQRCode
-import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel

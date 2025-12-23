@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:baselineAligned="false"
     android:orientation="horizontal"
-    tools:context=".fragments.ServerConfigurationFragment">
+    tools:context=".fragments.server.ServerConfigurationFragment">
 
     <FrameLayout
         android:id="@+id/serverContainer"

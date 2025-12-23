@@ -46,7 +46,7 @@ class SoccerScoreboardViewFilterRender(
 
     override fun release() {
         super.release()
-        Logd("SoccerScoreboardViewRenderer::release")
+        //Logd("SoccerScoreboardViewRenderer::release")
         serviceConnector.unbind(applicationContext)
         _binding = null
     }
@@ -54,7 +54,7 @@ class SoccerScoreboardViewFilterRender(
     @Synchronized
     override fun match(match: Match) {
         try {
-            Logd("SoccerScoreboardViewRenderer::match $match")
+            //Logd("SoccerScoreboardViewRenderer::match $match")
             this.handleHomeTeam(match)
             this.handleAwayTeam(match)
             render()
@@ -67,7 +67,7 @@ class SoccerScoreboardViewFilterRender(
     @Synchronized
     override fun score(score: IScore) {
         try {
-            Logd("SoccerScoreboardViewRenderer::score $score")
+            //Logd("SoccerScoreboardViewRenderer::score $score")
             this.handleScore(score as SoccerScore)
             this.handleCommand(score.command)
 
@@ -170,7 +170,7 @@ class SoccerScoreboardViewFilterRender(
 open class ScoreBoardFilterRender(
     var scoreBoardFragment: IScoreBoardFragment<BaseScoreBoardFragment>,
     val filterDescriptor: FilterDescriptor = FilterDescriptor()
-) : BitmapObjectFilterRender(),
+) : OverlayObjectFilterRender(),
     IScoreBoardFragment.OnUpdateCallback {
 
     //private var previewVideoStreamData : IVideoStreamData? = null

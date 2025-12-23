@@ -1,20 +1,15 @@
-package it.lmqv.livematchcam.fragments
+package it.lmqv.livematchcam.fragments.youtube
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import it.lmqv.livematchcam.INavigateDrawerActivity
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.utils.SyncStrategy
 import it.lmqv.livematchcam.databinding.FragmentYoutubeConfigurationBinding
-import it.lmqv.livematchcam.extensions.launchOnStarted
-import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.fragments.sports.MatchInfoFragment
 import it.lmqv.livematchcam.repositories.MatchSyncStrategyRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +28,7 @@ class YoutubeConfigurationFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val youtubeFragment = YoutubeFragment.newInstance()
-    private val matchInfoFragment = MatchInfoFragment.newInstance()
+    private val matchInfoFragment = MatchInfoFragment.Companion.newInstance()
 
     private val syncJob = SupervisorJob()
     private val syncScope = CoroutineScope(syncJob + Dispatchers.IO)

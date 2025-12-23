@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:baselineAligned="false"
     android:orientation="horizontal"
-    tools:context=".fragments.FirebaseConfigurationFragment">
+    tools:context=".fragments.firebase.FirebaseConfigurationFragment">
 
     <FrameLayout
         android:id="@+id/firebaseContainer"

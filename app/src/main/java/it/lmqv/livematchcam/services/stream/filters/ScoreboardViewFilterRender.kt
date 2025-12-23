@@ -20,7 +20,7 @@ interface IScoreboardViewFilterRender {
 abstract class ScoreboardViewFilterRender<T>(
     val applicationContext: Context,
     val filterDescriptor: FilterDescriptor = FilterDescriptor()
-) : BitmapObjectFilterRender(), IScoreboardViewFilterRender where T : ViewBinding {
+) : OverlayObjectFilterRender(), IScoreboardViewFilterRender where T : ViewBinding {
 
     internal var _binding: T? = null
     internal val binding get() = _binding!!
@@ -39,27 +39,29 @@ abstract class ScoreboardViewFilterRender<T>(
     }
 
     override fun setVideoStreamData(videoStreamData: IVideoStreamData) {
-        Logd("ScoreboardViewFilterRender::setVideoStreamData $videoStreamData")
-        this.width = videoStreamData.width
-        this.height = videoStreamData.height
+        if (_binding != null) {
+            Logd("ScoreboardViewFilterRender::setVideoStreamData $videoStreamData")
+            this.width = videoStreamData.width
+            this.height = videoStreamData.height
 
-        binding.root.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-        binding.root.layout(0, 0, binding.root.measuredWidth, binding.root.measuredHeight)
-        var scale = videoStreamData.width * filterDescriptor.maxFactor / binding.root.measuredWidth
+            binding.root.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            )
+            binding.root.layout(0, 0, binding.root.measuredWidth, binding.root.measuredHeight)
+            var scale = this.width * filterDescriptor.maxFactor / binding.root.measuredWidth
 
-        setScale(scale, scale)
-        setPosition(filterDescriptor.translateTo)
-        render()
+            setScale(scale, scale)
+            setPosition(filterDescriptor.translateTo)
+            render()
+        }
     }
 
     @Synchronized
     protected fun render() {
         try {
             //Logd("ScoreboardViewRenderer::render ${width}x$height")
-            if (width > 0 && height > 0) {
+            if (_binding != null && width > 0 && height > 0) {
                 val bitmap = createBitmap(width, height)
                 val canvas = Canvas(bitmap)
                 binding.root.draw(canvas)

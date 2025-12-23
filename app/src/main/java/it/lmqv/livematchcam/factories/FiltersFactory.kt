@@ -1,42 +1,39 @@
 package it.lmqv.livematchcam.factories
 
 import android.content.Context
+import com.pedro.encoder.input.gl.render.filters.`object`.BaseObjectFilterRender
 import com.pedro.encoder.utils.gl.TranslateTo
 import it.lmqv.livematchcam.repositories.MatchRepository
-import it.lmqv.livematchcam.services.stream.filters.BitmapObjectFilterRender
-import it.lmqv.livematchcam.services.stream.filters.BitmapRotatorFilterRender
+import it.lmqv.livematchcam.services.stream.filters.DimensionDescriptor
 import it.lmqv.livematchcam.services.stream.filters.FilterDescriptor
-import it.lmqv.livematchcam.services.stream.filters.RotatorDescriptor
+import it.lmqv.livematchcam.services.stream.filters.OverlayFilterRender
 import it.lmqv.livematchcam.services.stream.filters.SoccerScoreboardViewFilterRender
 import it.lmqv.livematchcam.services.stream.filters.SourceDescriptor
 import it.lmqv.livematchcam.services.stream.filters.VolleyScoreboardViewFilterRender
 
 object FiltersFactory {
-    fun get(sport: Sports, context: Context) : List<BitmapObjectFilterRender> {
+    fun get(sport: Sports, applicationContext: Context) : List<BaseObjectFilterRender> {
         return when (sport) {
             Sports.SOCCER ->
                 listOf(
-                    SoccerScoreboardViewFilterRender(
-                        context,
+                    SoccerScoreboardViewFilterRender(applicationContext,
                         filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT))
                 )
             Sports.VOLLEY ->
                 listOf(
-                    VolleyScoreboardViewFilterRender(
-                        context,
+                    VolleyScoreboardViewFilterRender(applicationContext,
                         filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT)
                     ),
-                    BitmapRotatorFilterRender(
-                        context,
+                    OverlayFilterRender(applicationContext,
                         sourceDescriptor = SourceDescriptor(MatchRepository.spotBannerURL, MatchRepository.spotBannerVisible),
-                        filterDescriptor = FilterDescriptor(maxFactor = 25f, translateTo = TranslateTo.TOP_RIGHT),
-                        rotatorDescriptor = RotatorDescriptor()
+                        filterDescriptor = FilterDescriptor(maxFactor = 20f, translateTo = TranslateTo.TOP_RIGHT),
+                        dimensionDescriptor = DimensionDescriptor()
                     ),
-                    BitmapRotatorFilterRender(
-                        context,
+                    OverlayFilterRender(applicationContext,
                         sourceDescriptor = SourceDescriptor(MatchRepository.mainBannerURL, MatchRepository.mainBannerVisible),
-                        filterDescriptor = FilterDescriptor(maxFactor = 70f, translateTo = TranslateTo.CENTER),
-                        rotatorDescriptor = RotatorDescriptor(targetWidthDp = 300)
+                        filterDescriptor = FilterDescriptor(maxFactor = 65f, translateTo = TranslateTo.CENTER),
+                        dimensionDescriptor = DimensionDescriptor(500)
+                        //rotatorDescriptor = RotatorDescriptor(targetWidthDp = 250)
                     )
                 )
             //VideoSourceKind.UVC_CAMERA -> listOf()

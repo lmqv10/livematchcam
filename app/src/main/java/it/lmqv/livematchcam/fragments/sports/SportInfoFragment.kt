@@ -1,15 +1,16 @@
-package it.lmqv.livematchcam.fragments
+package it.lmqv.livematchcam.fragments.sports
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.adapters.CardAdapter
 import it.lmqv.livematchcam.adapters.CardItem
 import it.lmqv.livematchcam.databinding.FragmentSportInfoBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.repositories.MatchRepository
@@ -26,8 +27,16 @@ class SportInfoFragment : Fragment() {
     private lateinit var sportCollectJob : Job
 
     private val cardItems = listOf(
-        CardItem(sport = Sports.SOCCER, description = R.string.sport_soccer, icon = R.drawable.sport_soccer),
-        CardItem(sport = Sports.VOLLEY, description = R.string.sport_volley, icon = R.drawable.sport_volley)
+        CardItem(
+            sport = Sports.SOCCER,
+            description = R.string.sport_soccer,
+            icon = R.drawable.sport_soccer
+        ),
+        CardItem(
+            sport = Sports.VOLLEY,
+            description = R.string.sport_volley,
+            icon = R.drawable.sport_volley
+        )
     )
 
     private var _binding: FragmentSportInfoBinding? = null
@@ -52,7 +61,7 @@ class SportInfoFragment : Fragment() {
 
                     val adapter = CardAdapter(cardItems) { selectedItem ->
                         viewLifecycleOwner.lifecycleScope.launch {
-                            //Logd("SportInfoFragment::selectedItem:: ${selectedItem.sport}")
+                            Logd("SportInfoFragment::selectedItem:: ${selectedItem.sport}")
                             MatchRepository.setSport(selectedItem.sport)
                         }
                     }

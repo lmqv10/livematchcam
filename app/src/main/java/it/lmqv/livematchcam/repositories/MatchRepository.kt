@@ -33,7 +33,6 @@ object MatchRepository {
                     onMatchUpdated = { match -> notifyMatchChanges(match) },
                     onEventInfoUpdated = { eventInfo -> notifyEventInfoChanges(eventInfo) },
                     onFirebaseAccountData = { firebaseAccountDataContract -> _firebaseAccountData.value = firebaseAccountDataContract },
-                    //onRealtimeDatabaseAvailability = { availability -> _isRealtimeDatabaseAvailable.value = availability }
                 )
                 //Logd("$instanceId :: MatchRepository::onSyncStrategy::isRealtimeDatabaseAvailable >> ${isRealtimeDatabaseAvailable.last()}")
             }
@@ -102,22 +101,28 @@ object MatchRepository {
 
     private var _sport = MutableStateFlow<Sports>(currentEventInfo.sport)
     val sport: StateFlow<Sports> = _sport
+    @Synchronized
     fun setSport(updatedSport: Sports) {
         if (currentEventInfo.sport != updatedSport) {
-            //Logd("$instanceId :: MatchRepository::setSport:: $updatedSport")
+            Logd("$instanceId :: MatchRepository::setSport:: $updatedSport")
             var score = ScoreFactory.getInitialScore(updatedSport)
-            //Logd("$instanceId :: MatchRepository::SetInitialScore::$score")
+            Logd("$instanceId :: MatchRepository::SetInitialScore::$score")
             applyEventInfoChanges(EventInfo(updatedSport, score))
         }
     }
 
     private var _score = MutableStateFlow<IScore>(currentEventInfo.score)
     var score: StateFlow<IScore> = _score
+    @Synchronized
     fun setScore(updatedScore: IScore) {
         try {
-            //Logd("$instanceId :: MatchRepository::setScore:: $updatedScore")
-            val updatedEventInfo = currentEventInfo.copy(score = updatedScore)
-            applyEventInfoChanges(updatedEventInfo)
+            if (currentEventInfo.score != updatedScore) {
+                Logd("$instanceId :: MatchRepository::setScore:: $updatedScore")
+                val updatedEventInfo = currentEventInfo.copy(score = updatedScore)
+                applyEventInfoChanges(updatedEventInfo)
+            } else {
+                Logd("$instanceId :: MatchRepository::setScore:: no update required")
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             Loge("MatchRepository::Exception::setScore:: ${e.message.toString()}")
@@ -171,17 +176,19 @@ object MatchRepository {
         applyMatchChanges(currentMatch.copy(mainBannerVisible = mainBannerVisible))
     }
 
-    // Internal update methods
+    @Synchronized
     private fun applyMatchChanges(updatedMatch: Match) {
-        //Logd("$instanceId :: MatchRepository::applyMatchChanges:: $updatedMatch")
+        Logd("$instanceId :: MatchRepository::applyMatchChanges:: $updatedMatch")
         syncStrategy.updateMatch(updatedMatch)
     }
 
+    @Synchronized
     private fun applyEventInfoChanges(updatedEventInfo: EventInfo) {
-        //Logd("$instanceId :: MatchRepository::applyEventInfoChanges:: $updatedEventInfo")
+        Logd("$instanceId :: MatchRepository::applyEventInfoChanges:: $updatedEventInfo")
         syncStrategy.updateEventInfo(updatedEventInfo)
     }
 
+    @Synchronized
     private fun notifyMatchChanges(updatedMatch: Match) {
         try {
             //Logd("$instanceId :: MatchRepository::notifyMatchChanges:: $updatedMatch")
@@ -233,9 +240,10 @@ object MatchRepository {
         }
     }
 
+    @Synchronized
     private fun notifyEventInfoChanges(updatedEventInfo: EventInfo) {
         try {
-            //Logd("$instanceId :: MatchRepository::notifyEventInfoChanges:: $updatedEventInfo")
+            Logd("$instanceId :: MatchRepository::notifyEventInfoChanges:: $updatedEventInfo")
             currentEventInfo = updatedEventInfo
 
             if (_sport.value != currentEventInfo.sport) {

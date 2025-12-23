@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.fragments.volley
+package it.lmqv.livematchcam.fragments.sports.volley
 
 import android.os.Bundle
 import android.text.InputFilter
@@ -16,15 +16,12 @@ import it.lmqv.livematchcam.databinding.FragmentVolleyRemoteControlBinding
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
-import it.lmqv.livematchcam.extensions.setShirtByColor
-import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.services.firebase.VolleyScore
-import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
+import it.lmqv.livematchcam.fragments.sports.BaseRemoteControlFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
@@ -51,13 +48,6 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-//        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
-//            binding.homeTeam.text = homeTeam
-//        }
-//        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
-//            binding.awayTeam.text = guestTeam
-//        }
 
         MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
             binding.homeTeamControl.setTeamName(homeTeam)
@@ -87,72 +77,6 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                 binding.guestTeamControl.setPrimaryColor(primaryColor.toColorInt())
             }
         }
-
-//        launchOnStarted {
-//            combine(
-//                MatchRepository.firebaseAccountData,
-//                MatchRepository.homePrimaryColorHex,
-//                MatchRepository.homeLogo) {
-//                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
-//            }.collect { (firebaseAccountData, colorHex, logoURL) ->
-//                //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
-//                if (logoURL.isNotEmpty()) {
-//                    binding.homeColor.load(logoURL) {
-//                        placeholder(R.drawable.shirt_white)
-//                        error(R.drawable.shirt_white)
-//                        allowHardware(false)
-//                    }
-//                } else {
-//                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
-//                }
-//
-//                binding.homeColor.setOnClickListener {
-//                    if (firebaseAccountData.remoteScoreAvailable) {
-//                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-//                            MatchRepository.setHomeLogo(updatedTeamLogo)
-//                            requireActivity().hideSystemUI()
-//                        }
-//                    } else {
-//                        requireContext().showColorPickerDialog { color ->
-//                            MatchRepository.setHomePrimaryColorHex(color)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        launchOnStarted {
-//            combine(
-//                MatchRepository.firebaseAccountData,
-//                MatchRepository.guestPrimaryColorHex,
-//                MatchRepository.guestLogo) {
-//                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
-//            }.collect { (firebaseAccountData, colorHex, logoURL) ->
-//                //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
-//                if (logoURL.isNotEmpty()) {
-//                    binding.guestColor.load(logoURL) {
-//                        placeholder(R.drawable.shirt_white)
-//                        error(R.drawable.shirt_white)
-//                        allowHardware(false)
-//                    }
-//                } else {
-//                    binding.guestColor.setShirtByColor(colorHex.toColorInt())
-//                }
-//
-//                binding.guestColor.setOnClickListener {
-//                    if (firebaseAccountData.remoteScoreAvailable) {
-//                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-//                            MatchRepository.setGuestLogo(updatedTeamLogo)
-//                            requireActivity().hideSystemUI()
-//                        }
-//                    } else {
-//                        requireContext().showColorPickerDialog { color ->
-//                            MatchRepository.setGuestPrimaryColorHex(color)
-//                        }
-//                    }
-//                }
-//            }
-//        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             MatchRepository.score.collectLatest { scoreInstance ->
@@ -284,32 +208,6 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             }
         }
 
-        /*binding.spotBannerUrl.setOnEditorActionListener(object : TextView.OnEditorActionListener {
-                override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
-                    return if (actionId == EditorInfo.IME_ACTION_DONE) {
-                        val text = v?.text.toString()
-                        toast("Spot: $text")
-                        hideKeyboard()
-                        true
-                    } else {
-                        false
-                    }
-                }
-            })
-
-        binding.mainBannerUrl.setOnEditorActionListener(object : TextView.OnEditorActionListener {
-            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
-                return if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    val text = v?.text.toString()
-                    toast("Main: $text")
-                    hideKeyboard()
-                    true
-                } else {
-                    false
-                }
-            }
-        })*/
-
         viewLifecycleOwner.lifecycleScope.launch {
             volleyScoreViewModel.liveScore.collectLatest { liveScore ->
                 //Logd("VolleyControlBar::liveScore.collectLatest::$liveScore")
@@ -362,18 +260,6 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             volleyScoreViewModel.incrementAwayScore()
         }
 
-        /*binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
-                matchViewModel.setHomeColorHex(color)
-            }
-        }
-
-        binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
-                matchViewModel.setGuestColorHex(color)
-            }
-        }*/
-
         binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
             MatchRepository.setHomeTeam(updatedTeamName)
         }
@@ -394,22 +280,6 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
             MatchRepository.setGuestPrimaryColorHex(updatedColor)
         }
 
-//        binding.homeTeam.setOnClickListener {
-//            var teamName = binding.homeTeam.text.toString()
-//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-//                MatchRepository.setHomeTeam(updatedTeamName)
-//                requireActivity().hideSystemUI()
-//            }
-//        }
-//
-//        binding.awayTeam.setOnClickListener {
-//            var teamName = binding.awayTeam.text.toString()
-//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-//                MatchRepository.setGuestTeam(updatedTeamName)
-//                requireActivity().hideSystemUI()
-//            }
-//        }
-
         binding.matchLeague.setOnClickListener {
             requireContext().showEditStringDialog(R.string.match_league, this.currentDescription, filters = arrayOf<InputFilter>()) { updatedMatchLeague ->
                 this.currentDescription = updatedMatchLeague
@@ -423,13 +293,4 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         super.onDestroyView()
         _binding = null
     }
-
-//    private fun hideKeyboard() {
-//        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//        val view = requireActivity().currentFocus
-//        if (view != null) {
-//            imm.hideSoftInputFromWindow(view.windowToken, 0)
-//            view.clearFocus() // Rimuove il focus
-//        }
-//    }
 }

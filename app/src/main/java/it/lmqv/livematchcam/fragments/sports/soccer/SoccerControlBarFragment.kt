@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.fragments.soccer
+package it.lmqv.livematchcam.fragments.sports.soccer
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,39 +6,38 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.databinding.FragmentSoccerRemoteControlBinding
-import it.lmqv.livematchcam.extensions.Loge
+import it.lmqv.livematchcam.databinding.FragmentSoccerControlBarBinding
+import it.lmqv.livematchcam.dialogs.TimePickerDialog
+import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.launchOnStarted
+import it.lmqv.livematchcam.extensions.parseTimeToSeconds
 import it.lmqv.livematchcam.services.firebase.SoccerScore
-import it.lmqv.livematchcam.fragments.BaseRemoteControlFragment
+import it.lmqv.livematchcam.fragments.sports.BaseControlBarFragment
 import it.lmqv.livematchcam.viewmodels.Command
 import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.services.counter.CounterService
+import it.lmqv.livematchcam.viewmodels.CounterViewModel
 import it.lmqv.livematchcam.viewmodels.SoccerScoreViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
-import it.lmqv.livematchcam.dialogs.TimePickerDialog
-import it.lmqv.livematchcam.extensions.formatTime
-import it.lmqv.livematchcam.extensions.parseTimeToSeconds
-import it.lmqv.livematchcam.services.counter.CounterService
-import it.lmqv.livematchcam.viewmodels.CounterViewModel
+import it.lmqv.livematchcam.extensions.Loge
 
-class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
+class SoccerControlBarFragment() : BaseControlBarFragment() {
     companion object {
-        fun newInstance() = SoccerRemoteControlFragment()
+        fun newInstance() = SoccerControlBarFragment()
     }
     private val soccerScoreViewModel: SoccerScoreViewModel by activityViewModels()
     private val counterViewModel: CounterViewModel by activityViewModels()
 
-    private var _binding: FragmentSoccerRemoteControlBinding? = null
+    private var _binding: FragmentSoccerControlBarBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentSoccerRemoteControlBinding.inflate(inflater, container, false)
+        _binding = FragmentSoccerControlBarBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -83,12 +82,10 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 
 //        launchOnStarted {
 //            combine(
-//                MatchRepository.firebaseAccountData,
 //                MatchRepository.homePrimaryColorHex,
 //                MatchRepository.homeLogo) {
-//                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
-//            }.collect { (firebaseAccountData, colorHex, logoURL) ->
-//                //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
+//                    color, logo -> Pair(color, logo)
+//            }.collect { (colorHex, logoURL) ->
 //                if (logoURL.isNotEmpty()) {
 //                    binding.homeColor.load(logoURL) {
 //                        placeholder(R.drawable.shirt_white)
@@ -98,65 +95,30 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 //                } else {
 //                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
 //                }
-//
-//                binding.homeColor.setOnClickListener {
-//                    if (firebaseAccountData.remoteScoreAvailable) {
-//                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-//                            MatchRepository.setHomeLogo(updatedTeamLogo)
-//                            requireActivity().hideSystemUI()
-//                        }
-//                    } else {
-//                        requireContext().showColorPickerDialog { color ->
-//                            MatchRepository.setHomePrimaryColorHex(color)
-//                        }
-//                    }
-//                }
 //            }
 //        }
 
 //        launchOnStarted {
 //            combine(
-//                MatchRepository.firebaseAccountData,
 //                MatchRepository.guestPrimaryColorHex,
 //                MatchRepository.guestLogo) {
-//                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
-//            }.collect { (firebaseAccountData, colorHex, logoURL) ->
-//                //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
+//                    color, logo -> Pair(color, logo)
+//            }.collect { (colorHex, logoURL) ->
 //                if (logoURL.isNotEmpty()) {
-//                    binding.guestColor.load(logoURL) {
+//                    binding.awayColor.load(logoURL) {
 //                        placeholder(R.drawable.shirt_white)
 //                        error(R.drawable.shirt_white)
 //                        allowHardware(false)
 //                    }
 //                } else {
-//                    binding.guestColor.setShirtByColor(colorHex.toColorInt())
-//                }
-//
-//                binding.guestColor.setOnClickListener {
-//                    if (firebaseAccountData.remoteScoreAvailable) {
-//                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-//                            MatchRepository.setGuestLogo(updatedTeamLogo)
-//                            requireActivity().hideSystemUI()
-//                        }
-//                    } else {
-//                        requireContext().showColorPickerDialog { color ->
-//                            MatchRepository.setGuestPrimaryColorHex(color)
-//                        }
-//                    }
+//                    binding.awayColor.setShirtByColor(colorHex.toColorInt())
 //                }
 //            }
 //        }
 
-        /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
-        }
-        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
-        }*/
-
         viewLifecycleOwner.lifecycleScope.launch {
             MatchRepository.score.collectLatest { scoreInstance ->
-                //Logd("SoccerRemoteControl::${scoreInstance}")
+                //Logd("SoccerControlBar::score.collectLatest::${scoreInstance}")
                 try {
                     val score = scoreInstance as SoccerScore
                     soccerScoreViewModel.initScore(score)
@@ -174,53 +136,35 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
                         binding.stopTime.visibility = View.GONE
                         //binding.resetTime.isEnabled = true
                     }
-                    //if (command == Command.RESET_TIME.toString()) {
-                    //}
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    Loge("SoccerRemoteControl::Exception:: ${e.message.toString()}")
+                    Loge("SoccerControlBar::Exception:: ${e.message.toString()}")
                 }
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             soccerScoreViewModel.liveScore.collectLatest { liveScore ->
-                //Logd("SoccerRemoteControlBar $liveScore")
+                //Logd("SoccerControlBar::liveScore.collectLatest::$liveScore")
                 MatchRepository.setScore(liveScore)
             }
         }
 
         binding.homeScoreMinus.setOnClickListener {
-            //Logd("SoccerRemoteControlBar::homeScoreMinus")
             soccerScoreViewModel.incrementHomeScore(-1)
         }
 
         binding.homeScoreAdd.setOnClickListener {
-            //Logd("SoccerRemoteControlBar::homeScoreAdd")
             soccerScoreViewModel.incrementHomeScore()
         }
 
         binding.awayScoreMinus.setOnClickListener {
-            //Logd("SoccerRemoteControlBar::awayScoreMinus")
             soccerScoreViewModel.incrementGuestScore(-1)
         }
 
         binding.awayScoreAdd.setOnClickListener {
-            //Logd("SoccerRemoteControlBar::awayScoreAdd")
             soccerScoreViewModel.incrementGuestScore()
         }
-
-        /*binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
-                matchViewModel.setHomeColorHex(color)
-            }
-        }
-
-        binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
-                matchViewModel.setGuestColorHex(color)
-            }
-        }*/
 
         binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
             MatchRepository.setHomeTeam(updatedTeamName)
@@ -242,6 +186,20 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
             MatchRepository.setGuestPrimaryColorHex(updatedColor)
         }
 
+//        binding.homeColor.setOnClickListener {
+//            launchOnStarted {
+//                requireContext().showColorPickerDialog { color ->
+//                    MatchRepository.setHomePrimaryColorHex(color)
+//                }
+//            }
+//        }
+
+//        binding.awayColor.setOnClickListener {
+//            requireContext().showColorPickerDialog { color ->
+//                MatchRepository.setGuestPrimaryColorHex(color)
+//            }
+//        }
+
 //        binding.homeTeam.setOnClickListener {
 //            var teamName = binding.homeTeam.text.toString()
 //            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
@@ -249,7 +207,7 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 //                requireActivity().hideSystemUI()
 //            }
 //        }
-//
+
 //        binding.awayTeam.setOnClickListener {
 //            var teamName = binding.awayTeam.text.toString()
 //            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
@@ -301,19 +259,6 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
 
                 binding.matchTime.text = formatTime(seconds)
             }
-        }
-
-        binding.zoomIn.setOnClickListener {
-            binding.currentZoom.text = getString(R.string.zoom_in)
-            soccerScoreViewModel.setCommand(Command.ZOOM_IN)
-        }
-        binding.zoomDefault.setOnClickListener {
-            binding.currentZoom.text = getString(R.string.zoom_none)
-            soccerScoreViewModel.setCommand(Command.ZOOM_DEFAULT)
-        }
-        binding.zoomOut.setOnClickListener {
-            binding.currentZoom.text = getString(R.string.zoom_out)
-            soccerScoreViewModel.setCommand(Command.ZOOM_OUT)
         }
     }
 

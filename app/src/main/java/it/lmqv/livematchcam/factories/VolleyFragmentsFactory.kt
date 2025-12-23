@@ -1,8 +1,8 @@
 package it.lmqv.livematchcam.factories
 
-import it.lmqv.livematchcam.fragments.volley.VolleyControlBarFragment
-import it.lmqv.livematchcam.fragments.volley.VolleyRemoteControlFragment
-import it.lmqv.livematchcam.fragments.volley.VolleyScoreBoardFragment
+import it.lmqv.livematchcam.fragments.sports.volley.VolleyControlBarFragment
+import it.lmqv.livematchcam.fragments.sports.volley.VolleyRemoteControlFragment
+import it.lmqv.livematchcam.fragments.sports.volley.VolleyScoreBoardFragment
 
 class VolleyFragmentsFactory : ISportsComponentsFactory {
 

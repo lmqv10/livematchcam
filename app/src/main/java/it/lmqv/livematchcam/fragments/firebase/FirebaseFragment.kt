@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.fragments
+package it.lmqv.livematchcam.fragments.firebase
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -15,7 +15,6 @@ import it.lmqv.livematchcam.adapters.StreamsAdapter
 import it.lmqv.livematchcam.databinding.FragmentFirebaseBinding
 import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.launchOnCreated
-import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.repositories.MatchRepository

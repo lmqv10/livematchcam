@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="top"
-    tools:context=".fragments.volley.VolleyRemoteControlFragment">
+    tools:context=".fragments.sports.volley.VolleyRemoteControlFragment">
 
     <LinearLayout
         android:id="@+id/control_home"

@@ -1,56 +1,46 @@
-package it.lmqv.livematchcam.fragments.volley
+package it.lmqv.livematchcam.fragments.sports.soccer
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.core.content.ContextCompat
 import coil.load
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.databinding.FragmentVolleyScoreBoardBinding
+import it.lmqv.livematchcam.databinding.FragmentSoccerScoreBoardLightBinding
+import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.setShirtByColor
-import it.lmqv.livematchcam.services.firebase.SetScore
-import it.lmqv.livematchcam.fragments.BaseScoreBoardFragment
-import it.lmqv.livematchcam.repositories.MatchRepository
-import kotlinx.coroutines.flow.collectLatest
+import it.lmqv.livematchcam.fragments.sports.BaseScoreBoardFragment
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.lifecycleScope
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
-import it.lmqv.livematchcam.services.firebase.VolleyScore
+import it.lmqv.livematchcam.services.firebase.SoccerScore
+import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.viewmodels.Command
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
+class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
 
     companion object {
-        fun newInstance() = VolleyScoreBoardFragment()
+        fun newInstance() = SoccerScoreBoardFragment()
     }
 
-    private var setsControls: List<Pair<TextView, TextView>> = mutableListOf()
-
-    private var _binding: FragmentVolleyScoreBoardBinding? = null
+    private var _binding: FragmentSoccerScoreBoardLightBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentVolleyScoreBoardBinding.inflate(inflater, container, false)
+        _binding = FragmentSoccerScoreBoardLightBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        this.setsControls = mutableListOf(
-            Pair(binding.homeScore1set, binding.awayScore1set),
-            Pair(binding.homeScore2set, binding.awayScore2set),
-            Pair(binding.homeScore3set, binding.awayScore3set),
-            Pair(binding.homeScore4set, binding.awayScore4set),
-            Pair(binding.homeScore5set, binding.awayScore5set),
-        )
 
         MatchRepository.homeTeam.observe(viewLifecycleOwner) { team ->
             binding.homeTeam.text = team
@@ -60,6 +50,39 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
         MatchRepository.guestTeam.observe(viewLifecycleOwner) { team ->
             binding.awayTeam.text = team
             onUpdateCallback?.refresh()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            MatchRepository.score.collectLatest { scoreInstance ->
+                //Logd("SoccerScoreBoard::${scoreInstance}")
+                try {
+                    val score = scoreInstance as SoccerScore
+                    binding.homeScore.text = score.home.toString()
+                    binding.awayScore.text = score.away.toString()
+                    binding.matchPeriod.text = score.period
+
+                    val command = score.command
+                    if (command == Command.START_TIME.toString()) {
+                        if (!isStarted()) {
+                            startTime()
+                        }
+                    }
+                    if (command == Command.PAUSE.toString()) {
+                        if (isStarted()) {
+                            pauseTime()
+                        }
+                    }
+                    if (command == Command.RESET_TIME.toString()) {
+                        if (!isStarted()) {
+                            resetTime()
+                        }
+                    }
+                    onUpdateCallback?.refresh()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Loge("SoccerScoreBoard::Exception:: ${e.message.toString()}")
+                }
+            }
         }
 
         launchOnStarted {
@@ -72,6 +95,7 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
                 if (logoURL.isNotEmpty()) {
                     binding.homeLogo.visibility = View.VISIBLE
+                    binding.homeColorBar.visibility = View.VISIBLE
                     binding.homeShirt.visibility = View.INVISIBLE
                     binding.homeLogo.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
@@ -85,6 +109,7 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
                     }
                 } else {
                     binding.homeLogo.visibility = View.GONE
+                    binding.homeColorBar.visibility = View.GONE
                     binding.homeShirt.visibility = View.VISIBLE
                     binding.homeShirt.setShirtByColor(colorHex.toColorInt())
                     onUpdateCallback?.refresh()
@@ -102,6 +127,7 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
                 if (logoURL.isNotEmpty()) {
                     binding.awayLogo.visibility = View.VISIBLE
+                    binding.awayColorBar.visibility = View.VISIBLE
                     binding.awayShirt.visibility = View.INVISIBLE
                     binding.awayLogo.load(logoURL) {
                         placeholder(R.drawable.shirt_white)
@@ -115,24 +141,10 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
                     }
                 } else {
                     binding.awayLogo.visibility = View.GONE
+                    binding.awayColorBar.visibility = View.GONE
                     binding.awayShirt.visibility = View.VISIBLE
                     binding.awayShirt.setShirtByColor(colorHex.toColorInt())
                     onUpdateCallback?.refresh()
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            MatchRepository.score.collectLatest { scoreInstance ->
-                //Logd("VolleyScoreBoard::score.collectLatest:: $scoreInstance")
-                try {
-                    val score = scoreInstance as VolleyScore
-                    updateScore(score.sets)
-                    updateLeagueDescription(score.league)
-                    onUpdateCallback?.refresh()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Loge("VolleyScoreBoard::Exception:: ${e.message.toString()}")
                 }
             }
         }
@@ -143,47 +155,8 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
         _binding = null
     }
 
-    private fun updateScore(sets: List<SetScore>) {
-        val setsSize = sets.size
-
-        setsControls.forEachIndexed { index, controls ->
-            if (index < setsSize) {
-                var score = sets[index]
-                controls.first.text = score.home.toString()
-                controls.second.text = score.guest.toString()
-
-                controls.first.visibility = View.VISIBLE
-                controls.second.visibility = View.VISIBLE
-
-                val winColor = ContextCompat.getColor(requireContext(), R.color.secondary_dark)
-                val loseColor = ContextCompat.getColor(requireContext(), R.color.BLACK)
-
-                if (index < setsSize - 1) {
-                    if (score.home > score.guest) {
-                        controls.first.setTextColor(winColor)
-                        controls.second.setTextColor(loseColor)
-                    } else {
-                        controls.first.setTextColor(loseColor)
-                        controls.second.setTextColor(winColor)
-                    }
-                } else {
-                    controls.second.setTextColor(loseColor)
-                    controls.second.setTextColor(loseColor)
-                }
-            } else {
-                controls.first.visibility = View.GONE
-                controls.second.visibility = View.GONE
-            }
-
-        }
-    }
-
-    private fun updateLeagueDescription(description: String) {
-        if (description == "") {
-            binding.matchDescription.visibility = View.GONE
-        } else {
-            binding.matchDescription.visibility = View.VISIBLE
-        }
-        binding.matchDescription.text = description
+    override fun onTickTimer(timeElapsedInSeconds: Int) {
+        Logd("onTickTimer:: $timeElapsedInSeconds")
+        binding.matchTime.text = formatTime(timeElapsedInSeconds)
     }
 }

@@ -102,7 +102,6 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
         binding.tvVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
 
         floatingActionsViewModel.setNavigator(this)
-        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (Build.VERSION.SDK_INT >= VERSION_CODES.R) {
@@ -142,7 +141,6 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
         headerView = binding.matchNavView.getHeaderView(0)
         headerView.setOnClickListener {
             startActivity(Intent(this, AccountActivity::class.java))
-            //startActivity(Intent(this, FirebaseAccountActivity::class.java))
             binding.matchDrawerLayout.post {
                 binding.matchDrawerLayout.closeDrawer(GravityCompat.START, true)
             }

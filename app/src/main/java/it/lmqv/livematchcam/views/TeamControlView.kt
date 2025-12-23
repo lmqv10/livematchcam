@@ -47,7 +47,6 @@ class TeamControlView @JvmOverloads constructor(
 
         binding.textTeamName.setOnClickListener {
             val sourceTeamName = binding.textTeamName.text.toString()
-
             context.showEditStringDialog(R.string.team_name, sourceTeamName) { updatedTeamName ->
                 binding.textTeamName.text = updatedTeamName
                 onTeamNameChanged?.invoke(updatedTeamName)
@@ -57,12 +56,6 @@ class TeamControlView @JvmOverloads constructor(
 
         binding.imageLogo.setOnClickListener {
             val sourceLogoUrl = binding.imageLogo.tag.toString()
-
-            /*context.showEditStringDialog(R.string.choose_logo, sourceLogoUrl, arrayOf()) { updatedLogoUrl ->
-                onLogoURLChanged?.invoke(updatedLogoUrl)
-                this.hideKeyboard()
-            }*/
-
             var dialog = LogosRecentsDialog(context, sourceLogoUrl) { updatedLogoUrl ->
                 onLogoURLChanged?.invoke(updatedLogoUrl)
             }
@@ -85,21 +78,25 @@ class TeamControlView @JvmOverloads constructor(
     }
 
     fun setLogoUrl(sourceLogoUrl: String) {
-        binding.imageLogo.tag = sourceLogoUrl
+        if (binding.imageLogo.tag != sourceLogoUrl) {
+            binding.imageLogo.tag = sourceLogoUrl
 
-        if (sourceLogoUrl.isEmpty()) {
-            binding.imageLogo.setImageResource(R.drawable.shield_add)
-        } else {
-            binding.imageLogo.load(sourceLogoUrl) {
-                placeholder(R.drawable.refresh)
-                error(R.drawable.shield_add)
-                allowHardware(false)
+            if (sourceLogoUrl.isEmpty()) {
+                binding.imageLogo.setImageResource(R.drawable.shield_add)
+            } else {
+                binding.imageLogo.load(sourceLogoUrl) {
+                    placeholder(R.drawable.refresh)
+                    error(R.drawable.shield_add)
+                    allowHardware(false)
+                }
             }
         }
     }
 
     fun setTeamName(name: String) {
-        binding.textTeamName.text = name
+        if (binding.textTeamName.text != name) {
+            binding.textTeamName.text = name
+        }
     }
 
     fun setPrimaryColor(color: Int) {

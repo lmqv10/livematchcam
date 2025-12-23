@@ -53,7 +53,7 @@ class VolleyScoreboardViewFilterRender(
     @Synchronized
     override fun match(match: Match) {
         try {
-            Logd("VolleyScoreboardViewFilterRender::match $match")
+            //Logd("VolleyScoreboardViewFilterRender::match $match")
             this.handleHomeTeam(match)
             this.handleAwayTeam(match)
             super.render()
@@ -66,7 +66,7 @@ class VolleyScoreboardViewFilterRender(
     @Synchronized
     override fun score(score: IScore) {
         try {
-            Logd("VolleyScoreboardViewFilterRender::score $score")
+            //Logd("VolleyScoreboardViewFilterRender::score $score")
             val score = score as VolleyScore
             updateScore(score.sets)
             updateLeagueDescription(score.league)
@@ -203,7 +203,7 @@ class VolleyScoreboardViewFilterRender(
     }
 
     private fun updateView() {
-        Logd("VolleyScoreboardViewFilterRender :: updateMeasure")
+        //Logd("VolleyScoreboardViewFilterRender :: updateMeasure")
         binding.scoreBoard.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)

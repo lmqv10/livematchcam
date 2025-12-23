@@ -121,10 +121,12 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
         this.onFirebaseAccountData(FirebaseAccountDataContract())
     }
 
+    @Synchronized
     override fun updateMatch(match: Match) {
         FirebaseDataService.updateMatchValue(match)
     }
 
+    @Synchronized
     override fun updateEventInfo(eventInfo: EventInfo) {
         var score = eventInfo.score
         val scoreMap = ScoreFactory.buildMap(score)

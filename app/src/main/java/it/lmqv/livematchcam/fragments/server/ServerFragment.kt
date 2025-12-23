@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.fragments
+package it.lmqv.livematchcam.fragments.server
 
 import android.os.Bundle
 import android.text.InputFilter

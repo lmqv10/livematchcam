@@ -85,12 +85,6 @@
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi">
-            <!--intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/device_filter" /-->
         </activity>
 
         <activity
@@ -101,14 +95,6 @@
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
-
-<!--        <activity-->
-<!--            android:name=".UVCStreamActivity"-->
-<!--            android:exported="true"-->
-<!--            android:screenOrientation="sensorLandscape"-->
-<!--            android:configChanges="orientation|screenSize"-->
-<!--            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"-->
-<!--            tools:ignore="DiscouragedApi"/>-->
 
         <activity
             android:name=".RemoteScoreActivity"
@@ -124,13 +110,6 @@
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
 
-<!--        <activity-->
-<!--            android:name=".FirebaseAccountActivity"-->
-<!--            android:screenOrientation="sensorLandscape"-->
-<!--            android:configChanges="orientation|screenSize"-->
-<!--            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"-->
-<!--            tools:ignore="DiscouragedApi" />-->
-
         <activity
             android:name=".YouTubeActivity"
             android:screenOrientation="sensorLandscape"
@@ -140,7 +119,6 @@
 
         <activity
             android:name=".UsbActivity"
-            android:screenOrientation="sensorLandscape"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/ActivityTransparent"
