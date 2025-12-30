@@ -53,9 +53,10 @@
 
         <Spinner
             android:id="@+id/spinner_streams"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="@dimen/image_size_width_small"
             android:spinnerMode="dialog" />
 
         <View
