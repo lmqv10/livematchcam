@@ -53,24 +53,27 @@ class ServerConfigurationFragment : Fragment() {
         val syncStrategy: SyncStrategy = args.syncStrategy
         MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)
 
-//        launchOnResumed {
-//            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
-//                var streams = firebaseAccountData.streams
-//                if (streams.isEmpty()) {
-//                    childFragmentManager
-//                        .beginTransaction()
+        binding.wall.setOnClickListener { _ -> true }
+        launchOnResumed {
+            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
+                var guid = firebaseAccountData.guid
+
+                //Logd(">>>>>>>>>>>>>> $guid")
+//                var transaction = childFragmentManager.beginTransaction()
+                if (guid.isEmpty()) {
+                    binding.wall.visibility = View.VISIBLE
+//                    transaction
 //                        .hide(serverFragment)
 //                        .hide(matchInfoFragment)
-//                        .commit()
-//                } else {
-//                    childFragmentManager
-//                        .beginTransaction()
+                } else {
+                    binding.wall.visibility = View.GONE
+//                    transaction
 //                        .show(serverFragment)
 //                        .show(matchInfoFragment)
-//                        .commit()
-//                }
-//            }
-//        }
+                }
+//                transaction.commit()
+            }
+        }
     }
     
     override fun onDestroyView() {

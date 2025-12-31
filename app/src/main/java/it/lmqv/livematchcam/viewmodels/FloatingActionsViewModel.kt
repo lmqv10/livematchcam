@@ -52,10 +52,6 @@ class FloatingActionsViewModel : ViewModel() {
         _actions.value = getActions()
     }
 
-//    fun setNoActions() {
-//        _actions.value = listOf<FloatingAction>()
-//    }
-
     private fun getActions() : List<FloatingAction> {
 //        Logd("getActions:: this.uvcEnabled ${this.uvcEnabled}")
 //        Logd("getActions:: this.remoteScoreAvailability ${this.remoteScoreAvailability}")
@@ -73,13 +69,6 @@ class FloatingActionsViewModel : ViewModel() {
                 onClick = {
                     navigator?.navigateAsStartActivity(RemoteScoreActivity::class.java)
                 }
-//            ),  FloatingAction(
-//                id = R.id.action_uvc_stream,
-//                iconRes = R.drawable.ic_uvc_camera,
-//                contentDescription = "usb",
-//                onClick = {
-//                    navigator?.navigateAsStartActivity(UVCStreamActivity::class.java)
-//                }
             ), FloatingAction(
                 id = R.id.action_camera_stream,
                 iconRes = R.drawable.play_stream,
@@ -88,7 +77,6 @@ class FloatingActionsViewModel : ViewModel() {
                     navigator?.navigateAsStartActivity(StreamActivity::class.java)
                 }
             ))
-            //.filter { x -> this.uvcEnabled || x.id != R.id.action_uvc_stream }
             .filter { x -> this.firebaseAccountData.guid.isNotEmpty() }
             .filter { x -> this.remoteScoreAvailability || x.id != R.id.action_remote_control }
             .filter { x -> this.currentMenuItemId != R.id.firebaseConfigurationFragment ||

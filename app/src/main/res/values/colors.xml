@@ -14,6 +14,7 @@
 
     <color name="alpha">#22000000</color>
     <color name="alpha_dark">#11000000</color>
+    <color name="alpha_black">#88000000</color>
 
     <color name="score_background_start">#ff676767</color>
     <color name="score_background_center">#ff565656</color>

@@ -2,6 +2,7 @@
     <dimen name="app_icon_size">40dp</dimen>
     <dimen name="user_icon_size">64dp</dimen>
 
+    <dimen name="text_size_wall">30sp</dimen>
     <dimen name="text_size_big">20sp</dimen>
     <dimen name="text_size_default">18sp</dimen>
     <dimen name="text_size_small">16sp</dimen>

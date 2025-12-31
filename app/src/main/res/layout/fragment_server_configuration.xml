@@ -1,22 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:baselineAligned="false"
-    android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.server.ServerConfigurationFragment">
 
-    <FrameLayout
-        android:id="@+id/serverContainer"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1" />
+        android:baselineAligned="false"
+        android:orientation="horizontal">
 
-    <FrameLayout
-        android:id="@+id/matchInfoContainer"
-        android:layout_width="0dp"
+        <FrameLayout
+            android:id="@+id/serverContainer"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <FrameLayout
+            android:id="@+id/matchInfoContainer"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:visibility="gone"
+        android:id="@+id/wall"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1" />
-</LinearLayout>
+        android:background="@drawable/alpha_black_background"
+        android:layout_margin="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true" >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|center_horizontal"
+            android:textSize="@dimen/text_size_wall"
+            android:text="@string/no_configured_account"
+            android:shadowColor="@color/black"
+            android:shadowDx="5"
+            android:shadowDy="5"
+            android:shadowRadius="25"
+            android:textColor="@color/primary"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>
