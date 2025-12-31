@@ -9,7 +9,9 @@ import androidx.navigation.fragment.navArgs
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.utils.SyncStrategy
 import it.lmqv.livematchcam.databinding.FragmentServerConfigurationBinding
+import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.fragments.sports.MatchInfoFragment
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.MatchSyncStrategyRepository
 import kotlin.getValue
 
@@ -32,10 +34,6 @@ class ServerConfigurationFragment : Fragment() {
         childFragmentManager
             .beginTransaction()
             .replace(R.id.serverContainer, serverFragment)
-            .commit()
-
-        childFragmentManager
-            .beginTransaction()
             .replace(R.id.matchInfoContainer, matchInfoFragment)
             .commit()
     }
@@ -54,6 +52,25 @@ class ServerConfigurationFragment : Fragment() {
         val args: ServerConfigurationFragmentArgs by navArgs()
         val syncStrategy: SyncStrategy = args.syncStrategy
         MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)
+
+//        launchOnResumed {
+//            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
+//                var streams = firebaseAccountData.streams
+//                if (streams.isEmpty()) {
+//                    childFragmentManager
+//                        .beginTransaction()
+//                        .hide(serverFragment)
+//                        .hide(matchInfoFragment)
+//                        .commit()
+//                } else {
+//                    childFragmentManager
+//                        .beginTransaction()
+//                        .show(serverFragment)
+//                        .show(matchInfoFragment)
+//                        .commit()
+//                }
+//            }
+//        }
     }
     
     override fun onDestroyView() {

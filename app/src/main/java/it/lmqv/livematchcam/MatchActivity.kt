@@ -234,6 +234,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                     binding.matchNavView.getHeaderView(0).findViewById<TextView>(R.id.textAccountEmail).isVisible = settings.youTubeEnabled && isLogged
 
                     var hasStreams = firebaseAccountData.streams.isNotEmpty()
+                    binding.matchNavView.menu.findItem(R.id.serverConfigurationFragment).isVisible = firebaseAccountViewModel.hasAccountKey() && hasStreams
                     binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = firebaseAccountViewModel.hasAccountKey() && hasStreams
 
                     floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData)
@@ -381,7 +382,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
+       // menuInflater.inflate(R.menu.main_menu, menu)
 
 // TODO - Add Preferences Menu
 //        val menuItem = menu.findItem(R.id.menu_settings)

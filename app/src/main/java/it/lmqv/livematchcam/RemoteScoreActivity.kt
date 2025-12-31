@@ -82,10 +82,6 @@ class RemoteScoreActivity : AppCompatActivity(),
                 supportFragmentManager
                     .beginTransaction()
                     .replace(R.id.score_board_placeholder, scoreBoardFragment as Fragment, "ScoreBoardFragmentTag")
-                    .commit()
-
-                supportFragmentManager
-                    .beginTransaction()
                     .replace(R.id.container, remoteControlFragment as Fragment)
                     .commit()
             }

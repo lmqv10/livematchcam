@@ -34,10 +34,6 @@ class FirebaseConfigurationFragment : Fragment() {
         childFragmentManager
             .beginTransaction()
             .replace(R.id.firebaseContainer, firebaseFragment)
-            .commit()
-
-        childFragmentManager
-            .beginTransaction()
             .replace(R.id.matchInfoContainer, matchInfoFragment)
             .commit()
     }

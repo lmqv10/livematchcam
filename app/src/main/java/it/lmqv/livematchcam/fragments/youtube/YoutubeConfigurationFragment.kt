@@ -39,10 +39,6 @@ class YoutubeConfigurationFragment : Fragment() {
         childFragmentManager
             .beginTransaction()
             .replace(R.id.youtubeContainer, youtubeFragment)
-            .commit()
-
-        childFragmentManager
-            .beginTransaction()
             .replace(R.id.matchInfoContainer, matchInfoFragment)
             .commit()
     }
