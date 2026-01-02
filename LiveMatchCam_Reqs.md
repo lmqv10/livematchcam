@@ -7,7 +7,6 @@ STEP 2
 - Gestione di bannter multipli temporizzati (se possibile animati)
 - Implementare Video full screen per spot/pubblicità
 - Premettere di configurarsi il proprio firebase per remote
-- Unificare la CameraFragmente e la UVCCameraFragment per le parti comuni.
 - Valutare anche il goLive() soprattutto UI!!!
 - Gestione flag YouTubeEnabled (on Firebase or...)
 

@@ -340,7 +340,6 @@ class StreamActivity : AppCompatActivity(),
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         spinnerVideoSource.adapter = adapter
-        spinnerVideoSource.isEnabled = !this.streamService.isStreaming()
         spinnerVideoSource.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
 
@@ -393,7 +392,7 @@ class StreamActivity : AppCompatActivity(),
             KeyDescription(20, "20fps"),
             KeyDescription(25, "25fps"),
             KeyDescription(30, "30fps"),
-            //KeyDescription(60, "60fps")
+            KeyDescription(60, "60fps")
         )
 
         val adapterVideoFps = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoFps)
