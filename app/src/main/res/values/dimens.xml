@@ -2,11 +2,11 @@
     <dimen name="app_icon_size">40dp</dimen>
     <dimen name="user_icon_size">64dp</dimen>
 
-    <dimen name="text_size_wall">30sp</dimen>
+<!--    <dimen name="text_size_wall">24sp</dimen>-->
     <dimen name="text_size_big">20sp</dimen>
     <dimen name="text_size_default">18sp</dimen>
     <dimen name="text_size_small">16sp</dimen>
-    <dimen name="text_size_smaller">16sp</dimen>
+    <dimen name="text_size_smaller">14sp</dimen>
     <dimen name="text_size_smallest">12sp</dimen>
 
     <dimen name="toolbar_title_size">@dimen/text_size_big</dimen>

@@ -46,6 +46,10 @@ class UvcSonyCameraSource: VideoSource() {
 
     override fun getOrientationConfig(): OrientationForced = OrientationForced.LANDSCAPE
 
+    fun getCameraResolutions() : List<Size>{
+        return cameraHelper?.supportedSizeList?.toMutableList() ?: listOf()
+    }
+
     private val stateCallback: ICameraHelper.StateCallback = object : ICameraHelper.StateCallback {
         override fun onAttach(device: UsbDevice) {
             //Logd("onAttach ${device.deviceName}")
@@ -83,7 +87,7 @@ class UvcSonyCameraSource: VideoSource() {
     // private fun getSize(sourceWidth: Int = 1920, sourceheight: Int = 1080, sourceFps: Int = 60): Size { // tEst
     // private fun getSize(sourceWidth: Int = 1280, sourceheight: Int = 720, sourceFps: Int = 25): Size { // OK
         var currentSize: Size? = null
-        val sizeList: List<Size> = cameraHelper?.supportedSizeList?.toMutableList() ?: listOf()
+        val sizeList: List<Size> = getCameraResolutions()
 
         if (sizeList.isNotEmpty()) {
             Collections.sort(

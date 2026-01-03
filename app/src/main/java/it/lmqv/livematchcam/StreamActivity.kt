@@ -338,7 +338,7 @@ class StreamActivity : AppCompatActivity(),
             optionsVideoSource
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
+        spinnerVideoSource.isEnabled = !this.streamService.isStreaming()
         spinnerVideoSource.adapter = adapter
         spinnerVideoSource.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
@@ -359,6 +359,8 @@ class StreamActivity : AppCompatActivity(),
             streamConfigurationViewModel.videoSourceKind.value
         )
         spinnerVideoSource.setSelection(defaultIndex)
+
+        //val resolutions = this.streamService.getCameraResolutions()
 
         val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
         val optionsVideoResolutions = listOf(
@@ -392,7 +394,7 @@ class StreamActivity : AppCompatActivity(),
             KeyDescription(20, "20fps"),
             KeyDescription(25, "25fps"),
             KeyDescription(30, "30fps"),
-            KeyDescription(60, "60fps")
+            //KeyDescription(60, "60fps")
         )
 
         val adapterVideoFps = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoFps)

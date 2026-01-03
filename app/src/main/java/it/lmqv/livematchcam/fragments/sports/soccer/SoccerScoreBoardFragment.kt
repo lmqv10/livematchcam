@@ -92,6 +92,7 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
                 binding.homeColorBar.setBackgroundColor(colorHex.toColorInt())
+                binding.homeShirt.setShirtByColor(colorHex.toColorInt())
 
                 if (logoURL.isNotEmpty()) {
                     binding.homeLogo.visibility = View.VISIBLE
@@ -124,6 +125,7 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
                     color, logo -> Pair(color, logo)
             }.collect { (colorHex, logoURL) ->
                 binding.awayColorBar.setBackgroundColor(colorHex.toColorInt())
+                binding.awayShirt.setShirtByColor(colorHex.toColorInt())
 
                 if (logoURL.isNotEmpty()) {
                     binding.awayLogo.visibility = View.VISIBLE

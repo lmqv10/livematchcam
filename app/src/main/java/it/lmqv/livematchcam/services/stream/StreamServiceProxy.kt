@@ -1,6 +1,7 @@
 package it.lmqv.livematchcam.services.stream
 
 import android.app.Activity
+import android.util.Size
 import android.view.SurfaceView
 import com.pedro.common.ConnectChecker
 import com.pedro.library.util.FpsListener
@@ -8,6 +9,7 @@ import it.lmqv.livematchcam.dialogs.StartStreamingDialog
 import it.lmqv.livematchcam.dialogs.StopStreamingDialog
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.factories.CameraResolutionsFactory
 import it.lmqv.livematchcam.factories.Sports
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.flow.StateFlow
@@ -109,6 +111,10 @@ class StreamServiceProxy(val activityContext: Activity, val streamService: Strea
 
     override fun setFpsListenerCallback(fpsListenerCallback: FpsListener.Callback?) {
         streamService.setFpsListenerCallback(fpsListenerCallback)
+    }
+
+    override fun getCameraResolutions() : List<Size> {
+        return streamService.getCameraResolutions()
     }
 
     override val streamingElapsedTime: StateFlow<Int>

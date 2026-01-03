@@ -34,7 +34,7 @@
     <string name="thumbnail">Thumbnail</string>
     <string name="streamer">Streamer</string>
     <string name="account">Account</string>
-    <string name="no_configured_account">No valid account configured</string>
+    <string name="no_configured_account">No valid account</string>
     <string name="account_key">Account Key</string>
     <string name="match">Teams Configuration</string>
     <string name="_config_auto_zoom">Auto Zoom</string>

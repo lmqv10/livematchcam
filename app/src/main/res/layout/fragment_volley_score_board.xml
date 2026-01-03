@@ -39,6 +39,7 @@
 
             <GridLayout
                 android:layout_width="@dimen/volley_score_board_team"
+                android:minWidth="@dimen/volley_score_board_team"
                 android:layout_height="wrap_content"
                 android:columnCount="4">
 
@@ -47,10 +48,11 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical"
                     android:layout_columnWeight="1">
+
                     <ImageView
                         android:id="@+id/home_shirt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:contentDescription="@string/description_placeholder"
                         android:src="@drawable/shirt_layers" />
                     <ImageView
@@ -63,13 +65,8 @@
 
                 <TextView
                     android:id="@+id/home_team"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="2"
-                    android:textColor="@color/BLACK"
-                    android:text="@string/hint_home_team"
-                    android:textSize="@dimen/text_size_big"
-                    android:gravity="center" />
+                    style="@style/teamTextView"
+                    android:text="@string/hint_home_team" />
 
 <!--                <ImageView-->
 <!--                    android:id="@+id/home_serve"-->
@@ -101,64 +98,35 @@
 
                 <TextView
                     android:id="@+id/home_score_1set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     app:layout_constraintHorizontal_chainStyle="packed"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/home_score_2set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     android:visibility="gone"
                     app:layout_constraintStart_toEndOf="@id/home_score_1set"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/home_score_3set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     android:visibility="gone"
                     app:layout_constraintStart_toEndOf="@id/home_score_2set"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/home_score_4set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     android:visibility="gone"
                     app:layout_constraintStart_toEndOf="@id/home_score_3set"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/home_score_5set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     android:visibility="gone"
                     app:layout_constraintStart_toEndOf="@id/home_score_4set"
                     app:layout_constraintTop_toTopOf="parent"
@@ -196,8 +164,8 @@
 
                     <ImageView
                         android:id="@+id/away_shirt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:contentDescription="@string/description_placeholder"
                         android:src="@drawable/shirt_layers" />
 
@@ -211,13 +179,8 @@
 
                 <TextView
                     android:id="@+id/away_team"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="2"
-                    android:textColor="@color/BLACK"
-                    android:text="@string/hint_away_team"
-                    android:textSize="@dimen/text_size_big"
-                    android:gravity="center" />
+                    style="@style/teamTextView"
+                    android:text="@string/hint_away_team" />
 
 <!--                <ImageView-->
 <!--                    android:visibility="invisible"-->
@@ -251,64 +214,35 @@
 
                 <TextView
                     android:id="@+id/away_score_1set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     app:layout_constraintHorizontal_chainStyle="packed"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/away_score_2set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     android:visibility="gone"
                     app:layout_constraintStart_toEndOf="@id/away_score_1set"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/away_score_3set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     android:visibility="gone"
                     app:layout_constraintStart_toEndOf="@id/away_score_2set"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/away_score_4set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     android:visibility="gone"
                     app:layout_constraintStart_toEndOf="@id/away_score_3set"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/away_score_5set"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:gravity="center"
-                    android:text="@string/score_placeholder"
-                    android:textSize="@dimen/text_size_big"
-                    android:textColor="@color/black"
+                    style="@style/scoreTextView"
                     android:visibility="gone"
                     app:layout_constraintStart_toEndOf="@id/away_score_4set"
                     app:layout_constraintTop_toTopOf="parent"
@@ -325,7 +259,13 @@
             android:textColor="@color/BLACK"
             android:text=""
             android:paddingHorizontal="2dp"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_default"
+            android:maxLines="1"
+            android:ellipsize="none"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="@dimen/text_size_smallest"
+            android:autoSizeMaxTextSize="@dimen/text_size_big"
+            android:autoSizeStepGranularity="1sp"
             android:gravity="start" />
 
     </LinearLayout>

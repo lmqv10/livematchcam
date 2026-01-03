@@ -1,6 +1,7 @@
 package it.lmqv.livematchcam.services.stream
 
 import android.util.Range
+import android.util.Size
 import android.view.SurfaceView
 import com.pedro.common.ConnectChecker
 import com.pedro.library.util.FpsListener
@@ -26,6 +27,7 @@ interface IStreamService {
     fun isStreaming(): Boolean
     fun isOnPreview(): Boolean
 
+
     fun toggleStreaming(onStartCallback: () -> Unit, onStopCallback: (Boolean) -> Unit)
     fun stopStreamWithConfirm(onConfirm: () -> Unit)
 
@@ -33,6 +35,8 @@ interface IStreamService {
 
     fun setConnectCheckerCallback(connectChecker: ConnectChecker?)
     fun setFpsListenerCallback(fpsListenerCallback: FpsListener.Callback?)
+
+    fun getCameraResolutions(): List<Size>
 
     val streamingElapsedTime: StateFlow<Int>
     val videoSourceZoomHandler: StateFlow<IVideoSourceZoomHandler?>

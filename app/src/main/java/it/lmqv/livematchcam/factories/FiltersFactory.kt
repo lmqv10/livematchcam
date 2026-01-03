@@ -36,7 +36,6 @@ object FiltersFactory {
                         //rotatorDescriptor = RotatorDescriptor(targetWidthDp = 250)
                     )
                 )
-            //VideoSourceKind.UVC_CAMERA -> listOf()
         }
     }
 }

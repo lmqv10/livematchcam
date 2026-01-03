@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.util.Range
+import android.util.Size
 import android.view.SurfaceView
 import androidx.core.app.NotificationCompat
 import com.pedro.common.ConnectChecker
@@ -18,6 +19,7 @@ import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.NoVideoSource
 import com.pedro.encoder.input.sources.video.VideoSource
+import com.pedro.encoder.input.video.CameraHelper
 import com.pedro.library.generic.GenericStream
 import com.pedro.library.util.BitrateAdapter
 import com.pedro.library.util.FpsListener
@@ -26,14 +28,15 @@ import it.lmqv.livematchcam.StreamActivity
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.factories.CameraResolutionsFactory
 import it.lmqv.livematchcam.factories.FiltersFactory
 import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.VideoSourceFactory
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.StreamConfigurationRepository
 import it.lmqv.livematchcam.services.firebase.Quadruple
 import it.lmqv.livematchcam.services.stream.filters.IScoreboardViewFilterRender
 import it.lmqv.livematchcam.services.stream.filters.IOverlayObjectFilterRender
-import it.lmqv.livematchcam.services.stream.sources.UvcSonyCameraSource
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,16 +53,6 @@ import kotlinx.coroutines.launch
 //interface IPreviewEventListener {
 //    fun onPreviewStarted()
 //}
-
-object VideoSourceFactory {
-    fun get(videoSourceKind: VideoSourceKind, context: Context) : VideoSource {
-        return when (videoSourceKind) {
-            VideoSourceKind.CAMERA2 -> Camera2Source(context)
-            VideoSourceKind.UVC_SONY -> UvcSonyCameraSource()
-            //VideoSourceKind.UVC_CAMERA -> CameraUvcSource()
-        }
-    }
-}
 
 class StreamService: Service(),
     IVideoSourceZoomHandler,
@@ -264,6 +257,10 @@ class StreamService: Service(),
         this.videoSourceZoomHandler.value?.setZoom(level)
     }
 
+    fun getCameraResolutions() : List<Size> {
+        return CameraResolutionsFactory.get(genericStream.videoSource)
+    }
+
     fun toggleMicrophoneAudio() : Boolean {
         return if (microphoneSource.isMuted()) {
             microphoneSource.unMute()
@@ -390,6 +387,10 @@ class StreamService: Service(),
 
             this.prepare()
             genericStream.startPreview(this.surfaceView, true)
+
+
+            (genericStream.videoSource as Camera2Source)
+                .getCameraResolutions((genericStream.videoSource as Camera2Source).getCameraFacing())
         }
         catch (e: Exception) {
             e.printStackTrace()

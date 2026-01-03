@@ -82,6 +82,7 @@ class VolleyScoreboardViewFilterRender(
 
         var homeColorHex = match.homePrimaryColorHex.toColorInt()
         binding.homeColorBar.setBackgroundColor(homeColorHex)
+        binding.homeShirt.setShirtByColor(homeColorHex)
 
         if (match.homeLogo != this.previousHomeLogo) {
             //Logd("SoccerScoreboardViewRenderer::match.homeLogo ${match.homeLogo}")
@@ -112,6 +113,7 @@ class VolleyScoreboardViewFilterRender(
 
         var awayColorHex = match.guestPrimaryColorHex.toColorInt()
         binding.awayColorBar.setBackgroundColor(awayColorHex)
+        binding.awayShirt.setShirtByColor(awayColorHex)
 
         if (match.guestLogo != this.previousAwayLogo) {
             //Logd("SoccerScoreboardViewRenderer::match.guestLogo ${match.guestLogo}")
@@ -183,8 +185,8 @@ class VolleyScoreboardViewFilterRender(
 
         if (this._previousSetsSize != setsSize) {
             this._previousSetsSize = setsSize
-            updateView()
         }
+        updateView()
     }
 
     private fun updateLeagueDescription(description: String) {
