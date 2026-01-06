@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +31,7 @@ import com.google.api.client.util.DateTime
 import com.pedro.encoder.input.gl.render.filters.`object`.BaseObjectFilterRender
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.repositories.KeyDescription
+import it.lmqv.livematchcam.utils.OptionItem
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
@@ -115,20 +117,6 @@ fun customToast(
     }
 }*/
 
-fun View.hideKeyboard() {
-    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-    imm?.hideSoftInputFromWindow(windowToken, 0)
-    clearFocus()
-}
-
-fun Fragment.hideKeyboard() {
-    view?.let { v ->
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        imm?.hideSoftInputFromWindow(v.windowToken, 0)
-        v.clearFocus()
-    }
-}
-
 fun View.setEnabledRecursively(enabled: Boolean) {
     this.isEnabled = enabled
     this.isClickable = enabled
@@ -140,6 +128,10 @@ fun View.setEnabledRecursively(enabled: Boolean) {
             getChildAt(i).setEnabledRecursively(enabled)
         }
     }
+}
+
+fun List<Size>.toOptionItems() : List<OptionItem<Int>> {
+    return this.map { x -> OptionItem(x.height, "${x.width}x${x.height}p") }
 }
 
 suspend fun loadDrawableOffscreen(

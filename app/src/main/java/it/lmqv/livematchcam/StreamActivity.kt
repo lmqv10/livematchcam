@@ -25,6 +25,7 @@ import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnCreated
 import it.lmqv.livematchcam.extensions.launchOnResumed
+import it.lmqv.livematchcam.extensions.toOptionItems
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.SportsFactory
 import it.lmqv.livematchcam.fragments.status.StatusContainerFragment
@@ -32,7 +33,7 @@ import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.stream.IStreamService
 import it.lmqv.livematchcam.services.stream.StreamServiceConnector
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
-import it.lmqv.livematchcam.utils.KeyDescription
+import it.lmqv.livematchcam.utils.OptionItem
 import it.lmqv.livematchcam.viewmodels.StreamConfigurationViewModel
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
@@ -327,7 +328,7 @@ class StreamActivity : AppCompatActivity(),
 
     private fun changeVideoSettingsDialog() {
         val inflater = LayoutInflater.from(this)
-        val dialogView = inflater.inflate(R.layout.dialog_change_video_settings, null)
+        val dialogView = inflater.inflate(R.layout.dialog_camera_settings, null)
 
         val spinnerVideoSource = dialogView.findViewById<Spinner>(R.id.video_source)
         val optionsVideoSource = VideoSourceKind.entries
@@ -360,12 +361,13 @@ class StreamActivity : AppCompatActivity(),
         )
         spinnerVideoSource.setSelection(defaultIndex)
 
-        //val resolutions = this.streamService.getCameraResolutions()
+//        val optionsVideoResolutions = this.streamService
+//            .getCameraResolutions().toOptionItems()
 
         val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
         val optionsVideoResolutions = listOf(
-            KeyDescription(1080, "1920x1080p"),
-            KeyDescription(720, "1280x720p")
+            OptionItem(1080, "1920x1080p"),
+            OptionItem(720, "1280x720p")
         )
 
         val adapterVideoResolutions = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoResolutions)
@@ -375,7 +377,7 @@ class StreamActivity : AppCompatActivity(),
         @Suppress("UNCHECKED_CAST")
         spinnerVideoResolutions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
+                val selectedItem = parent.getItemAtPosition(position) as OptionItem<Int>
                 var selectedItemValue = selectedItem.key
                 val height = this@StreamActivity.streamConfigurationViewModel.resolution.value
                 if (height != selectedItemValue) {
@@ -391,10 +393,10 @@ class StreamActivity : AppCompatActivity(),
 
         val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.video_fps)
         val optionsVideoFps = listOf(
-            KeyDescription(20, "20fps"),
-            KeyDescription(25, "25fps"),
-            KeyDescription(30, "30fps"),
-            //KeyDescription(60, "60fps")
+            OptionItem(20, "20fps"),
+            OptionItem(25, "25fps"),
+            OptionItem(30, "30fps"),
+            OptionItem(60, "60fps")
         )
 
         val adapterVideoFps = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoFps)
@@ -404,7 +406,7 @@ class StreamActivity : AppCompatActivity(),
         @Suppress("UNCHECKED_CAST")
         spinnerVideoFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as KeyDescription<Int>
+                val selectedItem = parent.getItemAtPosition(position) as OptionItem<Int>
                 var selectedItemValue = selectedItem.key
                 var fps = this@StreamActivity.streamConfigurationViewModel.fps.value
                 if (fps != selectedItemValue) {

@@ -1,8 +1,8 @@
 package it.lmqv.livematchcam.converters
 
 import it.lmqv.livematchcam.adapters.LogoItem
-import it.lmqv.livematchcam.utils.KeyDescription
+import it.lmqv.livematchcam.utils.OptionItem
 
-fun List<KeyDescription<String>>.toLogoItems() : List<LogoItem> {
+fun List<OptionItem<String>>.toLogoItems() : List<LogoItem> {
     return this.map { x -> LogoItem(x.key) }
 }

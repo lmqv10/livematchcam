@@ -1,11 +1,11 @@
 package it.lmqv.livematchcam.utils
 
-interface IKeyDescription<T> {
+interface IOptionItem<T> {
     val key: T
     val description: String
 }
 
-data class KeyDescription<T>(override val key: T, override val description: String) : IKeyDescription<T> {
+data class OptionItem<T>(override val key: T, override val description: String) : IOptionItem<T> {
     override fun toString(): String {
         return description
     }
@@ -23,9 +23,9 @@ data class KeyDescription<T>(override val key: T, override val description: Stri
 }*/
 
 
-/*fun <K, T> SpinnerAdapter.getItemPositionByKey(key: K): Int where T : IKeyDescription<K> {
+/*fun <K, T> SpinnerAdapter.getItemPositionByKey(key: K): Int where T : IOptionItem<K> {
     val itemsList = List(this.count) { index ->
-        this.getItem(index)!! as KeyDescription<K>
+        this.getItem(index)!! as OptionItem<K>
     }
     return max(0, itemsList.indexOfFirst { it.key == key })
 }*/

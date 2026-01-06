@@ -13,7 +13,6 @@ import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.adapters.BaseStreamItem
 import it.lmqv.livematchcam.adapters.StreamsAdapter
 import it.lmqv.livematchcam.databinding.FragmentFirebaseBinding
-import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.launchOnCreated
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
@@ -115,8 +114,6 @@ class FirebaseFragment : Fragment() {
                         }
                     }
                 }
-
-                binding.accountName.hideKeyboard()
             }
         }
     }

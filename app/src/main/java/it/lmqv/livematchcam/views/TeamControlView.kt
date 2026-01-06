@@ -9,7 +9,6 @@ import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.dialogs.LogosRecentsDialog
 import it.lmqv.livematchcam.databinding.ViewTeamControlBinding
-import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.setFillAndBorder
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.extensions.showEditStringDialog
@@ -50,7 +49,6 @@ class TeamControlView @JvmOverloads constructor(
             context.showEditStringDialog(R.string.team_name, sourceTeamName) { updatedTeamName ->
                 binding.textTeamName.text = updatedTeamName
                 onTeamNameChanged?.invoke(updatedTeamName)
-                this.hideKeyboard()
             }
         }
 

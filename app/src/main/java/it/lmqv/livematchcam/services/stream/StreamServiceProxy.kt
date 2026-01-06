@@ -9,8 +9,8 @@ import it.lmqv.livematchcam.dialogs.StartStreamingDialog
 import it.lmqv.livematchcam.dialogs.StopStreamingDialog
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.factories.CameraResolutionsFactory
 import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.utils.OptionItem
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.flow.StateFlow
 

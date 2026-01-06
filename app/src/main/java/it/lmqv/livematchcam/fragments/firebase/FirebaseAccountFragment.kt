@@ -9,7 +9,6 @@ import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.viewModels
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentFirebaseAccountBinding
-import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.launchOnCreated
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
@@ -58,8 +57,6 @@ class FirebaseAccountFragment : Fragment() {
                         }
                     }
                 }
-
-                binding.accountName.hideKeyboard()
             }
         }
 
@@ -68,7 +65,6 @@ class FirebaseAccountFragment : Fragment() {
             requireContext().showEditStringDialog(R.string.account_key, sourceKey, arrayOf()) { updatedAccountKey ->
                 binding.accountKey.text = updatedAccountKey
                 firebaseAccountViewModel.setAccountKey(updatedAccountKey)
-                binding.accountKey.hideKeyboard()
             }
         }
 

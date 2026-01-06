@@ -124,7 +124,7 @@
     <string name="microphone">Microphone</string>
     <string name="internal">Internal Audio</string>
     <string name="mix">Mix audio</string>
-    <string name="video_source">Video source</string>
+    <string name="video_source">Camera source</string>
     <string name="camera_uvc">CameraUVC</string>
     <string name="bitmap">Bitmap</string>
 

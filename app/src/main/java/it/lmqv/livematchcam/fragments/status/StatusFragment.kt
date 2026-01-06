@@ -17,7 +17,7 @@ import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentStatusBinding
 import it.lmqv.livematchcam.services.RotationSensorService
 import it.lmqv.livematchcam.repositories.SettingsRepository
-import it.lmqv.livematchcam.utils.KeyDescription
+import it.lmqv.livematchcam.utils.OptionItem
 import it.lmqv.livematchcam.extensions.bitrateFormat
 import it.lmqv.livematchcam.extensions.degreeFormat
 import it.lmqv.livematchcam.extensions.fpsFormat
@@ -203,7 +203,7 @@ class StatusFragment : Fragment(), IStatusFragment,
 
         val numberPicker = dialogView.findViewById<NumberPicker>(R.id.edit_offset)
         val floatValues = Array(5) {
-            i -> KeyDescription((i + 1) * 0.1f, String.format("%.1f", (i + 1) * 0.1))
+            i -> OptionItem((i + 1) * 0.1f, String.format("%.1f", (i + 1) * 0.1))
         }
 
         numberPicker.minValue = 0

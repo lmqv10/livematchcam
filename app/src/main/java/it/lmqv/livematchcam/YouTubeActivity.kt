@@ -19,7 +19,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
-import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.AdvertisingOptions
 import com.google.android.gms.nearby.connection.ConnectionInfo
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback
@@ -35,7 +34,6 @@ import com.google.android.gms.nearby.connection.Strategy
 import com.google.android.gms.tasks.Task
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
-import com.google.api.client.http.FileContent
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.DateTime
@@ -50,8 +48,7 @@ import it.lmqv.livematchcam.databinding.ActivityYouTubeBinding
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.repositories.accountDataStore
-import it.lmqv.livematchcam.utils.KeyDescription
+import it.lmqv.livematchcam.utils.OptionItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,7 +56,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
-import java.io.File
 
 object OAuthConfig {
     //const val CLIENT_ID = "54641307189-6181k175ei3m80jnvot27qkfhfvmteqt.apps.googleusercontent.com"
@@ -307,7 +303,7 @@ class YouTubeActivity : AppCompatActivity() {
             request.mine = true // Retrieve broadcasts from the authenticated user
             val response = request.execute()
             withContext(Dispatchers.Main) {
-                var streams = response.items.map { x -> KeyDescription<String>(x.id, "LiveStream: ${x.snippet.title} ${x.id}") }
+                var streams = response.items.map { x -> OptionItem<String>(x.id, "LiveStream: ${x.snippet.title} ${x.id}") }
 
                 val adapterServer =
                     ArrayAdapter(this@YouTubeActivity, android.R.layout.simple_spinner_item, streams)
@@ -340,7 +336,7 @@ class YouTubeActivity : AppCompatActivity() {
             request.mine = true // Retrieve broadcasts from the authenticated user
             val response = request.execute()
             withContext(Dispatchers.Main) {
-                var broadcasts = response.items.map { x -> KeyDescription<String>(x.id, "LiveBroadcast: ${x.snippet.title} - ${x.id}") }
+                var broadcasts = response.items.map { x -> OptionItem<String>(x.id, "LiveBroadcast: ${x.snippet.title} - ${x.id}") }
 
                 // "Os8jYda6AD0"
                 val adapterServer = ArrayAdapter(this@YouTubeActivity, android.R.layout.simple_spinner_item, broadcasts)

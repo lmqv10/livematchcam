@@ -3,7 +3,7 @@ package it.lmqv.livematchcam.preferences
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import it.lmqv.livematchcam.utils.KeyDescription
+import it.lmqv.livematchcam.utils.OptionItem
 import androidx.core.content.edit
 
 class RecentsLogosPreferences(context: Context) {
@@ -13,7 +13,7 @@ class RecentsLogosPreferences(context: Context) {
     private val key: String = "logos"
     private val gson = Gson()
 
-    fun getRecents(): List<KeyDescription<String>> {
+    fun getRecents(): List<OptionItem<String>> {
         /*val defaultJson = """
             [
                 { "description": "ALB", "key": "https://content-s3.tuttocampo.it/Teams/200/1201525.png" },
@@ -33,11 +33,11 @@ class RecentsLogosPreferences(context: Context) {
         """.trimIndent()*/
 
         val json = prefs.getString(key, null) ?: return emptyList()
-        val type = object : TypeToken<List<KeyDescription<String>>>() {}.type
+        val type = object : TypeToken<List<OptionItem<String>>>() {}.type
         return gson.fromJson(json, type)
     }
 
-    fun saveRecent(item: KeyDescription<String>) {
+    fun saveRecent(item: OptionItem<String>) {
         val current = getRecents().toMutableList()
         current.removeAll { it.key == item.key }
         current.add(0, item)
@@ -46,7 +46,7 @@ class RecentsLogosPreferences(context: Context) {
         prefs.edit { putString(key, json) }
     }
 
-    fun removeRecent(itemKey: String): List<KeyDescription<String>>  {
+    fun removeRecent(itemKey: String): List<OptionItem<String>>  {
         val current = getRecents().toMutableList()
         current.removeAll { it.key == itemKey }
         val updated = current.take(maxItems)

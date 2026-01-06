@@ -8,7 +8,7 @@ import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.adapters.LogosAdapter
 import it.lmqv.livematchcam.converters.toLogoItems
 import it.lmqv.livematchcam.databinding.DialogLogosRecentsBinding
-import it.lmqv.livematchcam.utils.KeyDescription
+import it.lmqv.livematchcam.utils.OptionItem
 import it.lmqv.livematchcam.preferences.RecentsLogosPreferences
 
 class LogosRecentsDialog (
@@ -29,7 +29,7 @@ class LogosRecentsDialog (
         binding.confirmButton.setOnClickListener {
             val input = binding.editTextInput.text.toString().trim()
             if (input.isNotEmpty()) {
-                recentLogosManager.saveRecent(KeyDescription<String>(input, input))
+                recentLogosManager.saveRecent(OptionItem<String>(input, input))
             }
             onInputConfirmed(input)
             val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

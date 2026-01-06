@@ -24,7 +24,6 @@ import it.lmqv.livematchcam.adapters.LiveStreamItem
 import it.lmqv.livematchcam.databinding.FragmentYoutubeStreamBinding
 import it.lmqv.livematchcam.dialogs.DateTimePickerDialog
 import it.lmqv.livematchcam.dialogs.LogosRecentsDialog
-import it.lmqv.livematchcam.extensions.hideKeyboard
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.services.auth.AuthResult
@@ -253,7 +252,6 @@ class YoutubeStreamFragment : Fragment() {
             val sourceTitle = binding.textTitle.text.toString()
             requireContext().showEditStringDialog(R.string.label_event_title, sourceTitle, arrayOf()) { updatedTitle ->
                 schedulesPrefs.set(title = updatedTitle)
-                this.hideKeyboard()
             }
         }
 

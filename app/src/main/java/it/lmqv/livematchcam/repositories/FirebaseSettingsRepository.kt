@@ -39,7 +39,7 @@ class FirebaseSettingsRepository(private val context: Context) {
 //
 //    private val gson = GsonBuilder().create()
 
-//    val getServers: Flow<List<KeyDescription>> = context.firebaseSettingsDatastore.data.map { preferences ->
+//    val getServers: Flow<List<OptionItem>> = context.firebaseSettingsDatastore.data.map { preferences ->
 //        //val jsonString = preferences[SERVERS] ?:
 //        val jsonString =
 //            """
@@ -52,7 +52,7 @@ class FirebaseSettingsRepository(private val context: Context) {
 //            emptyList()
 //        } else {
 //            try {
-//                val listType = object : TypeToken<List<KeyDescription>>() {}.type
+//                val listType = object : TypeToken<List<OptionItem>>() {}.type
 //                gson.fromJson(jsonString, listType)
 //            } catch (e: Exception) {
 //                e.printStackTrace()
@@ -60,11 +60,11 @@ class FirebaseSettingsRepository(private val context: Context) {
 //            }
 //        }
 //    }
-//    suspend fun setServers(servers: List<KeyDescription>) {
+//    suspend fun setServers(servers: List<OptionItem>) {
 //        context.firebaseSettingsDatastore.edit { preferences -> preferences[SERVERS] = gson.toJson(servers) }
 //    }
 
-//    val getKeys: Flow<List<KeyDescription>> = context.firebaseSettingsDatastore.data.map { preferences ->
+//    val getKeys: Flow<List<OptionItem>> = context.firebaseSettingsDatastore.data.map { preferences ->
 //        //val jsonString = preferences[KEYS] ?:
 //        val jsonString =
 //            """
@@ -90,7 +90,7 @@ class FirebaseSettingsRepository(private val context: Context) {
 //            emptyList()
 //        } else {
 //            try {
-//                val listType = object : TypeToken<List<KeyDescription>>() {}.type
+//                val listType = object : TypeToken<List<OptionItem>>() {}.type
 //                gson.fromJson(jsonString, listType)
 //            } catch (e: Exception) {
 //                e.printStackTrace()

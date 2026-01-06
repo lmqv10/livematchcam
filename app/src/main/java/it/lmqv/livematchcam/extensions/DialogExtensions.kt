@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.extensions
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
@@ -10,12 +11,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
+import androidx.fragment.app.Fragment
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import it.lmqv.livematchcam.R
@@ -120,6 +123,9 @@ fun Context.showEditStringDialog(@StringRes
         .setView(dialogView)
         .setPositiveButton("Confirm") { dialog, _ ->
             delegate(etTextValue.text.toString())
+            //hideKeyboard(etTextValue)
+            (etTextValue.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                ?.hideSoftInputFromWindow(etTextValue.windowToken, 0)
             dialog.dismiss()
         }
         .create()
@@ -130,42 +136,27 @@ fun Context.showEditStringDialog(@StringRes
     dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
     dialog.show()
 }
-
-fun Context.showLogoDialog(@StringRes
-                                 resTitleId: Int,
-                                 textValue: String,
-                                 delegate: (updatedTextValue: String) -> Unit) {
-    var context = this
-    val inflater = LayoutInflater.from(context)
-    val dialogView = inflater.inflate(R.layout.dialog_edit_text, null)
-
-    val tvTitle = dialogView.findViewById<TextView>(R.id.tv_title)
-    tvTitle.text = getString(resTitleId)
-
-    val etTextValue = dialogView.findViewById<EditText>(R.id.et_text_value)
-    etTextValue.text = Editable.Factory.getInstance().newEditable(textValue)
-
-    etTextValue.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
-        if (hasFocus) {
-            etTextValue.post(Runnable { etTextValue.selectAll() })
-        }
-    }
-
-    val dialog = androidx.appcompat.app.AlertDialog.Builder(context)
-        .setView(dialogView)
-        .setPositiveButton("Confirm") { dialog, _ ->
-            delegate(etTextValue.text.toString())
-            dialog.dismiss()
-        }
-        .create()
-
-    dialog.setOnShowListener {
-        etTextValue.requestFocus()
-    }
-    dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
-    dialog.show()
-}
-
+//
+//fun hideKeyboard(any: Any?) {
+//    val context = when (any) {
+//        is Activity -> any
+//        is Fragment -> any.activity
+//        is View -> any.context
+//        else -> null
+//    } ?: return
+//
+//    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+//        ?: return
+//
+//    val windowToken = when (any) {
+//        is Activity -> any.currentFocus?.windowToken
+//        is Fragment -> any.view?.windowToken
+//        is View -> any.windowToken
+//        else -> null
+//    } ?: return
+//
+//    imm.hideSoftInputFromWindow(windowToken, 0)
+//}
 
 fun Context.showQRCode(content: String) {
     var context = this

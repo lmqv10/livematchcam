@@ -148,8 +148,8 @@
             android:exported="false" />
 
         <service android:name="it.lmqv.livematchcam.services.stream.StreamService"
-            android:foregroundServiceType="mediaProjection|microphone|camera" />
-
+            android:foregroundServiceType="mediaProjection|microphone|camera"
+            android:exported="false" />
     </application>
 
 </manifest>

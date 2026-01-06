@@ -22,11 +22,11 @@ class FirebaseViewModel(application: Application) : AndroidViewModel(application
     private val _currentServer = MutableStateFlow<String?>(null)
 //    val currentServer: StateFlow<String?> = _currentServer
 //
-//    private val _servers = MutableStateFlow<List<KeyDescription>>(emptyList())
-//    val servers: StateFlow<List<KeyDescription>> = _servers
+//    private val _servers = MutableStateFlow<List<OptionItem>>(emptyList())
+//    val servers: StateFlow<List<OptionItem>> = _servers
 //
-//    private val _keys = MutableStateFlow<List<KeyDescription>>(emptyList())
-//    val keys: StateFlow<List<KeyDescription>> = _keys
+//    private val _keys = MutableStateFlow<List<OptionItem>>(emptyList())
+//    val keys: StateFlow<List<OptionItem>> = _keys
 
 //    private val _serverURL = MutableStateFlow<String?>(null)
 //    val serverURI: StateFlow<String?> = _serverURL
