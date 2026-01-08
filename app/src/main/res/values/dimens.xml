@@ -2,6 +2,13 @@
     <dimen name="app_icon_size">40dp</dimen>
     <dimen name="user_icon_size">64dp</dimen>
 
+    <dimen name="small_icon_size">24dp</dimen>
+    <dimen name="normal_icon_size">32dp</dimen>
+    <dimen name="big_icon_size">40dp</dimen>
+
+    <dimen name="default_icon_size">@dimen/normal_icon_size</dimen>
+    <dimen name="spinner_item_min_height">32dp</dimen>
+
 <!--    <dimen name="text_size_wall">24sp</dimen>-->
     <dimen name="text_size_big">20sp</dimen>
     <dimen name="text_size_default">18sp</dimen>

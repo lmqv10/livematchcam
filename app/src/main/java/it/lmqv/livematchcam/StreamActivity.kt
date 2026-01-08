@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import com.pedro.common.ConnectChecker
 import com.pedro.library.util.FpsListener
 import it.lmqv.livematchcam.databinding.ActivityStreamBinding
+import it.lmqv.livematchcam.dialogs.CameraSettingsDialog
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
@@ -32,6 +33,7 @@ import it.lmqv.livematchcam.fragments.status.StatusContainerFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.stream.IStreamService
 import it.lmqv.livematchcam.services.stream.StreamServiceConnector
+import it.lmqv.livematchcam.services.stream.VideoCaptureFormat
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.utils.OptionItem
 import it.lmqv.livematchcam.viewmodels.StreamConfigurationViewModel
@@ -58,6 +60,7 @@ class StreamActivity : AppCompatActivity(),
     }
 
     private lateinit var callback: OnBackPressedCallback
+    //private lateinit var cameraSettingsDialog: CameraSettingsDialog
 
 //    private val displayListener = object : DisplayManager.DisplayListener {
 //        override fun onDisplayAdded(displayId: Int) {}
@@ -126,6 +129,13 @@ class StreamActivity : AppCompatActivity(),
 
         binding.changeResolutionStrategy.setOnClickListener {
             this.changeVideoSettingsDialog()
+//            this.cameraSettingsDialog
+//                .setEnabled(!this.streamService.isStreaming())
+//                .setVideoSource(streamConfigurationViewModel.videoSourceKind.value)
+//                .setVideoCaptureFormat(streamConfigurationViewModel.videoCaptureFormat.value)
+//                .setEncoderFps(streamConfigurationViewModel.fps.value)
+//                .show()
+
         }
 //
 //        binding.mainBannerSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -180,12 +190,13 @@ class StreamActivity : AppCompatActivity(),
 
                     if (this.streamService.isStreaming() == true) {
                         binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
-                        Logd("StreamActivity :: setOnServiceConnected :: isStreaming!")
+                        //Logd("StreamActivity :: setOnServiceConnected :: isStreaming!")
                     } else {
                         binding.bStartStop.setImageResource(R.drawable.stream_icon)
-                        Logd("StreamActivity :: setOnServiceConnected :: PreparePreview")
-                        this.streamService.preparePreview(binding.surfaceView, sport)
                     }
+
+                    Logd("StreamActivity :: setOnServiceConnected :: initPreview?")
+                    this.streamService.initPreview(binding.surfaceView, sport)
 
                     launchOnResumed {
                         this.streamService.videoSourceZoomHandler.collect { videoSourceZoomHandler ->
@@ -211,6 +222,8 @@ class StreamActivity : AppCompatActivity(),
                             this.streamService.setEndpoint(configuredServerURI)
                         }
                     }
+
+                    //this.initCameraSettingsDialog()
                 }
             }
         }
@@ -326,6 +339,39 @@ class StreamActivity : AppCompatActivity(),
         toast("Auth success")
     }
 
+//    private fun initCameraSettingsDialog() {
+//
+//        binding.changeResolutionStrategy.isClickable = true
+//
+//        this.cameraSettingsDialog = CameraSettingsDialog(
+//            this,
+//            this.streamService,
+//            { videoSourceKind ->
+//                val current = streamConfigurationViewModel.videoSourceKind.value
+//                if (current != videoSourceKind) {
+//                    streamConfigurationViewModel.setVideoSourceKind(videoSourceKind)
+//                }
+//                this.hideSystemUI()
+//            },
+//            { selectedVideoCaptureFormat ->
+//                val videoCaptureFormat = streamConfigurationViewModel.videoCaptureFormat.value
+//                if (videoCaptureFormat?.width != selectedVideoCaptureFormat.width && videoCaptureFormat?.height != selectedVideoCaptureFormat.height) {
+//                    streamConfigurationViewModel.setVideoCaptureFormat(selectedVideoCaptureFormat)
+//                }
+//                this.hideSystemUI()
+//            },
+//            { selectedFps ->
+//                var fps = streamConfigurationViewModel.fps.value
+//                if (fps != selectedFps) {
+//                    streamConfigurationViewModel.setFps(selectedFps)
+//                }
+//                this.hideSystemUI()
+//            })
+//        this.cameraSettingsDialog.setOnShowListener {
+//            this.hideSystemUI()
+//        }
+//    }
+
     private fun changeVideoSettingsDialog() {
         val inflater = LayoutInflater.from(this)
         val dialogView = inflater.inflate(R.layout.dialog_camera_settings, null)
@@ -339,7 +385,7 @@ class StreamActivity : AppCompatActivity(),
             optionsVideoSource
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerVideoSource.isEnabled = !this.streamService.isStreaming()
+        //spinnerVideoSource.isEnabled = !this.streamService.isStreaming()
         spinnerVideoSource.adapter = adapter
         spinnerVideoSource.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
@@ -361,15 +407,8 @@ class StreamActivity : AppCompatActivity(),
         )
         spinnerVideoSource.setSelection(defaultIndex)
 
-//        val optionsVideoResolutions = this.streamService
-//            .getCameraResolutions().toOptionItems()
-
+        val optionsVideoResolutions = this.streamService.getVideoCaptureFormats().toOptionItems()
         val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
-        val optionsVideoResolutions = listOf(
-            OptionItem(1080, "1920x1080p"),
-            OptionItem(720, "1280x720p")
-        )
-
         val adapterVideoResolutions = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoResolutions)
         adapterVideoResolutions.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerVideoResolutions.isEnabled = !this.streamService.isStreaming()
@@ -377,26 +416,27 @@ class StreamActivity : AppCompatActivity(),
         @Suppress("UNCHECKED_CAST")
         spinnerVideoResolutions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position) as OptionItem<Int>
+                val selectedItem = parent.getItemAtPosition(position) as OptionItem<VideoCaptureFormat>
                 var selectedItemValue = selectedItem.key
-                val height = this@StreamActivity.streamConfigurationViewModel.resolution.value
-                if (height != selectedItemValue) {
-                    this@StreamActivity.streamConfigurationViewModel.setResolution(selectedItemValue)
+                val resolution = this@StreamActivity.streamConfigurationViewModel.videoCaptureFormat.value
+                if (resolution?.width != selectedItemValue.width && resolution?.height != selectedItemValue.height) {
+                    this@StreamActivity.streamConfigurationViewModel.setVideoCaptureFormat(selectedItemValue)
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
         val defaultResolution = optionsVideoResolutions.indexOfFirst {
-            it.key == this@StreamActivity.streamConfigurationViewModel.resolution.value
+            it.key.width == this@StreamActivity.streamConfigurationViewModel.videoCaptureFormat.value?.width &&
+            it.key.height == this@StreamActivity.streamConfigurationViewModel.videoCaptureFormat.value?.height
         }
         spinnerVideoResolutions.setSelection(defaultResolution)
 
-        val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.video_fps)
+        val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.encoder_fps)
         val optionsVideoFps = listOf(
-            OptionItem(20, "20fps"),
-            OptionItem(25, "25fps"),
-            OptionItem(30, "30fps"),
-            OptionItem(60, "60fps")
+            OptionItem(20, "20 fps"),
+            OptionItem(25, "25 fps"),
+            OptionItem(30, "30 fps"),
+            OptionItem(60, "60 fps")
         )
 
         val adapterVideoFps = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoFps)

@@ -1,16 +1,15 @@
 package it.lmqv.livematchcam.services.stream
 
 import android.app.Activity
-import android.util.Size
 import android.view.SurfaceView
 import com.pedro.common.ConnectChecker
 import com.pedro.library.util.FpsListener
 import it.lmqv.livematchcam.dialogs.StartStreamingDialog
 import it.lmqv.livematchcam.dialogs.StopStreamingDialog
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.Sports
-import it.lmqv.livematchcam.utils.OptionItem
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.flow.StateFlow
 
@@ -23,10 +22,15 @@ class StreamServiceProxy(val activityContext: Activity, val streamService: Strea
         return streamService.getVideoSourceKind()
     }
 
-    override fun preparePreview(surfaceView: SurfaceView, sport: Sports) {
-        //Logd("StreamServiceProxy :: preparePreview")
-        streamService.preparePreview(surfaceView, sport)
+    override fun initPreview(surfaceView: SurfaceView, sport: Sports) {
+        Logd("StreamServiceProxy :: initPreview")
+        this.streamService.initPreview(surfaceView, sport)
     }
+
+//    override fun preparePreview() {
+//        Logd("StreamServiceProxy :: preparePreview")
+//        streamService.preparePreview()
+//    }
 
     override fun stopPreview() {
         //Logd("StreamServiceProxy :: stopPreview")
@@ -113,9 +117,13 @@ class StreamServiceProxy(val activityContext: Activity, val streamService: Strea
         streamService.setFpsListenerCallback(fpsListenerCallback)
     }
 
-    override fun getCameraResolutions() : List<Size> {
-        return streamService.getCameraResolutions()
+    override fun getVideoCaptureFormats(): List<VideoCaptureFormat> {
+        return streamService.getVideoFormats()
     }
+
+//    override fun getVideoSource(): VideoSource {
+//        return streamService.getVideoSource()
+//    }
 
     override val streamingElapsedTime: StateFlow<Int>
         get() = streamService.streamingElapsedTime
@@ -123,4 +131,6 @@ class StreamServiceProxy(val activityContext: Activity, val streamService: Strea
     override val videoSourceZoomHandler: StateFlow<IVideoSourceZoomHandler?>
         get() = streamService.videoSourceZoomHandler
 
+    override val videoCaptureFormats: StateFlow<List<VideoCaptureFormat>>
+        get() = streamService.videoCaptureFormats
 }

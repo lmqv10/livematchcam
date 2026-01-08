@@ -1,5 +1,17 @@
 
+BUGS
+- Risoluzionei camera sorgente dinamiche
+- Freeze Preview during streaming,. possibile cambio resolution durante lo streaming?
+- Team name più lunghi per la pallavolo. 3 per il calcio.
+- Verificare caratteri e risoluzione schermo device.
+- Banners rotation con lista e configurabile
+- Streams Configurabili
+
+NOTA:: RIVEDERE TUTTE LE DIALOG PER init e non OnCReate
+.. Es. CameraSettingsDialog.. se funziona... 
+
 STEP 2
+
 - Gestione ACCOUNT/MENU/FRAGMENT ...
 - Migliorare la vista dell'Account UI
 - Migliorare la vista remote control

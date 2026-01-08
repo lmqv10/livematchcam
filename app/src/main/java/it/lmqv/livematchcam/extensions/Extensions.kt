@@ -11,7 +11,6 @@ import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.SpinnerAdapter
 import android.widget.TextView
@@ -31,6 +30,7 @@ import com.google.api.client.util.DateTime
 import com.pedro.encoder.input.gl.render.filters.`object`.BaseObjectFilterRender
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.repositories.KeyDescription
+import it.lmqv.livematchcam.services.stream.VideoCaptureFormat
 import it.lmqv.livematchcam.utils.OptionItem
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -130,8 +130,21 @@ fun View.setEnabledRecursively(enabled: Boolean) {
     }
 }
 
-fun List<Size>.toOptionItems() : List<OptionItem<Int>> {
-    return this.map { x -> OptionItem(x.height, "${x.width}x${x.height}p") }
+fun List<VideoCaptureFormat>.toOptionItems(): List<OptionItem<VideoCaptureFormat>> {
+    return this.map { x ->
+        val label = buildString {
+            append("${x.width}x${x.height}p")
+            if (x.fps > 0) append(" ${x.fps}fps")
+        }
+        OptionItem(x, label)
+    }
+}
+
+fun List<com.serenegiant.usb.Size>.toCameraSourceParametersWithFps() : List<VideoCaptureFormat> {
+    return this.map { x -> VideoCaptureFormat(x.width, x.height, x.fps) }
+}
+fun List<Size>.toCameraSourceParameters() : List<VideoCaptureFormat> {
+    return this.map { x -> VideoCaptureFormat(x.width, x.height) }
 }
 
 suspend fun loadDrawableOffscreen(

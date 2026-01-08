@@ -48,13 +48,13 @@ class StatusContainerFragment: Fragment(),
         launchOnResumed {
             combine(
                 streamConfigurationViewModel.fps,
-                streamConfigurationViewModel.resolution,
+                streamConfigurationViewModel.videoCaptureFormat,
                 streamConfigurationViewModel.videoSourceKind
-            ) { fps, resolution, videoSourceKind -> Triple(fps, resolution, videoSourceKind) }
+            ) { fps, videoCaptureFormat, videoSourceKind -> Triple(fps, videoCaptureFormat, videoSourceKind) }
             .distinctUntilChanged()
-            .collect { (fps, resolutionHeight, videoSourceKind) ->
-                if (fps != null && resolutionHeight != null) {
-                    statusViewModel.setSourceResolution(resolutionHeight)
+            .collect { (fps, videoCaptureFormat, videoSourceKind) ->
+                if (fps != null && videoCaptureFormat != null) {
+                    statusViewModel.setSourceResolution(videoCaptureFormat.height)
                     statusViewModel.setSourceFps(fps)
                     //statusViewModel.setVideoSourceKind(videoSourceKind)
                 }

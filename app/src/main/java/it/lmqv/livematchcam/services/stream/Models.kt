@@ -8,6 +8,11 @@ interface IVideoStreamData {
     val rotation: Int
 }
 
+data class VideoCaptureFormat(
+    val width: Int = 1920,
+    val height: Int = 1080,
+    val fps: Int = 0)
+
 data class CameraVideoStreamData(
     override var width: Int = 1920,
     override var height: Int = 1080,
@@ -16,13 +21,13 @@ data class CameraVideoStreamData(
     override val rotation: Int = 0,
 ) : IVideoStreamData
 
-data class UVCCameraVideoStreamData(
-    override var width: Int = 1280,
-    override var height: Int = 720,
-    override var fps: Int = 30,
-    override val bitrate: Int = 6000 * 1000,
-    override val rotation: Int = 0,
-) : IVideoStreamData
+//data class UVCCameraVideoStreamData(
+//    override var width: Int = 1280,
+//    override var height: Int = 720,
+//    override var fps: Int = 30,
+//    override val bitrate: Int = 6000 * 1000,
+//    override val rotation: Int = 0,
+//) : IVideoStreamData
 
 interface IAudioStreamData {
     val sampleRate: Int

@@ -22,6 +22,7 @@
         android:layout_marginBottom="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="@dimen/spinner_item_min_height"
         android:spinnerMode="dialog" />
 
     <TextView
@@ -37,6 +38,7 @@
         android:layout_marginBottom="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="@dimen/spinner_item_min_height"
         android:spinnerMode="dialog" />
 
     <TextView
@@ -48,37 +50,28 @@
         android:textColor="@color/appColorSecondary"/>
 
     <Spinner
-        android:id="@+id/video_fps"
+        android:id="@+id/encoder_fps"
         android:layout_marginBottom="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="@dimen/spinner_item_min_height"
         android:spinnerMode="dialog" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end"
-        android:padding="4dp"
-        android:layout_marginTop="10dp">
+<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:gravity="end"-->
+<!--        android:padding="4dp"-->
+<!--        android:layout_marginTop="10dp">-->
 
-        <ImageView
-            style="@style/defaultImageViewStyle"
-            android:id="@+id/cancel_button"
-            android:src="@drawable/ic_cancel"
-            android:layout_gravity="start"
-            android:contentDescription="@string/description_placeholder"
-            android:layout_marginEnd="4dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/confirm_button"/>
-
-        <ImageView
-            style="@style/defaultImageViewStyle"
-            android:id="@+id/confirm_button"
-            android:src="@drawable/ic_confirm"
-            android:contentDescription="@string/description_placeholder"
-            android:layout_marginEnd="4dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+<!--        <ImageView-->
+<!--            style="@style/defaultImageViewStyle"-->
+<!--            android:id="@+id/cancel_button"-->
+<!--            android:src="@drawable/ic_cancel"-->
+<!--            android:contentDescription="@string/description_placeholder"-->
+<!--            android:layout_marginEnd="4dp"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"/>-->
+<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
 </LinearLayout>

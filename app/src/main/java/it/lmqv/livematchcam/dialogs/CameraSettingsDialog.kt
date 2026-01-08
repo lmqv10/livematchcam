@@ -3,146 +3,145 @@ package it.lmqv.livematchcam.dialogs
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.StringRes
-import it.lmqv.livematchcam.databinding.DialogConfirmBinding
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import it.lmqv.livematchcam.CameraSourceAdapter
+import it.lmqv.livematchcam.CameraSourceItem
+import it.lmqv.livematchcam.CameraSourceItemsFactory
+import it.lmqv.livematchcam.databinding.DialogCameraSettingsBinding
 import it.lmqv.livematchcam.extensions.toOptionItems
+import it.lmqv.livematchcam.factories.EncoderFpsItemsFactory
+import it.lmqv.livematchcam.services.stream.IStreamService
+import it.lmqv.livematchcam.services.stream.VideoCaptureFormat
+import it.lmqv.livematchcam.utils.OptionItem
+import it.lmqv.livematchcam.viewmodels.VideoSourceKind
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class CameraSettingsDialog (
     context: Context,
-    private val onConfirm : () -> Unit,
-    private val onCancel: () -> Unit,
-    @StringRes private val resMessageId: Int
+    private val streamService: IStreamService,
+    private val onChangeVideoSource : (videoSourceKind: VideoSourceKind) -> Unit,
+    private val onChangeResolution: (videoCaptureFormat: VideoCaptureFormat) -> Unit,
+    private val onChangeFps: (selectedFps: Int) -> Unit,
 ) : Dialog(context) {
-    private lateinit var binding: DialogConfirmBinding
+    private val binding: DialogCameraSettingsBinding = DialogCameraSettingsBinding.inflate(LayoutInflater.from(context))
+    private var selectedVideoCaptureFormat: VideoCaptureFormat? = null
+
+    private val dialogScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    init {
+        setContentView(binding.root)
+
+        this.initVideoSourceSpinner()
+        this.initEncoderFpsSpinner()
+
+        setOnDismissListener {
+            dialogScope.cancel()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        binding = DialogConfirmBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         window?.setLayout(
             (context.resources.displayMetrics.widthPixels * 0.5).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
 
-        binding.dialogConfirmMessage.text = context.getString(resMessageId)
+//        binding.cancelButton.setOnClickListener {
+//            dismiss()
+//        }
 
-        binding.confirmButton.setOnClickListener {
-            onConfirm()
-            dismiss()
-        }
-        binding.cancelButton.setOnClickListener {
-            onCancel()
-            dismiss()
+        dialogScope.launch {
+            this@CameraSettingsDialog.streamService.videoCaptureFormats.collect { videoCaptureFormats ->
+                var optionsVideoCaptureFormat = videoCaptureFormats.toOptionItems()
+                val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, optionsVideoCaptureFormat)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                binding.videoResolutions.adapter = adapter
+                @Suppress("UNCHECKED_CAST")
+                binding.videoResolutions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                        val selectedItem = parent.getItemAtPosition(position) as OptionItem<VideoCaptureFormat>
+                        var selectedCameraSourceParameters = selectedItem.key
+                        onChangeResolution(selectedCameraSourceParameters)
+                    }
+                    override fun onNothingSelected(parent: AdapterView<*>) { }
+                }
+
+                val defaultResolution = optionsVideoCaptureFormat.indexOfFirst {
+                    it.key.width == this@CameraSettingsDialog.selectedVideoCaptureFormat?.width &&
+                    it.key.height == this@CameraSettingsDialog.selectedVideoCaptureFormat?.height
+                }
+
+                binding.videoResolutions.setSelection(defaultResolution)
+            }
         }
     }
 
-//    private fun changeVideoSettingsDialog() {
-//        val inflater = LayoutInflater.from(this)
-//        val dialogView = inflater.inflate(R.layout.dialog_camera_settings, null)
-//
-//        val spinnerVideoSource = dialogView.findViewById<Spinner>(R.id.video_source)
-//        val optionsVideoSource = VideoSourceKind.entries
-//
-//        val adapter = ArrayAdapter(
-//            this,
-//            android.R.layout.simple_spinner_item,
-//            optionsVideoSource
-//        )
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerVideoSource.isEnabled = !this.streamService.isStreaming()
-//        spinnerVideoSource.adapter = adapter
-//        spinnerVideoSource.onItemSelectedListener =
-//            object : AdapterView.OnItemSelectedListener {
-//
-//                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-//                    val selected = parent.getItemAtPosition(position) as VideoSourceKind
-//
-//                    val current = streamConfigurationViewModel.videoSourceKind.value
-//                    if (current != selected) {
-//                        streamConfigurationViewModel.setVideoSourceKind(selected)
-//                    }
-//                }
-//
-//                override fun onNothingSelected(parent: AdapterView<*>) {}
-//            }
-//
-//        val defaultIndex = optionsVideoSource.indexOf(
-//            streamConfigurationViewModel.videoSourceKind.value
-//        )
-//        spinnerVideoSource.setSelection(defaultIndex)
-//
-//        val optionsVideoResolutions = this.streamService
-//            .getCameraResolutions().toOptionItems()
-//
-//        val spinnerVideoResolutions = dialogView.findViewById<Spinner>(R.id.video_resolutions)
-////        val optionsVideoResolutions = listOf(
-////            OptionItem(1080, "1920x1080p"),
-////            OptionItem(720, "1280x720p")
-////        )
-//
-//        val adapterVideoResolutions = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoResolutions)
-//        adapterVideoResolutions.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerVideoResolutions.isEnabled = !this.streamService.isStreaming()
-//        spinnerVideoResolutions.adapter = adapterVideoResolutions
-//        @Suppress("UNCHECKED_CAST")
-//        spinnerVideoResolutions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-//                val selectedItem = parent.getItemAtPosition(position) as OptionItem<Int>
-//                var selectedItemValue = selectedItem.key
-//                val height = this@StreamActivity.streamConfigurationViewModel.resolution.value
-//                if (height != selectedItemValue) {
-//                    this@StreamActivity.streamConfigurationViewModel.setResolution(selectedItemValue)
-//                }
-//            }
-//            override fun onNothingSelected(parent: AdapterView<*>) { }
-//        }
-//        val defaultResolution = optionsVideoResolutions.indexOfFirst {
-//            it.key == this@StreamActivity.streamConfigurationViewModel.resolution.value
-//        }
-//        spinnerVideoResolutions.setSelection(defaultResolution)
-//
-//        val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.video_fps)
-//        val optionsVideoFps = listOf(
-//            OptionItem(20, "20fps"),
-//            OptionItem(25, "25fps"),
-//            OptionItem(30, "30fps"),
-//            OptionItem(60, "60fps")
-//        )
-//
-//        val adapterVideoFps = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoFps)
-//        adapterVideoFps.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        spinnerVideoFps.isEnabled = !this.streamService.isStreaming()
-//        spinnerVideoFps.adapter = adapterVideoFps
-//        @Suppress("UNCHECKED_CAST")
-//        spinnerVideoFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-//                val selectedItem = parent.getItemAtPosition(position) as OptionItem<Int>
-//                var selectedItemValue = selectedItem.key
-//                var fps = this@StreamActivity.streamConfigurationViewModel.fps.value
-//                if (fps != selectedItemValue) {
-//                    this@StreamActivity.streamConfigurationViewModel.setFps(selectedItemValue)
-//                }
-//            }
-//            override fun onNothingSelected(parent: AdapterView<*>) { }
-//        }
-//        val defaultVideoFps = optionsVideoFps.indexOfFirst { it.key == this@StreamActivity.streamConfigurationViewModel.fps.value }
-//        spinnerVideoFps.setSelection(defaultVideoFps)
-//
-//        val dialog = AlertDialog.Builder(this)
-//            .setView(dialogView)
-//            .setPositiveButton("OK") { dialog, _ ->
-//                dialog.dismiss()
-//                hideSystemUI()
-//            }
-//            .create()
-//
-//        dialog.setOnShowListener {
-//            hideSystemUI()
-//        }
-//
-//        dialog.show()
-//    }
+    fun setEnabled(enabled: Boolean) : CameraSettingsDialog  {
+        binding.videoResolutions.isEnabled = enabled
+        binding.encoderFps.isEnabled = enabled
+        return this
+    }
+
+    fun setVideoSource(videoSourceKind: VideoSourceKind) : CameraSettingsDialog {
+        val selectedIndex = (binding.videoSource.adapter as CameraSourceAdapter)
+            .getSelectedIndex(videoSourceKind)
+
+        binding.videoSource.setSelection(selectedIndex)
+        return this
+    }
+
+    fun setVideoCaptureFormat(videoCaptureFormat: VideoCaptureFormat?) : CameraSettingsDialog {
+        this.selectedVideoCaptureFormat = videoCaptureFormat
+        return this
+    }
+
+    fun setEncoderFps(fps: Int?) : CameraSettingsDialog {
+        val defaultVideoFps = EncoderFpsItemsFactory.get()
+            .indexOfFirst { it.key == fps }
+        binding.encoderFps.setSelection(defaultVideoFps)
+        return this
+    }
+
+    private fun initVideoSourceSpinner() {
+        var cameraSourceItems = CameraSourceItemsFactory.get()
+        binding.videoSource.adapter = CameraSourceAdapter(context, cameraSourceItems)
+        binding.videoSource.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    val selected = parent.getItemAtPosition(position) as CameraSourceItem
+                    onChangeVideoSource(selected.videoSourceKind)
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+    }
+
+    private fun initEncoderFpsSpinner() {
+
+        val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, EncoderFpsItemsFactory.get())
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.encoderFps.adapter = adapter
+        @Suppress("UNCHECKED_CAST")
+        binding.encoderFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as OptionItem<Int>
+                var selectedFps = selectedItem.key
+                onChangeFps(selectedFps)
+
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+
+    }
 }
