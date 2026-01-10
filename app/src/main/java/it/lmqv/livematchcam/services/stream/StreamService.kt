@@ -379,7 +379,7 @@ class StreamService: Service(),
             if (!prepared) {
                 toast("Invalid audio or video parameters, prepare failed")
             } else {
-                toast("Ready for ${videoStreamData.width}x${videoStreamData.height}p@${videoStreamData.fps}fps")
+                toast("Encoder ${videoStreamData.height}p@${videoStreamData.fps}fps")
             }
         }
     }
