@@ -21,7 +21,12 @@ import it.lmqv.livematchcam.viewmodels.SoccerScoreViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
+import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.extensions.Loge
+import it.lmqv.livematchcam.handlers.DialogContext
+import it.lmqv.livematchcam.handlers.DialogHandler
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 class SoccerControlBarFragment() : BaseControlBarFragment() {
     companion object {
@@ -44,18 +49,17 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //Logd("SoccerControlBarFragment::matchViewModelID: ${matchViewModel.instanceId}")
-//        MatchRepository.homeTeam.observe(viewLifecycleOwner) { team ->
-//            binding.homeTeam.text = team
-//        }
-        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
-            binding.homeTeamControl.setTeamName(homeTeam)
-        }
-//        MatchRepository.guestTeam.observe(viewLifecycleOwner) { team ->
-//            binding.awayTeam.text = team
-//        }
-        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
-            binding.guestTeamControl.setTeamName(guestTeam)
+        launchOnStarted {
+            combine(
+                MatchRepository.sport,
+                MatchRepository.homeTeam,
+                MatchRepository.guestTeam)
+            { sport, homeTeam, guestTeam -> Triple(sport, homeTeam, guestTeam)
+            }.distinctUntilChanged()
+            .collect { (sport, homeTeam, guestTeam) ->
+                binding.homeTeamControl.setTeamName(homeTeam, sport)
+                binding.guestTeamControl.setTeamName(guestTeam, sport)
+            }
         }
 
         launchOnStarted {
@@ -166,9 +170,12 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
             soccerScoreViewModel.incrementGuestScore()
         }
 
-        binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
-            MatchRepository.setHomeTeam(updatedTeamName)
+        binding.homeTeamControl.onEditTeamName = { teamName, sport ->
+            DialogHandler.editText(DialogContext(this, binding.homeTeamControl, R.string.team_name, teamName, sport)) {
+                MatchRepository.setHomeTeam(it)
+            }
         }
+
         binding.homeTeamControl.onLogoURLChanged = { updatedLogoUrl ->
             MatchRepository.setHomeLogo(updatedLogoUrl)
         }
@@ -176,45 +183,18 @@ class SoccerControlBarFragment() : BaseControlBarFragment() {
             MatchRepository.setHomePrimaryColorHex(updatedColor)
         }
 
-        binding.guestTeamControl.onTeamNameChanged = { updatedTeamName ->
-            MatchRepository.setGuestTeam(updatedTeamName)
+        binding.guestTeamControl.onEditTeamName = { teamName, sport ->
+            DialogHandler.editText(DialogContext(this, binding.guestTeamControl, R.string.team_name, teamName, sport)) {
+                MatchRepository.setGuestTeam(it)
+            }
         }
+
         binding.guestTeamControl.onLogoURLChanged = { updatedLogoUrl ->
             MatchRepository.setGuestLogo(updatedLogoUrl)
         }
         binding.guestTeamControl.onPrimaryColorsChanged = { updatedColor ->
             MatchRepository.setGuestPrimaryColorHex(updatedColor)
         }
-
-//        binding.homeColor.setOnClickListener {
-//            launchOnStarted {
-//                requireContext().showColorPickerDialog { color ->
-//                    MatchRepository.setHomePrimaryColorHex(color)
-//                }
-//            }
-//        }
-
-//        binding.awayColor.setOnClickListener {
-//            requireContext().showColorPickerDialog { color ->
-//                MatchRepository.setGuestPrimaryColorHex(color)
-//            }
-//        }
-
-//        binding.homeTeam.setOnClickListener {
-//            var teamName = binding.homeTeam.text.toString()
-//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-//                MatchRepository.setHomeTeam(updatedTeamName)
-//                requireActivity().hideSystemUI()
-//            }
-//        }
-
-//        binding.awayTeam.setOnClickListener {
-//            var teamName = binding.awayTeam.text.toString()
-//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-//                MatchRepository.setGuestTeam(updatedTeamName)
-//                requireActivity().hideSystemUI()
-//            }
-//        }
 
         binding.changePeriod.setOnClickListener {
             soccerScoreViewModel.nextPeriod()

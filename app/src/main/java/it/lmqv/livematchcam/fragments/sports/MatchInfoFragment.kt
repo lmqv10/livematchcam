@@ -10,7 +10,11 @@ import androidx.fragment.app.Fragment
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentMatchInfoBinding
 import it.lmqv.livematchcam.extensions.launchOnStarted
+import it.lmqv.livematchcam.handlers.DialogHandler
+import it.lmqv.livematchcam.handlers.DialogContext
 import it.lmqv.livematchcam.repositories.MatchRepository
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 class MatchInfoFragment : Fragment() {
 
@@ -44,12 +48,25 @@ class MatchInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
-            binding.homeTeamControl.setTeamName(homeTeam)
+        launchOnStarted {
+            combine(
+                MatchRepository.sport,
+                MatchRepository.homeTeam,
+                MatchRepository.guestTeam)
+            { sport, homeTeam, guestTeam -> Triple(sport, homeTeam, guestTeam)
+            }.distinctUntilChanged()
+            .collect { (sport, homeTeam, guestTeam) ->
+                binding.homeTeamControl.setTeamName(homeTeam, sport)
+                binding.guestTeamControl.setTeamName(guestTeam, sport)
+            }
         }
-        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
-            binding.guestTeamControl.setTeamName(guestTeam)
-        }
+
+//        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
+//            binding.homeTeamControl.setTeamName(homeTeam)
+//        }
+//        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
+//            binding.guestTeamControl.setTeamName(guestTeam)
+//        }
 
         launchOnStarted {
             MatchRepository.homeLogo.collect { logoUrl ->
@@ -73,9 +90,15 @@ class MatchInfoFragment : Fragment() {
             }
         }
 
-        binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
-            MatchRepository.setHomeTeam(updatedTeamName)
+        binding.homeTeamControl.onEditTeamName = { teamName, sport ->
+            DialogHandler.editText(DialogContext(this, binding.homeTeamControl,  R.string.team_name, teamName, sport)) {
+                MatchRepository.setHomeTeam(it)
+            }
         }
+
+//        binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
+//            MatchRepository.setHomeTeam(updatedTeamName)
+//        }
         binding.homeTeamControl.onLogoURLChanged = { updatedLogoUrl ->
             MatchRepository.setHomeLogo(updatedLogoUrl)
         }
@@ -83,9 +106,15 @@ class MatchInfoFragment : Fragment() {
             MatchRepository.setHomePrimaryColorHex(updatedColor)
         }
 
-        binding.guestTeamControl.onTeamNameChanged = { updatedTeamName ->
-            MatchRepository.setGuestTeam(updatedTeamName)
+        binding.guestTeamControl.onEditTeamName = { teamName, sport ->
+            DialogHandler.editText(DialogContext(this, binding.guestTeamControl,  R.string.team_name, teamName, sport)) {
+                MatchRepository.setGuestTeam(it)
+            }
         }
+
+//        binding.guestTeamControl.onTeamNameChanged = { updatedTeamName ->
+//            MatchRepository.setGuestTeam(updatedTeamName)
+//        }
         binding.guestTeamControl.onLogoURLChanged = { updatedLogoUrl ->
             MatchRepository.setGuestLogo(updatedLogoUrl)
         }

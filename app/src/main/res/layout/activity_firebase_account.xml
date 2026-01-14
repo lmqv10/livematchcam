@@ -50,7 +50,7 @@
                 android:textColor="@color/appColorSecondary" />
 
             <TextView
-                style="@style/editTextView"
+                style="@style/EditTextViewStyle"
                 android:id="@+id/account_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
 
                 <TextView
                     android:id="@+id/account_key"
-                    style="@style/editTextView"
+                    style="@style/EditTextViewStyle"
                     android:gravity="start"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -137,8 +137,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="This is a scrollable layout"
-                            android:textSize="20sp" />
+                            android:text="This is a scrollable layout" />
 
                         <ImageView
                             android:layout_width="match_parent"
@@ -148,8 +147,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="More Content Here..."
-                            android:textSize="18sp" />
+                            android:text="More Content Here..."/>
 
                         <ImageView
                             android:layout_width="match_parent"

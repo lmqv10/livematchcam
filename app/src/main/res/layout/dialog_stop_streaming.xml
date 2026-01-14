@@ -32,14 +32,13 @@
             android:minWidth="130dp"
             android:layout_height="match_parent"
             android:text="@string/switch_end_stream"
-            android:textSize="16sp"
             android:textColor="@color/secondary_darker"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            style="@style/defaultImageViewStyle"
+            style="@style/DefaultImageViewStyle"
             android:id="@+id/cancel_button"
             android:src="@drawable/ic_cancel"
             android:layout_gravity="start"
@@ -49,7 +48,7 @@
             app:layout_constraintEnd_toStartOf="@id/confirm_button"/>
 
         <ImageView
-            style="@style/defaultImageViewStyle"
+            style="@style/DefaultImageViewStyle"
             android:id="@+id/confirm_button"
             android:src="@drawable/ic_confirm"
             android:contentDescription="@string/description_placeholder"

@@ -28,7 +28,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/title_placeholder"
-            android:textSize="16sp"
             android:layout_marginBottom="5dp"
             android:textColor="@color/secondary_dark" />
 
@@ -38,7 +37,6 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:text="@string/server_placeholder"
-            android:textSize="12sp"
             android:drawablePadding="5dp"
             android:textColor="@color/black"
             app:drawableStartCompat="@drawable/ic_server" />
@@ -49,7 +47,6 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:text="@string/hint_key"
-            android:textSize="12sp"
             android:drawablePadding="5dp"
             android:textColor="@color/black"
             app:drawableStartCompat="@drawable/ic_key"/>
@@ -59,7 +56,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/hint_key"
-            android:textSize="10sp"
             android:textColor="@color/black" /-->
     </LinearLayout>
 </LinearLayout>

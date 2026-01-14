@@ -1,6 +1,10 @@
 package it.lmqv.livematchcam.factories
 
-enum class Sports {
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+enum class Sports : Parcelable {
     SOCCER,
     VOLLEY
 }

@@ -10,8 +10,8 @@
     android:background="@color/secondary_dark">
 
     <ImageView
-        android:layout_width="@dimen/user_icon_size"
-        android:layout_height="@dimen/user_icon_size"
+        android:layout_width="@dimen/icon_size_user"
+        android:layout_height="@dimen/icon_size_user"
         android:scaleType="centerCrop"
         app:tint="@color/primary"
         android:src="@drawable/login"
@@ -33,7 +33,6 @@
         android:text="@string/youtube_account_placeholder"
         android:textColor="@android:color/white"
         android:drawablePadding="5dp"
-        android:textSize="12sp"
         android:ellipsize="end"
         android:maxLines="1"
         app:drawableStartCompat="@drawable/ic_youtube" />
@@ -45,7 +44,6 @@
         android:text="@string/firebase_account_placeholder"
         android:textColor="@android:color/white"
         android:drawablePadding="5dp"
-        android:textSize="12sp"
         android:ellipsize="end"
         android:maxLines="1"
         app:drawableStartCompat="@drawable/ic_link"/>

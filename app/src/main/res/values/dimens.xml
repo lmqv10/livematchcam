@@ -1,39 +1,35 @@
 <resources>
-    <dimen name="app_icon_size">40dp</dimen>
-    <dimen name="user_icon_size">64dp</dimen>
+    <dimen name="menu_drawer_width">200dp</dimen>
+    <dimen name="icon_size_user">64dp</dimen>
 
-    <dimen name="small_icon_size">24dp</dimen>
-    <dimen name="normal_icon_size">32dp</dimen>
-    <dimen name="big_icon_size">40dp</dimen>
+    <dimen name="icon_size_default">@dimen/icon_size_normal</dimen>
+    <dimen name="icon_size_big">40dp</dimen>
+    <dimen name="icon_size_normal">32dp</dimen>
+    <dimen name="icon_size_small">24dp</dimen>
 
-    <dimen name="default_icon_size">@dimen/normal_icon_size</dimen>
+    <dimen name="text_size_default">@dimen/text_size_normal</dimen>
+    <dimen name="text_size_bigger">20sp</dimen>
+    <dimen name="text_size_big">18sp</dimen>
+    <dimen name="text_size_normal">14sp</dimen>
+    <dimen name="text_size_small">12sp</dimen>
+    <dimen name="text_size_smaller">10sp</dimen>
+
     <dimen name="spinner_item_min_height">32dp</dimen>
-
-<!--    <dimen name="text_size_wall">24sp</dimen>-->
-    <dimen name="text_size_big">20sp</dimen>
-    <dimen name="text_size_default">18sp</dimen>
-    <dimen name="text_size_small">16sp</dimen>
-    <dimen name="text_size_smaller">14sp</dimen>
-    <dimen name="text_size_smallest">12sp</dimen>
-
-    <dimen name="toolbar_title_size">@dimen/text_size_big</dimen>
-
-    <dimen name="menu_font">16sp</dimen>
-    <dimen name="grid_1">4dp</dimen>
-    <dimen name="grid_2">8dp</dimen>
-    <dimen name="grid_5">20dp</dimen>
 
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="volley_score_board_width">240dp</dimen>
-    <dimen name="volley_score_board_team">80dp</dimen>
+<!--    <dimen name="volley_score_board_width">240dp</dimen>-->
+    <dimen name="volley_score_board_team_min_width">40dp</dimen>
 
     <dimen name="edit_text_height">50dp</dimen>
     <dimen name="status_width">100dp</dimen>
 
     <dimen name="dialog_width">500dp</dimen>
+    <dimen name="dialog_padding">24dp</dimen>
+    <dimen name="dialog_action_margin">5dp</dimen>
+    <dimen name="dialog_action_bar_marginTop">10dp</dimen>
 
     <dimen name="image_size_default">90dp</dimen>
     <dimen name="image_size_width_small">72dp</dimen>

@@ -25,7 +25,6 @@ import it.lmqv.livematchcam.databinding.FragmentYoutubeStreamBinding
 import it.lmqv.livematchcam.dialogs.DateTimePickerDialog
 import it.lmqv.livematchcam.dialogs.LogosRecentsDialog
 import it.lmqv.livematchcam.extensions.launchOnStarted
-import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.services.auth.AuthResult
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
@@ -41,6 +40,8 @@ import it.lmqv.livematchcam.extensions.createThumbnail
 import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.extensions.saveBitmapToFile
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.handlers.DialogContext
+import it.lmqv.livematchcam.handlers.DialogHandler
 import it.lmqv.livematchcam.preferences.SchedulesPreferences
 import it.lmqv.livematchcam.preferences.toThumbnailAsset
 import it.lmqv.livematchcam.services.youtube.LiveStreamContentData
@@ -250,8 +251,8 @@ class YoutubeStreamFragment : Fragment() {
 
         binding.textTitle.setOnClickListener {
             val sourceTitle = binding.textTitle.text.toString()
-            requireContext().showEditStringDialog(R.string.label_event_title, sourceTitle, arrayOf()) { updatedTitle ->
-                schedulesPrefs.set(title = updatedTitle)
+            DialogHandler.editText(DialogContext(this, binding.textTitle, R.string.label_event_title, sourceTitle)) {
+                schedulesPrefs.set(title = it)
             }
         }
 

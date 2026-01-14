@@ -55,11 +55,11 @@ object MatchRepository {
     private var _firebaseAccountData = MutableStateFlow<FirebaseAccountDataContract>(FirebaseAccountDataContract())
     var firebaseAccountData: StateFlow<FirebaseAccountDataContract>  = _firebaseAccountData
 
-    private val _homeTeam = MutableLiveData(currentMatch.homeTeam)
-    val homeTeam: LiveData<String> = _homeTeam
+    private val _homeTeam = MutableStateFlow(currentMatch.homeTeam)
+    val homeTeam: StateFlow<String> = _homeTeam
 
-    private val _guestTeam = MutableLiveData(currentMatch.guestTeam)
-    val guestTeam: LiveData<String> = _guestTeam
+    private val _guestTeam = MutableStateFlow(currentMatch.guestTeam)
+    val guestTeam: StateFlow<String> = _guestTeam
 
     private val _homeLogo = MutableStateFlow(currentMatch.homeLogo)
     val homeLogo: StateFlow<String> = _homeLogo

@@ -12,7 +12,6 @@
         android:layout_height="match_parent"
         android:gravity="start|center_vertical"
         android:paddingHorizontal="10dp"
-        android:textSize="16sp"
         android:text="@string/warning_placeholder"
         android:textColor="@color/black"
         app:drawableStartCompat="@drawable/ic_warning" />

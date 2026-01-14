@@ -78,7 +78,6 @@
           android:padding="5dp"
           android:gravity="center"
           android:layout_gravity="center_vertical"
-          android:textSize="10sp"
           android:text="@string/bitrate_placeholder" />
 
       <Switch
@@ -105,7 +104,6 @@
           android:layout_gravity="center"
           android:paddingLeft="4dp"
           android:paddingVertical="2dp"
-          android:textSize="12sp"
           android:minWidth="40dp"
           android:textColor="@color/YELLOW"
           android:text="@string/degree_placeholder" />
@@ -118,7 +116,6 @@
           android:layout_gravity="center"
           android:paddingLeft="4dp"
           android:paddingVertical="2dp"
-          android:textSize="12sp"
           android:minWidth="40dp"
           android:textColor="@color/YELLOW"
           android:text="@string/degree_placeholder" />
@@ -136,7 +133,6 @@
           android:layout_gravity="center"
           android:paddingLeft="4dp"
           android:paddingVertical="2dp"
-          android:textSize="12sp"
           android:minWidth="40dp"
           android:textColor="@color/primary"
           android:text="@string/degree_placeholder" />
@@ -148,7 +144,6 @@
           android:gravity="center"
           android:layout_gravity="center"
           android:padding="3dp"
-          android:textSize="12sp"
           android:minWidth="30dp"
           android:textColor="@color/primary"
           android:text="@string/zoom_placeholder" />
@@ -160,7 +155,6 @@
           android:gravity="center"
           android:layout_gravity="center"
           android:padding="3dp"
-          android:textSize="12sp"
           android:minWidth="30dp"
           android:textColor="@color/primary"
           android:text="@string/zoom_placeholder" />
@@ -330,7 +324,6 @@
         android:layout_height="match_parent"
         android:paddingHorizontal="5dp"
         android:gravity="center"
-        android:textSize="20sp"
         android:minWidth="40dp"
         android:textColor="@color/primary"
         android:text= "@string/score_placeholder"/>
@@ -427,7 +420,6 @@
           android:layout_height="match_parent"
           android:paddingHorizontal="5dp"
           android:gravity="center"
-          android:textSize="20sp"
           android:minWidth="40dp"
           android:textColor="@color/primary"
           android:text= "@string/score_placeholder"/>

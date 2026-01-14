@@ -21,8 +21,12 @@ import androidx.core.graphics.toColorInt
 import it.lmqv.livematchcam.dialogs.TimePickerDialog
 import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.parseTimeToSeconds
+import it.lmqv.livematchcam.handlers.DialogContext
+import it.lmqv.livematchcam.handlers.DialogHandler
 import it.lmqv.livematchcam.services.counter.CounterService
 import it.lmqv.livematchcam.viewmodels.CounterViewModel
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
     companion object {
@@ -45,18 +49,17 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //Logd("SoccerControlBarFragment::matchViewModelID: ${matchViewModel.instanceId}")
-//        MatchRepository.homeTeam.observe(viewLifecycleOwner) { team ->
-//            binding.homeTeam.text = team
-//        }
-        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
-            binding.homeTeamControl.setTeamName(homeTeam)
-        }
-//        MatchRepository.guestTeam.observe(viewLifecycleOwner) { team ->
-//            binding.awayTeam.text = team
-//        }
-        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
-            binding.guestTeamControl.setTeamName(guestTeam)
+        launchOnStarted {
+            combine(
+                MatchRepository.sport,
+                MatchRepository.homeTeam,
+                MatchRepository.guestTeam)
+            { sport, homeTeam, guestTeam -> Triple(sport, homeTeam, guestTeam)
+            }.distinctUntilChanged()
+                .collect { (sport, homeTeam, guestTeam) ->
+                binding.homeTeamControl.setTeamName(homeTeam, sport)
+                binding.guestTeamControl.setTeamName(guestTeam, sport)
+            }
         }
 
         launchOnStarted {
@@ -80,79 +83,6 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
                 binding.guestTeamControl.setPrimaryColor(primaryColor.toColorInt())
             }
         }
-
-//        launchOnStarted {
-//            combine(
-//                MatchRepository.firebaseAccountData,
-//                MatchRepository.homePrimaryColorHex,
-//                MatchRepository.homeLogo) {
-//                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
-//            }.collect { (firebaseAccountData, colorHex, logoURL) ->
-//                //binding.homeColor.isClickable = logoURL.isNullOrEmpty()
-//                if (logoURL.isNotEmpty()) {
-//                    binding.homeColor.load(logoURL) {
-//                        placeholder(R.drawable.shirt_white)
-//                        error(R.drawable.shirt_white)
-//                        allowHardware(false)
-//                    }
-//                } else {
-//                    binding.homeColor.setShirtByColor(colorHex.toColorInt())
-//                }
-//
-//                binding.homeColor.setOnClickListener {
-//                    if (firebaseAccountData.remoteScoreAvailable) {
-//                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-//                            MatchRepository.setHomeLogo(updatedTeamLogo)
-//                            requireActivity().hideSystemUI()
-//                        }
-//                    } else {
-//                        requireContext().showColorPickerDialog { color ->
-//                            MatchRepository.setHomePrimaryColorHex(color)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-//        launchOnStarted {
-//            combine(
-//                MatchRepository.firebaseAccountData,
-//                MatchRepository.guestPrimaryColorHex,
-//                MatchRepository.guestLogo) {
-//                    firebaseAccountData, color, logo -> Triple(firebaseAccountData, color, logo)
-//            }.collect { (firebaseAccountData, colorHex, logoURL) ->
-//                //binding.guestColor.isClickable = logoURL.isNullOrEmpty()
-//                if (logoURL.isNotEmpty()) {
-//                    binding.guestColor.load(logoURL) {
-//                        placeholder(R.drawable.shirt_white)
-//                        error(R.drawable.shirt_white)
-//                        allowHardware(false)
-//                    }
-//                } else {
-//                    binding.guestColor.setShirtByColor(colorHex.toColorInt())
-//                }
-//
-//                binding.guestColor.setOnClickListener {
-//                    if (firebaseAccountData.remoteScoreAvailable) {
-//                        requireContext().showEditStringDialog(R.string.choose_logo, logoURL, arrayOf<InputFilter>()) { updatedTeamLogo ->
-//                            MatchRepository.setGuestLogo(updatedTeamLogo)
-//                            requireActivity().hideSystemUI()
-//                        }
-//                    } else {
-//                        requireContext().showColorPickerDialog { color ->
-//                            MatchRepository.setGuestPrimaryColorHex(color)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-        /*matchViewModel.homeColorHex.observe(viewLifecycleOwner) { homeColorHex ->
-            binding.homeColor.setShirtByColor(Color.parseColor(homeColorHex))
-        }
-        matchViewModel.guestColorHex.observe(viewLifecycleOwner) { guestColorHex ->
-            binding.awayColor.setShirtByColor(Color.parseColor(guestColorHex))
-        }*/
 
         viewLifecycleOwner.lifecycleScope.launch {
             MatchRepository.score.collectLatest { scoreInstance ->
@@ -210,21 +140,12 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
             soccerScoreViewModel.incrementGuestScore()
         }
 
-        /*binding.homeColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
-                matchViewModel.setHomeColorHex(color)
+        binding.homeTeamControl.onEditTeamName = { teamName, sport ->
+            DialogHandler.editText(DialogContext(this, binding.homeTeamControl, R.string.team_name, teamName, sport)) {
+                MatchRepository.setHomeTeam(it)
             }
         }
 
-        binding.awayColor.setOnClickListener {
-            requireContext().showColorPickerDialog { color ->
-                matchViewModel.setGuestColorHex(color)
-            }
-        }*/
-
-        binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
-            MatchRepository.setHomeTeam(updatedTeamName)
-        }
         binding.homeTeamControl.onLogoURLChanged = { updatedLogoUrl ->
             MatchRepository.setHomeLogo(updatedLogoUrl)
         }
@@ -232,31 +153,18 @@ class SoccerRemoteControlFragment : BaseRemoteControlFragment() {
             MatchRepository.setHomePrimaryColorHex(updatedColor)
         }
 
-        binding.guestTeamControl.onTeamNameChanged = { updatedTeamName ->
-            MatchRepository.setGuestTeam(updatedTeamName)
+        binding.guestTeamControl.onEditTeamName = { teamName, sport ->
+            DialogHandler.editText(DialogContext(this, binding.guestTeamControl, R.string.team_name, teamName, sport)) {
+                MatchRepository.setGuestTeam(it)
+            }
         }
+
         binding.guestTeamControl.onLogoURLChanged = { updatedLogoUrl ->
             MatchRepository.setGuestLogo(updatedLogoUrl)
         }
         binding.guestTeamControl.onPrimaryColorsChanged = { updatedColor ->
             MatchRepository.setGuestPrimaryColorHex(updatedColor)
         }
-
-//        binding.homeTeam.setOnClickListener {
-//            var teamName = binding.homeTeam.text.toString()
-//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-//                MatchRepository.setHomeTeam(updatedTeamName)
-//                requireActivity().hideSystemUI()
-//            }
-//        }
-//
-//        binding.awayTeam.setOnClickListener {
-//            var teamName = binding.awayTeam.text.toString()
-//            requireContext().showEditStringDialog(R.string.team_name, teamName) { updatedTeamName ->
-//                MatchRepository.setGuestTeam(updatedTeamName)
-//                requireActivity().hideSystemUI()
-//            }
-//        }
 
         binding.changePeriod.setOnClickListener {
             soccerScoreViewModel.nextPeriod()

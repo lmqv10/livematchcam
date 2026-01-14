@@ -14,7 +14,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/rtmp_server"
-        android:textSize="20sp"
         android:layout_marginBottom="15dp"
         android:drawablePadding="5dp"
         app:drawableStartCompat="@drawable/ic_server"
@@ -33,7 +32,7 @@
 
         <TextView
             android:id="@+id/text_server"
-            style="@style/editTextView"
+            style="@style/EditTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/hint_protocol"/>
@@ -47,7 +46,7 @@
 
         <TextView
             android:id="@+id/text_key"
-            style="@style/editTextView"
+            style="@style/EditTextViewStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/hint_key"/>

@@ -44,7 +44,7 @@
         android:layout_marginTop="10dp">
 
         <ImageView
-            style="@style/defaultImageViewStyle"
+            style="@style/DefaultImageViewStyle"
             android:id="@+id/clearButton"
             android:src="@drawable/ic_eraser"
             android:contentDescription="@string/description_placeholder"
@@ -55,7 +55,7 @@
 
         <ImageView
             android:visibility="gone"
-            style="@style/defaultImageViewStyle"
+            style="@style/DefaultImageViewStyle"
             android:id="@+id/cancelButton"
             android:src="@drawable/ic_cancel"
             android:layout_gravity="start"
@@ -65,7 +65,7 @@
             app:layout_constraintEnd_toStartOf="@id/confirmButton"/>
 
         <ImageView
-            style="@style/defaultImageViewStyle"
+            style="@style/DefaultImageViewStyle"
             android:id="@+id/confirmButton"
             android:src="@drawable/ic_confirm"
             android:contentDescription="@string/description_placeholder"

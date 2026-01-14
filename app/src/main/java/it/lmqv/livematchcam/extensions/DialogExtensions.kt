@@ -1,28 +1,17 @@
 package it.lmqv.livematchcam.extensions
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.text.Editable
-import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnFocusChangeListener
-import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.ImageView
-import android.widget.TextView
-import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
-import androidx.fragment.app.Fragment
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import it.lmqv.livematchcam.R
-
 
 fun Context.showColorPickerDialog(delegate: (color: Int) -> Unit) {
     val context = this
@@ -30,17 +19,6 @@ fun Context.showColorPickerDialog(delegate: (color: Int) -> Unit) {
     val dialog = AlertDialog.Builder(context, R.style.AppDialogTheme)
         .setView(dialogView)
         .create()
-
-    /*var logoUrlLabel = dialogView.findViewById<TextView>(R.id.logo_url_label)
-    var logoUrl = dialogView.findViewById<EditText>(R.id.logo_url)
-
-    if (isLogoAvailable) {
-        logoUrlLabel.visibility = View.VISIBLE
-        logoUrl.visibility = View.VISIBLE
-    } else {
-        logoUrlLabel.visibility = View.GONE
-        logoUrl.visibility = View.GONE
-    }*/
 
     dialogView.findViewById<View>(R.id.tShirtBlack).setOnClickListener {
         delegate(Color.BLACK)
@@ -93,70 +71,6 @@ fun Context.showColorPickerDialog(delegate: (color: Int) -> Unit) {
 
     dialog.show()
 }
-
-fun Context.showEditStringDialog(@StringRes
-                                 resTitleId: Int,
-                                 textValue: String,
-                                 filters: Array<InputFilter> = arrayOf<InputFilter>(
-                                     InputFilter.LengthFilter(3),
-                                     InputFilter.AllCaps()  // Example: Make text uppercase
-                                 ),
-                                 delegate: (updatedTextValue: String) -> Unit) {
-    var context = this
-    val inflater = LayoutInflater.from(context)
-    val dialogView = inflater.inflate(R.layout.dialog_edit_text, null)
-
-    val tvTitle = dialogView.findViewById<TextView>(R.id.tv_title)
-    tvTitle.text = getString(resTitleId)
-
-    val etTextValue = dialogView.findViewById<EditText>(R.id.et_text_value)
-    etTextValue.text = Editable.Factory.getInstance().newEditable(textValue)
-    etTextValue.filters = filters
-
-    etTextValue.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
-        if (hasFocus) {
-            etTextValue.post(Runnable { etTextValue.selectAll() })
-        }
-    }
-
-    val dialog = androidx.appcompat.app.AlertDialog.Builder(context)
-        .setView(dialogView)
-        .setPositiveButton("Confirm") { dialog, _ ->
-            delegate(etTextValue.text.toString())
-            //hideKeyboard(etTextValue)
-            (etTextValue.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
-                ?.hideSoftInputFromWindow(etTextValue.windowToken, 0)
-            dialog.dismiss()
-        }
-        .create()
-
-    dialog.setOnShowListener {
-        etTextValue.requestFocus()
-    }
-    dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
-    dialog.show()
-}
-//
-//fun hideKeyboard(any: Any?) {
-//    val context = when (any) {
-//        is Activity -> any
-//        is Fragment -> any.activity
-//        is View -> any.context
-//        else -> null
-//    } ?: return
-//
-//    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-//        ?: return
-//
-//    val windowToken = when (any) {
-//        is Activity -> any.currentFocus?.windowToken
-//        is Fragment -> any.view?.windowToken
-//        is View -> any.windowToken
-//        else -> null
-//    } ?: return
-//
-//    imm.hideSoftInputFromWindow(windowToken, 0)
-//}
 
 fun Context.showQRCode(content: String) {
     var context = this

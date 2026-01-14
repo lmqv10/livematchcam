@@ -33,7 +33,7 @@
             android:layout_marginStart="10dp" />
 
         <ImageView
-            style="@style/smallImageViewStyle"
+            style="@style/SmallImageViewStyle"
             android:layout_gravity="center_vertical"
             android:id="@+id/time_reset"
             android:src="@drawable/time_reset"
@@ -49,13 +49,13 @@
         android:gravity="end">
 
         <ImageView
-            style="@style/smallImageViewStyle"
+            style="@style/SmallImageViewStyle"
             android:id="@+id/btnCancel"
             android:src="@drawable/ic_cancel"
             android:contentDescription="@string/description_placeholder" />
 
         <ImageView
-            style="@style/smallImageViewStyle"
+            style="@style/SmallImageViewStyle"
             android:id="@+id/btnConfirm"
             android:src="@drawable/ic_confirm"
             android:layout_marginStart="8dp"

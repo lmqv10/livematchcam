@@ -14,8 +14,9 @@ import it.lmqv.livematchcam.adapters.BaseStreamItem
 import it.lmqv.livematchcam.adapters.StreamsAdapter
 import it.lmqv.livematchcam.databinding.FragmentFirebaseBinding
 import it.lmqv.livematchcam.extensions.launchOnCreated
-import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.handlers.DialogContext
+import it.lmqv.livematchcam.handlers.DialogHandler
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import it.lmqv.livematchcam.viewmodels.FirebaseViewModel
@@ -100,13 +101,13 @@ class FirebaseFragment : Fragment() {
         }
 
         binding.accountName.setOnClickListener {
-            val sourceName = binding.accountName.text.toString()
-            requireContext().showEditStringDialog(R.string.account, sourceName, arrayOf()) { updatedAccountName ->
-                binding.accountName.text = updatedAccountName
+            val accountName = binding.accountName.text.toString()
+            DialogHandler.editText(DialogContext(this, binding.accountName, R.string.account, accountName)) {
+                binding.accountName.text = it
 
-                if (updatedAccountName.isNotEmpty()) {
-                    firebaseAccountViewModel.signIn(updatedAccountName)
-                    toast(getString(R.string.logged_in, updatedAccountName))
+                if (it.isNotEmpty()) {
+                    firebaseAccountViewModel.signIn(it)
+                    toast(getString(R.string.logged_in, it))
                 } else {
                     firebaseAccountViewModel.signOut {
                         CoroutineScope(Dispatchers.Main).launch {

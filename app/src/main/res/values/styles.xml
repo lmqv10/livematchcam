@@ -1,128 +1,178 @@
 <resources>
 
-  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-    <item name="windowActionBar">false</item>
-    <item name="windowNoTitle">true</item>
-    <item name="colorPrimary">@color/appColorPrimary</item>
-    <item name="colorPrimaryDark">@color/appColorPrimary</item>
-    <item name="colorAccent">@color/appColorPrimary</item>
-    <item name="android:textColorPrimary">@color/appColorSecondary</item>
-    <item name="android:autoSizeTextType">uniform</item>
-    <item name="android:autoSizeMaxTextSize">@dimen/text_size_big</item>
-    <item name="android:autoSizeMinTextSize">@dimen/text_size_smallest</item>
-    <!--item name="android:buttonStyle">@style/buttonStyle</item-->
-    <!--item name="buttonStyle">@style/buttonStyle</item-->
-  </style>
-
-  <style name="ActivityTransparent" parent="Theme.AppCompat.NoActionBar">
-    <item name="android:windowIsTranslucent">true</item>
-    <item name="android:windowBackground">@android:color/transparent</item>
-    <item name="android:windowFullscreen">true</item>
-    <item name="android:windowContentOverlay">@null</item>
-  </style>
-
-  <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog">
-    <item name="android:windowBackground">@android:color/white</item>
-    <item name="android:backgroundDimEnabled">false</item>
-  </style>
-
-  <style name="SplashScreen" parent="AppTheme">
-    <item name="android:windowBackground">@drawable/splash_screen</item>
-  </style>
-    <style name="Widget.AppTheme.MyView" parent="">
-        <item name="android:background">@color/gray_400</item>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/appColorPrimary</item>
+        <item name="colorPrimaryDark">@color/appColorPrimary</item>
+        <item name="colorAccent">@color/appColorPrimary</item>
+        <item name="android:textColorPrimary">@color/appColorSecondary</item>
+        <item name="android:textSize">@dimen/text_size_default</item>
+        <item name="android:autoSizeTextType">none</item>
+<!--        <item name="android:autoSizeTextType">uniform</item>-->
+<!--        <item name="android:autoSizeMaxTextSize">@dimen/text_size_normal</item>-->
+<!--        <item name="android:autoSizeMinTextSize">@dimen/text_size_smaller</item>-->
+        <item name="android:textViewStyle">@style/DefaultTextViewStyle</item>
+        <item name="android:editTextStyle">@style/DefaultEditTextStyle</item>
+        <!--    <item name="android:buttonStyle">@style/buttonStyle</item>-->
+        <!--    <item name="buttonStyle">@style/buttonStyle</item>-->
     </style>
 
-  <!--style name="buttonStyle"
-      parent="android:style/Widget.Button">
-    <item name="android:background">@xml/button_style</item>
-    <item name="android:padding">8dp</item>
-    <item name="android:textColor">@color/white</item>
-    <item name="android:textStyle">bold</item>
-  </style-->
+    <style name="SplashScreen" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
 
-    <style name="defaultImageViewStyle" parent="">
+    <style name="ActivityTransparent" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="NavigationDrawerStyle" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:textSize">@dimen/text_size_default</item>
+    </style>
+
+    <style name="ToolbarImageViewStyle">
+        <item name="android:layout_width">?attr/actionBarSize</item>
+        <item name="android:layout_height">?attr/actionBarSize</item>
+        <item name="android:padding">0dp</item>
+    </style>
+
+    <!--<style name="buttonStyle"
+        parent="android:style/Widget.Button">
+      <item name="android:background">@xml/button_style</item>
+      <item name="android:padding">8dp</item>
+      <item name="android:textColor">@color/white</item>
+      <item name="android:textStyle">bold</item>
+    </style>-->
+
+    <style name="DefaultImageViewStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingHorizontal">10dp</item>
         <item name="android:paddingVertical">5dp</item>
         <item name="android:contentDescription">@string/description_placeholder</item>
         <item name="android:elevation">4dp</item>
-        <item name="android:shadowColor">@color/primary_negative</item>
+        <item name="android:shadowColor">@color/text_color_black_selector</item>
         <item name="android:background">@drawable/iv_background</item>
         <item name="android:tint">@color/secondary_dark</item>
     </style>
 
-    <style name="largeImageViewStyle" parent="@style/defaultImageViewStyle">
+    <style name="LargeImageViewStyle" parent="@style/DefaultImageViewStyle">
         <item name="android:layout_width">60dp</item>
         <item name="android:layout_height">60dp</item>
         <item name="android:paddingHorizontal">5dp</item>
         <item name="android:paddingVertical">5dp</item>
     </style>
 
-    <style name="normalImageViewStyle" parent="@style/defaultImageViewStyle">
+    <style name="NormalImageViewStyle" parent="@style/DefaultImageViewStyle">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
         <item name="android:paddingHorizontal">0dp</item>
         <item name="android:paddingVertical">0dp</item>
     </style>
 
-    <style name="smallImageViewStyle" parent="@style/defaultImageViewStyle">
+    <style name="SmallImageViewStyle" parent="@style/DefaultImageViewStyle">
         <item name="android:layout_width">40dp</item>
         <item name="android:layout_height">40dp</item>
         <item name="android:paddingHorizontal">0dp</item>
         <item name="android:paddingVertical">0dp</item>
     </style>
 
-    <style name="editTextView" parent="Widget.AppCompat.TextView">
-        <item name="android:background">?attr/editTextBackground</item>
-        <item name="android:textColor">@color/text_color_black_selector</item>
-        <item name="android:gravity">center</item>
-        <item name="android:layout_gravity">center_vertical</item>
+    <style name="DefaultEditTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
         <item name="android:textSize">@dimen/text_size_default</item>
-        <item name="android:autoSizeTextType">uniform</item>
-        <item name="android:autoSizeMinTextSize">@dimen/text_size_small</item>
-        <item name="android:autoSizeMaxTextSize">@dimen/text_size_default</item>
+        <item name="android:hint">@string/description_placeholder</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:inputType">text</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:imeOptions">flagNoExtractUi|actionDone</item>
+        <item name="android:importantForAutofill">no</item>
     </style>
 
-    <style name="teamTextView">
-        <item name="android:layout_width">0dp</item>
+    <style name="DefaultTextViewStyle" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_columnWeight">2</item>
-        <item name="android:textColor">@color/BLACK</item>
         <item name="android:textSize">@dimen/text_size_default</item>
+        <item name="android:textColor">@color/text_color_black_selector</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">none</item>
-        <item name="android:autoSizeTextType">uniform</item>
-        <item name="android:autoSizeMinTextSize">@dimen/text_size_small</item>
-        <item name="android:autoSizeMaxTextSize">@dimen/text_size_default</item>
-        <item name="android:autoSizeStepGranularity">1sp</item>
-        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:gravity">center_vertical</item>
+        <!--        <item name="android:layout_columnWeight">2</item>-->
+        <!--        <item name="android:autoSizeTextType">uniform</item>-->
+        <!--        <item name="android:autoSizeMinTextSize">@dimen/text_size_small</item>-->
+        <!--        <item name="android:autoSizeMaxTextSize">@dimen/text_size_default</item>-->
+        <!--        <item name="android:autoSizeStepGranularity">1sp</item>-->
+        <!--        <item name="android:gravity">center</item>-->
     </style>
 
-    <style name="scoreTextView">
+    <style name="ToolbarTitleTextViewStyle" parent="@style/DefaultTextViewStyle">
+        <item name="fontFamily">@font/capture_it</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">@dimen/text_size_bigger</item>
+        <item name="android:autoSizeTextType">none</item>
+    </style>
+
+    <style name="TitleTextViewStyle" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textColor">@color/secondary_darker</item>
+        <item name="android:textSize">@dimen/text_size_big</item>
+        <item name="android:text">@string/title_placeholder</item>
+    </style>
+
+    <style name="EditTextViewStyle" parent="Widget.AppCompat.TextView">
+        <item name="android:background">?attr/editTextBackground</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:textSize">@dimen/text_size_bigger</item>
+        <item name="android:textColor">@color/text_color_black_selector</item>
+        <!--        <item name="android:autoSizeTextType">uniform</item>-->
+        <!--        <item name="android:autoSizeMinTextSize">@dimen/text_size_small</item>-->
+        <!--        <item name="android:autoSizeMaxTextSize">@dimen/text_size_default</item>-->
+    </style>
+
+
+    <style name="TeamTextViewStyle" parent="Widget.AppCompat.TextView">
+<!--        <item name="android:layout_width">0dp</item>-->
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textSize">@dimen/text_size_big</item>
+        <item name="android:textColor">@color/text_color_black_selector</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">none</item>
+        <item name="android:gravity">start</item>
+        <item name="android:paddingHorizontal">5dp</item>
+    </style>
+
+    <style name="ScoreTextViewStyle" parent="Widget.AppCompat.TextView">
         <item name="android:layout_width">30dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
         <item name="android:text">@string/score_placeholder</item>
-        <item name="android:textSize">@dimen/text_size_default</item>
+        <item name="android:textSize">@dimen/text_size_big</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">none</item>
-        <item name="android:autoSizeTextType">uniform</item>
-        <item name="android:autoSizeMinTextSize">@dimen/text_size_small</item>
-        <item name="android:autoSizeMaxTextSize">@dimen/text_size_default</item>
-        <item name="android:autoSizeStepGranularity">1sp</item>
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/text_color_black_selector</item>
     </style>
 
-    <style name="labelTextView" parent="Widget.AppCompat.TextView">
+    <style name="__LabelTextViewStyle" parent="Widget.AppCompat.TextView">
         <item name="android:textColor">@color/text_color_black_selector</item>
         <item name="android:gravity">start</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:textSize">@dimen/text_size_small</item>
-        <item name="android:autoSizeTextType">uniform</item>
-        <item name="android:autoSizeMinTextSize">@dimen/text_size_small</item>
-        <item name="android:autoSizeMaxTextSize">@dimen/text_size_default</item>
+        <!--        <item name="android:autoSizeTextType">uniform</item>-->
+        <!--        <item name="android:autoSizeMinTextSize">@dimen/text_size_small</item>-->
+        <!--        <item name="android:autoSizeMaxTextSize">@dimen/text_size_default</item>-->
     </style>
 
     <style name="dividerStyle">
@@ -131,6 +181,36 @@
         <item name="android:layout_marginHorizontal">2dp</item>
         <item name="android:layout_marginVertical">2dp</item>
         <item name="android:background">@android:color/darker_gray</item>
+    </style>
+
+    <style name="DialogRootLayoutStyle">
+        <item name="android:layout_width">@dimen/dialog_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minWidth">@dimen/dialog_width</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/score_board_primary_background</item>
+        <item name="android:padding">@dimen/dialog_padding</item>
+    </style>
+
+    <style name="ActionBarContainerStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">@dimen/dialog_action_margin</item>
+        <item name="android:layout_marginTop">@dimen/dialog_action_bar_marginTop</item>
+    </style>
+
+    <style name="ActionIconStyle" parent="@style/DefaultImageViewStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:contentDescription">@string/description_placeholder</item>
+    </style>
+
+    <style name="ActionIconStyleMarginStart" parent="@style/ActionIconStyle">
+        <item name="android:layout_marginStart">@dimen/dialog_action_margin</item>
+    </style>
+
+    <style name="ActionIconStyleMarginEnd" parent="@style/ActionIconStyle">
+        <item name="android:layout_marginEnd">@dimen/dialog_action_margin</item>
     </style>
 </resources>
 

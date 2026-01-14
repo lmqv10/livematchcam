@@ -40,7 +40,7 @@ class CameraSourceAdapter(
         binding.tvCameraSourceItem.text = cameraSourceItem.videoSourceKind.label
 
         val drawable = ContextCompat.getDrawable(context, cameraSourceItem.icon)
-        val iconSize = context.resources.getDimensionPixelSize(R.dimen.default_icon_size)
+        val iconSize = context.resources.getDimensionPixelSize(R.dimen.icon_size_default)
         drawable?.setBounds(0, 0, iconSize, iconSize)
         TextViewCompat.setCompoundDrawablesRelative(binding.tvCameraSourceItem, drawable, null, null, null)
 

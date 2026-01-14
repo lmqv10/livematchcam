@@ -41,7 +41,6 @@
                 android:padding="3dp"
                 android:gravity="end"
                 android:layout_gravity="center_vertical"
-                android:textSize="11sp"
                 android:text="@string/bitrate_placeholder" />
 
             <TextView
@@ -52,7 +51,6 @@
                 android:padding="3dp"
                 android:gravity="end"
                 android:layout_gravity="center_vertical"
-                android:textSize="11sp"
                 android:text="@string/fps_placeholder" />
         </LinearLayout>
     </LinearLayout>
@@ -91,7 +89,6 @@
                 android:gravity="center_horizontal"
                 android:background="@drawable/alpha_background"
                 android:layout_gravity="center_vertical"
-                android:textSize="11sp"
                 android:text="@string/resolution_placeholder" />
 
             <TextView
@@ -104,7 +101,6 @@
                 android:gravity="center_horizontal"
                 android:background="@drawable/alpha_background"
                 android:layout_gravity="center_vertical"
-                android:textSize="11sp"
                 android:text="@string/fps_placeholder" />
         </LinearLayout>
     </LinearLayout>

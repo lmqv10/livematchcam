@@ -21,6 +21,7 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.services.firebase.VolleyScore
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
 
@@ -52,14 +53,18 @@ class VolleyScoreBoardFragment : BaseScoreBoardFragment() {
             Pair(binding.homeScore5set, binding.awayScore5set),
         )
 
-        MatchRepository.homeTeam.observe(viewLifecycleOwner) { team ->
-            binding.homeTeam.text = team
-            onUpdateCallback?.refresh()
-        }
-
-        MatchRepository.guestTeam.observe(viewLifecycleOwner) { team ->
-            binding.awayTeam.text = team
-            onUpdateCallback?.refresh()
+        launchOnStarted {
+            combine(
+                MatchRepository.sport,
+                MatchRepository.homeTeam,
+                MatchRepository.guestTeam)
+            { sport, homeTeam, guestTeam -> Triple(sport, homeTeam, guestTeam)
+            }.distinctUntilChanged()
+                .collect { (sport, homeTeam, guestTeam) ->
+                    binding.homeTeam.text = homeTeam
+                    binding.awayTeam.text = guestTeam
+                    onUpdateCallback?.refresh()
+                }
         }
 
         launchOnStarted {

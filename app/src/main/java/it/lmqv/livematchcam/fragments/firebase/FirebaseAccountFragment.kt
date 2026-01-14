@@ -10,8 +10,9 @@ import androidx.fragment.app.viewModels
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentFirebaseAccountBinding
 import it.lmqv.livematchcam.extensions.launchOnCreated
-import it.lmqv.livematchcam.extensions.showEditStringDialog
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.handlers.DialogContext
+import it.lmqv.livematchcam.handlers.DialogHandler
 import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,13 +44,12 @@ class FirebaseAccountFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.accountName.setOnClickListener {
-            val sourceName = binding.accountName.text.toString()
-            requireContext().showEditStringDialog(R.string.account, sourceName, arrayOf()) { updatedAccountName ->
-                binding.accountName.text = updatedAccountName
-
-                if (updatedAccountName.isNotEmpty()) {
-                    firebaseAccountViewModel.signIn(updatedAccountName)
-                    toast(getString(R.string.logged_in, updatedAccountName))
+            val accountName = binding.accountName.text.toString()
+            DialogHandler.editText(DialogContext(this, binding.accountName,  R.string.account, accountName)) {
+                binding.accountName.text = it
+                if (it.isNotEmpty()) {
+                    firebaseAccountViewModel.signIn(it)
+                    toast(getString(R.string.logged_in, it))
                 } else {
                     firebaseAccountViewModel.signOut {
                         CoroutineScope(Dispatchers.Main).launch {
@@ -61,10 +61,10 @@ class FirebaseAccountFragment : Fragment() {
         }
 
         binding.accountKey.setOnClickListener {
-            val sourceKey = binding.accountKey.text.toString()
-            requireContext().showEditStringDialog(R.string.account_key, sourceKey, arrayOf()) { updatedAccountKey ->
-                binding.accountKey.text = updatedAccountKey
-                firebaseAccountViewModel.setAccountKey(updatedAccountKey)
+            val accountKey = binding.accountKey.text.toString()
+            DialogHandler.editText(DialogContext(this, binding.accountName,  R.string.account_key, accountKey)) {
+                binding.accountKey.text = it
+                firebaseAccountViewModel.setAccountKey(it)
             }
         }
 

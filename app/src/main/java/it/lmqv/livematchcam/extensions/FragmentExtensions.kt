@@ -41,3 +41,35 @@ fun Fragment.launchOnResumed(delegate: suspend () -> Unit) {
         }
     }
 }
+
+//        fragment.showEditStringDialogForView(
+//            view = view,
+//            title = R.string.team_name,
+//            initialValue = initialValue,
+//            sport = sport
+//        ) { updatedTeamName ->
+//
+//        }
+
+//fun Fragment.showEditStringDialogForView(
+//    view: View,
+//    @StringRes title: Int,
+//    initialValue: String,
+//    sport: Sports? = null,
+//    onResult: (String) -> Unit
+//) {
+//    val requestKey = "edit_dialog_${view.id}_${System.identityHashCode(view)}"
+//
+//    childFragmentManager.setFragmentResultListener(requestKey, viewLifecycleOwner)
+//    { _, bundle ->
+//        val result = bundle.getString(EditStringDialogFragment.RESULT_VALUE) ?: return@setFragmentResultListener
+//        onResult(result)
+//    }
+//
+//    EditStringDialogFragment.newInstance(
+//        title = title,
+//        initialValue = initialValue,
+//        sport = sport,
+//        requestKey = requestKey
+//    ).show(childFragmentManager, "EditDialog_$requestKey")
+//}

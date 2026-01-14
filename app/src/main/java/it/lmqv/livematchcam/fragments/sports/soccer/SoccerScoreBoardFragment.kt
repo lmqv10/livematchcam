@@ -16,10 +16,12 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
+import it.lmqv.livematchcam.factories.TeamNameInputFiltersFactory
 import it.lmqv.livematchcam.services.firebase.SoccerScore
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.Command
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
@@ -42,14 +44,18 @@ class SoccerScoreBoardFragment : BaseScoreBoardFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        MatchRepository.homeTeam.observe(viewLifecycleOwner) { team ->
-            binding.homeTeam.text = team
-            onUpdateCallback?.refresh()
-        }
-
-        MatchRepository.guestTeam.observe(viewLifecycleOwner) { team ->
-            binding.awayTeam.text = team
-            onUpdateCallback?.refresh()
+        launchOnStarted {
+            combine(
+                MatchRepository.sport,
+                MatchRepository.homeTeam,
+                MatchRepository.guestTeam)
+            { sport, homeTeam, guestTeam -> Triple(sport, homeTeam, guestTeam)
+            }.distinctUntilChanged()
+                .collect { (sport, homeTeam, guestTeam) ->
+                binding.homeTeam.text = homeTeam
+                binding.awayTeam.text = guestTeam
+                onUpdateCallback?.refresh()
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

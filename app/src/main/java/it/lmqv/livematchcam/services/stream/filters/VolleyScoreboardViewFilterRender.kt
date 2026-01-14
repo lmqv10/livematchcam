@@ -1,21 +1,18 @@
 package it.lmqv.livematchcam.services.stream.filters
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyScoreBoardBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
+import it.lmqv.livematchcam.extensions.equalizeMaxWidthWith
 import it.lmqv.livematchcam.extensions.loadDrawableOffscreen
 import it.lmqv.livematchcam.extensions.setShirtByColor
+import it.lmqv.livematchcam.extensions.wrapLayout
 import it.lmqv.livematchcam.services.firebase.IScore
 import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.services.firebase.SetScore
@@ -56,6 +53,9 @@ class VolleyScoreboardViewFilterRender(
             //Logd("VolleyScoreboardViewFilterRender::match $match")
             this.handleHomeTeam(match)
             this.handleAwayTeam(match)
+
+            this.updateTeamsView()
+
             super.render()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -97,11 +97,11 @@ class VolleyScoreboardViewFilterRender(
                     val drawable =
                         loadDrawableOffscreen(applicationContext, match.homeLogo, R.drawable.shield)
                     binding.homeLogo.setImageDrawable(drawable)
-                    render()
+                    super.render()
                 }
             } else {
                 binding.homeLogo.visibility = View.GONE
-                binding.homeColorBar.visibility = View.GONE
+                binding.homeColorBar.visibility = View.INVISIBLE
                 binding.homeShirt.visibility = View.VISIBLE
                 binding.homeShirt.setShirtByColor(homeColorHex)
             }
@@ -131,11 +131,11 @@ class VolleyScoreboardViewFilterRender(
                         R.drawable.shield
                     )
                     binding.awayLogo.setImageDrawable(drawable)
-                    render()
+                    super.render()
                 }
             } else {
                 binding.awayLogo.visibility = View.GONE
-                binding.awayColorBar.visibility = View.GONE
+                binding.awayColorBar.visibility = View.INVISIBLE
                 binding.awayShirt.visibility = View.VISIBLE
                 binding.awayShirt.setShirtByColor(awayColorHex)
             }
@@ -185,8 +185,8 @@ class VolleyScoreboardViewFilterRender(
 
         if (this._previousSetsSize != setsSize) {
             this._previousSetsSize = setsSize
+            updateView()
         }
-        updateView()
     }
 
     private fun updateLeagueDescription(description: String) {
@@ -204,17 +204,17 @@ class VolleyScoreboardViewFilterRender(
         }
     }
 
-    private fun updateView() {
-        //Logd("VolleyScoreboardViewFilterRender :: updateMeasure")
-        binding.scoreBoard.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
+    private fun updateTeamsView() {
+        //Logd("VolleyScoreboardViewFilterRender :: updateTeamsView")
+        with(binding) {
+            homeTeam.equalizeMaxWidthWith(awayTeam)
+            homeTeamBar.equalizeMaxWidthWith(awayTeamBar)
+            updateView()
+        }
+    }
 
-        binding.scoreBoard.layout(
-            binding.scoreBoard.left,
-            binding.scoreBoard.top,
-            binding.scoreBoard.left + binding.scoreBoard.measuredWidth,
-            binding.scoreBoard.top + binding.scoreBoard.measuredHeight)
+    private fun updateView() {
+        //Logd("VolleyScoreboardViewFilterRender :: updateView")
+        binding.scoreBoard.wrapLayout()
     }
 }

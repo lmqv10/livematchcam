@@ -127,7 +127,6 @@
                 android:text="@string/period_placeholder"
                 android:textColor="@color/black"
                 android:background="@drawable/score_board_lightgray_background"
-                android:textSize="12sp"
                 android:layout_marginVertical="1dp"
                 android:gravity="center" />
 
@@ -163,7 +162,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/time_placeholder"
                 android:textColor="@color/DARKER_GRAY"
-                android:textSize="12sp"
                 android:gravity="center" />
 
         </LinearLayout>

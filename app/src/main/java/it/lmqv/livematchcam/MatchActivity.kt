@@ -12,9 +12,6 @@ import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowInsets
-import android.view.WindowInsetsController
-import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
@@ -22,7 +19,6 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -61,7 +57,7 @@ interface INavigateDrawerActivity {
     fun navigateAsStartActivity(activityClass: Class<out Activity>)
 }
 
-class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
+class MatchActivity : BaseActivity(), INavigateDrawerActivity {
 
     private val googleAccountViewModel: GoogleAccountViewModel by viewModels()
     private val firebaseAccountViewModel: FirebaseAccountViewModel by viewModels()
@@ -103,40 +99,10 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
 
         floatingActionsViewModel.setNavigator(this)
 
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        if (Build.VERSION.SDK_INT >= VERSION_CODES.R) {
-            @Suppress("DEPRECATION")
-            window.setDecorFitsSystemWindows(false)
-            window.insetsController?.let { controller ->
-                controller.hide(WindowInsets.Type.systemBars())
-                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN
-            )
-
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = (
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            )
-        }
-
         setSupportActionBar(binding.customToolbar.toolbar)
         if (supportActionBar != null) {
             supportActionBar!!.setDisplayShowTitleEnabled(false) // Hide default title if needed
         }
-
-        /*if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.slide_in, R.anim.slide_out)
-        } else {
-            @Suppress("DEPRECATION")
-            overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
-        }*/
 
         headerView = binding.matchNavView.getHeaderView(0)
         headerView.setOnClickListener {
@@ -157,7 +123,7 @@ class MatchActivity : AppCompatActivity(), INavigateDrawerActivity {
                         actions.forEachIndexed { index, action ->
                             val imageView = AnimateImageVIew(
                                 ContextThemeWrapper(this@MatchActivity, R.style.AppTheme),
-                                null, 0, R.style.defaultImageViewStyle
+                                null, 0, R.style.DefaultImageViewStyle
                             ).apply {
                                 id = action.id
                                 setImageResource(action.iconRes)

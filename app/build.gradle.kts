@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.safeargs.kotlin)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -53,8 +54,6 @@ android {
             excludes += "META-INF/NOTICE.txt"
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
-    }
-    packagingOptions {
         jniLibs {
             pickFirsts += setOf(
                 "lib/x86/libUVCCamera.so",

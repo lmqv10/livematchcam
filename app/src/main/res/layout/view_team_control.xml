@@ -32,10 +32,16 @@
 
         <TextView
             android:id="@+id/text_team_name"
-            style="@style/editTextView"
+            style="@style/EditTextViewStyle"
             android:layout_width="0dp"
             android:layout_weight="3"
             android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="1"
+            android:scrollHorizontally="true"
+            android:focusable="false"
             android:text="@string/hint_home_team"/>
 
     </LinearLayout>

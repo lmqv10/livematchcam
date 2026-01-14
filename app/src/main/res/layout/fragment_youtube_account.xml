@@ -33,7 +33,6 @@
             android:layout_weight="8"
             android:gravity="start|center_vertical"
             android:padding="5dp"
-            android:textSize="18sp"
             android:hint="@string/sign_in"
             android:drawablePadding="5dp"
             app:drawableStartCompat="@drawable/ic_youtube"
@@ -41,7 +40,7 @@
 
         <ImageView
             android:id="@+id/yt_sign_in"
-            style="@style/largeImageViewStyle"
+            style="@style/LargeImageViewStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -51,7 +50,7 @@
 
         <ImageView
             android:visibility="gone"
-            style="@style/largeImageViewStyle"
+            style="@style/LargeImageViewStyle"
             android:id="@+id/yt_sign_out"
             android:layout_width="0dp"
             android:layout_height="match_parent"

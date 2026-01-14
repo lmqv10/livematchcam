@@ -11,7 +11,7 @@ import it.lmqv.livematchcam.dialogs.LogosRecentsDialog
 import it.lmqv.livematchcam.databinding.ViewTeamControlBinding
 import it.lmqv.livematchcam.extensions.setFillAndBorder
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
-import it.lmqv.livematchcam.extensions.showEditStringDialog
+import it.lmqv.livematchcam.factories.Sports
 
 class TeamControlView @JvmOverloads constructor(
     context: Context,
@@ -21,10 +21,13 @@ class TeamControlView @JvmOverloads constructor(
     private var _binding: ViewTeamControlBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var sport: Sports
+
     var onPrimaryColorsChanged: ((Int) -> Unit)? = null
     var onSecondaryColorsChanged: ((Int) -> Unit)? = null
     var onLogoURLChanged: ((String) -> Unit)? = null
-    var onTeamNameChanged: ((String) -> Unit)? = null
+    //var onTeamNameChanged: ((String) -> Unit)? = null
+    var onEditTeamName: ((String, Sports) -> Unit)? = null
 
     init {
         orientation = VERTICAL
@@ -44,12 +47,10 @@ class TeamControlView @JvmOverloads constructor(
                 }
             }
 
+        binding.textTeamName.isSelected = true
         binding.textTeamName.setOnClickListener {
             val sourceTeamName = binding.textTeamName.text.toString()
-            context.showEditStringDialog(R.string.team_name, sourceTeamName) { updatedTeamName ->
-                binding.textTeamName.text = updatedTeamName
-                onTeamNameChanged?.invoke(updatedTeamName)
-            }
+            onEditTeamName?.invoke(sourceTeamName, sport)
         }
 
         binding.imageLogo.setOnClickListener {
@@ -58,7 +59,6 @@ class TeamControlView @JvmOverloads constructor(
                 onLogoURLChanged?.invoke(updatedLogoUrl)
             }
             dialog.show()
-
         }
 
         binding.primaryColor.setOnClickListener {
@@ -91,7 +91,8 @@ class TeamControlView @JvmOverloads constructor(
         }
     }
 
-    fun setTeamName(name: String) {
+    fun setTeamName(name: String, sport: Sports) {
+        this.sport = sport
         if (binding.textTeamName.text != name) {
             binding.textTeamName.text = name
         }

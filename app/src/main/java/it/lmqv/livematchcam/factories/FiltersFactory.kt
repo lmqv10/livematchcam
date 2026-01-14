@@ -22,7 +22,7 @@ object FiltersFactory {
             Sports.VOLLEY ->
                 listOf(
                     VolleyScoreboardViewFilterRender(applicationContext,
-                        filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT)
+                        filterDescriptor = FilterDescriptor(maxFactor = 20f, translateTo = TranslateTo.TOP_LEFT)
                     ),
                     OverlayFilterRender(applicationContext,
                         sourceDescriptor = SourceDescriptor(MatchRepository.spotBannerURL, MatchRepository.spotBannerVisible),

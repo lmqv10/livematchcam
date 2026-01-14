@@ -29,7 +29,6 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:gravity="center"
-            android:textSize="@dimen/text_size_smallest"
             android:text="@string/hint_sport"
             android:textColor="@color/appColorSecondary"
             android:layout_marginBottom="5dp"

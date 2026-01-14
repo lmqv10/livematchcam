@@ -31,7 +31,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/live_name_placeholder"
-                android:textSize="16sp"
                 android:textColor="@color/secondary_dark" />
 
             <TextView
@@ -41,7 +40,6 @@
                 android:gravity="end"
                 android:text="@string/hint_key"
                 android:textColor="@color/black"
-                android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent" />
 
         </LinearLayout>

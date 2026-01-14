@@ -140,7 +140,7 @@
 
             <TextView
                 android:id="@+id/text_label_title"
-                style="@style/labelTextView"
+                style="@style/DefaultTextViewStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/label_event_title"
@@ -151,7 +151,7 @@
 
             <TextView
                 android:id="@+id/text_title"
-                style="@style/editTextView"
+                style="@style/EditTextViewStyle"
                 android:gravity="start"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -164,7 +164,7 @@
 
             <it.lmqv.livematchcam.views.AnimateImageVIew
                 android:id="@+id/iv_title_clear"
-                style="@style/smallImageViewStyle"
+                style="@style/SmallImageViewStyle"
                 android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_eraser"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -181,7 +181,7 @@
 
             <TextView
                 android:id="@+id/text_label_livestream"
-                style="@style/labelTextView"
+                style="@style/DefaultTextViewStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/live_stream"
@@ -212,7 +212,7 @@
 
             <it.lmqv.livematchcam.views.AnimateImageVIew
                 android:id="@+id/iv_delete_live_stream"
-                style="@style/largeImageViewStyle"
+                style="@style/LargeImageViewStyle"
                 android:layout_gravity="end|bottom"
                 android:layout_marginEnd="10dp"
                 android:contentDescription="@string/description_placeholder"
@@ -220,7 +220,7 @@
 
             <it.lmqv.livematchcam.views.AnimateImageVIew
                 android:id="@+id/iv_create_live_stream"
-                style="@style/largeImageViewStyle"
+                style="@style/LargeImageViewStyle"
                 android:layout_gravity="end|bottom"
                 android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_save"/>

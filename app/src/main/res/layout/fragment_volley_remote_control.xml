@@ -62,7 +62,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/black"
                 android:text= "@string/score_placeholder"/>
@@ -114,7 +113,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/black"
                 android:text= "@string/first_set_placeholder"/>
@@ -124,7 +122,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/black"
                 android:text= "@string/set_placeholder"/>
@@ -215,7 +212,6 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
-                android:textSize="20sp"
                 android:minWidth="40dp"
                 android:textColor="@color/black"
                 android:text= "@string/score_placeholder"/>
