@@ -5,7 +5,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.sports.Sports
 
 object FirebaseDataService {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()

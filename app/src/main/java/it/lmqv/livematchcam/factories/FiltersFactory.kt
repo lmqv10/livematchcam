@@ -3,7 +3,9 @@ package it.lmqv.livematchcam.factories
 import android.content.Context
 import com.pedro.encoder.input.gl.render.filters.`object`.BaseObjectFilterRender
 import com.pedro.encoder.utils.gl.TranslateTo
+import it.lmqv.livematchcam.factories.sports.Sports
 import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.services.stream.filters.BasketScoreboardViewFilterRender
 import it.lmqv.livematchcam.services.stream.filters.DimensionDescriptor
 import it.lmqv.livematchcam.services.stream.filters.FilterDescriptor
 import it.lmqv.livematchcam.services.stream.filters.OverlayFilterRender
@@ -18,6 +20,16 @@ object FiltersFactory {
                 listOf(
                     SoccerScoreboardViewFilterRender(applicationContext,
                         filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT))
+                )
+            Sports.BASKET ->
+                listOf(
+                    BasketScoreboardViewFilterRender(applicationContext,
+                        filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT)),
+                    OverlayFilterRender(applicationContext,
+                        sourceDescriptor = SourceDescriptor(MatchRepository.spotBannerURL, MatchRepository.spotBannerVisible),
+                        filterDescriptor = FilterDescriptor(maxFactor = 20f, translateTo = TranslateTo.TOP_RIGHT),
+                        dimensionDescriptor = DimensionDescriptor()
+                    ),
                 )
             Sports.VOLLEY ->
                 listOf(

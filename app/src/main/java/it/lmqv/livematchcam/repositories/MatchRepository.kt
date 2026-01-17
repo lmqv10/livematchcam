@@ -1,10 +1,8 @@
 package it.lmqv.livematchcam.repositories
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.toArgbHex
-import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.sports.Sports
 import it.lmqv.livematchcam.services.firebase.IScore
 import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.strategies.IMatchSyncStrategy

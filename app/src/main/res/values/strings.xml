@@ -68,6 +68,7 @@
     <string name="streamin_time">00:00:00</string>
 
     <string name="sport_soccer">Soccer</string>
+    <string name="sport_basket">Basket</string>
     <string name="sport_volley">Volley</string>
     <!--filters-->
     <string name="grey_scale">Grey scale</string>

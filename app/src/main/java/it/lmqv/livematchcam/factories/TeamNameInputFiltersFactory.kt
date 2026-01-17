@@ -1,6 +1,7 @@
 package it.lmqv.livematchcam.factories
 
 import android.text.InputFilter
+import it.lmqv.livematchcam.factories.sports.Sports
 
 object TeamNameInputFiltersFactory {
     private var shortLength = 3
@@ -12,6 +13,9 @@ object TeamNameInputFiltersFactory {
                 InputFilter.LengthFilter(getMaxLength(sport)),
                 InputFilter.AllCaps()
             )
+            Sports.BASKET -> arrayOf<InputFilter>(
+                InputFilter.LengthFilter(getMaxLength(sport)),
+            )
             Sports.VOLLEY -> arrayOf<InputFilter>(
                 InputFilter.LengthFilter(getMaxLength(sport)),
             )
@@ -21,6 +25,7 @@ object TeamNameInputFiltersFactory {
     fun getMaxLength(sport: Sports) : Int {
         return when (sport) {
             Sports.SOCCER -> shortLength
+            Sports.BASKET -> shortLength
             Sports.VOLLEY -> normalLength
         }
     }

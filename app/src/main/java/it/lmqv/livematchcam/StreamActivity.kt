@@ -22,7 +22,7 @@ import it.lmqv.livematchcam.extensions.launchOnCreated
 import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.extensions.toOptionItems
 import it.lmqv.livematchcam.extensions.toast
-import it.lmqv.livematchcam.factories.SportsFactory
+import it.lmqv.livematchcam.factories.sports.SportsFactory
 import it.lmqv.livematchcam.fragments.status.StatusContainerFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.stream.IStreamService

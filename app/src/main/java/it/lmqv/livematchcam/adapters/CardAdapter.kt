@@ -11,7 +11,7 @@ import androidx.annotation.StringRes
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.sports.Sports
 
 data class CardItem(
     val sport: Sports,

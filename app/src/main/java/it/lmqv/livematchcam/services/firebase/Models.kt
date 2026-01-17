@@ -1,6 +1,6 @@
 package it.lmqv.livematchcam.services.firebase
 
-import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.sports.Sports
 
 /*data class Accounts(
     val accounts: Map<String, FirebaseAccount>
@@ -85,6 +85,13 @@ interface IScore {
 class UnknownScore(override val command: String = "") : IScore
 
 data class SoccerScore (
+    val home: Long = 0,
+    val away: Long = 0,
+    val period: String = "1T",
+    override val command: String = ""
+) : IScore
+
+data class BasketScore(
     val home: Long = 0,
     val away: Long = 0,
     val period: String = "1T",

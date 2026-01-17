@@ -4,7 +4,7 @@ import android.util.Range
 import android.view.SurfaceView
 import com.pedro.common.ConnectChecker
 import com.pedro.library.util.FpsListener
-import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.sports.Sports
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.flow.StateFlow
 

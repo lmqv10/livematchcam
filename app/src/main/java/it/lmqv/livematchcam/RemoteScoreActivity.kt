@@ -5,7 +5,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.databinding.ActivityRemoteScoreBinding
-import it.lmqv.livematchcam.factories.SportsFactory
+import it.lmqv.livematchcam.factories.sports.SportsFactory
 import it.lmqv.livematchcam.fragments.sports.BaseScoreBoardFragment
 import it.lmqv.livematchcam.fragments.sports.IRemoteControlFragment
 import it.lmqv.livematchcam.fragments.sports.IScoreBoardFragment

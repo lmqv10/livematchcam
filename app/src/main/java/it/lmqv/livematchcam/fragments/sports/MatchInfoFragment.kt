@@ -61,13 +61,6 @@ class MatchInfoFragment : Fragment() {
             }
         }
 
-//        MatchRepository.homeTeam.observe(viewLifecycleOwner) { homeTeam ->
-//            binding.homeTeamControl.setTeamName(homeTeam)
-//        }
-//        MatchRepository.guestTeam.observe(viewLifecycleOwner) { guestTeam ->
-//            binding.guestTeamControl.setTeamName(guestTeam)
-//        }
-
         launchOnStarted {
             MatchRepository.homeLogo.collect { logoUrl ->
                 binding.homeTeamControl.setLogoUrl(logoUrl)
@@ -96,9 +89,6 @@ class MatchInfoFragment : Fragment() {
             }
         }
 
-//        binding.homeTeamControl.onTeamNameChanged = { updatedTeamName ->
-//            MatchRepository.setHomeTeam(updatedTeamName)
-//        }
         binding.homeTeamControl.onLogoURLChanged = { updatedLogoUrl ->
             MatchRepository.setHomeLogo(updatedLogoUrl)
         }
@@ -112,9 +102,6 @@ class MatchInfoFragment : Fragment() {
             }
         }
 
-//        binding.guestTeamControl.onTeamNameChanged = { updatedTeamName ->
-//            MatchRepository.setGuestTeam(updatedTeamName)
-//        }
         binding.guestTeamControl.onLogoURLChanged = { updatedLogoUrl ->
             MatchRepository.setGuestLogo(updatedLogoUrl)
         }

@@ -5,7 +5,7 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import it.lmqv.livematchcam.dialogs.EditStringDialogFragment
-import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.sports.Sports
 import kotlinx.parcelize.Parcelize
 
 data class DialogContext(

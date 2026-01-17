@@ -27,7 +27,7 @@ import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.CameraResolutionsFactory
 import it.lmqv.livematchcam.factories.FiltersFactory
-import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.sports.Sports
 import it.lmqv.livematchcam.factories.VideoSourceFactory
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.StreamConfigurationRepository

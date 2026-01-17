@@ -6,13 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.adapters.CardAdapter
-import it.lmqv.livematchcam.adapters.CardItem
 import it.lmqv.livematchcam.databinding.FragmentSportInfoBinding
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
-import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.sports.SportsFactory
 import it.lmqv.livematchcam.repositories.MatchRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
@@ -24,23 +22,10 @@ class SportInfoFragment : Fragment() {
         fun newInstance() = SportInfoFragment()
     }
 
-    private lateinit var sportCollectJob : Job
-
-    private val cardItems = listOf(
-        CardItem(
-            sport = Sports.SOCCER,
-            description = R.string.sport_soccer,
-            icon = R.drawable.sport_soccer
-        ),
-        CardItem(
-            sport = Sports.VOLLEY,
-            description = R.string.sport_volley,
-            icon = R.drawable.sport_volley
-        )
-    )
-
     private var _binding: FragmentSportInfoBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var sportCollectJob : Job
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,6 +37,8 @@ class SportInfoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        var cardItems = SportsFactory.getSports()
 
         this.sportCollectJob = viewLifecycleOwner.lifecycleScope.launch {
             MatchRepository.sport.collectLatest { sport ->

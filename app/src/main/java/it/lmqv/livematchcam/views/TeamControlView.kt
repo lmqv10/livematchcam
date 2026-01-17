@@ -11,7 +11,7 @@ import it.lmqv.livematchcam.dialogs.LogosRecentsDialog
 import it.lmqv.livematchcam.databinding.ViewTeamControlBinding
 import it.lmqv.livematchcam.extensions.setFillAndBorder
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
-import it.lmqv.livematchcam.factories.Sports
+import it.lmqv.livematchcam.factories.sports.Sports
 
 class TeamControlView @JvmOverloads constructor(
     context: Context,
