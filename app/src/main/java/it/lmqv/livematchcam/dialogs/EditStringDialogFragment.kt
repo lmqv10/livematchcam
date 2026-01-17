@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.dialogs
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -67,13 +68,7 @@ class EditStringDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
-
-        setupViews()
-        showKeyboard()
-    }
-
-    private fun setupViews() {
+        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         with(binding) {
             tvTitle.text = getString(editStringDialogContext.resTitleId)
@@ -98,35 +93,36 @@ class EditStringDialogFragment : DialogFragment() {
             }
 
             cancelButton.setOnClickListener {
-                dismiss()
+                hideKeyboardAndDismiss()
             }
             confirmButton.setOnClickListener {
                 saveAndDismiss()
             }
+
+            etInput.requestFocus()
+            etInput.postDelayed({
+                val imm = getSystemService(requireContext(), InputMethodManager::class.java)
+                imm?.showSoftInput(etInput, InputMethodManager.SHOW_IMPLICIT)
+            }, 100)
         }
     }
 
     private fun saveAndDismiss() {
         val newValue = binding.etInput.text.toString().trim()
         parentFragmentManager.setFragmentResult(editStringDialogContext.requestKey, bundleOf(RESULT_VALUE to newValue))
-        dismiss()
+
+        hideKeyboardAndDismiss()
     }
 
-    private fun showKeyboard() {
-        binding.etInput.requestFocus()
-        binding.etInput.postDelayed({
-            val imm = getSystemService(requireContext(), InputMethodManager::class.java)
-            imm?.showSoftInput(binding.etInput, InputMethodManager.SHOW_IMPLICIT)
-        }, 100)
-    }
-
-    private fun hideKeyboard() {
+    private fun hideKeyboardAndDismiss() {
         val imm = getSystemService(requireContext(), InputMethodManager::class.java)
         imm?.hideSoftInputFromWindow(binding.etInput.windowToken, 0)
+
+        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+        dismissAllowingStateLoss()
     }
 
     override fun onDestroyView() {
-        hideKeyboard()
         super.onDestroyView()
         _binding = null
     }
