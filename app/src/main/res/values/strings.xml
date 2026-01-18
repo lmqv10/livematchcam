@@ -142,7 +142,9 @@
     <string name="date_placeholder">01/01/2025 10:00</string>
     <string name="time_placeholder">00:00</string>
     <string name="period_placeholder">1T</string>
+    <string name="quarter_placeholder">1Q</string>
     <string name="score_placeholder">0</string>
+    <string name="long_score_placeholder">100</string>
     <string name="degree_placeholder">0°</string>
     <string name="bitrate_placeholder">0 mb/s</string>
     <string name="fps_placeholder">0 fps</string>

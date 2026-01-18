@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="top"
+    android:layout_gravity="bottom"
     tools:context=".fragments.sports.volley.VolleyRemoteControlFragment">
 
     <LinearLayout
@@ -16,32 +16,6 @@
         android:background="@drawable/alpha_background"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
-
-<!--        <LinearLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="30dp"-->
-<!--            android:orientation="horizontal"-->
-<!--            android:layout_marginBottom="5dp"-->
-<!--            android:weightSum="4">-->
-
-<!--            <ImageView-->
-<!--                android:id="@+id/home_color"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_weight="1"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:gravity="start"-->
-<!--                android:src="@drawable/shirt_layers"-->
-<!--                android:contentDescription="@string/description_placeholder" />-->
-
-<!--            <TextView-->
-<!--                android:id="@+id/home_team"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_weight="3"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:gravity="center"-->
-<!--                android:textColor="@color/black"-->
-<!--                android:text="@string/home_team"/>-->
-<!--        </LinearLayout>-->
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -232,6 +206,15 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+<!--    <FrameLayout-->
+<!--        android:layout_marginTop="5dp"-->
+<!--        android:id="@+id/banners_container"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/control_home" />-->
+
+<!--
     <LinearLayout
         android:id="@+id/spot_banner"
         android:layout_width="match_parent"
@@ -305,4 +288,5 @@
                 tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     </LinearLayout>
+-->
 </androidx.constraintlayout.widget.ConstraintLayout>

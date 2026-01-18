@@ -6,10 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyRemoteControlBinding
 import it.lmqv.livematchcam.extensions.Loge
@@ -20,9 +18,10 @@ import it.lmqv.livematchcam.fragments.sports.BaseRemoteControlFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.VolleyScoreViewModel
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
+import androidx.fragment.app.Fragment
+import it.lmqv.livematchcam.fragments.sports.banners.BannersControlFragment
 import it.lmqv.livematchcam.handlers.DialogContext
 import it.lmqv.livematchcam.handlers.DialogHandler
 import kotlinx.coroutines.flow.combine
@@ -45,6 +44,12 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentVolleyRemoteControlBinding.inflate(inflater, container, false)
+
+//        childFragmentManager
+//            .beginTransaction()
+//            .replace(binding.bannersContainer.id, BannersControlFragment())
+//            .commit()
+
         return binding.root
     }
 
@@ -105,7 +110,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                 }
             }
         }
-
+/*
         lifecycleScope.launch {
             MatchRepository.spotBannerVisible.collect { isVisible ->
                 binding.spotBannerSwitch.isChecked = isVisible
@@ -207,7 +212,7 @@ class VolleyRemoteControlFragment() : BaseRemoteControlFragment() {
                 }
             }
         }
-
+*/
         viewLifecycleOwner.lifecycleScope.launch {
             volleyScoreViewModel.liveScore.collectLatest { liveScore ->
                 //Logd("VolleyControlBar::liveScore.collectLatest::$liveScore")

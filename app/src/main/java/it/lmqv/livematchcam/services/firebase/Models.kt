@@ -94,7 +94,7 @@ data class SoccerScore (
 data class BasketScore(
     val home: Long = 0,
     val away: Long = 0,
-    val period: String = "1T",
+    val period: String = "1Q",
     override val command: String = ""
 ) : IScore
 

@@ -19,6 +19,7 @@ import it.lmqv.livematchcam.databinding.FragmentBasketRemoteControlBinding
 import it.lmqv.livematchcam.dialogs.TimePickerDialog
 import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.parseTimeToSeconds
+import it.lmqv.livematchcam.fragments.sports.banners.BannersControlFragment
 import it.lmqv.livematchcam.handlers.DialogContext
 import it.lmqv.livematchcam.handlers.DialogHandler
 import it.lmqv.livematchcam.services.counter.CounterService
@@ -43,6 +44,12 @@ class BasketRemoteControlFragment : BaseRemoteControlFragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentBasketRemoteControlBinding.inflate(inflater, container, false)
+
+//        childFragmentManager
+//            .beginTransaction()
+//            .replace(binding.bannersContainer.id, BannersControlFragment())
+//            .commit()
+
         return binding.root
     }
 
@@ -121,23 +128,31 @@ class BasketRemoteControlFragment : BaseRemoteControlFragment() {
         }
 
         binding.homeScoreMinus.setOnClickListener {
-            //Logd("SoccerRemoteControlBar::homeScoreMinus")
             basketScoreViewModel.incrementHomeScore(-1)
         }
 
         binding.homeScoreAdd.setOnClickListener {
-            //Logd("SoccerRemoteControlBar::homeScoreAdd")
             basketScoreViewModel.incrementHomeScore()
+        }
+        binding.homeScoreAddTwo.setOnClickListener {
+            basketScoreViewModel.incrementHomeScore(2)
+        }
+        binding.homeScoreAddThree.setOnClickListener {
+            basketScoreViewModel.incrementHomeScore(3)
         }
 
         binding.awayScoreMinus.setOnClickListener {
-            //Logd("SoccerRemoteControlBar::awayScoreMinus")
             basketScoreViewModel.incrementGuestScore(-1)
         }
 
         binding.awayScoreAdd.setOnClickListener {
-            //Logd("SoccerRemoteControlBar::awayScoreAdd")
             basketScoreViewModel.incrementGuestScore()
+        }
+        binding.awayScoreAddTwo.setOnClickListener {
+            basketScoreViewModel.incrementGuestScore(2)
+        }
+        binding.awayScoreAddThree.setOnClickListener {
+            basketScoreViewModel.incrementGuestScore(3)
         }
 
         binding.homeTeamControl.onEditTeamName = { teamName, sport ->
@@ -205,19 +220,6 @@ class BasketRemoteControlFragment : BaseRemoteControlFragment() {
 
                 binding.matchTime.text = formatTime(seconds)
             }
-        }
-
-        binding.zoomIn.setOnClickListener {
-            binding.currentZoom.text = getString(R.string.zoom_in)
-            basketScoreViewModel.setCommand(Command.ZOOM_IN)
-        }
-        binding.zoomDefault.setOnClickListener {
-            binding.currentZoom.text = getString(R.string.zoom_none)
-            basketScoreViewModel.setCommand(Command.ZOOM_DEFAULT)
-        }
-        binding.zoomOut.setOnClickListener {
-            binding.currentZoom.text = getString(R.string.zoom_out)
-            basketScoreViewModel.setCommand(Command.ZOOM_OUT)
         }
     }
 

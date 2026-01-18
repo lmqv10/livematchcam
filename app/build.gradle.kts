@@ -17,7 +17,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 27
         versionCode = 1
-        versionName = "4.3.11"
+        versionName = "4.4"
         manifestPlaceholders["appAuthRedirectScheme"] = "it.lmqv.livematchcam"
     }
 

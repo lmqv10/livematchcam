@@ -29,11 +29,11 @@ object SportsFactory {
                 description = R.string.sport_soccer,
                 icon = R.drawable.sport_soccer
             ),
-//            CardItem(
-//                sport = Sports.BASKET,
-//                description = R.string.sport_basket,
-//                icon = R.drawable.sport_basket
-//            ),
+            CardItem(
+                sport = Sports.BASKET,
+                description = R.string.sport_basket,
+                icon = R.drawable.sport_basket
+            ),
             CardItem(
                 sport = Sports.VOLLEY,
                 description = R.string.sport_volley,

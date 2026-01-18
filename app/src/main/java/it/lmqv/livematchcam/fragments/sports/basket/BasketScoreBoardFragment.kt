@@ -13,7 +13,7 @@ import it.lmqv.livematchcam.fragments.sports.BaseScoreBoardFragment
 import kotlinx.coroutines.flow.combine
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.lifecycleScope
-import it.lmqv.livematchcam.databinding.FragmentBasketScoreBoardLightBinding
+import it.lmqv.livematchcam.databinding.FragmentBasketScoreBoardBinding
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.repositories.MatchRepository
@@ -29,14 +29,14 @@ class BasketScoreBoardFragment : BaseScoreBoardFragment() {
         fun newInstance() = BasketScoreBoardFragment()
     }
 
-    private var _binding: FragmentBasketScoreBoardLightBinding? = null
+    private var _binding: FragmentBasketScoreBoardBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentBasketScoreBoardLightBinding.inflate(inflater, container, false)
+        _binding = FragmentBasketScoreBoardBinding.inflate(inflater, container, false)
         return binding.root
     }
 

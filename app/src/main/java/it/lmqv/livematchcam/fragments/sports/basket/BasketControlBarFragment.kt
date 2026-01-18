@@ -128,6 +128,12 @@ class BasketControlBarFragment() : BaseControlBarFragment() {
         binding.homeScoreAdd.setOnClickListener {
             basketScoreViewModel.incrementHomeScore()
         }
+        binding.homeScoreAddTwo.setOnClickListener {
+            basketScoreViewModel.incrementHomeScore(2)
+        }
+        binding.homeScoreAddThree.setOnClickListener {
+            basketScoreViewModel.incrementHomeScore(3)
+        }
 
         binding.awayScoreMinus.setOnClickListener {
             basketScoreViewModel.incrementGuestScore(-1)
@@ -135,6 +141,12 @@ class BasketControlBarFragment() : BaseControlBarFragment() {
 
         binding.awayScoreAdd.setOnClickListener {
             basketScoreViewModel.incrementGuestScore()
+        }
+        binding.awayScoreAddTwo.setOnClickListener {
+            basketScoreViewModel.incrementGuestScore(2)
+        }
+        binding.awayScoreAddThree.setOnClickListener {
+            basketScoreViewModel.incrementGuestScore(3)
         }
 
         binding.homeTeamControl.onEditTeamName = { teamName, sport ->

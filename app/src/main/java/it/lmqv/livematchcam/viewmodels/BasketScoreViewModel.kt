@@ -32,7 +32,7 @@ class BasketScoreViewModel: ViewModel() {
     fun incrementHomeScore(step: Int = 1) {
         viewModelScope.launch {
             mutex.withLock {
-                //Logd("SoccerScoreViewModel::incrementHomeScore::$step")
+                //Logd("BasketScoreViewModel::incrementHomeScore::$step")
                 var scoreHome = max(_liveScore.value.home.plus(step), 0)
                 _liveScore.value = _liveScore.value.copy(home = scoreHome)
             }
@@ -42,7 +42,7 @@ class BasketScoreViewModel: ViewModel() {
     fun incrementGuestScore(step: Int = 1) {
         viewModelScope.launch {
             mutex.withLock {
-                //Logd("SoccerScoreViewModel::incrementGuestScore::$step")
+                //Logd("BasketScoreViewModel::incrementGuestScore::$step")
                 var scoreGuest = max(_liveScore.value.away.plus(step), 0)
                 _liveScore.value = _liveScore.value.copy(away = scoreGuest)
             }
@@ -52,8 +52,12 @@ class BasketScoreViewModel: ViewModel() {
     fun nextPeriod() {
         viewModelScope.launch {
             mutex.withLock {
-                var nextPeriod = if (_liveScore.value.period == "1T") "2T" else "1T"
-                //Logd("SoccerScoreViewModel::incrementGuestScore::$nextPeriod")
+                var nextPeriod =
+                    if (_liveScore.value.period == "1Q") "2Q" else
+                    if (_liveScore.value.period == "2Q") "3Q" else
+                    if (_liveScore.value.period == "3Q") "4Q" else "1Q"
+
+                //Logd("BasketScoreViewModel::incrementGuestScore::$nextPeriod")
                 _liveScore.value = _liveScore.value.copy(period = nextPeriod)
             }
         }

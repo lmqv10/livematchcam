@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.core.graphics.toColorInt
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.databinding.FragmentBasketScoreBoardLightBinding
+import it.lmqv.livematchcam.databinding.FragmentBasketScoreBoardBinding
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.loadDrawableOffscreen
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 class BasketScoreboardViewFilterRender(
     applicationContext: Context,
     filterDescriptor: FilterDescriptor = FilterDescriptor()
-) : ScoreboardViewFilterRender<FragmentBasketScoreBoardLightBinding>(applicationContext, filterDescriptor), ICounterListener {
+) : ScoreboardViewFilterRender<FragmentBasketScoreBoardBinding>(applicationContext, filterDescriptor), ICounterListener {
 
     private var previousHomeLogo: String? = null
     private var previousAwayLogo: String? = null
@@ -32,7 +32,7 @@ class BasketScoreboardViewFilterRender(
 
     init {
         val inflater = LayoutInflater.from(applicationContext)
-        _binding = FragmentBasketScoreBoardLightBinding.inflate(inflater)
+        _binding = FragmentBasketScoreBoardBinding.inflate(inflater)
 
         serviceConnector = CounterServiceConnector(applicationContext)
         serviceConnector.setCounterListener(this)
@@ -166,76 +166,3 @@ class BasketScoreboardViewFilterRender(
         }
     }
 }
-
-/*
-open class ScoreBoardFilterRender(
-    var scoreBoardFragment: IScoreBoardFragment<BaseScoreBoardFragment>,
-    val filterDescriptor: FilterDescriptor = FilterDescriptor()
-) : OverlayObjectFilterRender(),
-    IScoreBoardFragment.OnUpdateCallback {
-
-    //private var previewVideoStreamData : IVideoStreamData? = null
-
-    init {
-        streamObject = ImageStreamObject()
-        scoreBoardFragment.setOnUpdate(this)
-    }
-
-    override fun drawFilter() {
-        super.drawFilter()
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, streamObjectTextureId[0])
-        GLES20.glUniform1f(uAlphaHandle, if (streamObjectTextureId[0] == -1) 0f else alpha)
-    }
-
-    override fun setVideoStreamData(videoStreamData: IVideoStreamData) {
-//        if (previewVideoStreamData == null
-//            || previewVideoStreamData?.width != videoStreamData.width
-//            || previewVideoStreamData?.height != videoStreamData.height) {
-//            previewVideoStreamData = videoStreamData
-
-            Logd("ScoreBoardFilterRender :: setVideoStreamData ${videoStreamData.width}x${videoStreamData.height}")
-            loadBitmapFromView { bitmap ->
-                val defaultScaleX = (bitmap.width * 100 / videoStreamData.width).toFloat()
-                val defaultScaleY = (bitmap.height * 100 / videoStreamData.height).toFloat()
-
-                val factorX = filterDescriptor.maxFactor / defaultScaleX
-                val scaleX = factorX * defaultScaleX
-                val scaleY = factorX * defaultScaleY
-                setImage(bitmap)
-                setScale(scaleX, scaleY)
-                //val position = filterDescriptor.position
-                //setPosition(position.x, position.y)
-                setPosition(filterDescriptor.translateTo)
-            }
-//        } else {
-//            Logd("ScoreBoardFilterRender :: setVideoStreamData no changes")
-//        }
-    }
-
-    override fun refresh() {
-        Logd("ScoreBoardFilterRender:: refresh()")
-        loadBitmapFromView { bitmap ->
-            setImage(bitmap)
-        }
-    }
-
-    private fun loadBitmapFromView(callback: (Bitmap) -> Unit) {
-        val view = (this.scoreBoardFragment as Fragment).view
-        view?.post {
-            val width = view.width
-            val height = view.height
-            val scoreBoardBitmap : Bitmap
-            if (width > 0 && height > 0) {
-                scoreBoardBitmap = createBitmap(view.width, view.height)
-            } else {
-                val drawable = ContextCompat.getDrawable(view.context, R.drawable.preview_missing)!!
-                scoreBoardBitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
-            }
-            val canvas = Canvas(scoreBoardBitmap)
-            view.draw(canvas)
-
-            callback(scoreBoardBitmap)
-        }
-    }
-}
-*/

@@ -13,74 +13,78 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/alpha_background"
-        android:orientation="vertical"
+        android:orientation="horizontal"
+        android:padding="10dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
 
-<!--        <LinearLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:orientation="horizontal"-->
-<!--            android:weightSum="4">-->
-
-<!--            <ImageView-->
-<!--                android:id="@+id/home_color"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_weight="1"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:gravity="start"-->
-<!--                android:src="@drawable/shirt_layers"-->
-<!--                android:contentDescription="@string/description_placeholder" />-->
-
-<!--            <TextView-->
-<!--                android:id="@+id/home_team"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_weight="3"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:gravity="center"-->
-<!--                android:textColor="@color/primary"-->
-<!--                android:text="@string/home_team"/>-->
-<!--        </LinearLayout>-->
-
+        <!-- Colonna sinistra: minus, score e TeamControlView -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/home_score_minus"
-                android:src="@drawable/minus"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center_vertical"
-                tools:ignore="ContentDescription"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="3dp"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/home_score"
+                <ImageView
+                    android:id="@+id/home_score_minus"
+                    android:src="@drawable/minus_one"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_vertical"
+                    tools:ignore="ContentDescription"/>
+
+                <TextView
+                    android:id="@+id/home_score"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="5dp"
+                    android:gravity="center"
+                    android:minWidth="40dp"
+                    android:textColor="@color/primary"
+                    android:text= "@string/score_placeholder"/>
+            </LinearLayout>
+
+            <it.lmqv.livematchcam.views.TeamControlView
+                android:id="@+id/homeTeamControl"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingHorizontal="5dp"
-                android:gravity="center"
-                android:minWidth="40dp"
-                android:textColor="@color/primary"
-                android:text= "@string/score_placeholder"/>
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                app:textColor="@color/primary" />
+        </LinearLayout>
+
+        <!-- Colonna destra: bottoni +1, +2, +3 allineati verticalmente -->
+        <LinearLayout
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/home_score_add"
-                android:src="@drawable/add"
+                android:src="@drawable/add_one"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription"/>
+
+            <ImageView
+                android:id="@+id/home_score_add_two"
+                android:src="@drawable/add_two"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                tools:ignore="ContentDescription"/>
+
+            <ImageView
+                android:id="@+id/home_score_add_three"
+                android:src="@drawable/add_three"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 tools:ignore="ContentDescription"/>
         </LinearLayout>
-
-        <View style="@style/dividerStyle"/>
-
-        <it.lmqv.livematchcam.views.TeamControlView
-            android:id="@+id/homeTeamControl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:textColor="@color/primary" />
 
     </LinearLayout>
 
@@ -92,7 +96,7 @@
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="4dp"
-        app:layout_constraintBottom_toBottomOf="@+id/control_home"
+
         app:layout_constraintEnd_toStartOf="@+id/control_away"
         app:layout_constraintStart_toEndOf="@+id/control_home"
         app:layout_constraintTop_toTopOf="parent">
@@ -109,7 +113,7 @@
         <FrameLayout
             android:layout_width="75dp"
             android:layout_height="75dp"
-            android:layout_marginHorizontal="50dp">
+            android:layout_marginHorizontal="10dp">
 
             <ImageView
                 android:id="@+id/stop_time"
@@ -155,73 +159,80 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/alpha_background"
-        android:orientation="vertical"
+        android:orientation="horizontal"
+        android:padding="10dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
-<!--        <LinearLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:orientation="horizontal"-->
-<!--            android:weightSum="4">-->
-
-<!--            <TextView-->
-<!--                android:id="@+id/away_team"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_weight="3"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:gravity="center"-->
-<!--                android:textColor="@color/primary"-->
-<!--                android:text="@string/away_team"/>-->
-
-<!--            <ImageView-->
-<!--                android:id="@+id/away_color"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_weight="1"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:gravity="start"-->
-<!--                android:src="@drawable/shirt_layers"-->
-<!--                android:contentDescription="@string/description_placeholder" />-->
-<!--        </LinearLayout>-->
-
+        <!-- Colonna sinistra: minus, score e TeamControlView -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <ImageView
-                android:id="@+id/away_score_minus"
-                android:src="@drawable/minus"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center_vertical"
-                tools:ignore="ContentDescription"/>
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/away_score"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="3dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/away_score_minus"
+                    android:src="@drawable/minus_one"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_vertical"
+                    tools:ignore="ContentDescription"/>
+
+                <TextView
+                    android:id="@+id/away_score"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="5dp"
+                    android:gravity="center"
+                    android:minWidth="40dp"
+                    android:textColor="@color/primary"
+                    android:text= "@string/score_placeholder"/>
+            </LinearLayout>
+
+            <it.lmqv.livematchcam.views.TeamControlView
+                android:id="@+id/guestTeamControl"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingHorizontal="5dp"
-                android:gravity="center"
-                android:minWidth="40dp"
-                android:textColor="@color/primary"
-                android:text= "@string/score_placeholder"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:paddingTop="4dp"
+                app:textColor="@color/primary" />
+        </LinearLayout>
+
+        <!-- Colonna destra: bottoni +1, +2, +3 allineati verticalmente -->
+        <LinearLayout
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/away_score_add"
-                android:src="@drawable/add"
+                android:src="@drawable/add_one"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription"/>
+
+            <ImageView
+                android:id="@+id/away_score_add_two"
+                android:src="@drawable/add_two"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                tools:ignore="ContentDescription"/>
+
+            <ImageView
+                android:id="@+id/away_score_add_three"
+                android:src="@drawable/add_three"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 tools:ignore="ContentDescription"/>
         </LinearLayout>
 
-        <View style="@style/dividerStyle"/>
-
-        <it.lmqv.livematchcam.views.TeamControlView
-            android:id="@+id/guestTeamControl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:textColor="@color/primary" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

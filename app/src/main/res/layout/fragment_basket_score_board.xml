@@ -1,0 +1,191 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:background="@drawable/score_board_black_bar_background"
+    android:padding="2dp">
+
+    <!-- Sezione HOME (sinistra) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginHorizontal="3dp"
+        android:gravity="center">
+
+        <!-- Logo e maglietta HOME in alto -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp">
+
+            <ImageView
+                android:id="@+id/home_shirt"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:src="@drawable/shirt_layers"
+                android:contentDescription="@string/description_placeholder" />
+
+            <ImageView
+                android:id="@+id/home_logo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/shield"
+                android:contentDescription="@string/description_placeholder" />
+
+        </FrameLayout>
+
+        <!-- Barra colore HOME -->
+        <LinearLayout
+            android:id="@+id/home_color_bar"
+            android:layout_width="60dp"
+            android:layout_height="4dp"
+            android:background="@color/TRANSPARENT"
+            android:layout_marginBottom="4dp"
+            android:orientation="horizontal" />
+
+        <!-- Nome squadra HOME -->
+        <TextView
+            android:id="@+id/home_team"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@string/hint_home_team"
+            android:textColor="@color/primary"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:background="@drawable/alpha_black_background"
+            android:layout_marginBottom="5dp" />
+
+        <!-- Punteggio HOME -->
+        <TextView
+            android:id="@+id/home_score"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:text="@string/long_score_placeholder"
+            android:textColor="@color/white"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/score_board_black_background" />
+    </LinearLayout>
+
+    <!-- Sezione CENTRALE -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- Timer centrale -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/match_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/score_board_black_background"
+                android:gravity="center"
+                android:minWidth="80dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:text="@string/time_placeholder"
+                android:textColor="@color/secondary"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Periodo -->
+        <TextView
+            android:id="@+id/match_period"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/quarter_placeholder"
+            android:background="@drawable/alpha_black_background"
+            android:textColor="@color/primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- Sezione AWAY/GUEST (destra) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginHorizontal="3dp"
+        android:gravity="center">
+
+        <!-- Logo e maglietta AWAY in alto -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp">
+
+            <ImageView
+                android:id="@+id/away_logo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/shield"
+                android:contentDescription="@string/description_placeholder" />
+
+            <ImageView
+                android:id="@+id/away_shirt"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:src="@drawable/shirt_layers"
+                android:contentDescription="@string/description_placeholder" />
+        </FrameLayout>
+
+        <!-- Barra colore AWAY -->
+        <LinearLayout
+            android:id="@+id/away_color_bar"
+            android:layout_width="60dp"
+            android:layout_height="4dp"
+            android:background="@color/TRANSPARENT"
+            android:layout_marginBottom="4dp"
+            android:orientation="horizontal" />
+
+        <!-- Nome squadra AWAY -->
+        <TextView
+            android:id="@+id/away_team"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@string/hint_away_team"
+            android:textColor="@color/primary"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:background="@drawable/alpha_black_background"
+            android:layout_marginBottom="5dp" />
+
+        <!-- Punteggio AWAY -->
+        <TextView
+            android:id="@+id/away_score"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:text="@string/long_score_placeholder"
+            android:textColor="@color/white"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/score_board_black_background" />
+    </LinearLayout>
+
+</LinearLayout>

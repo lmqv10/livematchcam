@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="top">
+
+    <LinearLayout
+        android:id="@+id/spot_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/alpha_background"
+        android:orientation="horizontal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/spot_banner_preview"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:src="@drawable/preview_missing"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/spot_banner_trash"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/ic_trash_bin"
+            tools:ignore="ContentDescription" />
+
+        <Switch
+            android:id="@+id/spot_banner_switch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="@string/spot_banner"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/main_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/alpha_background"
+        app:layout_constraintTop_toBottomOf="@+id/spot_banner"
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <ImageView
+            android:id="@+id/main_banner_preview"
+            android:src="@drawable/preview_missing"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/main_banner_trash"
+            android:src="@drawable/ic_trash_bin"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            tools:ignore="ContentDescription" />
+
+        <Switch
+                android:id="@+id/main_banner_switch"
+                android:text="@string/main_banner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="5dp"
+                android:gravity="center"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

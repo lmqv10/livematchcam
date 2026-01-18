@@ -24,7 +24,7 @@ object FiltersFactory {
             Sports.BASKET ->
                 listOf(
                     BasketScoreboardViewFilterRender(applicationContext,
-                        filterDescriptor = FilterDescriptor(maxFactor = 30f, translateTo = TranslateTo.TOP_LEFT)),
+                        filterDescriptor = FilterDescriptor(maxFactor = 25f, translateTo = TranslateTo.BOTTOM)),
                     OverlayFilterRender(applicationContext,
                         sourceDescriptor = SourceDescriptor(MatchRepository.spotBannerURL, MatchRepository.spotBannerVisible),
                         filterDescriptor = FilterDescriptor(maxFactor = 20f, translateTo = TranslateTo.TOP_RIGHT),
