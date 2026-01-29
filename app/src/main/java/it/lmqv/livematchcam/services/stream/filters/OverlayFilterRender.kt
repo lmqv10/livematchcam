@@ -3,8 +3,11 @@ package it.lmqv.livematchcam.services.stream.filters
 import android.content.Context
 import android.graphics.Bitmap
 import android.opengl.GLES20
+import android.widget.Toast
+import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.animateAlpha
 import it.lmqv.livematchcam.extensions.loadBitmapOffscreen
+import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.services.stream.IVideoStreamData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,11 +44,18 @@ class OverlayFilterRender(
             .distinctUntilChanged()
             .collect { (url, visible) ->
                 //Logd("OverlayFilterRender:: url $url visible $visible")
-                isVisible = visible && url.isNotEmpty()
-                if (isVisible && previousUrl != url) {
-                    previousUrl = url
-                    bitmap = loadBitmapOffscreen(context, url, targetWidth)
-                    onBitmapAvailable()
+                try {
+                    isVisible = visible && url.isNotEmpty()
+                    if (isVisible && previousUrl != url) {
+                        previousUrl = url
+                        bitmap = loadBitmapOffscreen(context, url, targetWidth)
+                        onBitmapAvailable()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    CoroutineScope(Dispatchers.Main).launch {
+                        context.toast("Can't load image ${url}")
+                    }
                 }
             }
         }
