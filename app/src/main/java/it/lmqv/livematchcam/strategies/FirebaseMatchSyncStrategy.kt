@@ -12,6 +12,7 @@ import it.lmqv.livematchcam.repositories.AccountRepository
 import it.lmqv.livematchcam.repositories.FirebaseDataRepository
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
+import it.lmqv.livematchcam.services.firebase.Schedule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,31 +20,23 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
+class FirebaseMatchSyncStrategy(context: Context) :
+    IMatchSyncStrategy {
     override val instanceId: String? = UUID.randomUUID().toString()
 
     private val firebaseDataRepository = FirebaseDataRepository(context)
     private val firebaseAccountRepository = AccountRepository(context)
 
-    private lateinit var onMatchUpdated: (Match) -> Unit
-    private lateinit var onEventInfoUpdated: (EventInfo) -> Unit
-    private lateinit var onFirebaseAccountData: (FirebaseAccountDataContract) -> Unit
-    //private lateinit var onRealtimeDatabaseAvailability: (Boolean) -> Unit
+    private lateinit var syncDataListenerContract: SyncDataListenerContract
 
     private val syncJob = SupervisorJob()
     private val syncScope = CoroutineScope(syncJob + Dispatchers.IO)
 
     override suspend fun initialize(
-        onMatchUpdated: (Match) -> Unit,
-        onEventInfoUpdated: (EventInfo) -> Unit,
-        onFirebaseAccountData: (FirebaseAccountDataContract) -> Unit,
-        //onRealtimeDatabaseAvailability: (Boolean) -> Unit
+        syncDataListenerContract: SyncDataListenerContract
     ) {
         //Logd("$instanceId :: FirebaseMatchSyncStrategy::initialize")
-        this.onMatchUpdated = onMatchUpdated
-        this.onEventInfoUpdated = onEventInfoUpdated
-        this.onFirebaseAccountData = onFirebaseAccountData
-        //this.onRealtimeDatabaseAvailability = onRealtimeDatabaseAvailability
+        this.syncDataListenerContract = syncDataListenerContract
 
         syncScope.launch {
             combine(
@@ -73,32 +66,27 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
                             ownedStreams,
                             firebaseAccount.settings,
                             true)
-                        onFirebaseAccountData(firebaseAccountDataContract)
-
-                        //onRealtimeDatabaseAvailability(true)
-                        //_isRealtimeDatabaseAvailable.postValue(true)
+                        syncDataListenerContract.onChangeFirebaseAccount(firebaseAccountDataContract)
 
                         FirebaseDataService.attachMatchValueEventListener(streamName) { match ->
                             //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify Match Update")
-                            onMatchUpdated(match)
+                            syncDataListenerContract.onChangeMatch(match)
                         }
 
                         FirebaseDataService.attachEventInfoValueEventListener(streamName, sport) { eventInfo ->
                             //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify EventInfo Update")
-                            onEventInfoUpdated(eventInfo)
+                            syncDataListenerContract.onChangeEventInfo(eventInfo)
                         }
 
+                        FirebaseDataService.attachSchedulesValueEventListener(streamName) {
+                            syncDataListenerContract.onChangeSchedules(it)
+                        }
                     }, {
-                        //_isRealtimeDatabaseAvailable.postValue(false)
-                        onFirebaseAccountData(FirebaseAccountDataContract())
-                        //onRealtimeDatabaseAvailability(false)
+                        syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
                     })
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    //Logd("$instanceId :: _isRealtimeDatabaseAvailable.exception")
-                    //_isRealtimeDatabaseAvailable.postValue(false)
-                    onFirebaseAccountData(FirebaseAccountDataContract())
-                    //onRealtimeDatabaseAvailability(false)
+                    syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
                 }
             }
         }
@@ -109,16 +97,14 @@ class FirebaseMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
         Logd("$instanceId: FirebaseMatchSyncStrategy::dispose")
         syncJob.cancel()
         FirebaseDataService.detachMatchValueEventListener()
+        FirebaseDataService.detachSchedulesValueEventListener()
         FirebaseDataService.detachEventInfoValueEventListener()
 
-        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = false")
-        //_isRealtimeDatabaseAvailable.postValue(false)
-        //this.onRealtimeDatabaseAvailability(false)
-
         //Logd("$instanceId: LocalMatchSyncStrategy::reset to manual match")
-        this.onMatchUpdated(Match())
-        this.onEventInfoUpdated(EventInfo())
-        this.onFirebaseAccountData(FirebaseAccountDataContract())
+        syncDataListenerContract.onChangeMatch(Match())
+        syncDataListenerContract.onChangeEventInfo(EventInfo())
+        syncDataListenerContract.onChangeSchedules(listOf<Schedule>())
+        syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
     }
 
     @Synchronized

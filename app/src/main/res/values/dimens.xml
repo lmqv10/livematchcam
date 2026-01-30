@@ -32,7 +32,10 @@
     <dimen name="dialog_action_bar_marginTop">10dp</dimen>
 
     <dimen name="image_size_default">90dp</dimen>
+    <dimen name="image_size_width_smaller">36dp</dimen>
     <dimen name="image_size_width_small">72dp</dimen>
     <dimen name="image_size_width_large">160dp</dimen>
     <dimen name="image_size_height">90dp</dimen>
+
+    <dimen name="schedule_item_min_height">54dp</dimen>
 </resources>

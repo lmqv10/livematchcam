@@ -83,6 +83,10 @@ fun Fragment.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @Drawabl
     customToast(this.requireActivity(), message, duration, iconResId)
 }
 
+fun Context.toast(message: String, duration: Int = Toast.LENGTH_SHORT, @DrawableRes iconResId: Int = R.drawable.ic_confirm) {
+    customToast(this, message, duration, iconResId)
+}
+
 fun customToast(
     context: Context,
     message: String,
@@ -278,6 +282,11 @@ fun formatDate(dateTime: ZonedDateTime?, pattern: String = "EEEE dd MMMM yyyy HH
         dateFormat = dateTime.format(formatter)
     }
     return dateFormat
+}
+
+fun Long.toFormattedDate(): String {
+    val sdf = SimpleDateFormat("dd MMMM yyyy - HH:mm", Locale.getDefault())
+    return sdf.format(Date(this))
 }
 
 /*fun formatDate(calendar: Calendar): String {

@@ -43,7 +43,7 @@ object FiltersFactory {
                     ),
                     OverlayFilterRender(applicationContext,
                         sourceDescriptor = SourceDescriptor(MatchRepository.mainBannerURL, MatchRepository.mainBannerVisible),
-                        filterDescriptor = FilterDescriptor(maxFactor = 65f, translateTo = TranslateTo.CENTER),
+                        filterDescriptor = FilterDescriptor(maxFactor = 65f, translateTo = TranslateTo.BOTTOM),
                         dimensionDescriptor = DimensionDescriptor(500)
                         //rotatorDescriptor = RotatorDescriptor(targetWidthDp = 250)
                     )

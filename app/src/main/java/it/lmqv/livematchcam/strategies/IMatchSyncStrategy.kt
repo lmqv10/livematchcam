@@ -3,29 +3,20 @@ package it.lmqv.livematchcam.strategies
 import it.lmqv.livematchcam.services.firebase.EventInfo
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
 import it.lmqv.livematchcam.services.firebase.Match
-import it.lmqv.livematchcam.services.firebase.Stream
+import it.lmqv.livematchcam.services.firebase.Schedule
+
+interface SyncDataListenerContract {
+    fun onChangeMatch(match: Match)
+    fun onChangeEventInfo(eventInfo: EventInfo)
+    fun onChangeSchedules(schedules: List<Schedule>)
+    fun onChangeFirebaseAccount(account: FirebaseAccountDataContract)
+}
 
 interface IMatchSyncStrategy {
 
-    //TODO use in initialize
-//    interface FirebaseMatchSyncListener {
-//        fun onMatchUpdated(match: Match)
-//        fun onEventInfoUpdated(eventInfo: EventInfo)
-//        fun onPresetKeys(presetKeys: List<Stream>)
-//        fun onRealtimeDatabaseAvailability(available: Boolean)
-//    }
-
     val instanceId: String?
 
-    //TODO change initialize with ListenerInterface
-    suspend fun initialize(
-
-        //listener: FirebaseMatchSyncListener,
-        onMatchUpdated: (Match) -> Unit,
-        onEventInfoUpdated: (EventInfo) -> Unit,
-        onFirebaseAccountData: (FirebaseAccountDataContract) -> Unit,
-        //onRealtimeDatabaseAvailability: (Boolean) -> Unit
-    )
+    suspend fun initialize(syncDataListenerContract: SyncDataListenerContract)
 
     fun dispose()
 

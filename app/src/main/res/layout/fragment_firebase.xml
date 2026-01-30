@@ -10,87 +10,91 @@
     android:orientation="vertical"
     android:padding="10dp">
 
-    <ImageView
-        android:id="@+id/account_logo"
-        android:layout_width="120dp"
-        android:layout_height="60dp"
-        android:contentDescription="@string/description_placeholder"
-        android:src="@drawable/ic_link"
-        android:layout_marginBottom="10dp" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/streamer"
-            android:textColor="@color/appColorSecondary"/>
+        <ImageView
+            android:id="@+id/account_logo"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/description_placeholder"
+            android:src="@drawable/ic_link" />
 
-        <TextView
-            android:id="@+id/account_name"
-            style="@style/EditTextViewStyle"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="start"
-            android:drawablePadding="5dp"
-            app:drawableStartCompat="@drawable/user_account" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/firebase_match"
-            android:layout_marginTop="10dp"
-            android:textColor="@color/appColorSecondary"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/streamer"
+                android:textColor="@color/appColorSecondary"/>
 
-<!--        <View-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="1dp"-->
-<!--            android:layout_marginVertical="3dp"-->
-<!--            android:background="@android:color/darker_gray"/>-->
+            <TextView
+                android:id="@+id/account_name"
+                style="@style/ScrollableEditTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="5dp"
+                app:drawableStartCompat="@drawable/user_account" />
 
-        <Spinner
-            android:id="@+id/spinner_streams"
-            android:layout_marginBottom="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/image_size_width_small"
-            android:spinnerMode="dialog" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:layout_marginVertical="5dp" />
-
-        <!--TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rtmp_server"
-            android:textColor="@color/appColorSecondary"/>
-
-        <Spinner
-            android:id="@+id/spinner_servers"
-            android:layout_marginBottom="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:spinnerMode="dialog" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/stream_key"
-            android:textColor="@color/appColorSecondary"/>
-
-        <Spinner
-            android:id="@+id/spinner_keys"
-            android:layout_marginBottom="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:spinnerMode="dialog" /-->
-
+        </LinearLayout>
     </LinearLayout>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/firebase_match"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/appColorSecondary"/>
+
+    <Spinner
+        android:id="@+id/spinner_streams"
+        android:layout_marginBottom="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/image_size_width_small"
+        android:spinnerMode="dialog" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="3dp"
+        android:background="@android:color/darker_gray"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/schedule_match"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/appColorSecondary"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <GridView
+            android:id="@+id/schedule_grid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginVertical="3dp"
+            android:gravity="center_horizontal"
+            android:numColumns="2"
+            android:horizontalSpacing="5dp"
+            android:verticalSpacing="2dp" />
+
+        <TextView
+            android:id="@+id/tv_no_schedule"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/no_schedule_match"
+            android:gravity="center_horizontal|center_vertical"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/appColorSecondary"/>
+
+    </FrameLayout>
 </LinearLayout>

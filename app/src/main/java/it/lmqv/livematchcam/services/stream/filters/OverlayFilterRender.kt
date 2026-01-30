@@ -3,8 +3,7 @@ package it.lmqv.livematchcam.services.stream.filters
 import android.content.Context
 import android.graphics.Bitmap
 import android.opengl.GLES20
-import android.widget.Toast
-import it.lmqv.livematchcam.extensions.Loge
+import com.pedro.encoder.utils.gl.TranslateTo
 import it.lmqv.livematchcam.extensions.animateAlpha
 import it.lmqv.livematchcam.extensions.loadBitmapOffscreen
 import it.lmqv.livematchcam.extensions.toast
@@ -101,9 +100,27 @@ class OverlayFilterRender(
                 animateAlpha(0f, animationDescriptor.targetAlpha, animationDescriptor.duration) {
                     setImage(it)
                     setScale(scaleX, scaleY)
-                    setPosition(filterDescriptor.translateTo)
+                    translateSprite()
                 }
             }
+        }
+    }
+
+    private fun translateSprite() {
+        var maxFactor = filterDescriptor.maxFactor
+        var offset= if (streamObject.width > streamObject.height) { streamObject.height / streamObject.width * 100f } else { 0f }
+        var margin = 2f
+
+        when (filterDescriptor.translateTo) {
+            TranslateTo.CENTER -> setPosition(50f - maxFactor / 2f, 50f - maxFactor / 2f)
+            TranslateTo.TOP -> setPosition(50f - maxFactor / 2f, margin)
+            TranslateTo.LEFT -> setPosition(margin, 50f - maxFactor / 2f)
+            TranslateTo.TOP_LEFT -> setPosition(margin, margin)
+            TranslateTo.RIGHT -> setPosition(100f - maxFactor - margin, 50f - maxFactor / 2f)
+            TranslateTo.TOP_RIGHT -> setPosition(100f - maxFactor - margin, margin)
+            TranslateTo.BOTTOM -> setPosition(50f - maxFactor / 2f, 100f - maxFactor + offset - margin)
+            TranslateTo.BOTTOM_LEFT -> setPosition(margin, 100f - maxFactor - margin)
+            TranslateTo.BOTTOM_RIGHT -> setPosition(100f - maxFactor - margin, 100f - maxFactor - margin)
         }
     }
 }

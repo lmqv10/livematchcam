@@ -37,7 +37,7 @@
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
                 android:minWidth="40dp"
-                android:textColor="@color/black"
+                android:textColor="@color/primary"
                 android:text= "@string/score_placeholder"/>
 
             <ImageView
@@ -53,7 +53,8 @@
             android:layout_marginTop="5dp"
             android:id="@+id/homeTeamControl"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:textColor="@color/primary" />
     </LinearLayout>
 
     <LinearLayout
@@ -88,7 +89,7 @@
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
                 android:minWidth="40dp"
-                android:textColor="@color/black"
+                android:textColor="@color/primary"
                 android:text= "@string/first_set_placeholder"/>
 
             <TextView
@@ -97,7 +98,7 @@
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
                 android:minWidth="40dp"
-                android:textColor="@color/black"
+                android:textColor="@color/primary"
                 android:text= "@string/set_placeholder"/>
             <ImageView
                 android:id="@+id/add_new_set"
@@ -187,7 +188,7 @@
                 android:paddingHorizontal="5dp"
                 android:gravity="center"
                 android:minWidth="40dp"
-                android:textColor="@color/black"
+                android:textColor="@color/primary"
                 android:text= "@string/score_placeholder"/>
 
             <ImageView
@@ -203,7 +204,8 @@
             android:layout_marginTop="5dp"
             android:id="@+id/guestTeamControl"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:textColor="@color/primary" />
     </LinearLayout>
 
 <!--    <FrameLayout-->

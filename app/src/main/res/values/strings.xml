@@ -12,6 +12,7 @@
     <string name="hint_match_league">Serie C - Girone A</string>
     <string name="hint_home_team">AAA</string>
     <string name="hint_title">ddddd - dd mmmm yyyy - Ore: hh:mm</string>
+    <string name="hint_match_date">dd mmmm yyyy - hh:mm</string>
     <string name="hint_away_team">BBB</string>
     <string name="hint_protocol">rtmp://yourendpoint/…</string>
     <string name="hint_live">https://youtube.com/live/xxxxxxxxxxx</string>
@@ -27,7 +28,10 @@
     <string name="streaming_url">Streaming URL</string>
     <string name="live_url">Live URL</string>
     <string name="rtmp_server">RTMP</string>
-    <string name="firebase_match">Stream Match</string>
+    <string name="firebase_match">Stream</string>
+    <string name="schedule_match">Schedule Match</string>
+    <string name="no_schedule_match">No Schedules Match Available</string>
+    <string name="update_match_succeeded">Match data updated</string>
     <string name="server">Server</string>
     <string name="firebase_custom">Firebase</string>
     <string name="broadcasts">Add or Update Match</string>
@@ -174,6 +178,7 @@
     <string name="confirm_create_live_stream">Create Or Update Event. Confirm?</string>
     <string name="confirm_delete_live_stream">Delete Event. Confirm?</string>
     <string name="confirm_delete_item">Delete Item. Confirm?</string>
+    <string name="confirm_update_live_match_data">Update current live match data. Confirm?</string>
 
     <string name="reset_match_data_message">Reset match data.\n Confirm?</string>
 

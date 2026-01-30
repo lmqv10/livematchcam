@@ -19,21 +19,14 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
 
     private val firebaseAccountRepository = AccountRepository(context)
 
-    private lateinit var onMatchUpdated: (Match) -> Unit
-    private lateinit var onEventInfoUpdated: (EventInfo) -> Unit
+    private lateinit var syncDataListenerContract: SyncDataListenerContract
 
     private var syncJob = SupervisorJob()
     private val syncScope = CoroutineScope(syncJob + Dispatchers.IO)
 
-    override suspend fun initialize(
-        onMatchUpdated: (Match) -> Unit,
-        onEventInfoUpdated: (EventInfo) -> Unit,
-        onFirebaseAccountData: (FirebaseAccountDataContract) -> Unit,
-        //onRealtimeDatabaseAvailability: (Boolean) -> Unit
-    ) {
+    override suspend fun initialize(syncDataListenerContract: SyncDataListenerContract) {
         //Logd("$instanceId: LocalMatchSyncStrategy::initialize::start")
-        this.onMatchUpdated = onMatchUpdated
-        this.onEventInfoUpdated = onEventInfoUpdated
+        this.syncDataListenerContract = syncDataListenerContract
 
         syncScope.launch {
             combine(
@@ -60,15 +53,15 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
                             firebaseAccount.name,
                             ownedStreams,
                             firebaseAccount.settings)
-                        onFirebaseAccountData(firebaseAccountDataContract)
+                        syncDataListenerContract.onChangeFirebaseAccount(firebaseAccountDataContract)
                     }, {
-                        onFirebaseAccountData(FirebaseAccountDataContract())
+                        syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
                     })
                     //onRealtimeDatabaseAvailability(false)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     //Logd("$instanceId :: _isRealtimeDatabaseAvailable.exception")
-                    onFirebaseAccountData(FirebaseAccountDataContract())
+                    syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
                     //onRealtimeDatabaseAvailability(false)
                 }
             }
@@ -83,10 +76,10 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
 
     override fun updateMatch(match: Match) {
         //Logd("$instanceId: LocalMatchSyncStrategy::updateMatch")
-        this.onMatchUpdated(match)
+        syncDataListenerContract.onChangeMatch(match)
     }
     override fun updateEventInfo(eventInfo: EventInfo) {
         //Logd("$instanceId: LocalMatchSyncStrategy::updateEventInfo")
-        this.onEventInfoUpdated(eventInfo)
+        syncDataListenerContract.onChangeEventInfo(eventInfo)
     }
 }

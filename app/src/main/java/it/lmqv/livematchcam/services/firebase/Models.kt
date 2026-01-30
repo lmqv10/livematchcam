@@ -13,7 +13,7 @@ data class FirebaseAccount(
     val logo: String = "",
     val users: List<String> = emptyList(),
     val channels: List<String> = emptyList(),
-    val matches: Map<String, Match> = emptyMap(),
+    //val matches: Map<String, Match> = emptyMap(),
     val streams: List<Stream> = emptyList(),
     var settings : Settings = Settings()
 )
@@ -47,6 +47,24 @@ data class Settings(
 )*/
 
 data class Match(
+    val homeTeam: String = "ABC",
+    val homePrimaryColorHex: String = "#FFFFFF",
+    val homeSecondaryColorHex: String = "#FFFFFF",
+    val homeLogo: String = "",
+    val guestTeam: String = "DEF",
+    val guestPrimaryColorHex: String = "#000000",
+    val guestSecondaryColorHex: String = "#000000",
+    val guestLogo: String = "",
+    val spotBannerURL: String = "",
+    val spotBannerVisible: Boolean = false,
+    val mainBannerURL: String = "",
+    val mainBannerVisible: Boolean = false
+)
+
+data class Schedule(
+    val id: String = "",
+    val matchDate: Long = 0,
+    val visible: Boolean = false,
     val homeTeam: String = "ABC",
     val homePrimaryColorHex: String = "#FFFFFF",
     val homeSecondaryColorHex: String = "#FFFFFF",

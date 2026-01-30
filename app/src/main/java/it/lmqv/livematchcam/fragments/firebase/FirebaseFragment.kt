@@ -20,6 +20,8 @@ import it.lmqv.livematchcam.handlers.DialogHandler
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import it.lmqv.livematchcam.viewmodels.FirebaseViewModel
+import it.lmqv.livematchcam.adapters.ScheduleAdapter
+import it.lmqv.livematchcam.dialogs.ConfirmDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
@@ -52,6 +54,28 @@ class FirebaseFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         launchOnCreated {
+            MatchRepository.currentSchedules.collect { schedules ->
+                var sortedSchedules = schedules
+                    .filter { it.matchDate > System.currentTimeMillis() && it.visible }
+                    .sortedBy { it.matchDate }
+
+                binding.scheduleGrid.adapter = ScheduleAdapter(requireActivity(), sortedSchedules) { schedule ->
+                    var dialog = ConfirmDialog(requireContext(), {
+                            MatchRepository.updateFromSchedule(schedule)
+                            toast(requireContext().getString(R.string.update_match_succeeded))
+                    }, { }, R.string.confirm_update_live_match_data)
+                    dialog.show()
+                }
+
+                if (sortedSchedules.any()) {
+                    binding.tvNoSchedule.visibility = View.GONE
+                } else {
+                    binding.tvNoSchedule.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        launchOnCreated {
             combine(
                 MatchRepository.firebaseAccountData,
                 firebaseAccountViewModel.firebaseAccountKey,
@@ -71,6 +95,7 @@ class FirebaseFragment : Fragment() {
                 }
 
                 binding.accountName.text = firebaseAccountViewModel.accountName() ?: ""
+                binding.accountName.isSelected = true
 
                 var streams = firebaseAccountData.streams
                 var streamItems = streams

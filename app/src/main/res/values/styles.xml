@@ -141,6 +141,14 @@
         <!--        <item name="android:autoSizeMaxTextSize">@dimen/text_size_default</item>-->
     </style>
 
+    <style name="ScrollableEditTextViewStyle" parent="EditTextViewStyle">
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:marqueeRepeatLimit">1</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:focusable">false</item>
+    </style>
 
     <style name="TeamTextViewStyle" parent="Widget.AppCompat.TextView">
 <!--        <item name="android:layout_width">0dp</item>-->

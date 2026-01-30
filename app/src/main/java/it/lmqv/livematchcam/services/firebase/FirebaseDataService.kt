@@ -6,6 +6,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import it.lmqv.livematchcam.factories.sports.Sports
+import it.lmqv.livematchcam.services.firebase.listeners.SchedulesValueEventListener
 
 object FirebaseDataService {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -15,12 +16,19 @@ object FirebaseDataService {
     private var eventInfoKeyRef: DatabaseReference? = null
     private var eventInfoValueEventListener: ValueEventListener? = null
 
+    private val schedulesValueEventListener = SchedulesValueEventListener()
+
     private var isAdministrator: Boolean = false
     private var isAuthorizedUser: Boolean = false
     private var currentAccountKey: String = ""
+
     private val isValidAccount: Boolean get() =
         (isAdministrator || isAuthorizedUser)
         && currentAccountKey.isNotEmpty()
+
+    init {
+        schedulesValueEventListener.initialize(database)
+    }
 
     fun authenticateAccount(accountName: String,
                             accountKey: String,
@@ -147,6 +155,16 @@ object FirebaseDataService {
             //Logd("FirebaseDataService::detachEventInfoValueEventListener $eventInfoKeyRef")
             this.eventInfoKeyRef?.removeEventListener(this.eventInfoValueEventListener!!)
         }
+    }
+
+    fun attachSchedulesValueEventListener(currentKey: String, onChangeSchedules: (List<Schedule>) -> Unit) {
+        schedulesValueEventListener.setOnChangeListener(onChangeSchedules)
+        schedulesValueEventListener.attach(this.currentAccountKey, currentKey)
+    }
+
+    fun detachSchedulesValueEventListener () {
+        schedulesValueEventListener.detach()
+        schedulesValueEventListener.setOnChangeListener({ })
     }
 
     fun updateMatchValue(match: Match?) {

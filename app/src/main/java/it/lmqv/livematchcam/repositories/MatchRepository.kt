@@ -9,7 +9,9 @@ import it.lmqv.livematchcam.strategies.IMatchSyncStrategy
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.services.firebase.EventInfo
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
+import it.lmqv.livematchcam.services.firebase.Schedule
 import it.lmqv.livematchcam.services.firebase.ScoreFactory
+import it.lmqv.livematchcam.strategies.SyncDataListenerContract
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,25 +19,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlin.String
 
-object MatchRepository {
+object MatchRepository : SyncDataListenerContract {
     val instanceId: String? = UUID.randomUUID().toString()
 
-    fun init() {
+    init {
         //Logd("$instanceId :: MatchRepository::init::start")
         CoroutineScope(Dispatchers.IO).launch {
             MatchSyncStrategyRepository.syncStrategy.collectLatest { strategy ->
                 Logd("$instanceId :: MatchRepository::onSyncStrategy::initialize >> ${strategy}")
                 syncStrategy = strategy
-                syncStrategy.initialize(
-                    onMatchUpdated = { match -> notifyMatchChanges(match) },
-                    onEventInfoUpdated = { eventInfo -> notifyEventInfoChanges(eventInfo) },
-                    onFirebaseAccountData = { firebaseAccountDataContract -> _firebaseAccountData.value = firebaseAccountDataContract },
-                )
+                syncStrategy.initialize(this@MatchRepository)
                 //Logd("$instanceId :: MatchRepository::onSyncStrategy::isRealtimeDatabaseAvailable >> ${isRealtimeDatabaseAvailable.last()}")
             }
         }
-        //Logd("$instanceId :: MatchRepository::init::end")
+        Logd("$instanceId :: MatchRepository::init::end")
     }
 
     private lateinit var syncStrategy: IMatchSyncStrategy
@@ -47,8 +46,8 @@ object MatchRepository {
 
     private var currentEventInfo = EventInfo()
 
-//    private var _isRealtimeDatabaseAvailable = MutableStateFlow<Boolean>(false)
-//    var isRealtimeDatabaseAvailable = _isRealtimeDatabaseAvailable
+    private var _currentSchedules = MutableStateFlow<List<Schedule>>(listOf<Schedule>())
+    var currentSchedules: StateFlow<List<Schedule>>  = _currentSchedules
 
     private var _firebaseAccountData = MutableStateFlow<FirebaseAccountDataContract>(FirebaseAccountDataContract())
     var firebaseAccountData: StateFlow<FirebaseAccountDataContract>  = _firebaseAccountData
@@ -174,6 +173,22 @@ object MatchRepository {
         applyMatchChanges(currentMatch.copy(mainBannerVisible = mainBannerVisible))
     }
 
+    fun updateFromSchedule(schedule: Schedule) {
+        applyMatchChanges(currentMatch.copy(
+            homeTeam = schedule.homeTeam,
+            homePrimaryColorHex = schedule.homePrimaryColorHex,
+            homeSecondaryColorHex = schedule.homeSecondaryColorHex,
+            homeLogo = schedule.homeLogo,
+            guestTeam = schedule.guestTeam,
+            guestPrimaryColorHex = schedule.guestPrimaryColorHex,
+            guestSecondaryColorHex = schedule.guestSecondaryColorHex,
+            guestLogo = schedule.guestLogo,
+            spotBannerURL = schedule.spotBannerURL,
+            spotBannerVisible = schedule.spotBannerVisible,
+            mainBannerURL = schedule.mainBannerURL,
+            mainBannerVisible = schedule.mainBannerVisible))
+    }
+
     @Synchronized
     private fun applyMatchChanges(updatedMatch: Match) {
         Logd("$instanceId :: MatchRepository::applyMatchChanges:: $updatedMatch")
@@ -184,6 +199,11 @@ object MatchRepository {
     private fun applyEventInfoChanges(updatedEventInfo: EventInfo) {
         Logd("$instanceId :: MatchRepository::applyEventInfoChanges:: $updatedEventInfo")
         syncStrategy.updateEventInfo(updatedEventInfo)
+    }
+
+    override fun onChangeMatch(match: Match) {
+        Logd("$instanceId :: MatchRepository:: onChange $match")
+        this.notifyMatchChanges(match)
     }
 
     @Synchronized
@@ -238,6 +258,11 @@ object MatchRepository {
         }
     }
 
+    override fun onChangeEventInfo(eventInfo: EventInfo) {
+        Logd("$instanceId :: MatchRepository:: onChange $eventInfo")
+        notifyEventInfoChanges(eventInfo)
+    }
+
     @Synchronized
     private fun notifyEventInfoChanges(updatedEventInfo: EventInfo) {
         try {
@@ -255,5 +280,29 @@ object MatchRepository {
             e.printStackTrace()
             Loge("$instanceId :: MatchRepository::Exception::notifyEventInfoChanges:: ${e.message.toString()}")
         }
+    }
+
+    override fun onChangeSchedules(schedules: List<Schedule>) {
+        Logd("$instanceId :: MatchRepository:: onChange $schedules")
+        this.notifySchedulesUpdated(schedules)
+    }
+
+    @Synchronized
+    private fun notifySchedulesUpdated(updatedSchedules: List<Schedule>) {
+        try {
+            Logd("$instanceId :: MatchRepository::notifySchedulesUpdated:: $updatedSchedules")
+
+            if (_currentSchedules.value != updatedSchedules) {
+                _currentSchedules.value = updatedSchedules
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Loge("$instanceId :: MatchRepository::Exception::notifySchedulesUpdated:: ${e.message.toString()}")
+        }
+    }
+
+    override fun onChangeFirebaseAccount(account: FirebaseAccountDataContract) {
+        Logd("$instanceId :: MatchRepository:: onChange $account")
+        _firebaseAccountData.value = account
     }
 }
