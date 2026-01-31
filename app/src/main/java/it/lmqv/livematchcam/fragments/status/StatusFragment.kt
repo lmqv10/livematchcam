@@ -25,6 +25,7 @@ import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.extensions.resolutionFormat
 import it.lmqv.livematchcam.extensions.singleDecimalFormat
+import it.lmqv.livematchcam.extensions.sourceBitrateFormat
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import kotlinx.coroutines.launch
 
@@ -99,6 +100,10 @@ class StatusFragment : Fragment(), IStatusFragment,
 
         statusViewModel.sourceFps.observe(viewLifecycleOwner, Observer { data ->
             binding.sourceFps.text = fpsFormat(data)
+        })
+
+        statusViewModel.sourceBitrate.observe(viewLifecycleOwner, Observer { data ->
+            binding.sourceBitrate.text = sourceBitrateFormat(data)
         })
 
         return binding.root

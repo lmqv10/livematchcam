@@ -4,7 +4,7 @@ interface IVideoStreamData {
     var width: Int
     var height: Int
     var fps: Int
-    val bitrate: Int
+    var bitrate: Int
     val rotation: Int
 }
 
@@ -17,7 +17,7 @@ data class CameraVideoStreamData(
     override var width: Int = 1920,
     override var height: Int = 1080,
     override var fps: Int = 30,
-    override val bitrate: Int = 6000 * 1000,
+    override var bitrate: Int = 6000 * 1000,
     override val rotation: Int = 0,
 ) : IVideoStreamData
 

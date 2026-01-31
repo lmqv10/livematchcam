@@ -31,12 +31,20 @@ class StreamConfigurationViewModel(application: Application) : AndroidViewModel(
     private val _videoCaptureFormat = MutableStateFlow<VideoCaptureFormat?>(null)
     val videoCaptureFormat: StateFlow<VideoCaptureFormat?> = _videoCaptureFormat
 
+    private val _bitrate = MutableStateFlow<Int?>(null)
+    val bitrate: StateFlow<Int?> = _bitrate
+
     fun setFps(updatedFps: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             streamConfigurationRepository.setFps(updatedFps)
         }
     }
 
+    fun setBitrate(updatedBitrate: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            streamConfigurationRepository.setBitrate(updatedBitrate)
+        }
+    }
     fun setVideoCaptureFormat(updateVideoCaptureFormat: VideoCaptureFormat) {
         viewModelScope.launch(Dispatchers.IO) {
             streamConfigurationRepository.setVideoCaptureFormat(updateVideoCaptureFormat)
@@ -53,6 +61,12 @@ class StreamConfigurationViewModel(application: Application) : AndroidViewModel(
         viewModelScope.launch {
             streamConfigurationRepository.fps.collect {
                 _fps.value = it
+            }
+        }
+
+        viewModelScope.launch {
+            streamConfigurationRepository.bitrate.collect {
+                _bitrate.value = it
             }
         }
 

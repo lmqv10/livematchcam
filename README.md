@@ -1,29 +1,33 @@
 WIP 
-- Gestione Scheduled matches in app
-- 
-TODO LIST
-- BitRate Configurabile
 - API camera (autofocus, etc) da preferences
+  enableVideoStabilization()
+  enableOpticalVideoStabilization()
+  enableAutoFocus()
+  enableAutoExposure()
+  disableFaceDetection()
+
+TODO LIST
+- Share/QRCode on menu 
 - Battery Level
 - Banners positions configurabili
-- spegnere automaticamente il bannerino quando si attiva il bannerone
+- Fix Freeze Preview during streaming,. con microfono "attached"
 
-BUGS
-- Risoluzioni camera sorgente dinamiche
-- Freeze Preview during streaming,. con microfono "attached"
+IMPROVEMENT
+- Gestione del secondo colore di maglietta
 - Verificare caratteri e risoluzione schermo device.
+- spegnere automaticamente il bannerino quando si attiva il bannerone
+- Risoluzioni camera sorgente dinamiche
 - Banners rotation con lista e configurabile
+- Gestione di bannter multipli temporizzati (se possibile animati)
+- Implementare Video full screen per spot/pubblicità
 
-STEP 2
+LOWER PRIORITY
+- Valutare anche il goLive() soprattutto UI!!!
 - Gestione ACCOUNT/MENU/FRAGMENT ...
 - Migliorare la vista dell'Account UI
 - Migliorare la vista remote control
-- Gestione del secondo colore di maglietta
-- Gestione di bannter multipli temporizzati (se possibile animati)
-- Implementare Video full screen per spot/pubblicità
-- Premettere di configurarsi il proprio firebase per remote
-- Valutare anche il goLive() soprattutto UI!!!
 - Gestione flag YouTubeEnabled (on Firebase or...)
+- Permettere di configurarsi il proprio firebase per remote
 
 NOTA:: RIVEDERE TUTTE LE DIALOG PER init e non OnCReate
 .. Es. CameraSettingsDialog.. se funziona...

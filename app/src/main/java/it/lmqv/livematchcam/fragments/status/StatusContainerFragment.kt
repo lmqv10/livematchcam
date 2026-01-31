@@ -11,6 +11,7 @@ import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.factories.StatusFragmentFactory
 import it.lmqv.livematchcam.handlers.zoom.IZoomLevelHandler
 import it.lmqv.livematchcam.handlers.zoom.NoDebounceExtraSmoothZoomLevelHandler
+import it.lmqv.livematchcam.services.firebase.Quadruple
 import it.lmqv.livematchcam.services.stream.IVideoSourceZoomHandler
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.viewmodels.StreamConfigurationViewModel
@@ -48,14 +49,16 @@ class StatusContainerFragment: Fragment(),
         launchOnResumed {
             combine(
                 streamConfigurationViewModel.fps,
+                streamConfigurationViewModel.bitrate,
                 streamConfigurationViewModel.videoCaptureFormat,
                 streamConfigurationViewModel.videoSourceKind
-            ) { fps, videoCaptureFormat, videoSourceKind -> Triple(fps, videoCaptureFormat, videoSourceKind) }
+            ) { fps, bitrate, videoCaptureFormat, videoSourceKind -> Quadruple(fps, bitrate, videoCaptureFormat, videoSourceKind) }
             .distinctUntilChanged()
-            .collect { (fps, videoCaptureFormat, videoSourceKind) ->
-                if (fps != null && videoCaptureFormat != null) {
+            .collect { (fps, bitrate, videoCaptureFormat, videoSourceKind) ->
+                if (fps != null && videoCaptureFormat != null && bitrate != null) {
                     statusViewModel.setSourceResolution(videoCaptureFormat.height)
                     statusViewModel.setSourceFps(fps)
+                    statusViewModel.setSourceBitrate(bitrate)
                     //statusViewModel.setVideoSourceKind(videoSourceKind)
                 }
 

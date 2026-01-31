@@ -31,6 +31,7 @@ import it.lmqv.livematchcam.factories.sports.Sports
 import it.lmqv.livematchcam.factories.VideoSourceFactory
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.StreamConfigurationRepository
+import it.lmqv.livematchcam.services.firebase.Quadruple
 import it.lmqv.livematchcam.services.stream.filters.IScoreboardViewFilterRender
 import it.lmqv.livematchcam.services.stream.filters.IOverlayObjectFilterRender
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
@@ -138,11 +139,12 @@ class StreamService: Service(),
         this.streamConfigurationJob = streamServiceScope.launch {
             combine(
                 streamConfigurationRepository.fps,
+                streamConfigurationRepository.bitrate,
                 streamConfigurationRepository.videoCaptureFormat,
                 streamConfigurationRepository.videoSourceKind
-            ) { fps, videoCaptureFormat, videoSourceKind -> Triple(fps, videoCaptureFormat, videoSourceKind) }
+            ) { fps, bitrate, videoCaptureFormat, videoSourceKind -> Quadruple(fps, bitrate, videoCaptureFormat, videoSourceKind) }
             .distinctUntilChanged()
-            .collect { (fps, videoCaptureFormat,videoSourceKind) ->
+            .collect { (fps, bitrate, videoCaptureFormat,videoSourceKind) ->
 
                 Logd("StreamService :: streamConfigurationRepository :: ${this@StreamService.videoSourceKind} vs $videoSourceKind")
                 if (this@StreamService.videoSourceKind != videoSourceKind) {
@@ -153,17 +155,22 @@ class StreamService: Service(),
 
                 Logd("StreamService :: streamConfigurationRepository :: cameraSourceParameters :: ${videoCaptureFormat}")
                 Logd("StreamService :: streamConfigurationRepository :: ${videoStreamData.height}p@${videoStreamData.fps}fps vs ${videoCaptureFormat.height}p@${fps}fps")
+                Logd("StreamService :: streamConfigurationRepository :: bitrate: ${videoStreamData.bitrate} vs ${bitrate}")
 
                 if (//this@StreamService.sport != sport ||
                     this@StreamService.videoStreamData.width != videoCaptureFormat.width ||
                     this@StreamService.videoStreamData.height != videoCaptureFormat.height ||
-                    this@StreamService.videoStreamData.fps != fps) {
+                    this@StreamService.videoStreamData.fps != fps ||
+                    this@StreamService.videoStreamData.bitrate != bitrate) {
 
                     //this@StreamService.sport = sport
 
                     this@StreamService.videoStreamData.width = videoCaptureFormat.width
                     this@StreamService.videoStreamData.height = videoCaptureFormat.height
                     this@StreamService.videoStreamData.fps = fps
+
+                    this@StreamService.videoStreamData.bitrate = bitrate
+                    bitrateAdapter.setMaxBitrate(videoStreamData.bitrate + audioStreamData.bitrate)
 
                     //this@StreamService.restartPreview()
                     if (genericStream.isOnPreview) {
@@ -379,7 +386,7 @@ class StreamService: Service(),
             if (!prepared) {
                 toast("Invalid audio or video parameters, prepare failed")
             } else {
-                toast("Encoder ${videoStreamData.height}p@${videoStreamData.fps}fps")
+                toast("Encoder ${videoStreamData.height}p@${videoStreamData.fps}fps ${videoStreamData.bitrate / 1000}kbps")
             }
         }
     }

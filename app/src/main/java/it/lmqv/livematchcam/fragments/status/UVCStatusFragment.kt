@@ -11,6 +11,7 @@ import it.lmqv.livematchcam.databinding.FragmentUvcStatusBinding
 import it.lmqv.livematchcam.extensions.bitrateFormat
 import it.lmqv.livematchcam.extensions.fpsFormat
 import it.lmqv.livematchcam.extensions.resolutionFormat
+import it.lmqv.livematchcam.extensions.sourceBitrateFormat
 import it.lmqv.livematchcam.viewmodels.StatusViewModel
 
 class UVCStatusFragment : Fragment(), IStatusFragment {
@@ -48,6 +49,10 @@ class UVCStatusFragment : Fragment(), IStatusFragment {
 
         statusViewModel.sourceFps.observe(viewLifecycleOwner, Observer { data ->
             binding.sourceFps.text = fpsFormat(data)
+        })
+
+        statusViewModel.sourceBitrate.observe(viewLifecycleOwner, Observer { data ->
+            binding.sourceBitrate.text = sourceBitrateFormat(data)
         })
     }
 

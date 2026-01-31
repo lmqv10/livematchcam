@@ -102,6 +102,18 @@
                 android:background="@drawable/alpha_background"
                 android:layout_gravity="center_vertical"
                 android:text="@string/fps_placeholder" />
+
+            <TextView
+                android:id="@+id/sourceBitrate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textColor="@color/primary"
+                android:padding="3dp"
+                android:gravity="center_horizontal"
+                android:background="@drawable/alpha_background"
+                android:layout_gravity="center_vertical"
+                android:text="@string/bitrate_placeholder" />
         </LinearLayout>
     </LinearLayout>
 

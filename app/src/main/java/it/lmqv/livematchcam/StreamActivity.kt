@@ -22,6 +22,7 @@ import it.lmqv.livematchcam.extensions.launchOnCreated
 import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.extensions.toOptionItems
 import it.lmqv.livematchcam.extensions.toast
+import it.lmqv.livematchcam.factories.EncoderItemsFactory
 import it.lmqv.livematchcam.factories.sports.SportsFactory
 import it.lmqv.livematchcam.fragments.status.StatusContainerFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
@@ -401,12 +402,7 @@ class StreamActivity : BaseActivity(),
         spinnerVideoResolutions.setSelection(defaultResolution)
 
         val spinnerVideoFps = dialogView.findViewById<Spinner>(R.id.encoder_fps)
-        val optionsVideoFps = listOf(
-            OptionItem(20, "20 fps"),
-            OptionItem(25, "25 fps"),
-            OptionItem(30, "30 fps"),
-            OptionItem(60, "60 fps")
-        )
+        val optionsVideoFps = EncoderItemsFactory.getFps()
 
         val adapterVideoFps = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoFps)
         adapterVideoFps.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -426,6 +422,28 @@ class StreamActivity : BaseActivity(),
         }
         val defaultVideoFps = optionsVideoFps.indexOfFirst { it.key == this@StreamActivity.streamConfigurationViewModel.fps.value }
         spinnerVideoFps.setSelection(defaultVideoFps)
+
+        val spinnerVideoBitrate = dialogView.findViewById<Spinner>(R.id.encoder_bitrate)
+        val optionsVideoBitrate = EncoderItemsFactory.getBitrate()
+
+        val adapterVideoBitrate = ArrayAdapter(this, android.R.layout.simple_spinner_item, optionsVideoBitrate)
+        adapterVideoBitrate.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerVideoBitrate.isEnabled = !this.streamService.isStreaming()
+        spinnerVideoBitrate.adapter = adapterVideoBitrate
+        @Suppress("UNCHECKED_CAST")
+        spinnerVideoBitrate.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as OptionItem<Int>
+                var selectedItemValue = selectedItem.key
+                var bitrate = this@StreamActivity.streamConfigurationViewModel.bitrate.value
+                if (bitrate != selectedItemValue) {
+                    this@StreamActivity.streamConfigurationViewModel.setBitrate(selectedItemValue)
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+        val defaultVideoBitrate = optionsVideoBitrate.indexOfFirst { it.key == this@StreamActivity.streamConfigurationViewModel.bitrate.value }
+        spinnerVideoBitrate.setSelection(defaultVideoBitrate)
 
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)

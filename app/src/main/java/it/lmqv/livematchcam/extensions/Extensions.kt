@@ -235,12 +235,17 @@ fun degreeFormat(value:Int) : String {
 
 fun bitrateFormat(value:Float) : String {
     val formatter = String.format(Locale.getDefault(), "%.1f mb/s", value)
-    return formatter.format(value)
+    return formatter //.format(value)
 }
 
 fun fpsFormat(value:Int) : String {
     val formatter = String.format(Locale.getDefault(), "%d fps", value)
-    return formatter.format(value)
+    return formatter //.format(value)
+}
+
+fun sourceBitrateFormat(value:Int) : String {
+    //Logd("sourceBitrateFormat :: ${value}")
+    return String.format(Locale.getDefault(), "%.1f mb/s", value / 1000_000f)
 }
 
 fun resolutionFormat(value:Int) : String {

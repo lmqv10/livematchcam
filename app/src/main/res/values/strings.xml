@@ -52,6 +52,7 @@
     <string name="date_time">Select Scheduled Date and Time</string>
     <string name="start_period_time">Update Match Time</string>
     <string name="video_fps">fps</string>
+    <string name="video_bitrate">Bitrate</string>
     <string name="choose_color">Choose shirt color</string>
     <string name="choose_logo">Insert or choose logo URL</string>
     <string name="handle_streamers">Streamers</string>

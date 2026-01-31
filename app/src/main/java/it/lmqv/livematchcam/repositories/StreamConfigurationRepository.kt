@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.GsonBuilder
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.services.stream.VideoCaptureFormat
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.flow.Flow
@@ -22,11 +21,17 @@ class StreamConfigurationRepository(private val context: Context) {
 
     private val VIDEO_SOURCE_KIND = stringPreferencesKey("VideoSourceKind")
     private val STREAM_FPS = intPreferencesKey("StreamFps")
+    private val STREAM_BITRATE = intPreferencesKey("StreamBitrate")
     private val VIDEO_CAPTURE_FORMATS = stringPreferencesKey("VideoCaptureFormats")
 
     val fps: Flow<Int> = context.streamConfigurationDataStore.data.map { preferences -> preferences[STREAM_FPS] ?: 30 }
     suspend fun setFps(updatedFps: Int) {
         context.streamConfigurationDataStore.edit { preferences -> preferences[STREAM_FPS] = updatedFps }
+    }
+
+    val bitrate: Flow<Int> = context.streamConfigurationDataStore.data.map { preferences -> preferences[STREAM_BITRATE] ?: (6000 * 1000) }
+    suspend fun setBitrate(updatedBitrate: Int) {
+        context.streamConfigurationDataStore.edit { preferences -> preferences[STREAM_BITRATE] = updatedBitrate }
     }
 
     val videoCaptureFormat: Flow<VideoCaptureFormat> = context.streamConfigurationDataStore.data.map { preferences ->

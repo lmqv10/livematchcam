@@ -10,7 +10,11 @@ import kotlinx.coroutines.launch
 class StatusViewModel : ViewModel() {
     private val _bitrate = MutableLiveData(0.0f)
     val bitrate: LiveData<Float> = _bitrate
-    fun setBitrate(updatedBitrate: Float) { _bitrate.value = updatedBitrate }
+    fun setBitrate(updatedBitrate: Float) {
+        viewModelScope.launch(Dispatchers.Main) {
+            _bitrate.value = updatedBitrate
+        }
+    }
 
     private val _fps = MutableLiveData(0)
     val fps: LiveData<Int> = _fps
@@ -40,6 +44,13 @@ class StatusViewModel : ViewModel() {
     fun setSourceFps(updatedFps: Int) {
         viewModelScope.launch(Dispatchers.Main) {
             _sourceFps.value = updatedFps
+        }
+    }
+    private val _sourceBitrate = MutableLiveData(0)
+    val sourceBitrate: LiveData<Int> = _sourceBitrate
+    fun setSourceBitrate(updatedBitrate: Int) {
+        viewModelScope.launch(Dispatchers.Main) {
+            _sourceBitrate.value = updatedBitrate
         }
     }
 }

@@ -8,15 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import it.lmqv.livematchcam.CameraSourceAdapter
 import it.lmqv.livematchcam.CameraSourceItem
 import it.lmqv.livematchcam.CameraSourceItemsFactory
 import it.lmqv.livematchcam.databinding.DialogCameraSettingsBinding
 import it.lmqv.livematchcam.extensions.toOptionItems
-import it.lmqv.livematchcam.factories.EncoderFpsItemsFactory
+import it.lmqv.livematchcam.factories.EncoderItemsFactory
 import it.lmqv.livematchcam.services.stream.IStreamService
 import it.lmqv.livematchcam.services.stream.VideoCaptureFormat
 import it.lmqv.livematchcam.utils.OptionItem
@@ -33,6 +30,7 @@ class CameraSettingsDialog (
     private val onChangeVideoSource : (videoSourceKind: VideoSourceKind) -> Unit,
     private val onChangeResolution: (videoCaptureFormat: VideoCaptureFormat) -> Unit,
     private val onChangeFps: (selectedFps: Int) -> Unit,
+    private val onChangeBitrate: (selectedBitrate: Int) -> Unit,
 ) : Dialog(context) {
     private val binding: DialogCameraSettingsBinding = DialogCameraSettingsBinding.inflate(LayoutInflater.from(context))
     private var selectedVideoCaptureFormat: VideoCaptureFormat? = null
@@ -108,7 +106,7 @@ class CameraSettingsDialog (
     }
 
     fun setEncoderFps(fps: Int?) : CameraSettingsDialog {
-        val defaultVideoFps = EncoderFpsItemsFactory.get()
+        val defaultVideoFps = EncoderItemsFactory.getFps()
             .indexOfFirst { it.key == fps }
         binding.encoderFps.setSelection(defaultVideoFps)
         return this
@@ -129,7 +127,7 @@ class CameraSettingsDialog (
 
     private fun initEncoderFpsSpinner() {
 
-        val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, EncoderFpsItemsFactory.get())
+        val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, EncoderItemsFactory.getFps())
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.encoderFps.adapter = adapter
         @Suppress("UNCHECKED_CAST")
@@ -139,6 +137,23 @@ class CameraSettingsDialog (
                 var selectedFps = selectedItem.key
                 onChangeFps(selectedFps)
 
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+
+    }
+
+    private fun initEncoderBitrateSpinner() {
+
+        val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, EncoderItemsFactory.getBitrate())
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.encoderFps.adapter = adapter
+        @Suppress("UNCHECKED_CAST")
+        binding.encoderFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position) as OptionItem<Int>
+                var selectedBitrate = selectedItem.key
+                onChangeBitrate(selectedBitrate)
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
