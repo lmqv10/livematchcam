@@ -196,19 +196,65 @@
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
+    <string name="preferences_header">Preferences</string>
+    <string name="scoreboard_header">ScoreBoard</string>
+    <string name="overlays_header">Overlays Sizes</string>
+    <string name="camera_af_header">Camera Autofocus (No UVC)</string>
+    <string name="camera_vs_header">Stabilization (No UVC)</string>
+    <string name="notifications_header">Camera Preferences</string>
 
     <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
+<!--    <string name="signature_title">Your signature</string>-->
+    <string name="video_settings_screen_key">video_settings_screen</string>
+    <string name="video_settings_screen_title">Camera Preferences</string>
+    <string name="video_settings_screen_summary">Configure notifications and Camera Preferences</string>
+
+    <string name="video_overlay_screen_key">video_ovelray_screen</string>
+    <string name="video_overlay_screen_title">Filters</string>
+    <string name="video_overlay_screen_summary">Configure scoreboard and banners sizes</string>
+
+    <string name="scoreboard_size_key">scoreboard_size</string>
+    <string name="scoreboard_size_title">Scoreboard Size</string>
+
+    <string name="spot_banner_size_key">spot_banner_size</string>
+    <string name="spot_banner_size_title">Spot Size (Top-Right)</string>
+
+    <string name="main_banner_size_key">main_banner_size</string>
+    <string name="main_banner_size_title">Banner Size (Center)</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+<!--    <string name="sync_title">Sync email periodically</string>-->
+<!--    <string name="attachment_title">Download incoming attachments</string>-->
+<!--    <string name="attachment_summary_on">Automatically download attachments for incoming emails</string>-->
+<!--    <string name="attachment_summary_off">Only download attachments when manually requested</string>-->
+
+    <!-- Camera Preferences -->
+    <string name="camera_status_notifications_key">camera_status_notifications</string>
+    <string name="camera_status_notifications_title">Status notifications</string>
+    <string name="camera_status_notifications_on">Show toast notifications on camera status</string>
+    <string name="camera_status_notifications_off">Hide toast notifications on camera status</string>
+
+<!--    <string name="camera_auto_focus_key">auto_focus</string>-->
+<!--    <string name="camera_auto_focus_title">Autofocus Continuous</string>-->
+<!--    <string name="camera_auto_focus_on">Enabled</string>-->
+<!--    <string name="camera_auto_focus_off">Disabled</string>-->
+
+    <string name="camera_video_stabilization_key">video_stabilization</string>
+    <string name="camera_video_stabilization_title">Video Stabilization</string>
+    <string name="camera_video_stabilization_on">Enabled</string>
+    <string name="camera_video_stabilization_off">Disabled</string>
+
+    <string name="camera_optical_video_stabilization_key">optical_video_stabilization</string>
+    <string name="camera_optical_video_stabilization_title">Optical Video Stabilization</string>
+    <string name="camera_optical_video_stabilization_on">Enabled</string>
+    <string name="camera_optical_video_stabilization_off">Disabled</string>
+
+    <string name="camera_lock_af_key">lock_auto_focus</string>
+    <string name="camera_lock_af_title">Lock Autofocus</string>
+    <string name="camera_lock_af_on">Autofocus continuous will be auto disabled on start streaming</string>
+    <string name="camera_lock_af_off">No action on autofocus continuous on start streaming</string>
+
+    <!-- /Camera Preferences -->
 
     <string name="youtube">YouTube</string>
     <string name="youtube_stream">Next Matches</string>
@@ -216,6 +262,9 @@
     <string name="zoom_in">In</string>
     <string name="zoom_none">None</string>
     <string name="zoom_out">Out</string>
+
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
 
     <string name="warning_schedule_start_time">Cannot schedule event in the past!\nPlease check the date and time!</string>
 </resources>

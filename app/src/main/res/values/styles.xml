@@ -16,6 +16,11 @@
         <item name="android:editTextStyle">@style/DefaultEditTextStyle</item>
         <!--    <item name="android:buttonStyle">@style/buttonStyle</item>-->
         <!--    <item name="buttonStyle">@style/buttonStyle</item>-->
+        <item name="android:spinnerStyle">@style/CustomSpinnerStyle</item>
+    </style>
+
+    <style name="CustomSpinnerStyle" parent="Widget.AppCompat.Spinner">
+        <item name="android:spinnerMode">dialog</item>
     </style>
 
     <style name="SplashScreen" parent="AppTheme">

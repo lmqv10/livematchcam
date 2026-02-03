@@ -1,12 +1,47 @@
 <resources>
-    <!-- Reply Preference -->
-    <string-array name="reply_entries">
-        <item>Reply</item>
-        <item>Reply to all</item>
+    <string-array name="scoreboard_sizes">
+        <item>Hide</item>
+        <item>Minimal</item>
+        <item>Small</item>
+        <item>Normal</item>
+        <item>Large</item>
     </string-array>
 
-    <string-array name="reply_values">
-        <item>reply</item>
-        <item>reply_all</item>
+    <string-array name="scoreboard_sizes_values">
+        <item>-10</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+    </string-array>
+
+    <string-array name="spot_banner_sizes">
+        <item>Minimal</item>
+        <item>Small</item>
+        <item>Normal</item>
+        <item>Large</item>
+    </string-array>
+
+    <string-array name="spot_banner_sizes_values">
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+    </string-array>
+
+    <string-array name="main_banner_sizes">
+        <item>Minimal</item>
+        <item>Small</item>
+        <item>Normal</item>
+        <item>Large</item>
+        <item>Full</item>
+    </string-array>
+
+    <string-array name="main_banner_sizes_values">
+        <item>55</item>
+        <item>60</item>
+        <item>65</item>
+        <item>70</item>
+        <item>100</item>
     </string-array>
 </resources>

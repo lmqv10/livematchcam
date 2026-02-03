@@ -26,8 +26,7 @@
             android:id="@+id/video_source"
             android:layout_width="0dp"
             android:layout_weight="2"
-            android:layout_height="match_parent"
-            android:spinnerMode="dialog" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <LinearLayout
@@ -49,8 +48,7 @@
             android:id="@+id/video_resolutions"
             android:layout_width="0dp"
             android:layout_weight="2"
-            android:layout_height="match_parent"
-            android:spinnerMode="dialog" />
+            android:layout_height="match_parent"/>
     </LinearLayout>
 
     <LinearLayout
@@ -72,8 +70,7 @@
             android:id="@+id/encoder_fps"
             android:layout_width="0dp"
             android:layout_weight="2"
-            android:layout_height="match_parent"
-            android:spinnerMode="dialog" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <LinearLayout
@@ -94,8 +91,7 @@
             android:id="@+id/encoder_bitrate"
             android:layout_width="0dp"
             android:layout_weight="2"
-            android:layout_height="match_parent"
-            android:spinnerMode="dialog" />
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 

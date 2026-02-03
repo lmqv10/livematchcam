@@ -12,9 +12,6 @@ import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowInsets
-import android.view.WindowInsetsController
-import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
@@ -51,6 +48,7 @@ import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import coil.request.ImageRequest
+import it.lmqv.livematchcam.dialogs.PreferencesDialogFragment
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.repositories.MatchRepository
 import kotlinx.coroutines.flow.combine
@@ -351,15 +349,7 @@ class MatchActivity : BaseActivity(), INavigateDrawerActivity {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-       // menuInflater.inflate(R.menu.main_menu, menu)
-
-// TODO - Add Preferences Menu
-//        val menuItem = menu.findItem(R.id.menu_settings)
-//        val drawable = menuItem.icon
-//        drawable?.let {
-//            it.setTint(ContextCompat.getColor(this, R.color.primary))
-//            menuItem.icon = it
-//        }
+       menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
 
@@ -367,6 +357,16 @@ class MatchActivity : BaseActivity(), INavigateDrawerActivity {
         return when (item.itemId) {
             R.id.menu_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
+//                val dialog = PreferencesDialogFragment
+//                    .newInstance(R.xml.root_preferences)
+//                dialog.show(supportFragmentManager, "preferences_dialog")
+
+                // Esempio 2: Carica solo una sezione specifica (usando rootKey)
+                //val dialog = PreferencesDialogFragment.newInstance(
+                //    R.xml.root_preferences,
+                //    rootKey = "video_settings"
+                //)
+                //dialog.show(supportFragmentManager, "preference_dialog")
                 true
             }
             else -> super.onOptionsItemSelected(item)

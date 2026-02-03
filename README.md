@@ -1,29 +1,21 @@
 WIP 
-- API camera (autofocus, etc) da preferences
-  enableVideoStabilization()
-  enableOpticalVideoStabilization()
-  enableAutoFocus()
-  enableAutoExposure()
-  disableFaceDetection()
 
 TODO LIST
-- Share/QRCode on menu 
 - Battery Level
 - Banners positions configurabili
-- Fix Freeze Preview during streaming,. con microfono "attached"
+- Banners rotation con lista e configurabile
+- News Bar bottom
 
 IMPROVEMENT
+- Valutare anche il goLive() soprattutto UI!!!
 - Gestione del secondo colore di maglietta
 - Verificare caratteri e risoluzione schermo device.
 - spegnere automaticamente il bannerino quando si attiva il bannerone
 - Risoluzioni camera sorgente dinamiche
-- Banners rotation con lista e configurabile
 - Gestione di bannter multipli temporizzati (se possibile animati)
 - Implementare Video full screen per spot/pubblicità
 
 LOWER PRIORITY
-- Valutare anche il goLive() soprattutto UI!!!
-- Gestione ACCOUNT/MENU/FRAGMENT ...
 - Migliorare la vista dell'Account UI
 - Migliorare la vista remote control
 - Gestione flag YouTubeEnabled (on Firebase or...)

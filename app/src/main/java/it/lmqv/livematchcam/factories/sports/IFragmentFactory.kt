@@ -1,4 +1,4 @@
-package it.lmqv.livematchcam.factories
+package it.lmqv.livematchcam.factories.sports
 
 import it.lmqv.livematchcam.fragments.sports.BaseScoreBoardFragment
 import it.lmqv.livematchcam.fragments.sports.IBannersControlFragment
@@ -11,4 +11,5 @@ interface ISportsComponentsFactory {
     fun getScoreBoard() : IScoreBoardFragment<BaseScoreBoardFragment>
     fun getRemoteControl() : IRemoteControlFragment
     fun getBannersControl() : IBannersControlFragment
+    fun getBannersSlimControl() : IBannersControlFragment
 }

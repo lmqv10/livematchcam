@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="32dp" android:viewportHeight="24" android:viewportWidth="24" android:width="32dp">
+
+    <path android:fillColor="#00000000" android:pathData="M17,7H14M17,7V10M17,7L13.5,10.5M7,17H10M7,17V14M7,17L10.5,13.5" android:strokeColor="@color/secondary_dark" android:strokeLineCap="round" android:strokeLineJoin="round" android:strokeWidth="1.5"/>
+
+    <path android:fillColor="#00000000" android:pathData="M7,7H10M7,7V10M7,7L10.5,10.5M17,17H14M17,17V14M17,17L13.5,13.5" android:strokeColor="@color/secondary_dark" android:strokeLineCap="round" android:strokeLineJoin="round" android:strokeWidth="1.5"/>
+
+    <!-- Bordo tratteggiato manuale -->
+    <path android:fillColor="#00000000"
+        android:pathData="M3.464,3.464 L5.464,3.464 M7.464,3.464 L9.464,3.464 M11.464,3.464 L13.464,3.464 M15.464,3.464 L17.464,3.464 M19.464,3.464 L20.535,3.464 L20.535,5.464 M20.535,7.464 L20.535,9.464 M20.535,11.464 L20.535,13.464 M20.535,15.464 L20.535,17.464 M20.535,19.464 L20.535,20.535 L18.535,20.535 M16.535,20.535 L14.535,20.535 M12.535,20.535 L10.535,20.535 M8.535,20.535 L6.535,20.535 M4.535,20.535 L3.464,20.535 L3.464,18.535 M3.464,16.535 L3.464,14.535 M3.464,12.535 L3.464,10.535 M3.464,8.535 L3.464,6.535 M3.464,4.535 L3.464,3.464"
+        android:strokeAlpha="0.5"
+        android:strokeColor="@color/secondary_dark"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"/>
+
+</vector>

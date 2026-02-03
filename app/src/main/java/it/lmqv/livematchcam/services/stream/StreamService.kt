@@ -14,7 +14,6 @@ import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.gl.render.filters.`object`.BaseObjectFilterRender
 import com.pedro.encoder.input.sources.OrientationForced
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
-import com.pedro.encoder.input.sources.video.Camera2Source
 import com.pedro.encoder.input.sources.video.NoVideoSource
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.pedro.library.generic.GenericStream
@@ -29,6 +28,7 @@ import it.lmqv.livematchcam.factories.CameraResolutionsFactory
 import it.lmqv.livematchcam.factories.FiltersFactory
 import it.lmqv.livematchcam.factories.sports.Sports
 import it.lmqv.livematchcam.factories.VideoSourceFactory
+import it.lmqv.livematchcam.preferences.CameraAPIPreferencesManager
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.StreamConfigurationRepository
 import it.lmqv.livematchcam.services.firebase.Quadruple
@@ -50,6 +50,8 @@ import kotlinx.coroutines.launch
 //interface IPreviewEventListener {
 //    fun onPreviewStarted()
 //}
+
+
 
 class StreamService: Service(),
     IVideoSourceZoomHandler,
@@ -98,6 +100,8 @@ class StreamService: Service(),
     private var matchRepositoryJob : Job? = null
     private var scoreRepositoryJob : Job? = null
 
+    private lateinit var cameraAPIPreferencesManager: CameraAPIPreferencesManager
+
     private val bitrateAdapter = BitrateAdapter {
         genericStream.setVideoBitrateOnFly(it)
     }.apply {
@@ -122,6 +126,11 @@ class StreamService: Service(),
     override fun onCreate() {
         super.onCreate()
         Logd("StreamService :: onCreate")
+
+        cameraAPIPreferencesManager = CameraAPIPreferencesManager(this) {
+            Logd("StreamService :: cameraAPIPreferencesManager :: change filters preferences")
+            this.prepareFilters()
+        }
         streamConfigurationRepository = StreamConfigurationRepository(applicationContext)
 
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -209,11 +218,14 @@ class StreamService: Service(),
     override fun onDestroy() {
         super.onDestroy()
         Logd("StreamService :: onDestroy")
+
         this.streamConfigurationJob.cancel()
         this.matchRepositoryJob?.cancel()
         this.scoreRepositoryJob?.cancel()
         this.stopStream()
         genericStream.release()
+
+        cameraAPIPreferencesManager.destroy()
     }
 
 //    override fun onPreviewStarted() {
@@ -226,6 +238,7 @@ class StreamService: Service(),
 
     override fun onConnectionStarted(url: String) {
         this.connectCheckerCallback?.onConnectionStarted(url)
+        this.cameraAPIPreferencesManager.onConnectionStarted()
         this.startStreamingTimer()
     }
 
@@ -255,6 +268,7 @@ class StreamService: Service(),
 
     override fun onDisconnect() {
         this.connectCheckerCallback?.onDisconnect()
+        this.cameraAPIPreferencesManager.onDisconnect()
         this.stopStreamingTimer()
     }
 
@@ -326,20 +340,10 @@ class StreamService: Service(),
             if (genericStream.videoSource::class != videoSource::class) {
                 Logd("StreamService :: streamConfigurationRepository :: Change VideoSource to $videoSourceKind")
 
-                when (videoSource) {
-                    is Camera2Source -> {
-                        with(videoSource) {
-                            enableVideoStabilization()
-                            enableOpticalVideoStabilization()
-                            enableAutoFocus()
-                            enableAutoExposure()
-                            disableFaceDetection()
-                        }
-                    }
-                }
-
                 genericStream.changeVideoSource(videoSource)
 
+                Logd("StreamService :: set video source to camera preferences handler")
+                this.cameraAPIPreferencesManager.setVideoSource(genericStream.videoSource)
                 Logd("StreamService :: initialize and notify zoomHandler")
                 _videoSourceZoomHandler.value = VideoSourceZoomHandler(genericStream.videoSource)
                 Logd("StreamService :: initialize and notify videoCaptureFormats")
@@ -410,7 +414,7 @@ class StreamService: Service(),
                 genericStream.startPreview(this.surfaceView, true)
             } else if (genericStream.isOnPreview) {
                 Logd("StreamService :: restart Preview")
-                genericStream.stopPreview()
+                this.stopPreview()
                 this.prepareFilters()
                 genericStream.startPreview(this.surfaceView, true)
             }
@@ -425,7 +429,7 @@ class StreamService: Service(),
 //        try {
 //            if (genericStream.isOnPreview) {
 //                Logd("StreamService :: restart Preview")
-//                genericStream.stopPreview()
+//                this.stopPreview()
 //                this.prepareFilters()
 //                genericStream.startPreview(this.surfaceView, true)
 //            } else {
@@ -439,7 +443,11 @@ class StreamService: Service(),
 //    }
 
     fun stopPreview() {
-        if (genericStream.isOnPreview) genericStream.stopPreview()
+        if (genericStream.isOnPreview)
+        {
+            genericStream.stopPreview()
+            genericStream.getGlInterface().setPreviewResolution(videoStreamData.width, videoStreamData.height)
+        }
     }
 
     private fun startStreamingTimer() {
@@ -486,7 +494,6 @@ class StreamService: Service(),
     }
 
     private fun prepareFilters() {
-        genericStream.getGlInterface().setPreviewResolution(videoStreamData.width, videoStreamData.height)
         genericStream.getGlInterface().clearFilters()
 
         var filters = FiltersFactory.get(sport, applicationContext)

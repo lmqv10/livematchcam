@@ -3,7 +3,6 @@ package it.lmqv.livematchcam.factories.sports
 import android.os.Parcelable
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.adapters.CardItem
-import it.lmqv.livematchcam.factories.ISportsComponentsFactory
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

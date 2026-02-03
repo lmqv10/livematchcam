@@ -55,10 +55,6 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_settings" />
 
         <activity
             android:name=".SplashActivity"
@@ -98,13 +94,23 @@
 
         <activity
             android:name=".RemoteScoreActivity"
+            android:exported="false"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
             tools:ignore="DiscouragedApi" />
 
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
+            tools:ignore="DiscouragedApi"/>
+
+        <activity
             android:name=".AccountActivity"
+            android:exported="false"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
@@ -112,6 +118,7 @@
 
         <activity
             android:name=".YouTubeActivity"
+            android:exported="false"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"

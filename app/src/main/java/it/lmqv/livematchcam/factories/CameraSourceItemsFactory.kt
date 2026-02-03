@@ -14,7 +14,7 @@ object CameraSourceItemsFactory{
         var cameraSourceItems = VideoSourceKind.entries.map { x ->
             var resId = when (x) {
                 VideoSourceKind.CAMERA2 -> R.drawable.ic_device_camera
-                VideoSourceKind.UVC_SONY -> R.drawable.ic_uvc_camera
+                VideoSourceKind.UVC_SONY -> R.drawable.ic_handycam
             }
             CameraSourceItem(resId, x)
         }

@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import com.pedro.common.ConnectChecker
 import com.pedro.library.util.FpsListener
 import it.lmqv.livematchcam.databinding.ActivityStreamBinding
+import it.lmqv.livematchcam.dialogs.PreferencesDialogFragment
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.formatHourTime
 import it.lmqv.livematchcam.extensions.hideSystemUI
@@ -97,8 +98,16 @@ class StreamActivity : BaseActivity(),
             }
         }
 
+        binding.changeFiltersStrategy.setOnClickListener {
+            val dialog = PreferencesDialogFragment
+                .newInstance(R.xml.filters_preferences)//, getString(R.string.video_settings_screen_key))
+            dialog.show(supportFragmentManager, "preferences_dialog")
+
+        }
         binding.changeResolutionStrategy.setOnClickListener {
             this.changeVideoSettingsDialog()
+
+            // CUSTOM DIALOG
 //            this.cameraSettingsDialog
 //                .setEnabled(!this.streamService.isStreaming())
 //                .setVideoSource(streamConfigurationViewModel.videoSourceKind.value)
@@ -143,12 +152,12 @@ class StreamActivity : BaseActivity(),
 
                 var sportFragmentFactory = SportsFactory.get(sport)
                 var controlBarFragment = sportFragmentFactory.getControlBar()
+                var bannersContainerFragment = sportFragmentFactory.getBannersSlimControl()
                 supportFragmentManager.beginTransaction()
-                    .replace(
-                        binding.controlBarContainer.id,
-                        controlBarFragment as Fragment,
-                        "ControlBarFragmentTag"
-                    ).commit()
+                    .replace(binding.statusContainer.id, this.statusContainerFragment)
+                    .replace(binding.controlBarContainer.id, controlBarFragment as Fragment, "ControlBarFragmentTag")
+                    .replace(binding.bannersContainer.id, bannersContainerFragment as Fragment, "bannersContainerFragmentTag")
+                    .commit()
 
                 this.streamServiceConnector = StreamServiceConnector(this)
                 this.streamServiceConnector.setOnServiceConnected { streamService ->
@@ -198,10 +207,6 @@ class StreamActivity : BaseActivity(),
             }
         }
 
-        supportFragmentManager.beginTransaction()
-            .replace(binding.statusContainer.id,
-                this.statusContainerFragment)
-            .commit()
     }
 
     override fun onStart() {

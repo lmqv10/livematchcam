@@ -3,7 +3,7 @@ package it.lmqv.livematchcam
 import android.app.Application
 import android.content.Context
 import com.google.firebase.FirebaseApp
-import it.lmqv.livematchcam.extensions.Loge
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.utils.FontScaleHelper
 
 class LiveMatchApp : Application() {
@@ -11,9 +11,9 @@ class LiveMatchApp : Application() {
         super.onCreate()
 
         if (FirebaseApp.initializeApp(this) == null) {
-            Loge("Firebase failed to initialize!")
+            Logd("Firebase failed to initialize!")
         } else {
-            Loge("Firebase initialized successfully.")
+            Logd("Firebase initialized successfully.")
         }
 
         //Logd("LiveMatchApp::MatchRepository.init()")
