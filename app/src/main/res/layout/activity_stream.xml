@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.68" />
+            app:layout_constraintGuide_percent="0.72" />
 
         <ImageView
             android:id="@+id/microphone"
@@ -98,18 +98,30 @@
             android:layout_marginEnd="8dp"
             tools:ignore="ContentDescription" />
 
-<!--        <ImageView-->
-<!--            android:id="@+id/change_filters_strategy"-->
-<!--            android:layout_width="50dp"-->
-<!--            android:layout_height="50dp"-->
-<!--            android:background="@drawable/alpha_background"-->
-<!--            android:src="@drawable/ic_resize"-->
-<!--            android:clickable="false"-->
-<!--            app:layout_constraintTop_toTopOf="parent"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="@id/guideline_source"-->
-<!--            android:layout_marginEnd="8dp"-->
-<!--            tools:ignore="ContentDescription" />-->
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/go_live_container"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/guideline_source">
+
+            <TextView
+                android:id="@+id/go_live_tip"
+                android:text="@string/go_live"
+                android:textColor="@color/white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/go_live_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,10 +1,12 @@
 package it.lmqv.livematchcam.services.stream.filters
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.opengl.GLES20
+import androidx.preference.PreferenceManager
 import com.pedro.encoder.utils.gl.TranslateTo
-import it.lmqv.livematchcam.extensions.animateAlpha
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.loadBitmapOffscreen
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.services.stream.IVideoStreamData
@@ -31,29 +33,45 @@ class OverlayFilterRender(
     private var previousUrl:String? = null
     private var bitmap: Bitmap? = null
     private var isVisible: Boolean = false
-    private var width: Int = 1
-    private var height: Int = 1
+    private var width: Int = 100
+    private var height: Int = 100
+    private var maxFactor: Float = 18f
+
+    private var sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    private val preferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            key?.let {
+                handlePreferenceKey(it)
+            }
+        }
 
     init {
+        this.sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
+        this.handlePreferenceKey(filterDescriptor.preferencesSizeKey)
+
         sourceJob = sourceScope.launch {
             combine(
                 sourceDescriptor.url,
                 sourceDescriptor.isVisible
-            ) { url, visible -> Pair(url, visible) }
+            ) { currentUrl, visible -> Pair(currentUrl, visible) }
             .distinctUntilChanged()
-            .collect { (url, visible) ->
-                //Logd("OverlayFilterRender:: url $url visible $visible")
+            .collect { (currentUrl, visible) ->
                 try {
-                    isVisible = visible && url.isNotEmpty()
-                    if (isVisible && previousUrl != url) {
-                        previousUrl = url
-                        bitmap = loadBitmapOffscreen(context, url, targetWidth)
-                        onBitmapAvailable()
+                    Logd("OverlayFilterRender:: url $currentUrl visible $visible")
+                    isVisible = visible && currentUrl.isNotEmpty()
+                    if (isVisible && previousUrl != currentUrl) {
+                        previousUrl = currentUrl
+                        bitmap = loadBitmapOffscreen(context, currentUrl, targetWidth)
+                        this@OverlayFilterRender.scaleSprite()
+                        this@OverlayFilterRender.setImage(bitmap)
+                        this@OverlayFilterRender.translateSprite()
+                    } else {
+                        Logd("OverlayFilterRender:: load bitmap not required")
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     CoroutineScope(Dispatchers.Main).launch {
-                        context.toast("Can't load image ${url}")
+                        context.toast("Can't load image $currentUrl")
                     }
                 }
             }
@@ -62,22 +80,20 @@ class OverlayFilterRender(
 
     override fun release() {
         super.release()
-        //Logd("OverlayFilterRender::release")
         sourceJob.cancel()
+        this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
 
     override fun drawFilter() {
         super.drawFilter()
-        if (!isVisible || this.bitmap == null) {
-            GLES20.glUniform1f(uAlphaHandle, 0f)
-        }
+        var targetAlpha = if (!isVisible || this.bitmap == null) { 0f } else { animationDescriptor.targetAlpha }
+        GLES20.glUniform1f(uAlphaHandle, targetAlpha)
     }
 
     override fun setVideoStreamData(videoStreamData: IVideoStreamData) {
+        Logd("OverlayFilterRender::setVideoStreamData ${videoStreamData.width}x${videoStreamData.height}")
         this.width = videoStreamData.width
         this.height = videoStreamData.height
-        //Logd("OverlayFilterRender::setVideoStreamData ${width}x$height")
-        onBitmapAvailable()
     }
 
     private fun convertDpToPx(dp: Int): Int {
@@ -85,42 +101,51 @@ class OverlayFilterRender(
         return (dp * density).toInt()
     }
 
-    @Synchronized
-    fun onBitmapAvailable() {
+    private fun scaleSprite() {
         this.bitmap?.let {
-            CoroutineScope(Dispatchers.Main).launch {
-                val defaultScaleX = (it.width.times(100) / width).toFloat()
-                val defaultScaleY = (it.height.times(100) / height).toFloat()
+            Logd("OverlayFilterRender::scaleSprite ${it.width}x${it.height} overlay ${width}x${height}")
 
-                val factorX = filterDescriptor.maxFactor / defaultScaleX
+            val defaultScaleX = (it.width.times(100) / width).toFloat()
+            val defaultScaleY = (it.height.times(100) / height).toFloat()
 
-                val scaleX = factorX * defaultScaleX
-                val scaleY = factorX * defaultScaleY
+            val factorX = this@OverlayFilterRender.maxFactor / defaultScaleX
 
-                animateAlpha(0f, animationDescriptor.targetAlpha, animationDescriptor.duration) {
-                    setImage(it)
-                    setScale(scaleX, scaleY)
-                    translateSprite()
-                }
-            }
+            val scaleX = factorX * defaultScaleX
+            val scaleY = factorX * defaultScaleY
+
+            setScale(scaleX, scaleY)
         }
     }
 
     private fun translateSprite() {
-        var maxFactor = filterDescriptor.maxFactor
+        var factor = this.maxFactor
         var offset= if (streamObject.width > streamObject.height) { streamObject.height / streamObject.width * 100f } else { 0f }
         var margin = 2f
 
         when (filterDescriptor.translateTo) {
-            TranslateTo.CENTER -> setPosition(50f - maxFactor / 2f, 50f - maxFactor / 2f)
-            TranslateTo.TOP -> setPosition(50f - maxFactor / 2f, margin)
-            TranslateTo.LEFT -> setPosition(margin, 50f - maxFactor / 2f)
+            TranslateTo.CENTER -> setPosition(50f - factor / 2f, 50f - factor / 2f)
+            TranslateTo.TOP -> setPosition(50f - factor / 2f, margin)
+            TranslateTo.LEFT -> setPosition(margin, 50f - factor / 2f)
             TranslateTo.TOP_LEFT -> setPosition(margin, margin)
-            TranslateTo.RIGHT -> setPosition(100f - maxFactor - margin, 50f - maxFactor / 2f)
-            TranslateTo.TOP_RIGHT -> setPosition(100f - maxFactor - margin, margin)
-            TranslateTo.BOTTOM -> setPosition(50f - maxFactor / 2f, 100f - maxFactor + offset - margin)
-            TranslateTo.BOTTOM_LEFT -> setPosition(margin, 100f - maxFactor - margin)
-            TranslateTo.BOTTOM_RIGHT -> setPosition(100f - maxFactor - margin, 100f - maxFactor - margin)
+            TranslateTo.RIGHT -> setPosition(100f - factor - margin, 50f - factor / 2f)
+            TranslateTo.TOP_RIGHT -> setPosition(100f - factor - margin, margin)
+            TranslateTo.BOTTOM -> setPosition(50f - factor / 2f, 100f - factor + offset - margin)
+            TranslateTo.BOTTOM_LEFT -> setPosition(margin, 100f - factor - margin)
+            TranslateTo.BOTTOM_RIGHT -> setPosition(100f - factor - margin, 100f - factor - margin)
+        }
+    }
+
+    private fun handlePreferenceKey(key: String) {
+        if (key == filterDescriptor.preferencesSizeKey) {
+            this.maxFactor = sharedPreferences.getString(filterDescriptor.preferencesSizeKey, filterDescriptor.defaultSize.toString())?.toFloatOrNull() ?: filterDescriptor.defaultSize.toFloat()
+            try {
+                scaleSprite()
+                translateSprite()
+            } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    context.toast("OverlayFilterRender::handlePreferenceKey ${e.message.toString()}")
+                }
+            }
         }
     }
 }

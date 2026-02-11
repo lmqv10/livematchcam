@@ -153,7 +153,7 @@ fun List<Size>.toCameraSourceParameters() : List<VideoCaptureFormat> {
 
 suspend fun loadDrawableOffscreen(
     context: Context,
-    data: Any?,
+    data: String?,
     @DrawableRes icon: Int = 0
 ): Drawable? {
     val request = ImageRequest.Builder(context)
@@ -164,7 +164,7 @@ suspend fun loadDrawableOffscreen(
 }
 
 suspend fun loadBitmapOffscreen(context: Context,
-    data: Any?,
+    data: String?,
 targetWidth: Int) : Bitmap? {
     return loadDrawableOffscreen(context, data)?.toBitmap()?.let {
         return it.scale(targetWidth, targetWidth * it.height / it.width)

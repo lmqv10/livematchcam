@@ -16,8 +16,7 @@ import kotlinx.coroutines.launch
 import android.os.SystemClock;
 
 class CameraAPIPreferencesManager(
-    private val context : Context,
-    private val onFiltersChanged : () -> Unit)
+    private val context : Context)
     : CameraCallbacks {
 
     private val KEY_HAS_CAMERA_STATUS_NOTIFICATIONS = context.getString(R.string.camera_status_notifications_key)
@@ -25,10 +24,6 @@ class CameraAPIPreferencesManager(
     private val KEY_VIDEO_STABILIZATION = context.getString(R.string.camera_video_stabilization_key)
     private val KEY_OPTICAL_VIDEO_STABILIZATION = context.getString(R.string.camera_optical_video_stabilization_key)
     private val KEY_LOCK_AUTO_FOCUS = context.getString(R.string.camera_lock_af_key)
-
-    private val KEY_SCORE_BOARD_SIZE = context.getString(R.string.scoreboard_size_key)
-    private val KEY_SPOT_BANNER_SIZE = context.getString(R.string.spot_banner_size_key)
-    private val KEY_MAIN_BANNER_SIZE = context.getString(R.string.main_banner_size_key)
 
     private var hasNotifications: Boolean = false
 
@@ -64,12 +59,6 @@ class CameraAPIPreferencesManager(
 
             when (it) {
                 is Camera2Source -> when (key) {
-                    KEY_SCORE_BOARD_SIZE,
-                    KEY_SPOT_BANNER_SIZE,
-                    KEY_MAIN_BANNER_SIZE -> {
-                        this.onFiltersChanged.invoke()
-                    }
-
                     KEY_HAS_CAMERA_STATUS_NOTIFICATIONS -> {
                         var isEnabled = sharedPreferences.getBoolean(key, false)
                         this.hasNotifications = isEnabled
@@ -140,12 +129,12 @@ class CameraAPIPreferencesManager(
         }
     }
 
-    fun destroy() {
+    fun cancel() {
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
 
     override fun onCameraChanged(facing: CameraHelper.Facing) {
-        //showNotification("camera started")
+        showNotification("camera changed")
         //handlePreferenceKey(KEY_AUTO_FOCUS)
         handlePreferenceKey(KEY_VIDEO_STABILIZATION)
         handlePreferenceKey(KEY_OPTICAL_VIDEO_STABILIZATION)
@@ -155,7 +144,9 @@ class CameraAPIPreferencesManager(
         showNotification("camera error: $error")
     }
 
-    override fun onCameraOpened() { }
+    override fun onCameraOpened() {
+        showNotification("camera opened")
+    }
 
     override fun onCameraDisconnected() {
         showNotification("camera disconnected")

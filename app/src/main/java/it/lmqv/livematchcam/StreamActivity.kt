@@ -150,15 +150,6 @@ class StreamActivity : BaseActivity(),
             MatchRepository.sport.collectLatest { sport ->
                 Logd("StreamActivity :: MatchRepository.sport $sport")
 
-                var sportFragmentFactory = SportsFactory.get(sport)
-                var controlBarFragment = sportFragmentFactory.getControlBar()
-                var bannersContainerFragment = sportFragmentFactory.getBannersSlimControl()
-                supportFragmentManager.beginTransaction()
-                    .replace(binding.statusContainer.id, this.statusContainerFragment)
-                    .replace(binding.controlBarContainer.id, controlBarFragment as Fragment, "ControlBarFragmentTag")
-                    .replace(binding.bannersContainer.id, bannersContainerFragment as Fragment, "bannersContainerFragmentTag")
-                    .commit()
-
                 this.streamServiceConnector = StreamServiceConnector(this)
                 this.streamServiceConnector.setOnServiceConnected { streamService ->
                     Logd("StreamActivity :: setOnServiceConnected")
@@ -204,6 +195,17 @@ class StreamActivity : BaseActivity(),
 
                     //this.initCameraSettingsDialog()
                 }
+
+                var sportFragmentFactory = SportsFactory.get(sport)
+                var controlBarFragment = sportFragmentFactory.getControlBar()
+                var bannersContainerFragment = sportFragmentFactory.getBannersSlimControl()
+
+                supportFragmentManager.beginTransaction()
+                    .replace(binding.statusContainer.id, this.statusContainerFragment)
+                    .replace(binding.controlBarContainer.id, controlBarFragment as Fragment, "ControlBarFragmentTag")
+                    .replace(binding.bannersContainer.id, bannersContainerFragment as Fragment, "bannersContainerFragmentTag")
+                    .commit()
+
             }
         }
 

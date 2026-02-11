@@ -18,7 +18,8 @@ data class RotatorDescriptor(
 )
 
 data class FilterDescriptor(
-    val maxFactor: Float = 25f,
+    val defaultSize: Float = 18f,
+    val preferencesSizeKey: String = "",
     val translateTo : TranslateTo = TranslateTo.TOP_LEFT
 )
 

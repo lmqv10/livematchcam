@@ -1,8 +1,10 @@
 package it.lmqv.livematchcam.services.stream.filters
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Canvas
 import androidx.core.graphics.createBitmap
+import androidx.preference.PreferenceManager
 import androidx.viewbinding.ViewBinding
 import com.pedro.encoder.utils.gl.ImageStreamObject
 import com.pedro.encoder.utils.gl.TranslateTo
@@ -28,13 +30,30 @@ abstract class ScoreboardViewFilterRender<T>(
 
     private var width: Int = 0
     private var height: Int = 0
+    private var maxFactor: Float = 18f
+
+    private var sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+    private val preferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            key?.let {
+                if (it == filterDescriptor.preferencesSizeKey) {
+                    this.handlePreference()
+                    this.scaleSprite()
+                    this.translateSprite()
+                }
+            }
+        }
 
     init {
         streamObject = ImageStreamObject()
+
+        this.sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
+        this.handlePreference()
     }
 
     override fun release() {
         super.release()
+        this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
         _binding = null
     }
 
@@ -67,12 +86,11 @@ abstract class ScoreboardViewFilterRender<T>(
 
     private fun scaleSprite() {
         binding.root.wrapLayout()
-        var scale = this.width * filterDescriptor.maxFactor / binding.root.measuredWidth
+        var scale = this.width * this.maxFactor / binding.root.measuredWidth
         setScale(scale, scale)
     }
 
     private fun translateSprite() {
-        var maxFactor = filterDescriptor.maxFactor
         var offset= if (streamObject.width > streamObject.height) { streamObject.height / streamObject.width * 100f } else { 0f }
 
         when (filterDescriptor.translateTo) {
@@ -86,6 +104,10 @@ abstract class ScoreboardViewFilterRender<T>(
             TranslateTo.BOTTOM_LEFT -> setPosition(0f, 100f - maxFactor)
             TranslateTo.BOTTOM_RIGHT -> setPosition(100f - maxFactor, 100f - maxFactor)
         }
+    }
+
+    private fun handlePreference() {
+        this.maxFactor = sharedPreferences.getString(filterDescriptor.preferencesSizeKey, filterDescriptor.defaultSize.toString())?.toFloatOrNull() ?: filterDescriptor.defaultSize.toFloat()
     }
 
     abstract override fun match(match: Match)

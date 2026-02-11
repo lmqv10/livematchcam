@@ -51,8 +51,6 @@ import kotlinx.coroutines.launch
 //    fun onPreviewStarted()
 //}
 
-
-
 class StreamService: Service(),
     IVideoSourceZoomHandler,
     //IPreviewEventListener,
@@ -127,10 +125,8 @@ class StreamService: Service(),
         super.onCreate()
         Logd("StreamService :: onCreate")
 
-        cameraAPIPreferencesManager = CameraAPIPreferencesManager(this) {
-            Logd("StreamService :: cameraAPIPreferencesManager :: change filters preferences")
-            this.prepareFilters()
-        }
+        cameraAPIPreferencesManager = CameraAPIPreferencesManager(this)
+
         streamConfigurationRepository = StreamConfigurationRepository(applicationContext)
 
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -155,16 +151,16 @@ class StreamService: Service(),
             .distinctUntilChanged()
             .collect { (fps, bitrate, videoCaptureFormat,videoSourceKind) ->
 
-                Logd("StreamService :: streamConfigurationRepository :: ${this@StreamService.videoSourceKind} vs $videoSourceKind")
+                //Logd("StreamService :: streamConfigurationRepository :: ${this@StreamService.videoSourceKind} vs $videoSourceKind")
                 if (this@StreamService.videoSourceKind != videoSourceKind) {
                     this@StreamService.videoSourceKind = videoSourceKind
                     var videoSource = VideoSourceFactory.get(videoSourceKind, baseContext)
                     this@StreamService.changeVideoSource(videoSource)
                 }
 
-                Logd("StreamService :: streamConfigurationRepository :: cameraSourceParameters :: ${videoCaptureFormat}")
-                Logd("StreamService :: streamConfigurationRepository :: ${videoStreamData.height}p@${videoStreamData.fps}fps vs ${videoCaptureFormat.height}p@${fps}fps")
-                Logd("StreamService :: streamConfigurationRepository :: bitrate: ${videoStreamData.bitrate} vs ${bitrate}")
+//                Logd("StreamService :: streamConfigurationRepository :: cameraSourceParameters :: ${videoCaptureFormat}")
+//                Logd("StreamService :: streamConfigurationRepository :: ${videoStreamData.height}p@${videoStreamData.fps}fps vs ${videoCaptureFormat.height}p@${fps}fps")
+//                Logd("StreamService :: streamConfigurationRepository :: bitrate: ${videoStreamData.bitrate} vs ${bitrate}")
 
                 if (//this@StreamService.sport != sport ||
                     this@StreamService.videoStreamData.width != videoCaptureFormat.width ||
@@ -224,8 +220,7 @@ class StreamService: Service(),
         this.scoreRepositoryJob?.cancel()
         this.stopStream()
         genericStream.release()
-
-        cameraAPIPreferencesManager.destroy()
+        cameraAPIPreferencesManager.cancel()
     }
 
 //    override fun onPreviewStarted() {
@@ -295,10 +290,6 @@ class StreamService: Service(),
     fun getVideoFormats(): List<VideoCaptureFormat> {
         return CameraResolutionsFactory.get(genericStream.videoSource)
     }
-
-//    fun getVideoSource(): VideoSource {
-//        return genericStream.videoSource
-//    }
 
     fun toggleMicrophoneAudio() : Boolean {
         return if (microphoneSource.isMuted()) {
@@ -405,36 +396,42 @@ class StreamService: Service(),
     fun preparePreview()
     {
         try {
+//            Logd("StreamService :: preparePreview - start")
+//            Logd("StreamService :: preparePreview - genericStream.isStreaming ${genericStream.isStreaming}")
+//            Logd("StreamService :: preparePreview - genericStream.isOnPreview ${genericStream.isOnPreview}")
             if (!genericStream.isStreaming) {
-                Logd("StreamService :: preparePreview $sport")
-                Logd("StreamService :: preparePreview $videoStreamData")
+//                Logd("StreamService :: preparePreview - $sport")
+//                Logd("StreamService :: preparePreview - $videoStreamData")
                 this.stopPreview()
-                this.prepareFilters()
                 this.prepare()
+                this.prepareFilters()
                 genericStream.startPreview(this.surfaceView, true)
             } else if (genericStream.isOnPreview) {
-                Logd("StreamService :: restart Preview")
+                //Logd("StreamService :: preparePreview - restart Preview")
                 this.stopPreview()
                 this.prepareFilters()
                 genericStream.startPreview(this.surfaceView, true)
+            //} else {
+            //    Logd("StreamService :: preparePreview - Not Handled case")
             }
+            //Logd("StreamService :: preparePreview - end")
         }
         catch (e: Exception) {
             e.printStackTrace()
-            Loge("preparePreview:: Exception ${e.message.toString()}")
+            Loge("StreamService :: preparePreview:: Exception ${e.message.toString()}")
         }
     }
 
 //    fun restartPreview() {
 //        try {
-//            if (genericStream.isOnPreview) {
+//            //if (genericStream.isOnPreview) {
 //                Logd("StreamService :: restart Preview")
 //                this.stopPreview()
 //                this.prepareFilters()
 //                genericStream.startPreview(this.surfaceView, true)
-//            } else {
-//                Logd("StreamService :: Restart Preview not available")
-//            }
+//            //} else {
+//            //    Logd("StreamService :: Restart Preview not available")
+//            //}
 //        }
 //        catch (e: Exception) {
 //            e.printStackTrace()
@@ -446,7 +443,6 @@ class StreamService: Service(),
         if (genericStream.isOnPreview)
         {
             genericStream.stopPreview()
-            genericStream.getGlInterface().setPreviewResolution(videoStreamData.width, videoStreamData.height)
         }
     }
 
@@ -469,6 +465,32 @@ class StreamService: Service(),
         _streamingElapsedTime.value = timeElapsedInSeconds
     }
 
+    private fun prepareFilters() {
+//        Logd("StreamService :: prepareFilters")
+//        genericStream.getGlInterface().setPreviewResolution(videoStreamData.width, videoStreamData.height)
+        genericStream.getGlInterface().clearFilters()
+
+        var filters = FiltersFactory.get(sport, applicationContext)
+        with (genericStream.getGlInterface()) {
+
+            filters.forEachIndexed { index, filter ->
+//                if (filtersCount() > index) {
+//                    Logd("StreamService :: removeFilter $index $filter")
+//                    removeFilter(index)
+//                }
+//                Logd("StreamService :: addFilter $filter")
+                addFilter(index, filter)
+
+                if (filter is IOverlayObjectFilterRender) {
+                    //Logd("StreamService :: filter $filter setVideoStreamData $videoStreamData")
+                    filter.setVideoStreamData(videoStreamData)
+                }
+            }
+        }
+
+        this.prepareMatchDataListeners(filters)
+    }
+
     private fun prepareMatchDataListeners(filters: List<BaseObjectFilterRender>) {
         this.matchRepositoryJob?.cancel()
         this.scoreRepositoryJob?.cancel()
@@ -488,24 +510,9 @@ class StreamService: Service(),
                     scoreBoardFilterRender.score(score)
                 }
             }
-        //} else {
-        //    Logd("StreamService :: prepareListeners :: not required")
+            //} else {
+            //    Logd("StreamService :: prepareListeners :: not required")
         }
-    }
-
-    private fun prepareFilters() {
-        genericStream.getGlInterface().clearFilters()
-
-        var filters = FiltersFactory.get(sport, applicationContext)
-        filters.forEachIndexed { index, filter ->
-            //Logd("StreamService :: addFilter $filter")
-            genericStream.getGlInterface().addFilter(index, filter)
-            if (filter is IOverlayObjectFilterRender) {
-                //Logd("StreamService :: filter $filter setVideoStreamData $videoStreamData")
-                filter.setVideoStreamData(videoStreamData)
-            }
-        }
-        this.prepareMatchDataListeners(filters)
     }
 
     private fun keepAliveTrick() {

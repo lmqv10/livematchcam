@@ -1,4 +1,5 @@
 WIP 
+- Valutare anche il goLive() soprattutto UI!!!
 
 TODO LIST
 - Battery Level
@@ -7,7 +8,6 @@ TODO LIST
 - News Bar bottom
 
 IMPROVEMENT
-- Valutare anche il goLive() soprattutto UI!!!
 - Gestione del secondo colore di maglietta
 - Verificare caratteri e risoluzione schermo device.
 - spegnere automaticamente il bannerino quando si attiva il bannerone
@@ -70,3 +70,6 @@ f67fee1fd18f3ce57855964b806a4f3a
 
 https://avisbiella.it/wp-content/uploads/2022/01/Logo_AVIS.png
 https://www.nowpadova.com/images/2020/01/23/AVIST_large.jpg
+
+
+https://raw.githubusercontent.com/paolodito-lab/loghi/refs/heads/main/ACCIATUBI_PICCO_VIDEO.png
