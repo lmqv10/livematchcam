@@ -8,9 +8,13 @@ import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.strategies.IMatchSyncStrategy
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.services.firebase.EventInfo
+import it.lmqv.livematchcam.services.firebase.FilterOverlay
+import it.lmqv.livematchcam.services.firebase.FilterOverlayEvent
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
+import it.lmqv.livematchcam.services.firebase.OverlaysModel
 import it.lmqv.livematchcam.services.firebase.Schedule
 import it.lmqv.livematchcam.services.firebase.ScoreFactory
+import it.lmqv.livematchcam.services.firebase.ScoreboardOverlay
 import it.lmqv.livematchcam.strategies.SyncDataListenerContract
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,8 +50,17 @@ object MatchRepository : SyncDataListenerContract {
 
     private var currentEventInfo = EventInfo()
 
-    private var _currentSchedules = MutableStateFlow<List<Schedule>>(listOf<Schedule>())
-    var currentSchedules: StateFlow<List<Schedule>>  = _currentSchedules
+    private var _schedules = MutableStateFlow<List<Schedule>>(listOf<Schedule>())
+    var schedules: StateFlow<List<Schedule>>  = _schedules
+
+    private var _scoreboard = MutableStateFlow<ScoreboardOverlay>(ScoreboardOverlay())
+    var scoreboard: StateFlow<ScoreboardOverlay>  = _scoreboard
+
+//    private var _filterEvent = MutableStateFlow<FilterOverlayEvent>(FilterOverlayEvent())
+//    var filterEvent: StateFlow<FilterOverlayEvent>  = _filterEvent
+//
+    private var _filters = MutableStateFlow<List<FilterOverlayEvent>>(listOf())
+    var filters: StateFlow<List<FilterOverlayEvent>>  = _filters
 
     private var _firebaseAccountData = MutableStateFlow<FirebaseAccountDataContract>(FirebaseAccountDataContract())
     var firebaseAccountData: StateFlow<FirebaseAccountDataContract>  = _firebaseAccountData
@@ -201,6 +214,16 @@ object MatchRepository : SyncDataListenerContract {
         syncStrategy.updateEventInfo(updatedEventInfo)
     }
 
+    @Synchronized
+    fun updateFilter(filter: FilterOverlayEvent) {
+        syncStrategy.updateFilter(filter)
+    }
+
+    @Synchronized
+    fun updateScoreboard(scoreboard: ScoreboardOverlay) {
+        syncStrategy.updateScoreboard(scoreboard)
+    }
+
     override fun onChangeMatch(match: Match) {
         Logd("$instanceId :: MatchRepository:: onChange $match")
         this.notifyMatchChanges(match)
@@ -286,20 +309,67 @@ object MatchRepository : SyncDataListenerContract {
         Logd("$instanceId :: MatchRepository:: onChange $schedules")
         this.notifySchedulesUpdated(schedules)
     }
-
     @Synchronized
     private fun notifySchedulesUpdated(updatedSchedules: List<Schedule>) {
         try {
             Logd("$instanceId :: MatchRepository::notifySchedulesUpdated:: $updatedSchedules")
 
-            if (_currentSchedules.value != updatedSchedules) {
-                _currentSchedules.value = updatedSchedules
+            if (_schedules.value != updatedSchedules) {
+                _schedules.value = updatedSchedules
             }
         } catch (e: Exception) {
             e.printStackTrace()
             Loge("$instanceId :: MatchRepository::Exception::notifySchedulesUpdated:: ${e.message.toString()}")
         }
     }
+
+    @Synchronized
+    override fun onChangeScoreboard(scoreboard: ScoreboardOverlay) {
+        this.notifyScoreboardUpdated(scoreboard)
+    }
+
+    @Synchronized
+    private fun notifyScoreboardUpdated(scoreboard: ScoreboardOverlay) {
+        try {
+            Logd("$instanceId :: MatchRepository::notifyScoreboardUpdated:: $scoreboard")
+
+            if (_scoreboard.value != scoreboard) {
+                _scoreboard.value = scoreboard
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Loge("$instanceId :: MatchRepository::Exception::notifyScoreboardUpdated:: ${e.message.toString()}")
+        }
+    }
+    override fun onChangeFilters(updatedfilters: List<FilterOverlayEvent>) {
+        Logd("$instanceId :: MatchRepository::onChangeFilters:: $updatedfilters")
+        this.notifyFilterEventsUpdated(updatedfilters)
+    }
+    @Synchronized
+    private fun notifyFilterEventsUpdated(updatedfilters: List<FilterOverlayEvent>) {
+        try {
+            Logd("$instanceId :: MatchRepository::notifyFilterEventsUpdated:: $updatedfilters")
+            _filters.value = updatedfilters.toList()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Loge("$instanceId :: MatchRepository::Exception::notifyFilterEventsUpdated:: ${e.message.toString()}")
+        }
+    }
+
+//    override fun onChangeFilter(filterEvent: FilterOverlayEvent) {
+//        Logd("$instanceId :: MatchRepository::onChangeFilter:: $filterEvent")
+//        this.notifyFilterEventUpdated(filterEvent)
+//    }
+//    @Synchronized
+//    private fun notifyFilterEventUpdated(filterEvent: FilterOverlayEvent) {
+//        try {
+//            Logd("$instanceId :: MatchRepository::notifyFilterEventUpdated:: $filterEvent")
+//            _filterEvent.value = filterEvent
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            Loge("$instanceId :: MatchRepository::Exception::notifyFilterEventUpdated:: ${e.message.toString()}")
+//        }
+//    }
 
     override fun onChangeFirebaseAccount(account: FirebaseAccountDataContract) {
         Logd("$instanceId :: MatchRepository:: onChange $account")

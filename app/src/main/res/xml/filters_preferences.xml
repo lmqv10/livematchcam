@@ -6,32 +6,14 @@
 <!--        android:title="@string/overlays_header"-->
 <!--        app:icon="@drawable/ic_resize">-->
 
-    <DropDownPreference
-        app:key="@string/scoreboard_size_key"
-        android:icon="@drawable/ic_scoreboard"
-        app:title="@string/scoreboard_size_title"
-        app:defaultValue="@integer/default_scoreboard_size"
-        app:entries="@array/scoreboard_sizes"
-        app:useSimpleSummaryProvider="true"
-        app:entryValues="@array/scoreboard_sizes_values"/>
-
-    <DropDownPreference
-        android:icon="@drawable/ic_spot_top_right"
-        app:key="@string/spot_banner_size_key"
-        app:title="@string/spot_banner_size_title"
-        app:defaultValue="@integer/default_spot_banner_size"
-        app:entries="@array/spot_banner_sizes"
-        app:useSimpleSummaryProvider="true"
-        app:entryValues="@array/spot_banner_sizes_values"/>
-
-    <DropDownPreference
-        android:icon="@drawable/ic_main_bottom"
-        app:key="@string/main_banner_size_key"
-        app:title="@string/main_banner_size_title"
-        app:defaultValue="@integer/default_main_banner_size"
-        app:entries="@array/main_banner_sizes"
-        app:useSimpleSummaryProvider="true"
-        app:entryValues="@array/main_banner_sizes_values" />
-
+<!--    <SeekBarPreference-->
+<!--        android:icon="@drawable/ic_spot_top_right"-->
+<!--        android:key="volume"-->
+<!--        android:title="Volume"-->
+<!--        android:summary="Regola il volume"-->
+<!--        android:defaultValue="50"-->
+<!--        app:min="0"-->
+<!--        android:max="100"-->
+<!--        app:showSeekBarValue="true" />-->
 <!--    </PreferenceCategory>-->
 </PreferenceScreen>

@@ -163,14 +163,20 @@ suspend fun loadDrawableOffscreen(
         ?: AppCompatResources.getDrawable(context, icon)
 }
 
-suspend fun loadBitmapOffscreen(context: Context,
-    data: String?,
-targetWidth: Int) : Bitmap? {
+suspend fun loadBitmapOffscreen(context: Context, data: String?) : Bitmap? {
     return loadDrawableOffscreen(context, data)?.toBitmap()?.let {
-        return it.scale(targetWidth, targetWidth * it.height / it.width)
-            .copy(Bitmap.Config.ARGB_8888, true)
+        return it.copy(Bitmap.Config.ARGB_8888, true)
     }
 }
+
+//suspend fun loadBitmapOffscreen(context: Context,
+//    data: String?,
+//targetWidth: Int) : Bitmap? {
+//    return loadDrawableOffscreen(context, data)?.toBitmap()?.let {
+//        return it.scale(targetWidth, targetWidth * it.height / it.width)
+//            .copy(Bitmap.Config.ARGB_8888, true)
+//    }
+//}
 
 /*fun MenuItem.setColor(context: Context, @ColorRes color: Int) {
     val spannableString = SpannableString(title.toString())

@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="ToggleDrawerView">
+        <attr name="drawerIcon" format="reference" />
+    </declare-styleable>
+</resources>

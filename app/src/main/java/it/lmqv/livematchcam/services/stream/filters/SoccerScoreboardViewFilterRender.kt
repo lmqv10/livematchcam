@@ -6,7 +6,6 @@ import android.view.View
 import androidx.core.graphics.toColorInt
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentSoccerScoreBoardLightBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.formatTime
 import it.lmqv.livematchcam.extensions.loadDrawableOffscreen
@@ -21,10 +20,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class SoccerScoreboardViewFilterRender(
-    applicationContext: Context,
-    filterDescriptor: FilterDescriptor = FilterDescriptor()
-) : ScoreboardViewFilterRender<FragmentSoccerScoreBoardLightBinding>(applicationContext, filterDescriptor), ICounterListener {
+class SoccerScoreboardViewFilterRender(applicationContext: Context)
+    : ScoreboardViewFilterRender<FragmentSoccerScoreBoardLightBinding>(applicationContext), ICounterListener {
 
     private var previousHomeLogo: String? = null
     private var previousAwayLogo: String? = null
@@ -41,7 +38,7 @@ class SoccerScoreboardViewFilterRender(
 
     override fun onTick(timeElapsedInSeconds: Int) {
         binding.matchTime.text = formatTime(timeElapsedInSeconds)
-        render()
+        updateContentView()
     }
 
     override fun release() {
@@ -57,7 +54,8 @@ class SoccerScoreboardViewFilterRender(
             //Logd("SoccerScoreboardViewRenderer::match $match")
             this.handleHomeTeam(match)
             this.handleAwayTeam(match)
-            render()
+
+            updateContentView()
         } catch (e: Exception) {
             e.printStackTrace()
             Loge("SoccerScoreboardViewRenderer::match Exception:: ${e.message.toString()}")
@@ -71,7 +69,7 @@ class SoccerScoreboardViewFilterRender(
             this.handleScore(score as SoccerScore)
             this.handleCommand(score.command)
 
-            render()
+            updateContentView()
         } catch (e: Exception) {
             e.printStackTrace()
             Loge("SoccerScoreboardViewRenderer::score Exception:: ${e.message.toString()}")
@@ -98,7 +96,7 @@ class SoccerScoreboardViewFilterRender(
                     val drawable =
                         loadDrawableOffscreen(applicationContext, match.homeLogo, R.drawable.shield)
                     binding.homeLogo.setImageDrawable(drawable)
-                    render()
+                    updateContentView()
                 }
             } else {
                 binding.homeLogo.visibility = View.GONE
@@ -132,7 +130,7 @@ class SoccerScoreboardViewFilterRender(
                         R.drawable.shield
                     )
                     binding.awayLogo.setImageDrawable(drawable)
-                    render()
+                    updateContentView()
                 }
             } else {
                 binding.awayLogo.visibility = View.GONE
@@ -167,76 +165,3 @@ class SoccerScoreboardViewFilterRender(
         }
     }
 }
-
-/*
-open class ScoreBoardFilterRender(
-    var scoreBoardFragment: IScoreBoardFragment<BaseScoreBoardFragment>,
-    val filterDescriptor: FilterDescriptor = FilterDescriptor()
-) : OverlayObjectFilterRender(),
-    IScoreBoardFragment.OnUpdateCallback {
-
-    //private var previewVideoStreamData : IVideoStreamData? = null
-
-    init {
-        streamObject = ImageStreamObject()
-        scoreBoardFragment.setOnUpdate(this)
-    }
-
-    override fun drawFilter() {
-        super.drawFilter()
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, streamObjectTextureId[0])
-        GLES20.glUniform1f(uAlphaHandle, if (streamObjectTextureId[0] == -1) 0f else alpha)
-    }
-
-    override fun setVideoStreamData(videoStreamData: IVideoStreamData) {
-//        if (previewVideoStreamData == null
-//            || previewVideoStreamData?.width != videoStreamData.width
-//            || previewVideoStreamData?.height != videoStreamData.height) {
-//            previewVideoStreamData = videoStreamData
-
-            Logd("ScoreBoardFilterRender :: setVideoStreamData ${videoStreamData.width}x${videoStreamData.height}")
-            loadBitmapFromView { bitmap ->
-                val defaultScaleX = (bitmap.width * 100 / videoStreamData.width).toFloat()
-                val defaultScaleY = (bitmap.height * 100 / videoStreamData.height).toFloat()
-
-                val factorX = filterDescriptor.maxFactor / defaultScaleX
-                val scaleX = factorX * defaultScaleX
-                val scaleY = factorX * defaultScaleY
-                setImage(bitmap)
-                setScale(scaleX, scaleY)
-                //val position = filterDescriptor.position
-                //setPosition(position.x, position.y)
-                setPosition(filterDescriptor.translateTo)
-            }
-//        } else {
-//            Logd("ScoreBoardFilterRender :: setVideoStreamData no changes")
-//        }
-    }
-
-    override fun refresh() {
-        Logd("ScoreBoardFilterRender:: refresh()")
-        loadBitmapFromView { bitmap ->
-            setImage(bitmap)
-        }
-    }
-
-    private fun loadBitmapFromView(callback: (Bitmap) -> Unit) {
-        val view = (this.scoreBoardFragment as Fragment).view
-        view?.post {
-            val width = view.width
-            val height = view.height
-            val scoreBoardBitmap : Bitmap
-            if (width > 0 && height > 0) {
-                scoreBoardBitmap = createBitmap(view.width, view.height)
-            } else {
-                val drawable = ContextCompat.getDrawable(view.context, R.drawable.preview_missing)!!
-                scoreBoardBitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
-            }
-            val canvas = Canvas(scoreBoardBitmap)
-            view.draw(canvas)
-
-            callback(scoreBoardBitmap)
-        }
-    }
-}
-*/

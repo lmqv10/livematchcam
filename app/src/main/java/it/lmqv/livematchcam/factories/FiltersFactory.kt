@@ -2,22 +2,45 @@ package it.lmqv.livematchcam.factories
 
 import android.content.Context
 import com.pedro.encoder.input.gl.render.filters.`object`.BaseObjectFilterRender
-import com.pedro.encoder.utils.gl.TranslateTo
 import it.lmqv.livematchcam.factories.sports.Sports
-import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.stream.filters.BasketScoreboardViewFilterRender
-import it.lmqv.livematchcam.services.stream.filters.DimensionDescriptor
-import it.lmqv.livematchcam.services.stream.filters.FilterDescriptor
 import it.lmqv.livematchcam.services.stream.filters.OverlayFilterRender
 import it.lmqv.livematchcam.services.stream.filters.SoccerScoreboardViewFilterRender
-import it.lmqv.livematchcam.services.stream.filters.SourceDescriptor
 import it.lmqv.livematchcam.services.stream.filters.VolleyScoreboardViewFilterRender
-import it.lmqv.livematchcam.R
+import it.lmqv.livematchcam.services.stream.filters.OverlayObjectFilterRender
+
+enum class FilterPosition {
+    TOP_LEFT, TOP, TOP_RIGHT,
+    CENTER,
+    BOTTOM_LEFT, BOTTOM, BOTTOM_RIGHT
+}
 
 object FiltersFactory {
 
-    fun get(sport: Sports, applicationContext: Context) : List<BaseObjectFilterRender> {
+    fun getScoreBoard(sport: Sports, applicationContext: Context) : OverlayObjectFilterRender {
+        return when (sport) {
+            Sports.SOCCER -> SoccerScoreboardViewFilterRender(applicationContext)
+            Sports.BASKET -> BasketScoreboardViewFilterRender(applicationContext)
+            Sports.VOLLEY -> VolleyScoreboardViewFilterRender(applicationContext)
+        }
+    }
 
+    fun getFilters(applicationContext: Context) : List<BaseObjectFilterRender> {
+        return listOf(
+            OverlayFilterRender(applicationContext, FilterPosition.TOP_LEFT),
+            OverlayFilterRender(applicationContext, FilterPosition.TOP),
+            OverlayFilterRender(applicationContext, FilterPosition.TOP_RIGHT),
+//            OverlayFilterRender(applicationContext, FilterPosition.LEFT),
+            OverlayFilterRender(applicationContext, FilterPosition.CENTER),
+//            OverlayFilterRender(applicationContext, FilterPosition.RIGHT),
+            OverlayFilterRender(applicationContext, FilterPosition.BOTTOM_LEFT),
+            OverlayFilterRender(applicationContext, FilterPosition.BOTTOM),
+            OverlayFilterRender(applicationContext, FilterPosition.BOTTOM_RIGHT)
+        )
+    }
+
+    /*
+    fun get(sport: Sports, applicationContext: Context) : List<BaseObjectFilterRender> {
         val defaultScoreBoardSize = applicationContext.resources.getInteger(R.integer.default_scoreboard_size).toFloat()
         val scoreboardKey = applicationContext.resources.getString(R.string.scoreboard_size_key)
 
@@ -44,8 +67,7 @@ object FiltersFactory {
                         filterDescriptor = FilterDescriptor(
                             defaultSize = applicationContext.resources.getInteger(R.integer.default_spot_banner_size).toFloat(),
                             preferencesSizeKey = applicationContext.resources.getString(R.string.spot_banner_size_key),
-                            translateTo = TranslateTo.TOP_RIGHT),
-                        dimensionDescriptor = DimensionDescriptor()
+                            translateTo = TranslateTo.TOP_RIGHT)
                     ),
                     OverlayFilterRender(applicationContext,
                         sourceDescriptor = SourceDescriptor(
@@ -54,19 +76,12 @@ object FiltersFactory {
                         filterDescriptor = FilterDescriptor(
                             defaultSize = applicationContext.resources.getInteger(R.integer.default_main_banner_size).toFloat(),
                             preferencesSizeKey = applicationContext.resources.getString(R.string.main_banner_size_key),
-                            translateTo = TranslateTo.CENTER),
-                        dimensionDescriptor = DimensionDescriptor(500)
+                            translateTo = TranslateTo.CENTER)
                         //rotatorDescriptor = RotatorDescriptor(targetWidthDp = 250)
                     )
                 )
             Sports.VOLLEY ->
                 listOf(
-                    VolleyScoreboardViewFilterRender(applicationContext,
-                        filterDescriptor = FilterDescriptor(
-                            defaultSize = defaultScoreBoardSize,
-                            preferencesSizeKey = scoreboardKey,
-                            translateTo = TranslateTo.TOP_LEFT)
-                    ),
                     OverlayFilterRender(applicationContext,
                         sourceDescriptor = SourceDescriptor(
                             url = MatchRepository.spotBannerURL,
@@ -74,8 +89,7 @@ object FiltersFactory {
                         filterDescriptor = FilterDescriptor(
                             defaultSize = applicationContext.resources.getInteger(R.integer.default_spot_banner_size).toFloat(),
                             preferencesSizeKey = applicationContext.resources.getString(R.string.spot_banner_size_key),
-                            translateTo = TranslateTo.TOP_RIGHT),
-                        dimensionDescriptor = DimensionDescriptor()
+                            translateTo = TranslateTo.TOP_RIGHT)
                     ),
                     OverlayFilterRender(applicationContext,
                         sourceDescriptor = SourceDescriptor(
@@ -84,11 +98,17 @@ object FiltersFactory {
                         filterDescriptor = FilterDescriptor(
                             defaultSize = applicationContext.resources.getInteger(R.integer.default_main_banner_size).toFloat(),
                             preferencesSizeKey = applicationContext.resources.getString(R.string.main_banner_size_key),
-                            translateTo = TranslateTo.CENTER),
-                        dimensionDescriptor = DimensionDescriptor(500)
+                            translateTo = TranslateTo.CENTER)
                         //rotatorDescriptor = RotatorDescriptor(targetWidthDp = 250)
+                    ),
+                    VolleyScoreboardViewFilterRender(applicationContext,
+                        filterDescriptor = FilterDescriptor(
+                            defaultSize = defaultScoreBoardSize,
+                            preferencesSizeKey = scoreboardKey,
+                            translateTo = TranslateTo.TOP_LEFT)
                     )
                 )
         }
     }
+    */
 }

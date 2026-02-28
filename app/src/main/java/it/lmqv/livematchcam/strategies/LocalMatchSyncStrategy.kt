@@ -4,9 +4,11 @@ import android.content.Context
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.repositories.AccountRepository
 import it.lmqv.livematchcam.services.firebase.EventInfo
+import it.lmqv.livematchcam.services.firebase.FilterOverlayEvent
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
 import it.lmqv.livematchcam.services.firebase.FirebaseDataService
 import it.lmqv.livematchcam.services.firebase.Match
+import it.lmqv.livematchcam.services.firebase.ScoreboardOverlay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -81,5 +83,15 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
     override fun updateEventInfo(eventInfo: EventInfo) {
         //Logd("$instanceId: LocalMatchSyncStrategy::updateEventInfo")
         syncDataListenerContract.onChangeEventInfo(eventInfo)
+    }
+    override fun updateFilter(filter: FilterOverlayEvent) {
+        val current = it.lmqv.livematchcam.repositories.MatchRepository.filters.value.toMutableList()
+        val index = current.indexOfFirst { it.position == filter.position }
+        if (index >= 0) current[index] = filter else current.add(filter)
+        syncDataListenerContract.onChangeFilters(current)
+    }
+
+    override fun updateScoreboard(scoreboard: ScoreboardOverlay) {
+        syncDataListenerContract.onChangeScoreboard(scoreboard)
     }
 }

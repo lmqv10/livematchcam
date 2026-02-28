@@ -7,7 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.databinding.ActivityRemoteScoreBinding
 import it.lmqv.livematchcam.factories.sports.SportsFactory
 import it.lmqv.livematchcam.fragments.sports.BaseScoreBoardFragment
-import it.lmqv.livematchcam.fragments.sports.IBannersControlFragment
+import it.lmqv.livematchcam.fragments.sports.IFiltersControlFragment
 import it.lmqv.livematchcam.fragments.sports.IRemoteControlFragment
 import it.lmqv.livematchcam.fragments.sports.IScoreBoardFragment
 import it.lmqv.livematchcam.repositories.MatchRepository
@@ -20,7 +20,7 @@ class RemoteScoreActivity : BaseActivity(),
 
     private lateinit var binding: ActivityRemoteScoreBinding
     private lateinit var remoteControlFragment: IRemoteControlFragment
-    private lateinit var bannerControlFragment: IBannersControlFragment
+    private lateinit var bannerControlFragment: IFiltersControlFragment
     private lateinit var scoreBoardFragment: IScoreBoardFragment<BaseScoreBoardFragment>
 
     private lateinit var sportCollectJob : Job
@@ -49,7 +49,7 @@ class RemoteScoreActivity : BaseActivity(),
                 val sportFragmentFactory = SportsFactory.get(sport)
                 remoteControlFragment = sportFragmentFactory.getRemoteControl()
                 scoreBoardFragment = sportFragmentFactory.getScoreBoard()
-                bannerControlFragment = sportFragmentFactory.getBannersControl()
+                bannerControlFragment = sportFragmentFactory.getFiltersControl()
                 scoreBoardFragment.setOnUpdate(this@RemoteScoreActivity)
 
                 supportFragmentManager

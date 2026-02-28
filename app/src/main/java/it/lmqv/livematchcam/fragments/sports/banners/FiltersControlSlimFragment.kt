@@ -4,22 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import coil.load
-import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.repositories.MatchRepository
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import it.lmqv.livematchcam.databinding.FragmentBannersControlBinding
 import it.lmqv.livematchcam.databinding.FragmentBannersControlSlimBinding
-import it.lmqv.livematchcam.fragments.sports.BaseBannersControlFragment
-import it.lmqv.livematchcam.handlers.DialogContext
-import it.lmqv.livematchcam.handlers.DialogHandler
+import it.lmqv.livematchcam.fragments.sports.BaseFiltersControlFragment
 
-class BannersControlSlimFragment() : BaseBannersControlFragment() {
+class FiltersControlSlimFragment() : BaseFiltersControlFragment() {
     companion object {
-        fun newInstance() = BannersControlSlimFragment()
+        fun newInstance() = FiltersControlSlimFragment()
     }
 
     private var _binding: FragmentBannersControlSlimBinding? = null

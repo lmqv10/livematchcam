@@ -19,11 +19,10 @@ import it.lmqv.livematchcam.viewmodels.Command
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
-class BasketScoreboardViewFilterRender(
-    applicationContext: Context,
-    filterDescriptor: FilterDescriptor = FilterDescriptor()
-) : ScoreboardViewFilterRender<FragmentBasketScoreBoardBinding>(applicationContext, filterDescriptor), ICounterListener {
+class BasketScoreboardViewFilterRender(applicationContext: Context)
+    : ScoreboardViewFilterRender<FragmentBasketScoreBoardBinding>(applicationContext), ICounterListener {
 
     private var previousHomeLogo: String? = null
     private var previousAwayLogo: String? = null
@@ -36,11 +35,14 @@ class BasketScoreboardViewFilterRender(
 
         serviceConnector = CounterServiceConnector(applicationContext)
         serviceConnector.setCounterListener(this)
+
+        //super.initializeCollectors()
     }
 
     override fun onTick(timeElapsedInSeconds: Int) {
-        binding.matchTime.text = formatTime(timeElapsedInSeconds)
-        render()
+        var counterTimeInSeconds = max(0, 10 * 60 - timeElapsedInSeconds)
+        binding.matchTime.text = formatTime(counterTimeInSeconds)
+        updateContentView()
     }
 
     override fun release() {
@@ -56,7 +58,7 @@ class BasketScoreboardViewFilterRender(
             //Logd("BasketScoreboardViewRenderer::match $match")
             this.handleHomeTeam(match)
             this.handleAwayTeam(match)
-            render()
+            updateContentView()
         } catch (e: Exception) {
             e.printStackTrace()
             Loge("BasketScoreboardViewRenderer::match Exception:: ${e.message.toString()}")
@@ -70,7 +72,7 @@ class BasketScoreboardViewFilterRender(
             this.handleScore(score as BasketScore)
             this.handleCommand(score.command)
 
-            render()
+            updateContentView()
         } catch (e: Exception) {
             e.printStackTrace()
             Loge("BasketScoreboardViewRenderer::score Exception:: ${e.message.toString()}")
@@ -97,7 +99,7 @@ class BasketScoreboardViewFilterRender(
                     val drawable =
                         loadDrawableOffscreen(applicationContext, match.homeLogo, R.drawable.shield)
                     binding.homeLogo.setImageDrawable(drawable)
-                    render()
+                    updateContentView()
                 }
             } else {
                 binding.homeLogo.visibility = View.GONE
@@ -131,7 +133,7 @@ class BasketScoreboardViewFilterRender(
                         R.drawable.shield
                     )
                     binding.awayLogo.setImageDrawable(drawable)
-                    render()
+                    updateContentView()
                 }
             } else {
                 binding.awayLogo.visibility = View.GONE

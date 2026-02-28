@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyScoreBoardBinding
+import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.equalizeMaxWidthWith
 import it.lmqv.livematchcam.extensions.loadDrawableOffscreen
@@ -22,10 +23,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-class VolleyScoreboardViewFilterRender(
-    applicationContext: Context,
-    filterDescriptor: FilterDescriptor = FilterDescriptor()
-) : ScoreboardViewFilterRender<FragmentVolleyScoreBoardBinding>(applicationContext, filterDescriptor) {
+class VolleyScoreboardViewFilterRender(applicationContext: Context)
+    : ScoreboardViewFilterRender<FragmentVolleyScoreBoardBinding>(applicationContext) {
 
     private var previousHomeLogo: String? = null
     private var previousAwayLogo: String? = null
@@ -50,13 +49,13 @@ class VolleyScoreboardViewFilterRender(
     @Synchronized
     override fun match(match: Match) {
         try {
-            //Logd("VolleyScoreboardViewFilterRender::match $match")
+            Logd("VolleyScoreboardViewFilterRender::match $match")
             this.handleHomeTeam(match)
             this.handleAwayTeam(match)
 
             this.updateTeamsView()
 
-            super.render()
+            updateLayout()
         } catch (e: Exception) {
             e.printStackTrace()
             Loge("VolleyScoreboardViewFilterRender::match Exception:: ${e.message.toString()}")
@@ -66,11 +65,12 @@ class VolleyScoreboardViewFilterRender(
     @Synchronized
     override fun score(score: IScore) {
         try {
-            //Logd("VolleyScoreboardViewFilterRender::score $score")
+            Logd("VolleyScoreboardViewFilterRender::score $score")
             val score = score as VolleyScore
             updateScore(score.sets)
             updateLeagueDescription(score.league)
-            super.render()
+
+            updateLayout()
         } catch (e: Exception) {
             e.printStackTrace()
             Loge("VolleyScoreboardViewFilterRender::score Exception:: ${e.message.toString()}")
@@ -97,7 +97,7 @@ class VolleyScoreboardViewFilterRender(
                     val drawable =
                         loadDrawableOffscreen(applicationContext, match.homeLogo, R.drawable.shield)
                     binding.homeLogo.setImageDrawable(drawable)
-                    super.render()
+                    updateContentView()
                 }
             } else {
                 binding.homeLogo.visibility = View.GONE
@@ -131,7 +131,7 @@ class VolleyScoreboardViewFilterRender(
                         R.drawable.shield
                     )
                     binding.awayLogo.setImageDrawable(drawable)
-                    super.render()
+                    updateContentView()
                 }
             } else {
                 binding.awayLogo.visibility = View.GONE
@@ -185,7 +185,7 @@ class VolleyScoreboardViewFilterRender(
 
         if (this._previousSetsSize != setsSize) {
             this._previousSetsSize = setsSize
-            updateView()
+            updateLayout()
         }
     }
 
@@ -200,21 +200,27 @@ class VolleyScoreboardViewFilterRender(
             }
             binding.matchDescription.text = description
 
-            updateView()
+            //updateView()
         }
     }
 
     private fun updateTeamsView() {
-        //Logd("VolleyScoreboardViewFilterRender :: updateTeamsView")
+        Logd("VolleyScoreboardViewFilterRender :: updateTeamsView")
         with(binding) {
             homeTeam.equalizeMaxWidthWith(awayTeam)
             homeTeamBar.equalizeMaxWidthWith(awayTeamBar)
-            updateView()
+            //updateView()
         }
     }
 
-    private fun updateView() {
-        //Logd("VolleyScoreboardViewFilterRender :: updateView")
-        binding.scoreBoard.wrapLayout()
-    }
+//    override fun updateView() {
+//        Logd("VolleyScoreboardViewFilterRender :: updateView")
+//        if (_binding != null && width > 0 && height > 0) {
+//            //binding.scoreBoard.wrapLayout(width, height)
+//
+////            Logd("VolleyScoreboardViewFilterRender :: updateView.measuredWidth ${binding.scoreBoard.measuredWidth}")
+////            Logd("VolleyScoreboardViewFilterRender :: updateView.measuredHeight ${binding.scoreBoard.measuredHeight}")
+//            super.updateView()
+//        }
+//    }
 }

@@ -29,10 +29,8 @@ import it.lmqv.livematchcam.factories.FiltersFactory
 import it.lmqv.livematchcam.factories.sports.Sports
 import it.lmqv.livematchcam.factories.VideoSourceFactory
 import it.lmqv.livematchcam.preferences.CameraAPIPreferencesManager
-import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.StreamConfigurationRepository
 import it.lmqv.livematchcam.services.firebase.Quadruple
-import it.lmqv.livematchcam.services.stream.filters.IScoreboardViewFilterRender
 import it.lmqv.livematchcam.services.stream.filters.IOverlayObjectFilterRender
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.CoroutineScope
@@ -47,13 +45,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-//interface IPreviewEventListener {
-//    fun onPreviewStarted()
-//}
-
 class StreamService: Service(),
     IVideoSourceZoomHandler,
-    //IPreviewEventListener,
     ConnectChecker,
     FpsListener.Callback {
 
@@ -80,7 +73,6 @@ class StreamService: Service(),
     private lateinit var streamConfigurationRepository: StreamConfigurationRepository
     private var notificationManager: NotificationManager? = null
     private var connectCheckerCallback: ConnectChecker? = null
-    //private var previewEventListenerCallback: IPreviewEventListener? = null
     private var fpsListenerCallback: FpsListener.Callback? = null
     private var videoSourceKind: VideoSourceKind? = null
 
@@ -95,8 +87,6 @@ class StreamService: Service(),
 
     private val streamServiceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private lateinit var streamConfigurationJob : Job
-    private var matchRepositoryJob : Job? = null
-    private var scoreRepositoryJob : Job? = null
 
     private lateinit var cameraAPIPreferencesManager: CameraAPIPreferencesManager
 
@@ -108,10 +98,6 @@ class StreamService: Service(),
 
     private var timeElapsedInSeconds = 0
     private var job: Job? = null
-
-//    fun setPreviewEventListenerCallback(previewEventListener: IPreviewEventListener?) {
-//        this.previewEventListenerCallback = previewEventListener
-//    }
 
     fun setConnectCheckerCallback(connectChecker: ConnectChecker?) {
         this.connectCheckerCallback = connectChecker
@@ -162,13 +148,10 @@ class StreamService: Service(),
 //                Logd("StreamService :: streamConfigurationRepository :: ${videoStreamData.height}p@${videoStreamData.fps}fps vs ${videoCaptureFormat.height}p@${fps}fps")
 //                Logd("StreamService :: streamConfigurationRepository :: bitrate: ${videoStreamData.bitrate} vs ${bitrate}")
 
-                if (//this@StreamService.sport != sport ||
-                    this@StreamService.videoStreamData.width != videoCaptureFormat.width ||
+                if (this@StreamService.videoStreamData.width != videoCaptureFormat.width ||
                     this@StreamService.videoStreamData.height != videoCaptureFormat.height ||
                     this@StreamService.videoStreamData.fps != fps ||
                     this@StreamService.videoStreamData.bitrate != bitrate) {
-
-                    //this@StreamService.sport = sport
 
                     this@StreamService.videoStreamData.width = videoCaptureFormat.width
                     this@StreamService.videoStreamData.height = videoCaptureFormat.height
@@ -177,18 +160,10 @@ class StreamService: Service(),
                     this@StreamService.videoStreamData.bitrate = bitrate
                     bitrateAdapter.setMaxBitrate(videoStreamData.bitrate + audioStreamData.bitrate)
 
-                    //this@StreamService.restartPreview()
                     if (genericStream.isOnPreview) {
                         Logd("StreamService :: streamConfigurationRepository :: change resolution or sport during preview.. re-PreparePreview()")
                         this@StreamService.preparePreview()
                     }
-//                    if (!genericStream.isStreaming && genericStream.isOnPreview) {
-//                        Logd("StreamService :: streamConfigurationRepository :: change resolution or sport! .. re-PreparePreview()")
-//                        this@StreamService.preparePreview()
-//                    } else {
-//                        Logd("StreamService :: streamConfigurationRepository :: No changes")
-//                        this@StreamService.restartPreview()
-//                    }
                 }
             }
         }
@@ -216,16 +191,11 @@ class StreamService: Service(),
         Logd("StreamService :: onDestroy")
 
         this.streamConfigurationJob.cancel()
-        this.matchRepositoryJob?.cancel()
-        this.scoreRepositoryJob?.cancel()
+
         this.stopStream()
         genericStream.release()
         cameraAPIPreferencesManager.cancel()
     }
-
-//    override fun onPreviewStarted() {
-//        this.previewEventListenerCallback?.onPreviewStarted()
-//    }
 
     override fun onFps(fps: Int) {
         this.fpsListenerCallback?.onFps(fps)
@@ -258,7 +228,6 @@ class StreamService: Service(),
                 toast("Failed: $reason")
             }
         }
-
     }
 
     override fun onDisconnect() {
@@ -467,53 +436,36 @@ class StreamService: Service(),
 
     private fun prepareFilters() {
 //        Logd("StreamService :: prepareFilters")
-//        genericStream.getGlInterface().setPreviewResolution(videoStreamData.width, videoStreamData.height)
-        genericStream.getGlInterface().clearFilters()
-
-        var filters = FiltersFactory.get(sport, applicationContext)
         with (genericStream.getGlInterface()) {
+            //setPreviewResolution(videoStreamData.width, videoStreamData.height)
+            clearFilters()
 
+            //var filters = FiltersFactory.get(sport, applicationContext)
+            var filters = FiltersFactory.getFilters(applicationContext)
             filters.forEachIndexed { index, filter ->
-//                if (filtersCount() > index) {
-//                    Logd("StreamService :: removeFilter $index $filter")
-//                    removeFilter(index)
-//                }
-//                Logd("StreamService :: addFilter $filter")
-                addFilter(index, filter)
-
                 if (filter is IOverlayObjectFilterRender) {
                     //Logd("StreamService :: filter $filter setVideoStreamData $videoStreamData")
                     filter.setVideoStreamData(videoStreamData)
                 }
+                addFilter(index, filter)
             }
+
+            var scoreboard = FiltersFactory.getScoreBoard(sport, applicationContext)
+            Logd("StreamService :: prepareFilters.scoreboard $scoreboard")
+            scoreboard.setVideoStreamData(videoStreamData)
+            addFilter(scoreboard)
         }
 
-        this.prepareMatchDataListeners(filters)
+        //this.prepareOverlaysListeners(filters)
     }
 
-    private fun prepareMatchDataListeners(filters: List<BaseObjectFilterRender>) {
-        this.matchRepositoryJob?.cancel()
-        this.scoreRepositoryJob?.cancel()
-
-        var scoreBoardFilterInstance = filters.firstOrNull { it is IScoreboardViewFilterRender }
-        if (scoreBoardFilterInstance != null) {
-            var scoreBoardFilterRender = scoreBoardFilterInstance as IScoreboardViewFilterRender
-            this.matchRepositoryJob = this.streamServiceScope.launch {
-                MatchRepository.match.collect { match ->
-                    //Logd("StreamService :: MatchRepository.match.collect :: $match")
-                    scoreBoardFilterRender.match(match)
-                }
-            }
-            this.scoreRepositoryJob = this.streamServiceScope.launch {
-                MatchRepository.score.collect { score ->
-                    //Logd("StreamService :: MatchRepository.score.collect :: $score")
-                    scoreBoardFilterRender.score(score)
-                }
-            }
-            //} else {
-            //    Logd("StreamService :: prepareListeners :: not required")
-        }
-    }
+//    private fun prepareOverlaysListeners(filters: List<BaseObjectFilterRender>) {
+//        this.filtersRepositoryJob = this.streamServiceScope.launch {
+//            MatchRepository.filters.collect { filters ->
+//                Logd("StreamService :: collect.filters $filters")
+//            }
+//        }
+//    }
 
     private fun keepAliveTrick() {
         val notificationIntent = Intent(this, StreamActivity::class.java).apply {

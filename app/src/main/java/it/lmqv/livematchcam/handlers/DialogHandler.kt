@@ -30,7 +30,8 @@ object DialogHandler {
             var bindingView = context.bindingView
             val requestKey = "edit_text_request_key_${bindingView.id}_${System.identityHashCode(bindingView)}"
 
-            childFragmentManager.setFragmentResultListener(requestKey, viewLifecycleOwner)
+            val lifecycleOwner = if (view != null) viewLifecycleOwner else this
+            childFragmentManager.setFragmentResultListener(requestKey, lifecycleOwner)
             { _, bundle ->
                 val result = bundle.getString(EditStringDialogFragment.RESULT_VALUE) ?: return@setFragmentResultListener
                 onResult(result)

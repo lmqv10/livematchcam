@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.services.firebase
 
+import it.lmqv.livematchcam.factories.FilterPosition
 import it.lmqv.livematchcam.factories.sports.Sports
 
 /*data class Accounts(
@@ -15,7 +16,7 @@ data class FirebaseAccount(
     val channels: List<String> = emptyList(),
     //val matches: Map<String, Match> = emptyMap(),
     val streams: List<Stream> = emptyList(),
-    var settings : Settings = Settings()
+    var settings: Settings = Settings()
 )
 
 data class Stream(
@@ -31,7 +32,7 @@ data class FirebaseAccountDataContract(
     val logoURL: String = "",
     val title: String = "",
     val streams: List<Stream> = emptyList(),
-    val settings : Settings = Settings(),
+    val settings: Settings = Settings(),
     val remoteScoreAvailable: Boolean = false
 )
 
@@ -39,12 +40,6 @@ data class Settings(
     val youTubeEnabled: Boolean = false,
     val uvcEnabled: Boolean = false
 )
-
-/*TODO data class Event(
-    val match: Match = Match(),
-    var eventInfo: EventInfo = EventInfo()
-    var banners: Banners = Banners()
-)*/
 
 data class Match(
     val homeTeam: String = "ABC",
@@ -89,11 +84,28 @@ data class EventInfoData(
     var score: Map<String, Any?>? = null
 )
 
-data class Banners (
-    val spotBannerUrls: List<String> = listOf(),
-    val spotBannerVisible: Boolean = false,
-    val mainBannerURL: List<String> = listOf(),
-    val mainBannerVisible: Boolean = false
+data class ScoreboardOverlay(
+    val position: FilterPosition = FilterPosition.TOP_LEFT,
+    val size: Int = 30,
+    val visible: Boolean = true,
+)
+
+data class FilterOverlayEvent(
+    val position: FilterPosition = FilterPosition.TOP_LEFT,
+    val filter: FilterOverlay? = null
+)
+
+data class FilterOverlay(
+    val position: FilterPosition = FilterPosition.TOP_RIGHT,
+    val urls: List<String> = emptyList(),
+    val size: Int = 20,
+    val visible: Boolean = false
+)
+
+
+data class OverlaysModel(
+    val scoreboard: ScoreboardOverlay = ScoreboardOverlay(),
+    val filters: List<FilterOverlay> = emptyList()
 )
 
 interface IScore {
@@ -102,7 +114,7 @@ interface IScore {
 
 class UnknownScore(override val command: String = "") : IScore
 
-data class SoccerScore (
+data class SoccerScore(
     val home: Long = 0,
     val away: Long = 0,
     val period: String = "1T",

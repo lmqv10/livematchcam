@@ -1,6 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="default_scoreboard_size">18</integer>
-    <integer name="default_spot_banner_size">18</integer>
-    <integer name="default_main_banner_size">65</integer>
 </resources>

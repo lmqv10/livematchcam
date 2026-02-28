@@ -20,6 +20,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:drawableStart="@drawable/ic_main_bottom"
+        android:drawableStart="@drawable/ic_spot_center"
         android:drawablePadding="10dp" />
     </LinearLayout>

@@ -3,7 +3,8 @@ package it.lmqv.livematchcam.extensions
 import android.view.View
 import it.lmqv.livematchcam.R
 
-fun View.wrapLayout() {
+fun View.wrapLayout(parentWidth: Int, parentHeight: Int) {
+    //this.measure(setExactlyContent(parentWidth), setExactlyContent(parentHeight))
     this.measure(wrapContent(), wrapContent())
 
     this.layout(

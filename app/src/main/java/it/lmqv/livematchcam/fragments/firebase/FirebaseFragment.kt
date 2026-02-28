@@ -54,7 +54,7 @@ class FirebaseFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         launchOnCreated {
-            MatchRepository.currentSchedules.collect { schedules ->
+            MatchRepository.schedules.collect { schedules ->
                 var sortedSchedules = schedules
                     .filter { it.matchDate > System.currentTimeMillis() && it.visible }
                     .sortedBy { it.matchDate }

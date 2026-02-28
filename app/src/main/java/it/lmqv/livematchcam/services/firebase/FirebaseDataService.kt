@@ -6,6 +6,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import it.lmqv.livematchcam.factories.sports.Sports
+import it.lmqv.livematchcam.services.firebase.listeners.OverlaysValueEventListener
+import it.lmqv.livematchcam.services.firebase.listeners.OverlaysValueListener
 import it.lmqv.livematchcam.services.firebase.listeners.SchedulesValueEventListener
 
 object FirebaseDataService {
@@ -17,6 +19,7 @@ object FirebaseDataService {
     private var eventInfoValueEventListener: ValueEventListener? = null
 
     private val schedulesValueEventListener = SchedulesValueEventListener()
+    private val overlaysValueEventListener = OverlaysValueEventListener()
 
     private var isAdministrator: Boolean = false
     private var isAuthorizedUser: Boolean = false
@@ -28,6 +31,7 @@ object FirebaseDataService {
 
     init {
         schedulesValueEventListener.initialize(database)
+        overlaysValueEventListener.initialize(database)
     }
 
     fun authenticateAccount(accountName: String,
@@ -167,6 +171,17 @@ object FirebaseDataService {
         schedulesValueEventListener.setOnChangeListener({ })
     }
 
+    fun attachOverlaysValueEventListener(currentKey: String, overlaysValueListener: OverlaysValueListener) {
+        overlaysValueEventListener.setOnChangeListener(overlaysValueListener)
+        overlaysValueEventListener.attach(this.currentAccountKey, currentKey)
+    }
+
+    fun detachOverlaysValueEventListener () {
+        overlaysValueEventListener.detach()
+        overlaysValueEventListener.setOnChangeListener(null)
+    }
+
+
     fun updateMatchValue(match: Match?) {
         if (this.isValidAccount) {
             this.matchKeyRef?.setValue(match)
@@ -176,6 +191,18 @@ object FirebaseDataService {
     fun updateEventInfoValue(eventInfoData: EventInfoData) {
         if (this.isValidAccount) {
             this.eventInfoKeyRef?.setValue(eventInfoData)
+        }
+    }
+
+    fun updateFilterValue(filter: FilterOverlayEvent) {
+        if (this.isValidAccount) {
+            overlaysValueEventListener.updateFilter(filter)
+        }
+    }
+
+    fun updateScoreboardValue(scoreboard: ScoreboardOverlay) {
+        if (this.isValidAccount) {
+            overlaysValueEventListener.updateScoreboard(scoreboard)
         }
     }
 

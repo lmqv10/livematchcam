@@ -11,8 +11,11 @@ import it.lmqv.livematchcam.services.firebase.ScoreFactory
 import it.lmqv.livematchcam.repositories.AccountRepository
 import it.lmqv.livematchcam.repositories.FirebaseDataRepository
 import it.lmqv.livematchcam.repositories.MatchRepository
+import it.lmqv.livematchcam.services.firebase.FilterOverlayEvent
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
 import it.lmqv.livematchcam.services.firebase.Schedule
+import it.lmqv.livematchcam.services.firebase.ScoreboardOverlay
+import it.lmqv.livematchcam.services.firebase.listeners.OverlaysValueListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -81,6 +84,23 @@ class FirebaseMatchSyncStrategy(context: Context) :
                         FirebaseDataService.attachSchedulesValueEventListener(streamName) {
                             syncDataListenerContract.onChangeSchedules(it)
                         }
+
+                        FirebaseDataService.attachOverlaysValueEventListener(streamName, object : OverlaysValueListener {
+//                            override fun onChangeFilter(filter: FilterOverlayEvent) {
+//                                Logd("$instanceId :: FirebaseMatchSyncStrategy:: onChangeFilter $filter")
+//                                syncDataListenerContract.onChangeFilter(filter)
+//                            }
+
+                            override fun onChangeScoreboard(scoreboard: ScoreboardOverlay) {
+                                Logd("$instanceId :: FirebaseMatchSyncStrategy:: scoreboard $scoreboard")
+                                syncDataListenerContract.onChangeScoreboard(scoreboard)
+                            }
+
+                            override fun onChangeFilters(filters: List<FilterOverlayEvent>) {
+                                Logd("$instanceId :: FirebaseMatchSyncStrategy:: filters $filters")
+                                syncDataListenerContract.onChangeFilters(filters)
+                            }
+                        })
                     }, {
                         syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
                     })
@@ -97,13 +117,16 @@ class FirebaseMatchSyncStrategy(context: Context) :
         Logd("$instanceId: FirebaseMatchSyncStrategy::dispose")
         syncJob.cancel()
         FirebaseDataService.detachMatchValueEventListener()
-        FirebaseDataService.detachSchedulesValueEventListener()
         FirebaseDataService.detachEventInfoValueEventListener()
+        FirebaseDataService.detachSchedulesValueEventListener()
+        FirebaseDataService.detachOverlaysValueEventListener()
 
         //Logd("$instanceId: LocalMatchSyncStrategy::reset to manual match")
         syncDataListenerContract.onChangeMatch(Match())
         syncDataListenerContract.onChangeEventInfo(EventInfo())
         syncDataListenerContract.onChangeSchedules(listOf<Schedule>())
+        syncDataListenerContract.onChangeScoreboard(ScoreboardOverlay())
+        syncDataListenerContract.onChangeFilters(listOf())
         syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
     }
 
@@ -119,5 +142,14 @@ class FirebaseMatchSyncStrategy(context: Context) :
         val eventInfoData = EventInfoData(eventInfo.sport.name, scoreMap)
 
         FirebaseDataService.updateEventInfoValue(eventInfoData)
+    }
+
+    @Synchronized
+    override fun updateFilter(filter: FilterOverlayEvent) {
+        FirebaseDataService.updateFilterValue(filter)
+    }
+
+    override fun updateScoreboard(scoreboard: ScoreboardOverlay) {
+        FirebaseDataService.updateScoreboardValue(scoreboard)
     }
 }

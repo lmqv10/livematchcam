@@ -1,11 +1,23 @@
+ATTENTION:
+- Il banner non è caricato se parte "not visible"
+  ============================================================
 WIP 
-- Valutare anche il goLive() soprattutto UI!!!
+- Banners Refactor
+  NOTA: Verificare che per il volley si riposizioni dopo il cambio di dimensioni.
+
+- Banners temporizzabili (25 sec)
+- Banners rotation con lista e configurabile se possibile animati
+- Banners Video full screen per spot/pubblicità
+- News Bar bottom
 
 TODO LIST
-- Battery Level
-- Banners positions configurabili
-- Banners rotation con lista e configurabile
-- News Bar bottom
+- Switch tra le squadre.
+- Notifica al dispositivo in app per contattare streamer. (popup in app).
+- Gestione Loghi con "nome" / git repository?
+- Battery Level (preference "show/hide battery level"). NOTA: il monitoring potrebbe costare.
+- Gestione Ruoli (administrator/operator)
+- Visibilità delle preferences su "availability del device"
+- Autenticazione YOUTUBE (owner/ branding channel).
 
 IMPROVEMENT
 - Gestione del secondo colore di maglietta
@@ -14,8 +26,28 @@ IMPROVEMENT
 - Risoluzioni camera sorgente dinamiche
 - Gestione di bannter multipli temporizzati (se possibile animati)
 - Implementare Video full screen per spot/pubblicità
+- Speed Test e wizard di configurazione streaming.
+
+PRO
+- Gestione delle autenticazioni, della sicurezza, dei dispositivi.
+  consentire a dispositivi di trasmettere soltanto con alcuni account
+- aggiungere mfa,
+- mettere in Black list dispositivi,
+- disattivare o inibire audio da remoto and so on.
+
+MUST HAVE
+- Valutare anche il goLive() soprattutto UI!!!
+  Richiede API youtube - richiede account autenticato su youtube
+  TBE:
+    - Preferences Request "GoLive" / "End Stream"
+    - avviare lo streaming su control room (con conferma).
+    - se attivo il bottone diventa un "play" e mette un testo "contenuto non pubblico" ben visibile.
+    - il bottone "play" "invia" il "GoLive" (con conferma) e far sparire il testo "contenuto non pubblico"
+    - il bottone "play" diventa "stop" (quadrato)
+    - lo "stop" chiede anche l'"end stream"
 
 LOWER PRIORITY
+- Censimento Palestre e Qualità della rete. Censimento e DB consultabile
 - Migliorare la vista dell'Account UI
 - Migliorare la vista remote control
 - Gestione flag YouTubeEnabled (on Firebase or...)

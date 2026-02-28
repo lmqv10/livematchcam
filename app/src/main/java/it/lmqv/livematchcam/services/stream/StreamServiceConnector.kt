@@ -42,8 +42,12 @@ class StreamServiceConnector(val activityContext: Activity) : ServiceConnection 
     }
 
     fun unbindService() {
-        Logd("StreamServiceConnector :: stopPreview")
-        streamService?.stopPreview()
+        streamService?.let { service ->
+            Thread {
+                Logd("StreamServiceConnector :: stopPreview")
+                service.stopPreview()
+            }.start()
+        }
         if (bound) {
             Logd("StreamServiceConnector :: unbindService")
             activityContext.unbindService(this)

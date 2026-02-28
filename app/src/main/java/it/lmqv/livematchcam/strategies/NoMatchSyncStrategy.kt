@@ -1,7 +1,9 @@
 package it.lmqv.livematchcam.strategies
 
 import it.lmqv.livematchcam.services.firebase.EventInfo
+import it.lmqv.livematchcam.services.firebase.FilterOverlayEvent
 import it.lmqv.livematchcam.services.firebase.Match
+import it.lmqv.livematchcam.services.firebase.ScoreboardOverlay
 import java.util.UUID
 
 class NoMatchSyncStrategy() : IMatchSyncStrategy {
@@ -17,4 +19,6 @@ class NoMatchSyncStrategy() : IMatchSyncStrategy {
 
     override fun updateMatch(match: Match) { }
     override fun updateEventInfo(eventInfo: EventInfo) { }
+    override fun updateFilter(filter: FilterOverlayEvent) { }
+    override fun updateScoreboard(scoreboard: ScoreboardOverlay) { }
 }

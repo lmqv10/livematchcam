@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minHeight="48dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical|start"
+    android:layout_gravity="start"
+    android:background="@drawable/alpha_background">
+
+    <!-- Icona toggle (parametrica) -->
+    <ImageView
+        android:id="@+id/icon_toggle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="4dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_settings"
+        tools:ignore="ContentDescription" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="4dp"/>
+
+    <LinearLayout
+        android:id="@+id/panel_drawer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="8dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <SeekBar
+            android:id="@+id/slider_value"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:minHeight="48dp"
+            android:max="100"
+            android:min="5"
+            android:progress="5"
+            android:splitTrack="false"
+            android:progressBackgroundTint="@color/primary"
+            android:progressBackgroundTintMode="screen"
+            android:thumb="@drawable/custom_seekbar_thumb" />
+
+        <TextView
+            android:id="@+id/text_slider_value"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:paddingVertical="4dp"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_small"
+            android:background="@drawable/secondary_background"
+            android:textColor="@color/primary"
+            android:text="@string/description_placeholder" />
+
+    </LinearLayout>
+
+</LinearLayout>

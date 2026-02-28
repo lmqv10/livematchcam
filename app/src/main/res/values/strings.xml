@@ -167,8 +167,11 @@
     <string name="logo_url_placeholder">http://&#8230;</string>
     <string name="spot_banner">Top-Right banner</string>
     <string name="main_banner">Main banner</string>
-    <string name="show_banner">Banner On</string>
-    <string name="hide_banner">Banner Off</string>
+    <string name="show_scoreboard">Scoreboard On</string>
+    <string name="hide_scoreboard">Scoreboard On</string>
+    <string name="show_overlay">Overlay On</string>
+    <string name="hide_overlay">Overlay Off</string>
+    <string name="show_hide">Show - Hide</string>
 
     <string name="logo_left">Home</string>
     <string name="logo_right">Guest</string>
@@ -197,8 +200,6 @@
 
     <!-- Preference Titles -->
     <string name="preferences_header">Preferences</string>
-    <string name="scoreboard_header">ScoreBoard</string>
-    <string name="overlays_header">Overlays Sizes</string>
     <string name="camera_af_header">Camera Autofocus (No UVC)</string>
     <string name="camera_vs_header">Stabilization (No UVC)</string>
     <string name="notifications_header">Camera Preferences</string>
@@ -212,15 +213,6 @@
     <string name="video_overlay_screen_key">video_ovelray_screen</string>
     <string name="video_overlay_screen_title">Filters</string>
     <string name="video_overlay_screen_summary">Configure scoreboard and banners sizes</string>
-
-    <string name="scoreboard_size_key">scoreboard_size</string>
-    <string name="scoreboard_size_title">Scoreboard Size</string>
-
-    <string name="spot_banner_size_key">spot_banner_size</string>
-    <string name="spot_banner_size_title">Spot Size (Top-Right)</string>
-
-    <string name="main_banner_size_key">main_banner_size</string>
-    <string name="main_banner_size_title">Banner Size (Center)</string>
 
     <!-- Sync Preferences -->
 <!--    <string name="sync_title">Sync email periodically</string>-->

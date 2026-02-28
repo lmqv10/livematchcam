@@ -1,8 +1,9 @@
 package it.lmqv.livematchcam.factories.sports
 
-import it.lmqv.livematchcam.fragments.sports.IBannersControlFragment
+import it.lmqv.livematchcam.fragments.sports.IFiltersControlFragment
 import it.lmqv.livematchcam.fragments.sports.banners.BannersControlFragment
-import it.lmqv.livematchcam.fragments.sports.banners.BannersControlSlimFragment
+import it.lmqv.livematchcam.fragments.sports.banners.FiltersControlFragment
+import it.lmqv.livematchcam.fragments.sports.banners.FiltersControlSlimFragment
 import it.lmqv.livematchcam.fragments.sports.volley.VolleyControlBarFragment
 import it.lmqv.livematchcam.fragments.sports.volley.VolleyRemoteControlFragment
 import it.lmqv.livematchcam.fragments.sports.volley.VolleyScoreBoardFragment
@@ -34,19 +35,15 @@ class VolleyFragmentsFactory : ISportsComponentsFactory {
         return _remoteScoreControl
     }
 
-    private val _bannersControl: IBannersControlFragment by lazy {
-        BannersControlFragment()
+    private val _filtersControlFragment: IFiltersControlFragment by lazy {
+        FiltersControlFragment()
     }
 
-    override fun getBannersControl(): IBannersControlFragment {
-        return _bannersControl
+    override fun getFiltersControl(): IFiltersControlFragment {
+        return _filtersControlFragment
     }
 
-    private val _bannersSlimControl: IBannersControlFragment by lazy {
-        BannersControlSlimFragment()
-    }
-
-    override fun getBannersSlimControl(): IBannersControlFragment {
-        return _bannersSlimControl
+    override fun getFiltersSlimControl(): IFiltersControlFragment {
+        return _filtersControlFragment
     }
 }

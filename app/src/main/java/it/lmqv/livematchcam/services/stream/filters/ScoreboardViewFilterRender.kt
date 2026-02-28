@@ -1,81 +1,194 @@
 package it.lmqv.livematchcam.services.stream.filters
 
 import android.content.Context
-import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.opengl.GLES20
 import androidx.core.graphics.createBitmap
-import androidx.preference.PreferenceManager
 import androidx.viewbinding.ViewBinding
 import com.pedro.encoder.utils.gl.ImageStreamObject
-import com.pedro.encoder.utils.gl.TranslateTo
 import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.wrapLayout
+import it.lmqv.livematchcam.factories.FilterPosition
+import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.firebase.IScore
 import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.services.stream.IVideoStreamData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlin.math.min
 
-interface IScoreboardViewFilterRender {
-    fun match(match: Match)
-    fun score(score: IScore)
-}
-
-abstract class ScoreboardViewFilterRender<T>(
-    val applicationContext: Context,
-    val filterDescriptor: FilterDescriptor = FilterDescriptor(),
-) : OverlayObjectFilterRender(), IScoreboardViewFilterRender where T : ViewBinding {
+abstract class ScoreboardViewFilterRender<T>(val applicationContext: Context)
+    : OverlayObjectFilterRender() where T : ViewBinding {
 
     internal var _binding: T? = null
     internal val binding get() = _binding!!
 
     private var width: Int = 0
     private var height: Int = 0
-    private var maxFactor: Float = 18f
+    private var scaleFactor: Float = 0f
+    private var translateTo: FilterPosition = FilterPosition.TOP_LEFT
 
-    private var sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-    private val preferenceChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-            key?.let {
-                if (it == filterDescriptor.preferencesSizeKey) {
-                    this.handlePreference()
-                    this.scaleSprite()
-                    this.translateSprite()
-                }
-            }
-        }
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private var scoreboardRepositoryJob : Job? = null
+    private var matchRepositoryJob : Job? = null
+    private var scoreRepositoryJob : Job? = null
+
+    private var isVisible: Boolean = false
+    @Volatile
+    private var isUpdating: Boolean = false
+
+    private var minimalWidth: Int = Int.MAX_VALUE
+    private var minimalHeight: Int = Int.MAX_VALUE
 
     init {
         streamObject = ImageStreamObject()
-
-        this.sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
-        this.handlePreference()
     }
 
     override fun release() {
         super.release()
-        this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
+
+        this.matchRepositoryJob?.cancel()
+        this.scoreRepositoryJob?.cancel()
+        this.scoreboardRepositoryJob?.cancel()
+
         _binding = null
+    }
+
+    override fun drawFilter() {
+        if (!this.isUpdating) {
+            super.drawFilter()
+            var targetAlpha = if (!isVisible) { 0f } else { 1f }
+            GLES20.glUniform1f(uAlphaHandle, targetAlpha)
+        }
     }
 
     override fun setVideoStreamData(videoStreamData: IVideoStreamData) {
         if (_binding != null) {
-            Logd("ScoreboardViewFilterRender::setVideoStreamData $videoStreamData")
+            // Logd("ScoreboardViewFilterRender::setVideoStreamData $videoStreamData")
             this.width = videoStreamData.width
             this.height = videoStreamData.height
-            this.scaleSprite()
-            this.translateSprite()
-            this.render()
+
+            binding.root.wrapLayout(width, height)
+            minimalWidth = min(minimalWidth, binding.root.measuredWidth)
+            minimalHeight = min(minimalHeight, binding.root.measuredHeight)
+
+            this.initializeCollectors()
+        }
+    }
+
+    private fun initializeCollectors() {
+        //Logd("ScoreboardViewFilterRender initializeCollectors")
+        this.matchRepositoryJob?.cancel()
+        this.matchRepositoryJob = this.coroutineScope.launch {
+            MatchRepository.match.collect { match ->
+                //Logd("ScoreboardViewFilterRender :: MatchRepository.match.collect :: $match")
+                match(match)
+            }
+        }
+
+        this.scoreRepositoryJob?.cancel()
+        this.scoreRepositoryJob = this.coroutineScope.launch {
+            MatchRepository.score.collect { score ->
+                //Logd("ScoreboardViewFilterRender :: MatchRepository.score.collect :: $score")
+                score(score)
+            }
+        }
+
+        this.scoreboardRepositoryJob?.cancel()
+        this.scoreboardRepositoryJob = this.coroutineScope.launch {
+            MatchRepository.scoreboard.collect { scoreboard ->
+                //Logd("ScoreboardViewFilterRender collect.scoreboard $scoreboard")
+                this@ScoreboardViewFilterRender.isVisible = scoreboard.visible
+                
+                if (isVisible) {
+                    this@ScoreboardViewFilterRender.scaleFactor = scoreboard.size.toFloat()
+                    this@ScoreboardViewFilterRender.translateTo = scoreboard.position
+                    this@ScoreboardViewFilterRender.updateLayout()
+                }
+            }
         }
     }
 
     @Synchronized
-    protected fun render() {
+    open fun updateLayout() {
+        //Logd("ScoreboardViewFilterRender::updateLayout")
+        this.isUpdating = true
+        binding.root.wrapLayout(width, height)
+        scaleSprite()
+        translateSprite()
+        render()
+        this.isUpdating = false
+    }
+
+    @Synchronized
+    open fun updateContentView() {
+        //Logd("ScoreboardViewFilterRender::updateContentView")
+        this.isUpdating = true
+        render()
+        this.isUpdating = false
+    }
+
+    @Synchronized
+    private fun scaleSprite() {
         try {
-            //Logd("ScoreboardViewRenderer::render ${width}x$height")
-            if (_binding != null && width > 0 && height > 0) {
-                val bitmap = createBitmap(width, height)
-                val canvas = Canvas(bitmap)
+            //Logd("ScoreboardViewFilterRender::scaleSprite")
+            if (_binding != null && minimalWidth > 0 && binding.root.measuredHeight > 0 && isVisible) {
+                val streamAspectRatio = width.toFloat() / height.toFloat()
+
+                val viewWidth = binding.root.measuredWidth.toFloat()
+                val viewHeight = binding.root.measuredHeight.toFloat()
+                val viewAspectRatio = viewWidth / viewHeight
+
+                val adaptedFactorWidth = this.scaleFactor * (viewWidth / minimalWidth)
+                val adaptedFactorHeight = adaptedFactorWidth * (streamAspectRatio / viewAspectRatio)
+
+                //Logd("ScoreboardViewFilterRender::scaleSprite -> X: $adaptedFactorWidth, Y: $adaptedFactorHeight")
+                setScale(adaptedFactorWidth, adaptedFactorHeight)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Loge("ScoreboardViewRenderer::scaleSprite Exception:: ${e.message.toString()}")
+        }
+    }
+
+    @Synchronized
+    private fun translateSprite() {
+        try {
+            //Logd("ScoreboardViewFilterRender::translateSprite")
+            if (isVisible) {
+                var adaptedFactorWidth = scale.x
+                var adaptedFactorHeight = scale.y
+
+                when (this.translateTo) {
+                    FilterPosition.TOP_LEFT -> setPosition(0f, 0f)
+                    FilterPosition.TOP -> setPosition(50f - adaptedFactorWidth / 2f, 0f)
+                    FilterPosition.TOP_RIGHT -> setPosition(100f - adaptedFactorWidth, 0f)
+                    FilterPosition.CENTER -> setPosition(50f - adaptedFactorWidth / 2f, 50f - adaptedFactorHeight / 2f)
+                    FilterPosition.BOTTOM_LEFT -> setPosition(0f, 100f - adaptedFactorHeight)
+                    FilterPosition.BOTTOM -> setPosition(50f - adaptedFactorWidth / 2f, 100f - adaptedFactorHeight)
+                    FilterPosition.BOTTOM_RIGHT -> setPosition(100f - adaptedFactorWidth, 100f - adaptedFactorHeight)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Loge("ScoreboardViewRenderer::translateSprite Exception:: ${e.message.toString()}")
+        }
+    }
+
+    @Synchronized
+    private fun render() {
+        try {
+            if (_binding != null && binding.root.measuredWidth > 0 && binding.root.measuredHeight > 0 && isVisible) {
+                var bitmap = createBitmap(binding.root.measuredWidth, binding.root.measuredHeight)
+                var canvas = Canvas(bitmap)
                 binding.root.draw(canvas)
+                //Logd("ScoreboardViewFilterRender::render bitmap ${bitmap.width}x${bitmap.height}")
                 setImage(bitmap)
             }
         } catch (e: Exception) {
@@ -84,32 +197,6 @@ abstract class ScoreboardViewFilterRender<T>(
         }
     }
 
-    private fun scaleSprite() {
-        binding.root.wrapLayout()
-        var scale = this.width * this.maxFactor / binding.root.measuredWidth
-        setScale(scale, scale)
-    }
-
-    private fun translateSprite() {
-        var offset= if (streamObject.width > streamObject.height) { streamObject.height / streamObject.width * 100f } else { 0f }
-
-        when (filterDescriptor.translateTo) {
-            TranslateTo.CENTER -> setPosition(50f - maxFactor / 2f, 50f - maxFactor / 2f)
-            TranslateTo.TOP -> setPosition(50f - maxFactor / 2f, 0f)
-            TranslateTo.LEFT -> setPosition(0f, 50f - maxFactor / 2f)
-            TranslateTo.TOP_LEFT -> setPosition(0f, 0f)
-            TranslateTo.RIGHT -> setPosition(100f - maxFactor,50f - maxFactor / 2f)
-            TranslateTo.TOP_RIGHT -> setPosition(100f - maxFactor, 0f)
-            TranslateTo.BOTTOM -> setPosition(50f - maxFactor / 2f, 100f - maxFactor + offset)
-            TranslateTo.BOTTOM_LEFT -> setPosition(0f, 100f - maxFactor)
-            TranslateTo.BOTTOM_RIGHT -> setPosition(100f - maxFactor, 100f - maxFactor)
-        }
-    }
-
-    private fun handlePreference() {
-        this.maxFactor = sharedPreferences.getString(filterDescriptor.preferencesSizeKey, filterDescriptor.defaultSize.toString())?.toFloatOrNull() ?: filterDescriptor.defaultSize.toFloat()
-    }
-
-    abstract override fun match(match: Match)
-    abstract override fun score(score: IScore)
+    abstract fun match(match: Match)
+    abstract fun score(score: IScore)
 }

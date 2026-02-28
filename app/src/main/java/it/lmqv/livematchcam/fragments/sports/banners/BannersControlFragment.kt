@@ -12,11 +12,11 @@ import it.lmqv.livematchcam.repositories.MatchRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import it.lmqv.livematchcam.databinding.FragmentBannersControlBinding
-import it.lmqv.livematchcam.fragments.sports.BaseBannersControlFragment
+import it.lmqv.livematchcam.fragments.sports.BaseFiltersControlFragment
 import it.lmqv.livematchcam.handlers.DialogContext
 import it.lmqv.livematchcam.handlers.DialogHandler
 
-class BannersControlFragment() : BaseBannersControlFragment() {
+class BannersControlFragment() : BaseFiltersControlFragment() {
     companion object {
         fun newInstance() = BannersControlFragment()
     }

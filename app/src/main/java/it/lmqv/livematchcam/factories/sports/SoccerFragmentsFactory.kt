@@ -1,7 +1,7 @@
 package it.lmqv.livematchcam.factories.sports
 
-import it.lmqv.livematchcam.fragments.sports.IBannersControlFragment
-import it.lmqv.livematchcam.fragments.sports.banners.NoBannersControlFragment
+import it.lmqv.livematchcam.fragments.sports.IFiltersControlFragment
+import it.lmqv.livematchcam.fragments.sports.banners.FiltersControlFragment
 import it.lmqv.livematchcam.fragments.sports.soccer.SoccerControlBarFragment
 import it.lmqv.livematchcam.fragments.sports.soccer.SoccerRemoteControlFragment
 import it.lmqv.livematchcam.fragments.sports.soccer.SoccerScoreBoardFragment
@@ -36,15 +36,15 @@ class SoccerFragmentsFactory : ISportsComponentsFactory {
         return _remoteScoreControl
     }
 
-    private val _noBannersControl: IBannersControlFragment by lazy {
-        NoBannersControlFragment()
+    private val _filtersControlFragment: IFiltersControlFragment by lazy {
+        FiltersControlFragment()
     }
 
-    override fun getBannersControl(): IBannersControlFragment {
-        return _noBannersControl
+    override fun getFiltersControl(): IFiltersControlFragment {
+        return _filtersControlFragment
     }
 
-    override fun getBannersSlimControl(): IBannersControlFragment {
-        return _noBannersControl
+    override fun getFiltersSlimControl(): IFiltersControlFragment {
+        return _filtersControlFragment
     }
 }

@@ -1,5 +1,6 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/score_board_container"
     android:layout_width="wrap_content"
@@ -7,10 +8,19 @@
     android:layout_height="wrap_content">
 
 <!--    <LinearLayout-->
-<!--        android:layout_width="@dimen/volley_score_board_width"-->
-<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_width="250dp"-->
+<!--        android:layout_height="5dp"-->
+<!--        tools:layout_height="5dp"-->
 <!--        android:orientation="vertical"-->
-<!--        android:background="@color/TRANSPARENT"-->
+<!--        android:background="@color/RED"-->
+<!--        android:padding="2dp"/>-->
+
+<!--    <LinearLayout-->
+<!--        android:layout_width="5dp"-->
+<!--        android:layout_height="90dp"-->
+<!--        tools:layout_width="5dp"-->
+<!--        android:orientation="vertical"-->
+<!--        android:background="@color/RED"-->
 <!--        android:padding="2dp"/>-->
 
     <LinearLayout
@@ -180,7 +190,7 @@
                     android:id="@+id/away_team"
                     style="@style/TeamTextViewStyle"
                     android:minWidth="@dimen/volley_score_board_team_min_width"
-                    android:text="@string/hint_home_team" />
+                    android:text="@string/hint_away_team" />
 
                 <!--                <ImageView-->
                 <!--                    android:id="@+id/away_serve"-->
@@ -254,15 +264,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/BLACK"
-            android:text=""
             android:paddingHorizontal="2dp"
             android:maxLines="1"
             android:ellipsize="none"
             android:autoSizeStepGranularity="1sp"
             android:gravity="start" />
-    <!--            android:autoSizeTextType="uniform"-->
-    <!--            android:autoSizeMinTextSize="@dimen/text_size_smallest"-->
-    <!--            android:autoSizeMaxTextSize="@dimen/text_size_big"-->
+
     </LinearLayout>
 
 </FrameLayout>
