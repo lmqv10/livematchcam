@@ -1,34 +1,27 @@
-ATTENTION:
-- Il banner non è caricato se parte "not visible"
-  ============================================================
 WIP 
-- Banners Refactor
-  NOTA: Verificare che per il volley si riposizioni dopo il cambio di dimensioni.
 
+NEXT CANDIDATE
+- Switch tra le squadre.
 - Banners temporizzabili (25 sec)
+- Notifica al dispositivo in app per contattare streamer. (popup in app).
+- Battery Level warning (preference "show/hide battery level"). NOTA: il monitoring potrebbe costare.
+
+TODO LIST
+- Replay (10sec)
 - Banners rotation con lista e configurabile se possibile animati
 - Banners Video full screen per spot/pubblicità
 - News Bar bottom
-
-TODO LIST
-- Switch tra le squadre.
-- Notifica al dispositivo in app per contattare streamer. (popup in app).
 - Gestione Loghi con "nome" / git repository?
-- Battery Level (preference "show/hide battery level"). NOTA: il monitoring potrebbe costare.
 - Gestione Ruoli (administrator/operator)
 - Visibilità delle preferences su "availability del device"
 - Autenticazione YOUTUBE (owner/ branding channel).
-
-IMPROVEMENT
 - Gestione del secondo colore di maglietta
 - Verificare caratteri e risoluzione schermo device.
-- spegnere automaticamente il bannerino quando si attiva il bannerone
 - Risoluzioni camera sorgente dinamiche
-- Gestione di bannter multipli temporizzati (se possibile animati)
-- Implementare Video full screen per spot/pubblicità
-- Speed Test e wizard di configurazione streaming.
 
 PRO
+- Integrazione 
+- Speed Test e wizard di configurazione streaming.
 - Gestione delle autenticazioni, della sicurezza, dei dispositivi.
   consentire a dispositivi di trasmettere soltanto con alcuni account
 - aggiungere mfa,

@@ -12,4 +12,19 @@
   <path
       android:pathData="M174.33,158.74h137.34c32.74,0 59.37,-26.63 59.37,-59.37S344.41,40 311.67,40H174.33C141.59,40 114.96,66.63 114.96,99.37S141.59,158.74 174.33,158.74zM351.04,99.37c0,21.71 -17.66,39.37 -39.37,39.37S272.3,121.08 272.3,99.37S289.96,60 311.67,60S351.04,77.66 351.04,99.37zM174.33,60h92.96C257.97,70.49 252.3,84.28 252.3,99.37s5.67,28.89 14.98,39.37h-92.96c-21.71,0 -39.37,-17.66 -39.37,-39.37S152.62,60 174.33,60z"
       android:fillColor="@color/primary"/>
+
+  <!-- Pallino toggle in alto: cerchio a destra (311.67, 99.37) -->
+  <path
+      android:pathData="M311.67,99.37m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0"
+      android:fillColor="@color/primary"/>
+
+  <!-- Pallino toggle in mezzo: cerchio a sinistra (174.33, 243) -->
+  <path
+      android:pathData="M174.33,243m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0"
+      android:fillColor="@color/primary"/>
+
+  <!-- Pallino toggle in basso: cerchio a sinistra (174.33, 386.63) -->
+  <path
+      android:pathData="M174.33,386.63m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0"
+      android:fillColor="@color/primary"/>
 </vector>
