@@ -302,11 +302,11 @@ class StreamService: Service(),
 
                 genericStream.changeVideoSource(videoSource)
 
-                Logd("StreamService :: set video source to camera preferences handler")
+                //Logd("StreamService :: set video source to camera preferences handler")
                 this.cameraAPIPreferencesManager.setVideoSource(genericStream.videoSource)
-                Logd("StreamService :: initialize and notify zoomHandler")
+                //Logd("StreamService :: initialize and notify zoomHandler")
                 _videoSourceZoomHandler.value = VideoSourceZoomHandler(genericStream.videoSource)
-                Logd("StreamService :: initialize and notify videoCaptureFormats")
+                //Logd("StreamService :: initialize and notify videoCaptureFormats")
                 _videoCaptureFormats.value = CameraResolutionsFactory.get(genericStream.videoSource)
 
                 CoroutineScope(Dispatchers.Main).launch {
@@ -435,37 +435,27 @@ class StreamService: Service(),
     }
 
     private fun prepareFilters() {
-//        Logd("StreamService :: prepareFilters")
+        //Logd("StreamService :: prepareFilters")
         with (genericStream.getGlInterface()) {
-            //setPreviewResolution(videoStreamData.width, videoStreamData.height)
+            setPreviewResolution(videoStreamData.width, videoStreamData.height)
             clearFilters()
 
-            //var filters = FiltersFactory.get(sport, applicationContext)
             var filters = FiltersFactory.getFilters(applicationContext)
             filters.forEachIndexed { index, filter ->
                 if (filter is IOverlayObjectFilterRender) {
                     //Logd("StreamService :: filter $filter setVideoStreamData $videoStreamData")
                     filter.setVideoStreamData(videoStreamData)
                 }
-                addFilter(index, filter)
+                addFilter(filter)
+                //Logd("StreamService :: add ${index} filter $filter")
             }
 
             var scoreboard = FiltersFactory.getScoreBoard(sport, applicationContext)
-            Logd("StreamService :: prepareFilters.scoreboard $scoreboard")
+            //Logd("StreamService :: prepareFilters.scoreboard $scoreboard")
             scoreboard.setVideoStreamData(videoStreamData)
             addFilter(scoreboard)
         }
-
-        //this.prepareOverlaysListeners(filters)
     }
-
-//    private fun prepareOverlaysListeners(filters: List<BaseObjectFilterRender>) {
-//        this.filtersRepositoryJob = this.streamServiceScope.launch {
-//            MatchRepository.filters.collect { filters ->
-//                Logd("StreamService :: collect.filters $filters")
-//            }
-//        }
-//    }
 
     private fun keepAliveTrick() {
         val notificationIntent = Intent(this, StreamActivity::class.java).apply {

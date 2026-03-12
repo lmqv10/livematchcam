@@ -8,10 +8,8 @@ import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.strategies.IMatchSyncStrategy
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.services.firebase.EventInfo
-import it.lmqv.livematchcam.services.firebase.FilterOverlay
 import it.lmqv.livematchcam.services.firebase.FilterOverlayEvent
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
-import it.lmqv.livematchcam.services.firebase.OverlaysModel
 import it.lmqv.livematchcam.services.firebase.Schedule
 import it.lmqv.livematchcam.services.firebase.ScoreFactory
 import it.lmqv.livematchcam.services.firebase.ScoreboardOverlay
@@ -114,9 +112,9 @@ object MatchRepository : SyncDataListenerContract {
     @Synchronized
     fun setSport(updatedSport: Sports) {
         if (currentEventInfo.sport != updatedSport) {
-            Logd("$instanceId :: MatchRepository::setSport:: $updatedSport")
+            //Logd("$instanceId :: MatchRepository::setSport:: $updatedSport")
             var score = ScoreFactory.getInitialScore(updatedSport)
-            Logd("$instanceId :: MatchRepository::SetInitialScore::$score")
+            //Logd("$instanceId :: MatchRepository::SetInitialScore::$score")
             applyEventInfoChanges(EventInfo(updatedSport, score))
         }
     }
@@ -127,11 +125,11 @@ object MatchRepository : SyncDataListenerContract {
     fun setScore(updatedScore: IScore) {
         try {
             if (currentEventInfo.score != updatedScore) {
-                Logd("$instanceId :: MatchRepository::setScore:: $updatedScore")
+                //Logd("$instanceId :: MatchRepository::setScore:: $updatedScore")
                 val updatedEventInfo = currentEventInfo.copy(score = updatedScore)
                 applyEventInfoChanges(updatedEventInfo)
-            } else {
-                Logd("$instanceId :: MatchRepository::setScore:: no update required")
+            //} else {
+                //Logd("$instanceId :: MatchRepository::setScore:: no update required")
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -215,13 +213,13 @@ object MatchRepository : SyncDataListenerContract {
     }
     @Synchronized
     private fun applyMatchChanges(updatedMatch: Match) {
-        Logd("$instanceId :: MatchRepository::applyMatchChanges:: $updatedMatch")
+        //Logd("$instanceId :: MatchRepository::applyMatchChanges:: $updatedMatch")
         syncStrategy.updateMatch(updatedMatch)
     }
 
     @Synchronized
     private fun applyEventInfoChanges(updatedEventInfo: EventInfo) {
-        Logd("$instanceId :: MatchRepository::applyEventInfoChanges:: $updatedEventInfo")
+        //Logd("$instanceId :: MatchRepository::applyEventInfoChanges:: $updatedEventInfo")
         syncStrategy.updateEventInfo(updatedEventInfo)
     }
 
@@ -236,7 +234,7 @@ object MatchRepository : SyncDataListenerContract {
     }
 
     override fun onChangeMatch(match: Match) {
-        Logd("$instanceId :: MatchRepository:: onChange $match")
+        //Logd("$instanceId :: MatchRepository:: onChange $match")
         this.notifyMatchChanges(match)
     }
 
@@ -293,14 +291,14 @@ object MatchRepository : SyncDataListenerContract {
     }
 
     override fun onChangeEventInfo(eventInfo: EventInfo) {
-        Logd("$instanceId :: MatchRepository:: onChange $eventInfo")
+        //Logd("$instanceId :: MatchRepository:: onChange $eventInfo")
         notifyEventInfoChanges(eventInfo)
     }
 
     @Synchronized
     private fun notifyEventInfoChanges(updatedEventInfo: EventInfo) {
         try {
-            Logd("$instanceId :: MatchRepository::notifyEventInfoChanges:: $updatedEventInfo")
+            //Logd("$instanceId :: MatchRepository::notifyEventInfoChanges:: $updatedEventInfo")
             currentEventInfo = updatedEventInfo
 
             if (_sport.value != currentEventInfo.sport) {
@@ -323,7 +321,7 @@ object MatchRepository : SyncDataListenerContract {
     @Synchronized
     private fun notifySchedulesUpdated(updatedSchedules: List<Schedule>) {
         try {
-            Logd("$instanceId :: MatchRepository::notifySchedulesUpdated:: $updatedSchedules")
+            //Logd("$instanceId :: MatchRepository::notifySchedulesUpdated:: $updatedSchedules")
 
             if (_schedules.value != updatedSchedules) {
                 _schedules.value = updatedSchedules
@@ -342,7 +340,7 @@ object MatchRepository : SyncDataListenerContract {
     @Synchronized
     private fun notifyScoreboardUpdated(scoreboard: ScoreboardOverlay) {
         try {
-            Logd("$instanceId :: MatchRepository::notifyScoreboardUpdated:: $scoreboard")
+            //Logd("$instanceId :: MatchRepository::notifyScoreboardUpdated:: $scoreboard")
 
             if (_scoreboard.value != scoreboard) {
                 _scoreboard.value = scoreboard
@@ -353,13 +351,13 @@ object MatchRepository : SyncDataListenerContract {
         }
     }
     override fun onChangeFilters(updatedfilters: List<FilterOverlayEvent>) {
-        Logd("$instanceId :: MatchRepository::onChangeFilters:: $updatedfilters")
+        //Logd("$instanceId :: MatchRepository::onChangeFilters:: $updatedfilters")
         this.notifyFilterEventsUpdated(updatedfilters)
     }
     @Synchronized
     private fun notifyFilterEventsUpdated(updatedfilters: List<FilterOverlayEvent>) {
         try {
-            Logd("$instanceId :: MatchRepository::notifyFilterEventsUpdated:: $updatedfilters")
+            //Logd("$instanceId :: MatchRepository::notifyFilterEventsUpdated:: $updatedfilters")
             _filters.value = updatedfilters.toList()
         } catch (e: Exception) {
             e.printStackTrace()

@@ -1,35 +1,23 @@
 package it.lmqv.livematchcam.services.stream.filters
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Bitmap
-import android.opengl.GLES20
-import androidx.preference.PreferenceManager
-import com.pedro.encoder.utils.gl.TranslateTo
-import it.lmqv.livematchcam.extensions.Logd
+import androidx.core.graphics.createBitmap
 import it.lmqv.livematchcam.extensions.loadBitmapOffscreen
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.FilterPosition
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.firebase.FilterOverlay
-import it.lmqv.livematchcam.services.firebase.FilterOverlayEvent
 import it.lmqv.livematchcam.services.stream.IVideoStreamData
-import it.lmqv.livematchcam.services.stream.filters.ScoreboardViewFilterRender
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 class OverlayFilterRender(
     var context: Context,
-    val filterPosition: FilterPosition
-//    val sourceDescriptor: SourceDescriptor,
-//    val filterDescriptor: FilterDescriptor = FilterDescriptor(),
-//    var animationDescriptor: AnimationDescriptor = AnimationDescriptor()
-) : OverlayObjectFilterRender() {
+    val filterPosition: FilterPosition) : OverlayObjectFilterRender() {
 
     private var sourceJob : Job? = null
     private var filtersRepositoryJob : Job? = null
@@ -37,98 +25,64 @@ class OverlayFilterRender(
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private var current: FilterOverlay? = null
-    //private var bitmap: Bitmap? = null
-    private var isVisible: Boolean = false
     private var streamWidth: Int = 100
     private var streamHeight: Int = 100
 
-//    private var sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-//    private val preferenceChangeListener =
-//        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-//            key?.let {
-//                handlePreferenceKey(it)
-//            }
-//        }
-
-//    init {
-//        this.sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
-//        this.handlePreferenceKey(filterDescriptor.preferencesSizeKey)
-//    }
+    init {
+        //Logd("OverlayFilterRender::$filterPosition::init")
+        setImage(createBitmap(1, 1, Bitmap.Config.ARGB_8888))
+    }
 
     private fun initializeCollectors() {
         this.filtersRepositoryJob?.cancel()
         this.filtersRepositoryJob = coroutineScope.launch {
             MatchRepository.filters.collect { filters ->
+                //Logd("OverlayFilterRender::$filterPosition::filters ${filters}")
                 var updated = filters
-                    .firstOrNull { it.position == this@OverlayFilterRender.filterPosition }
+                    .firstOrNull { it.position == filterPosition }
                     ?.filter
 
+                //Logd("OverlayFilterRender::$filterPosition::updated $updated")
+                val lastUrl = current?.urls?.firstOrNull()
+
                 if (updated != null && current != updated) {
+                    current = updated
                     var url = updated.urls.firstOrNull()
-                    val lastUrl = current?.urls?.firstOrNull()
+
+//                    Logd("OverlayFilterRender::$filterPosition::url $url")
+//                    Logd("OverlayFilterRender::$filterPosition::lastUrl $lastUrl")
 
                     if (url?.isNotEmpty() == true) {
                         try {
-                            var bitmap : Bitmap? = null
                             if (url != lastUrl) {
-                                bitmap = loadBitmapOffscreen(context, url)
-                                if (bitmap != null) {
-                                    this@OverlayFilterRender.setImage(bitmap)
-                                }
+                                //Logd("OverlayFilterRender::$filterPosition::bitmap ${url}")
+                                var bitmap = loadBitmapOffscreen(context, url)
+                                //Logd("OverlayFilterRender::$filterPosition::bitmap.WxH ${bitmap?.width}x${bitmap?.height}")
+                                setImage(bitmap)
                             }
 
-                            this@OverlayFilterRender.scaleSprite(updated)
-                            this@OverlayFilterRender.translateSprite(updated)
-                            isVisible = (bitmap != null || url == lastUrl) && updated.visible
+                            scaleSprite(updated)
+                            translateSprite(updated)
+                            alpha = if (updated.visible) { 0.75f } else { 0f }
                         } catch (e: Exception) {
                             e.printStackTrace()
                             CoroutineScope(Dispatchers.Main).launch {
-                                context.toast("Can't load image $url")
+                                context.toast("Exception: Can't load image $url")
                             }
-                            isVisible = false
+                            alpha = 0f
                         }
                     } else {
-                        isVisible = false
+                        alpha = 0f
                     }
                 } else {
                     //Logd("OverlayFilterRender:: current != updated ?? ${current != updated}")
                     //Logd("OverlayFilterRender:: updated?.visible == true ?? ${updated?.visible == true}")
-                    isVisible = updated?.visible == true
+                    alpha = if (updated?.visible == true) { 0.75f } else { 0f }
                 }
 
-                current = updated
+                //Logd("OverlayFilterRender::$filterPosition::alpha $alpha with $updated")
             }
         }
-
-//        this.sourceJob?.cancel()
-//        this.sourceJob =  coroutineScope.launch {
-//            combine(
-//                sourceDescriptor.url,
-//                sourceDescriptor.isVisible
-//            ) { currentUrl, visible -> Pair(currentUrl, visible) }
-//            .distinctUntilChanged()
-//            .collect { (currentUrl, visible) ->
-//                try {
-//                    Logd("OverlayFilterRender:: url $currentUrl visible $visible")
-//                    isVisible = visible && currentUrl.isNotEmpty()
-//                    if (isVisible && previousUrl != currentUrl) {
-//                        previousUrl = currentUrl
-//                        //bitmap = loadBitmapOffscreen(context, currentUrl, targetWidth)
-//                        bitmap = loadBitmapOffscreen(context, currentUrl)
-//                        this@OverlayFilterRender.scaleSprite()
-//                        this@OverlayFilterRender.setImage(bitmap)
-//                        this@OverlayFilterRender.translateSprite()
-//                    } else {
-//                        Logd("OverlayFilterRender:: load bitmap not required")
-//                    }
-//                } catch (e: Exception) {
-//                    e.printStackTrace()
-//                    CoroutineScope(Dispatchers.Main).launch {
-//                        context.toast("Can't load image $currentUrl")
-//                    }
-//                }
-//            }
-//        }
     }
 
     override fun release() {
@@ -141,18 +95,8 @@ class OverlayFilterRender(
 //        this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
 
-    override fun drawFilter() {
-        super.drawFilter()
-        if (streamObjectTextureId[0] == -1) {
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
-        }
-        var targetAlpha = if (!isVisible || streamObjectTextureId[0] == -1) { 0f } else { 0.75f }
-        GLES20.glUniform1f(uAlphaHandle, targetAlpha)
-    }
-
     override fun setVideoStreamData(videoStreamData: IVideoStreamData) {
-        Logd("OverlayFilterRender::setVideoStreamData $filterPosition")
-        //Logd("OverlayFilterRender::setVideoStreamData ${videoStreamData.width}w ${videoStreamData.height}h")
+        //Logd("OverlayFilterRender::$filterPosition::setVideoStreamData ${videoStreamData.width}w ${videoStreamData.height}h")
         this.streamWidth = videoStreamData.width
         this.streamHeight = videoStreamData.height
 
@@ -183,6 +127,7 @@ class OverlayFilterRender(
         var scaleY = scale.y
         var margin = 1f
 
+        //Logd("OverlayFilterRender::$filterPosition::translateSprite ${updated}")
         when (updated.position) {
             FilterPosition.CENTER -> setPosition(50f - scaleX / 2f, 50f - scaleY / 2f)
             FilterPosition.TOP -> setPosition(50f - scaleX / 2f, margin)
@@ -195,18 +140,4 @@ class OverlayFilterRender(
             FilterPosition.BOTTOM_RIGHT -> setPosition(100f - scaleX - margin, 100f - scaleY - margin)
         }
     }
-
-//    private fun handlePreferenceKey(key: String) {
-//        if (key == filterDescriptor.preferencesSizeKey) {
-//            this.maxFactor = sharedPreferences.getString(filterDescriptor.preferencesSizeKey, filterDescriptor.defaultSize.toString())?.toFloatOrNull() ?: filterDescriptor.defaultSize.toFloat()
-//            try {
-//                scaleSprite()
-//                translateSprite()
-//            } catch (e: Exception) {
-//                CoroutineScope(Dispatchers.Main).launch {
-//                    context.toast("OverlayFilterRender::handlePreferenceKey ${e.message.toString()}")
-//                }
-//            }
-//        }
-//    }
 }

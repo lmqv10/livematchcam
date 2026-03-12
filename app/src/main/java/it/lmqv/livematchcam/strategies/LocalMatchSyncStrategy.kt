@@ -85,10 +85,10 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
         syncDataListenerContract.onChangeEventInfo(eventInfo)
     }
     override fun updateFilter(filter: FilterOverlayEvent) {
-        val current = it.lmqv.livematchcam.repositories.MatchRepository.filters.value.toMutableList()
-        val index = current.indexOfFirst { it.position == filter.position }
-        if (index >= 0) current[index] = filter else current.add(filter)
-        syncDataListenerContract.onChangeFilters(current)
+//        val current = it.lmqv.livematchcam.repositories.MatchRepository.filters.value.toMutableList()
+//        val index = current.indexOfFirst { it.position == filter.position }
+//        if (index >= 0) current[index] = filter else current.add(filter)
+        syncDataListenerContract.onChangeFilters(listOf())
     }
 
     override fun updateScoreboard(scoreboard: ScoreboardOverlay) {

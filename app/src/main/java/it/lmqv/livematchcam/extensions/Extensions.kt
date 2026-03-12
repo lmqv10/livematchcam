@@ -20,8 +20,8 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.scale
 import androidx.fragment.app.Fragment
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -163,10 +163,10 @@ suspend fun loadDrawableOffscreen(
         ?: AppCompatResources.getDrawable(context, icon)
 }
 
-suspend fun loadBitmapOffscreen(context: Context, data: String?) : Bitmap? {
+suspend fun loadBitmapOffscreen(context: Context, data: String?) : Bitmap {
     return loadDrawableOffscreen(context, data)?.toBitmap()?.let {
         return it.copy(Bitmap.Config.ARGB_8888, true)
-    }
+    } ?: createBitmap(1, 1, Bitmap.Config.ARGB_8888)
 }
 
 //suspend fun loadBitmapOffscreen(context: Context,

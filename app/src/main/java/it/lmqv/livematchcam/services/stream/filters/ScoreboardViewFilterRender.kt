@@ -1,13 +1,10 @@
 package it.lmqv.livematchcam.services.stream.filters
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.opengl.GLES20
 import androidx.core.graphics.createBitmap
 import androidx.viewbinding.ViewBinding
 import com.pedro.encoder.utils.gl.ImageStreamObject
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.wrapLayout
 import it.lmqv.livematchcam.factories.FilterPosition
@@ -39,7 +36,6 @@ abstract class ScoreboardViewFilterRender<T>(val applicationContext: Context)
     private var matchRepositoryJob : Job? = null
     private var scoreRepositoryJob : Job? = null
 
-    private var isVisible: Boolean = false
     @Volatile
     private var isUpdating: Boolean = false
 
@@ -63,17 +59,12 @@ abstract class ScoreboardViewFilterRender<T>(val applicationContext: Context)
     override fun drawFilter() {
         if (!this.isUpdating) {
             super.drawFilter()
-            if (streamObjectTextureId[0] == -1) {
-                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
-            }
-            var targetAlpha = if (!isVisible || streamObjectTextureId[0] == -1) { 0f } else { 1f }
-            GLES20.glUniform1f(uAlphaHandle, targetAlpha)
         }
     }
 
     override fun setVideoStreamData(videoStreamData: IVideoStreamData) {
         if (_binding != null) {
-            // Logd("ScoreboardViewFilterRender::setVideoStreamData $videoStreamData")
+            //Logd("ScoreboardViewFilterRender::setVideoStreamData $videoStreamData")
             this.width = videoStreamData.width
             this.height = videoStreamData.height
 
@@ -107,12 +98,12 @@ abstract class ScoreboardViewFilterRender<T>(val applicationContext: Context)
         this.scoreboardRepositoryJob = this.coroutineScope.launch {
             MatchRepository.scoreboard.collect { scoreboard ->
                 //Logd("ScoreboardViewFilterRender collect.scoreboard $scoreboard")
-                this@ScoreboardViewFilterRender.isVisible = scoreboard.visible
+                alpha = if (scoreboard.visible) { 1f } else { 0f }
                 
-                if (isVisible) {
-                    this@ScoreboardViewFilterRender.scaleFactor = scoreboard.size.toFloat()
-                    this@ScoreboardViewFilterRender.translateTo = scoreboard.position
-                    this@ScoreboardViewFilterRender.updateLayout()
+                if (scoreboard.visible) {
+                    scaleFactor = scoreboard.size.toFloat()
+                    translateTo = scoreboard.position
+                    updateLayout()
                 }
             }
         }
@@ -141,7 +132,7 @@ abstract class ScoreboardViewFilterRender<T>(val applicationContext: Context)
     private fun scaleSprite() {
         try {
             //Logd("ScoreboardViewFilterRender::scaleSprite")
-            if (_binding != null && minimalWidth > 0 && binding.root.measuredHeight > 0 && isVisible) {
+            if (_binding != null && minimalWidth > 0 && binding.root.measuredHeight > 0) { // && isVisible) {
                 val streamAspectRatio = width.toFloat() / height.toFloat()
 
                 val viewWidth = binding.root.measuredWidth.toFloat()
@@ -164,19 +155,17 @@ abstract class ScoreboardViewFilterRender<T>(val applicationContext: Context)
     private fun translateSprite() {
         try {
             //Logd("ScoreboardViewFilterRender::translateSprite")
-            if (isVisible) {
-                var adaptedFactorWidth = scale.x
-                var adaptedFactorHeight = scale.y
+            var adaptedFactorWidth = scale.x
+            var adaptedFactorHeight = scale.y
 
-                when (this.translateTo) {
-                    FilterPosition.TOP_LEFT -> setPosition(0f, 0f)
-                    FilterPosition.TOP -> setPosition(50f - adaptedFactorWidth / 2f, 0f)
-                    FilterPosition.TOP_RIGHT -> setPosition(100f - adaptedFactorWidth, 0f)
-                    FilterPosition.CENTER -> setPosition(50f - adaptedFactorWidth / 2f, 50f - adaptedFactorHeight / 2f)
-                    FilterPosition.BOTTOM_LEFT -> setPosition(0f, 100f - adaptedFactorHeight)
-                    FilterPosition.BOTTOM -> setPosition(50f - adaptedFactorWidth / 2f, 100f - adaptedFactorHeight)
-                    FilterPosition.BOTTOM_RIGHT -> setPosition(100f - adaptedFactorWidth, 100f - adaptedFactorHeight)
-                }
+            when (this.translateTo) {
+                FilterPosition.TOP_LEFT -> setPosition(0f, 0f)
+                FilterPosition.TOP -> setPosition(50f - adaptedFactorWidth / 2f, 0f)
+                FilterPosition.TOP_RIGHT -> setPosition(100f - adaptedFactorWidth, 0f)
+                FilterPosition.CENTER -> setPosition(50f - adaptedFactorWidth / 2f, 50f - adaptedFactorHeight / 2f)
+                FilterPosition.BOTTOM_LEFT -> setPosition(0f, 100f - adaptedFactorHeight)
+                FilterPosition.BOTTOM -> setPosition(50f - adaptedFactorWidth / 2f, 100f - adaptedFactorHeight)
+                FilterPosition.BOTTOM_RIGHT -> setPosition(100f - adaptedFactorWidth, 100f - adaptedFactorHeight)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -187,7 +176,7 @@ abstract class ScoreboardViewFilterRender<T>(val applicationContext: Context)
     @Synchronized
     private fun render() {
         try {
-            if (_binding != null && binding.root.measuredWidth > 0 && binding.root.measuredHeight > 0 && isVisible) {
+            if (_binding != null && binding.root.measuredWidth > 0 && binding.root.measuredHeight > 0) { // && isVisible) {
                 var bitmap = createBitmap(binding.root.measuredWidth, binding.root.measuredHeight)
                 var canvas = Canvas(bitmap)
                 binding.root.draw(canvas)
