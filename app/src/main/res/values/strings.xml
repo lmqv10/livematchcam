@@ -55,6 +55,8 @@
     <string name="video_bitrate">Bitrate</string>
     <string name="choose_color">Choose shirt color</string>
     <string name="choose_logo">Insert or choose logo URL</string>
+    <string name="choose_overlay">Insert or choose overlay URL</string>
+    <string name="overlay_url_placeholder">http://&#8230;</string>
     <string name="handle_streamers">Streamers</string>
     <string name="add_remove">Add/Remove</string>
     <string name="stream">Stream</string>

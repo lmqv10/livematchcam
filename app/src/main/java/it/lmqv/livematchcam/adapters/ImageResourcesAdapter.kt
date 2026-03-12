@@ -6,23 +6,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import coil.load
 import it.lmqv.livematchcam.R
 
-data class LogoItem(val imageURL: String)
+data class ImageResourceItem(val url: String)
 
-class LogosAdapter(
-        context: Context,
-        private var items: List<LogoItem>,
-        private val onClick: (LogoItem) -> Unit,
-        private val onLongClick: (LogosAdapter, LogoItem) -> Unit
+class ImageResourcesAdapter(
+    context: Context,
+    private var items: List<ImageResourceItem>,
+    private val onClick: (ImageResourceItem) -> Unit,
+    private val onLongClick: (ImageResourcesAdapter, ImageResourceItem) -> Unit,
+    @DrawableRes private val placeholderResId: Int = R.drawable.shield,
     ) : BaseAdapter() {
 
     private val inflater = LayoutInflater.from(context)
 
     override fun getCount(): Int = items.size
 
-    override fun getItem(position: Int): LogoItem = items[position]
+    override fun getItem(position: Int): ImageResourceItem = items[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
@@ -40,8 +42,8 @@ class LogosAdapter(
         }
 
         val item = getItem(position)
-        viewHolder.imageView.load(item.imageURL) {
-            placeholder(R.drawable.shield)
+        viewHolder.imageView.load(item.url) {
+            placeholder(placeholderResId)
             error(R.drawable.preview_missing)
         }
 
@@ -56,7 +58,7 @@ class LogosAdapter(
         return view
     }
 
-    fun updateItems(newItems: List<LogoItem>) {
+    fun updateItems(newItems: List<ImageResourceItem>) {
         items = newItems.toMutableList()
         notifyDataSetChanged()
     }

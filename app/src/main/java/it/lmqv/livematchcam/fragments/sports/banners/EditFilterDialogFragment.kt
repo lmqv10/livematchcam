@@ -12,14 +12,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.lifecycleScope
 import coil.load
 import it.lmqv.livematchcam.R
+import it.lmqv.livematchcam.dialogs.RecentsDialog
 import it.lmqv.livematchcam.factories.FilterPosition
-import it.lmqv.livematchcam.handlers.DialogContext
-import it.lmqv.livematchcam.handlers.DialogHandler
+import it.lmqv.livematchcam.preferences.RecentsOverlaysPreferences
 import it.lmqv.livematchcam.repositories.MatchRepository
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.text.isNotEmpty
 
@@ -209,12 +207,18 @@ class EditFilterDialogFragment : DialogFragment() {
         }
 
         ivFilterUrlPreview.setOnClickListener {
-            lifecycleScope.launch {
-                var currentUrl = currentFilter.urls.firstOrNull() ?: ""
-                DialogHandler.editText(DialogContext(this@EditFilterDialogFragment, ivFilterUrlPreview, R.string.spot_banner_placeholder, currentUrl)) {
-                    loadPreview(it)
-                }
+            val currentUrl = filterUrls.firstOrNull() ?: ""
+            val dialog = RecentsDialog(
+                requireContext(),
+                currentUrl,
+                RecentsOverlaysPreferences(requireContext()),
+                titleResId = R.string.choose_overlay,
+                hintResId = R.string.overlay_url_placeholder,
+                placeholderResId = R.drawable.preview_missing
+            ) { selectedUrl ->
+                loadPreview(selectedUrl)
             }
+            dialog.show()
         }
 
         ivFilterUrlTrash.setOnClickListener {

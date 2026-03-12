@@ -7,11 +7,12 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import coil.load
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.dialogs.LogosRecentsDialog
+import it.lmqv.livematchcam.dialogs.RecentsDialog
 import it.lmqv.livematchcam.databinding.ViewTeamControlBinding
 import it.lmqv.livematchcam.extensions.setFillAndBorder
 import it.lmqv.livematchcam.extensions.showColorPickerDialog
 import it.lmqv.livematchcam.factories.sports.Sports
+import it.lmqv.livematchcam.preferences.RecentsLogosPreferences
 
 class TeamControlView @JvmOverloads constructor(
     context: Context,
@@ -38,10 +39,6 @@ class TeamControlView @JvmOverloads constructor(
             .apply {
                 try {
                     binding.textTeamName.setTextColor(getColor(R.styleable.TeamControlView_textColor, Color.BLACK))
-//                    binding.textTeamName.text = getString(R.styleable.TeamControlView_teamName) ?: ""
-//                    binding.imageLogo.tag = getString(R.styleable.TeamControlView_logoURL) ?: ""
-//                    binding.primaryColor.setFillAndBorder(getColor(R.styleable.TeamControlView_primaryColor, Color.BLACK))
-//                    binding.secondaryColor.setFillAndBorder(getColor(R.styleable.TeamControlView_secondaryColor, Color.BLACK))
                 } finally {
                     recycle()
                 }
@@ -55,7 +52,7 @@ class TeamControlView @JvmOverloads constructor(
 
         binding.imageLogo.setOnClickListener {
             val sourceLogoUrl = binding.imageLogo.tag.toString()
-            var dialog = LogosRecentsDialog(context, sourceLogoUrl) { updatedLogoUrl ->
+            var dialog = RecentsDialog(context, sourceLogoUrl, RecentsLogosPreferences(context)) { updatedLogoUrl ->
                 onLogoURLChanged?.invoke(updatedLogoUrl)
             }
             dialog.show()

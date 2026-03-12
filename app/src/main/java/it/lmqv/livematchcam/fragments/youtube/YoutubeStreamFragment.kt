@@ -23,7 +23,7 @@ import it.lmqv.livematchcam.adapters.LiveStreamAdapter
 import it.lmqv.livematchcam.adapters.LiveStreamItem
 import it.lmqv.livematchcam.databinding.FragmentYoutubeStreamBinding
 import it.lmqv.livematchcam.dialogs.DateTimePickerDialog
-import it.lmqv.livematchcam.dialogs.LogosRecentsDialog
+import it.lmqv.livematchcam.dialogs.RecentsDialog
 import it.lmqv.livematchcam.extensions.launchOnStarted
 import it.lmqv.livematchcam.services.auth.AuthResult
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
@@ -42,6 +42,7 @@ import it.lmqv.livematchcam.extensions.saveBitmapToFile
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.handlers.DialogContext
 import it.lmqv.livematchcam.handlers.DialogHandler
+import it.lmqv.livematchcam.preferences.RecentsLogosPreferences
 import it.lmqv.livematchcam.preferences.SchedulesPreferences
 import it.lmqv.livematchcam.preferences.toThumbnailAsset
 import it.lmqv.livematchcam.services.youtube.LiveStreamContentData
@@ -261,7 +262,7 @@ class YoutubeStreamFragment : Fragment() {
         }
 
         binding.ivLogoHome.setOnClickListener {
-            var dialog = LogosRecentsDialog(requireContext(), "") { selectedLogoUrl ->
+            var dialog = RecentsDialog(requireContext(), "", RecentsLogosPreferences(requireContext())) { selectedLogoUrl ->
                 lifecycleScope.launch {
                     schedulesPrefs.set(logoHome = selectedLogoUrl)
                 }
@@ -270,7 +271,7 @@ class YoutubeStreamFragment : Fragment() {
         }
 
         binding.ivLogoGuest.setOnClickListener {
-            var dialog = LogosRecentsDialog(requireContext(), "") { selectedLogoUrl ->
+            var dialog = RecentsDialog(requireContext(), "", RecentsLogosPreferences(requireContext())) { selectedLogoUrl ->
                 lifecycleScope.launch {
                     schedulesPrefs.set(logoGuest = selectedLogoUrl)
                 }
