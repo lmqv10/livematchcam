@@ -108,6 +108,10 @@ class MatchInfoFragment : Fragment() {
         binding.guestTeamControl.onPrimaryColorsChanged = { updatedColor ->
             MatchRepository.setGuestPrimaryColorHex(updatedColor)
         }
+
+        binding.switchTeams.setOnClickListener {
+            MatchRepository.switchTeams()
+        }
     }
 
     override fun onDestroyView() {

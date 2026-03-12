@@ -202,6 +202,17 @@ object MatchRepository : SyncDataListenerContract {
             mainBannerVisible = schedule.mainBannerVisible))
     }
 
+    fun switchTeams() {
+        applyMatchChanges(currentMatch.copy(
+            guestTeam = currentMatch.homeTeam,
+            guestPrimaryColorHex = currentMatch.homePrimaryColorHex,
+            guestSecondaryColorHex = currentMatch.homeSecondaryColorHex,
+            guestLogo = currentMatch.homeLogo,
+            homeTeam = currentMatch.guestTeam,
+            homePrimaryColorHex = currentMatch.guestPrimaryColorHex,
+            homeSecondaryColorHex = currentMatch.guestSecondaryColorHex,
+            homeLogo = currentMatch.guestLogo))
+    }
     @Synchronized
     private fun applyMatchChanges(updatedMatch: Match) {
         Logd("$instanceId :: MatchRepository::applyMatchChanges:: $updatedMatch")

@@ -42,6 +42,15 @@
                 android:layout_weight="1"
             />
 
+            <it.lmqv.livematchcam.views.AnimateImageVIew
+                style="@style/SmallImageViewStyle"
+                android:id="@+id/switch_teams"
+                android:src="@drawable/arrows"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="2dp"
+                android:contentDescription="@string/description_placeholder"
+                tools:ignore="MissingConstraints" />
+
             <it.lmqv.livematchcam.views.TeamControlView
                 android:id="@+id/guestTeamControl"
                 android:layout_width="0dp"

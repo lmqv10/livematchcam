@@ -1,8 +1,6 @@
 WIP 
-- Recents for overlays url. (switch)
 
 NEXT CANDIDATE
-- Switch tra le squadre.
 - Banners temporizzabili (25 sec)
 - Notifica al dispositivo in app per contattare streamer. (popup in app).
 - Battery Level warning (preference "show/hide battery level"). NOTA: il monitoring potrebbe costare.
