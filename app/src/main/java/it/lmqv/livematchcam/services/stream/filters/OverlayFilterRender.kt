@@ -143,8 +143,10 @@ class OverlayFilterRender(
 
     override fun drawFilter() {
         super.drawFilter()
-        //var targetAlpha = if (!isVisible || this.bitmap == null) { 0f } else { 0.75f }
-        var targetAlpha = if (!isVisible) { 0f } else { 0.75f }
+        if (streamObjectTextureId[0] == -1) {
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+        }
+        var targetAlpha = if (!isVisible || streamObjectTextureId[0] == -1) { 0f } else { 0.75f }
         GLES20.glUniform1f(uAlphaHandle, targetAlpha)
     }
 

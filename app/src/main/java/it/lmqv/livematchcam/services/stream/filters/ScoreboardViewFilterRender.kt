@@ -63,7 +63,10 @@ abstract class ScoreboardViewFilterRender<T>(val applicationContext: Context)
     override fun drawFilter() {
         if (!this.isUpdating) {
             super.drawFilter()
-            var targetAlpha = if (!isVisible) { 0f } else { 1f }
+            if (streamObjectTextureId[0] == -1) {
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+            }
+            var targetAlpha = if (!isVisible || streamObjectTextureId[0] == -1) { 0f } else { 1f }
             GLES20.glUniform1f(uAlphaHandle, targetAlpha)
         }
     }
