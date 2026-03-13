@@ -1,7 +1,12 @@
-package it.lmqv.livematchcam.fragments.sports.banners
+package it.lmqv.livematchcam.dialogs
 
 import android.app.Dialog
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageButton
@@ -12,46 +17,47 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
-import coil.load
 import it.lmqv.livematchcam.R
-import it.lmqv.livematchcam.dialogs.RecentsDialog
 import it.lmqv.livematchcam.factories.FilterPosition
-import it.lmqv.livematchcam.preferences.RecentsOverlaysPreferences
 import it.lmqv.livematchcam.repositories.MatchRepository
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
-import kotlin.text.isNotEmpty
 
-class EditFilterDialogFragment : DialogFragment() {
+class EditScoreboardDialogFragment : DialogFragment() {
 
     companion object {
-        private const val ARG_POSITION = "arg_position"
-
-        fun newInstance(position: FilterPosition): EditFilterDialogFragment {
-            return EditFilterDialogFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable(ARG_POSITION, position)
-                }
-            }
+        fun newInstance(): EditScoreboardDialogFragment {
+            return EditScoreboardDialogFragment()
         }
     }
 
-    private lateinit var initialPosition: FilterPosition
     private var selectedPosition: FilterPosition = FilterPosition.TOP_LEFT
-    private var selectedSize: Int = 20
-    private var selectedVisible: Boolean = false
-    private var filterUrls: List<String> = listOf()
+    private var selectedSize: Int = 30
+    private var selectedVisible: Boolean = true
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        @Suppress("DEPRECATION")
-        initialPosition = arguments?.getSerializable(ARG_POSITION) as? FilterPosition ?: FilterPosition.TOP_LEFT
+    override fun onResume() {
+        super.onResume()
+        val window = dialog?.window ?: return
+        val displayMetrics = DisplayMetrics()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val bounds = requireActivity().windowManager.currentWindowMetrics.bounds
+            val width = (bounds.width() * 0.75).toInt()
+            val height = (bounds.height() * 0.75).toInt()
+            window.setLayout(width, height)
+        } else {
+            @Suppress("DEPRECATION")
+            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+            val width = (displayMetrics.widthPixels * 0.75).toInt()
+            val height = (displayMetrics.heightPixels * 0.75).toInt()
+            window.setLayout(width, height)
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val currentScoreboard = MatchRepository.scoreboard.value
         val currentFilters = MatchRepository.filters.value
-        val event = currentFilters.firstOrNull { it.position == initialPosition }
-            ?: return super.onCreateDialog(savedInstanceState)
-        val currentFilter = event.filter ?: return super.onCreateDialog(savedInstanceState)
 
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_filter, null)
         val dialog = AlertDialog.Builder(requireContext())
@@ -59,13 +65,14 @@ class EditFilterDialogFragment : DialogFragment() {
             .setCancelable(true)
             .create()
 
-        // Trova le viste nel layout
+        // Trova le viste nel layout (riutilizzo lo stesso layout dei filtri)
         val switchVisible = dialogView.findViewById<SwitchCompat>(R.id.switch_visible)!!
         val switchDescription = dialogView.findViewById<TextView>(R.id.switch_description)!!
+        val increaseSize = dialogView.findViewById<ImageView>(R.id.filter_increase_size)!!
+        val decreaseSize = dialogView.findViewById<ImageView>(R.id.filter_decrease_size)!!
         val sliderSize = dialogView.findViewById<SeekBar>(R.id.slider_size)!!
         val textSliderSize = dialogView.findViewById<TextView>(R.id.text_slider_size)!!
-        val ivFilterUrlPreview = dialogView.findViewById<ImageView>(R.id.filter_url_preview)!!
-        val ivFilterUrlTrash = dialogView.findViewById<ImageView>(R.id.filter_url_trash)!!
+        val filterUrlPreview = dialogView.findViewById<ImageView>(R.id.filter_url_preview)!!
 
         val btnPosTopLeft = dialogView.findViewById<ImageButton>(R.id.btn_pos_top_left)!!
         val btnPosTop = dialogView.findViewById<ImageButton>(R.id.btn_pos_top)!!
@@ -74,21 +81,23 @@ class EditFilterDialogFragment : DialogFragment() {
         val btnPosBottomLeft = dialogView.findViewById<ImageButton>(R.id.btn_pos_bottom_left)!!
         val btnPosBottom = dialogView.findViewById<ImageButton>(R.id.btn_pos_bottom)!!
         val btnPosBottomRight = dialogView.findViewById<ImageButton>(R.id.btn_pos_bottom_right)!!
-        
+
         val btnCancel = dialogView.findViewById<ImageView>(R.id.cancelButton)!!
         val btnSave = dialogView.findViewById<ImageView>(R.id.confirmButton)!!
 
+        // hide preview handling
+        filterUrlPreview.visibility = View.GONE
+
         // Inizializza stato locale
-        selectedPosition = initialPosition
-        selectedSize = currentFilter.size
-        selectedVisible = currentFilter.visible
-        filterUrls = currentFilter.urls
+        selectedPosition = currentScoreboard.position
+        selectedSize = currentScoreboard.size
+        selectedVisible = currentScoreboard.visible
 
         fun handleSwitchDescription() {
             switchDescription.text = if (selectedVisible) {
-                getString(R.string.show_overlay)
+                getString(R.string.show_scoreboard)
             }  else {
-                getString(R.string.hide_overlay)
+                getString(R.string.hide_scoreboard)
             }
         }
 
@@ -100,6 +109,16 @@ class EditFilterDialogFragment : DialogFragment() {
         switchVisible.setOnCheckedChangeListener { _, isChecked ->
             selectedVisible = isChecked
             handleSwitchDescription()
+        }
+
+        increaseSize.setOnClickListener {
+            sliderSize.progress = min(100, sliderSize.progress + 5)
+            textSliderSize.text = sliderSize.progress.toString()
+        }
+
+        decreaseSize.setOnClickListener {
+            sliderSize.progress = max(5, sliderSize.progress - 5)
+            textSliderSize.text = sliderSize.progress.toString()
         }
 
         sliderSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -127,18 +146,13 @@ class EditFilterDialogFragment : DialogFragment() {
             FilterPosition.BOTTOM_RIGHT to btnPosBottomRight
         )
 
-        // Determina le posizioni occupate dagli altri filtri attivi e visibili (incluso lo scoreboard)
-        val scoreboard = MatchRepository.scoreboard.value
+        // Determina le posizioni occupate dai filtri attivi e visibili
         val occupiedPositions = currentFilters
-            .filter { it.position != initialPosition && it.filter != null && it.filter.visible }
+            .filter { it.filter != null && it.filter.visible }
             .map { it.filter!!.position }
-            .toMutableSet()
-        
-        if (scoreboard.visible) {
-            occupiedPositions.add(scoreboard.position)
-        }
+            .toSet()
 
-        val typedValue = android.util.TypedValue()
+        val typedValue = TypedValue()
         requireContext().theme.resolveAttribute(android.R.attr.selectableItemBackground, typedValue, true)
         val selectableBackgroundResId = typedValue.resourceId
 
@@ -147,13 +161,13 @@ class EditFilterDialogFragment : DialogFragment() {
                 if (occupiedPositions.contains(pos)) {
                     btn.isEnabled = false
                     btn.alpha = 0.3f
-                    btn.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                    btn.setBackgroundColor(Color.TRANSPARENT)
                 } else {
                     btn.isEnabled = true
                     btn.alpha = 1.0f
                     if (pos == selectedPosition) {
                         btn.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.primary_1))
-                        btn.imageTintList = android.content.res.ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white))
+                        btn.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white))
                     } else {
                         btn.setBackgroundResource(selectableBackgroundResId)
                         btn.imageTintList = null
@@ -173,81 +187,21 @@ class EditFilterDialogFragment : DialogFragment() {
 
         updateGridSelection()
 
-        fun loadPreview(url: String) {
-            if (url.isNotEmpty()) {
-                ivFilterUrlPreview.load(url) {
-                    placeholder(R.drawable.preview_missing)
-                    error(R.drawable.preview_missing)
-                    allowHardware(false)
-                    listener(
-                        onError = { _, error ->
-                            ivFilterUrlTrash.visibility = View.GONE
-                            switchVisible.isChecked = false
-                            switchVisible.isEnabled = false
-                        },
-                        onSuccess = { _, result ->
-                            ivFilterUrlTrash.visibility = View.VISIBLE
-                            switchVisible.isChecked = true
-                            switchVisible.isEnabled = true
-                            filterUrls = listOf(url)
-                        }
-                    )
-                }
-            } else {
-                ivFilterUrlTrash.visibility = View.GONE
-                switchVisible.isChecked = false
-                switchVisible.isEnabled = false
-                val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.preview_missing)
-                ivFilterUrlPreview.setImageDrawable(drawable)
-            }
-        }
-
-        if (filterUrls.isNotEmpty()) {
-            loadPreview(filterUrls.first())
-        }
-
-        ivFilterUrlPreview.setOnClickListener {
-            val currentUrl = filterUrls.firstOrNull() ?: ""
-            val dialog = RecentsDialog(
-                requireContext(),
-                currentUrl,
-                RecentsOverlaysPreferences(requireContext()),
-                titleResId = R.string.choose_overlay,
-                hintResId = R.string.overlay_url_placeholder,
-                placeholderResId = R.drawable.preview_missing
-            ) { selectedUrl ->
-                loadPreview(selectedUrl)
-            }
-            dialog.show()
-        }
-
-        ivFilterUrlTrash.setOnClickListener {
-            filterUrls = listOf()
-            loadPreview("")
-        }
-
         btnCancel.setOnClickListener {
             dismiss()
         }
 
         btnSave.setOnClickListener {
-            // Aggiorniamo semplicemente le proprietà all'interno del filtro attuale.
-            // Il contenitore FilterOverlayEvent manterrà la sua "position" originale (che funge da ID),
-            // ma il "FilterOverlay" interno avrà la nuova position aggiornata per i vari component/listener.
-            val updatedFilter = currentFilter.copy(
-                position = selectedPosition, 
-                size = selectedSize, 
-                visible = selectedVisible,
-                urls = filterUrls
+            val updatedScoreboard = currentScoreboard.copy(
+                position = selectedPosition,
+                size = selectedSize,
+                visible = selectedVisible
             )
-            val updatedEvent = event.copy(filter = updatedFilter)
-            
-            MatchRepository.updateFilter(updatedEvent)
+            MatchRepository.updateScoreboard(updatedScoreboard)
             dismiss()
         }
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         return dialog
     }
-
 }

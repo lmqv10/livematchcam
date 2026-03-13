@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:minHeight="48dp"
@@ -36,28 +37,55 @@
         android:visibility="gone"
         tools:visibility="visible">
 
-        <SeekBar
-            android:id="@+id/slider_value"
-            android:layout_width="120dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:minHeight="48dp"
-            android:max="100"
-            android:min="5"
-            android:progress="5"
-            android:splitTrack="false"
-            android:progressBackgroundTint="@color/primary"
-            android:progressBackgroundTintMode="screen"
-            android:thumb="@drawable/custom_seekbar_thumb" />
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/decrease_size"
+                android:src="@drawable/minus"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:padding="6dp"
+                app:tint="@color/image_tint_selector"
+                tools:ignore="ContentDescription"/>
+
+            <SeekBar
+                android:visibility="gone"
+                android:id="@+id/slider_value"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:minHeight="48dp"
+                android:max="100"
+                android:min="5"
+                android:progress="5"
+                android:splitTrack="false"
+                android:progressBackgroundTint="@color/primary"
+                android:progressBackgroundTintMode="screen"
+                android:thumb="@drawable/custom_seekbar_thumb" />
+
+            <ImageView
+                android:id="@+id/increase_size"
+                android:src="@drawable/add"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="6dp"
+                android:layout_gravity="center"
+                app:tint="@color/image_tint_selector"
+                tools:ignore="ContentDescription"/>
+        </LinearLayout>
 
         <TextView
             android:id="@+id/text_slider_value"
-            android:layout_width="30dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:paddingVertical="4dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="4dp"
+            android:paddingVertical="2dp"
             android:gravity="center"
-            android:textSize="@dimen/text_size_small"
+            android:textSize="@dimen/text_size_normal"
             android:background="@drawable/secondary_background"
             android:textColor="@color/primary"
             android:text="@string/description_placeholder" />

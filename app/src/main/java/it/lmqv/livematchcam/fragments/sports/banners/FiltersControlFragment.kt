@@ -12,6 +12,8 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentFiltersControlBinding
+import it.lmqv.livematchcam.dialogs.EditFilterDialogFragment
+import it.lmqv.livematchcam.dialogs.EditScoreboardDialogFragment
 import it.lmqv.livematchcam.factories.FilterPosition
 import it.lmqv.livematchcam.fragments.sports.BaseFiltersControlFragment
 import it.lmqv.livematchcam.repositories.MatchRepository

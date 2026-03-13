@@ -170,7 +170,7 @@
     <string name="spot_banner">Top-Right banner</string>
     <string name="main_banner">Main banner</string>
     <string name="show_scoreboard">Scoreboard On</string>
-    <string name="hide_scoreboard">Scoreboard On</string>
+    <string name="hide_scoreboard">Scoreboard Off</string>
     <string name="show_overlay">Overlay On</string>
     <string name="hide_overlay">Overlay Off</string>
     <string name="show_hide">Show - Hide</string>
@@ -256,6 +256,9 @@
     <string name="zoom_in">In</string>
     <string name="zoom_none">None</string>
     <string name="zoom_out">Out</string>
+
+    <string name="description_on">On</string>
+    <string name="description_off">Off</string>
 
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>

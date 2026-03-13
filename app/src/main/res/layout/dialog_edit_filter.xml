@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/dialogRoot"
-    android:layout_width="@dimen/dialog_width"
+    android:layout_width="@dimen/dialog_wider"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/score_board_primary_background"
@@ -11,14 +11,26 @@
 
 
     <LinearLayout
+        android:id="@+id/filter_preview_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_gravity="start">
-        
+        android:gravity="center_horizontal">
+
+        <ImageView
+            android:id="@+id/filter_url_preview"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="5dp"
+            android:src="@drawable/preview_missing"
+            tools:ignore="ContentDescription" />
+
+
         <GridLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:columnCount="3"
             android:rowCount="3"
             android:useDefaultMargins="true"
@@ -26,179 +38,160 @@
 
             <ImageButton
                 android:id="@+id/btn_pos_top_left"
-                android:layout_width="80dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/filter_placeholder_width"
+                android:layout_height="@dimen/filter_placeholder_height"
                 android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_top_left"
                 android:layout_margin="4dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_top"
-                android:layout_width="80dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/filter_placeholder_width"
+                android:layout_height="@dimen/filter_placeholder_height"
                 android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_top"
                 android:layout_margin="4dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_top_right"
-                android:layout_width="80dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/filter_placeholder_width"
+                android:layout_height="@dimen/filter_placeholder_height"
                 android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_top_right"
                 android:layout_margin="4dp" />
 
-            <!-- Seconda riga: LEFT (vuoto), CENTER, RIGHT (vuoto) -->
             <Space
-                android:layout_width="80dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/filter_placeholder_width"
+                android:layout_height="@dimen/filter_placeholder_height"
                 android:layout_margin="4dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_center"
-                android:layout_width="80dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/filter_placeholder_width"
+                android:layout_height="@dimen/filter_placeholder_height"
                 android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_center"
                 android:layout_margin="4dp" />
 
             <Space
-                android:layout_width="80dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/filter_placeholder_width"
+                android:layout_height="@dimen/filter_placeholder_height"
                 android:layout_margin="4dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_bottom_left"
-                android:layout_width="80dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/filter_placeholder_width"
+                android:layout_height="@dimen/filter_placeholder_height"
                 android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_bottom_left"
                 android:layout_margin="4dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_bottom"
-                android:layout_width="80dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/filter_placeholder_width"
+                android:layout_height="@dimen/filter_placeholder_height"
                 android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_bottom"
                 android:layout_margin="4dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_bottom_right"
-                android:layout_width="80dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/filter_placeholder_width"
+                android:layout_height="@dimen/filter_placeholder_height"
                 android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_bottom_right"
                 android:layout_margin="4dp" />
 
         </GridLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingHorizontal="10dp"
-            android:gravity="center_vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical|end">
-
-                <TextView
-                    android:id="@+id/switch_description"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/show_hide"
-                    android:gravity="center"
-                    android:textColor="@color/secondary" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_visible"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minHeight="40dp"
-                    android:textColor="@color/primary" />
-
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray"
-                android:layout_marginVertical="5dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <SeekBar
-                    android:id="@+id/slider_size"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:minHeight="40dp"
-                    android:max="100"
-                    android:min="5"
-                    android:progress="5"
-                    android:splitTrack="false"
-                    android:progressBackgroundTint="@color/primary"
-                    android:progressBackgroundTintMode="screen"
-                    android:thumb="@drawable/custom_seekbar_thumb" />
-
-                <TextView
-                    android:id="@+id/text_slider_size"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:paddingVertical="4dp"
-                    android:gravity="center"
-                    android:background="@drawable/secondary_background"
-                    android:textSize="@dimen/text_size_small"
-                    android:textColor="@color/primary"
-                    tools:text="30" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray"
-                android:layout_marginVertical="5dp"/>
-
-            <LinearLayout
-                android:id="@+id/filter_url_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/filter_url_preview"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="50dp"
-                    android:src="@drawable/preview_missing"
-                    tools:ignore="ContentDescription" />
-
-                <ImageView
-                    style="@style/DefaultImageViewStyle"
-                    android:id="@+id/filter_url_trash"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="10dp"
-                    android:src="@drawable/ic_trash_bin"
-                    tools:ignore="ContentDescription" />
-
-
-            </LinearLayout>
-
-        </LinearLayout>
-
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginVertical="5dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/filter_decrease_size"
+            android:src="@drawable/minus"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription"/>
+
+        <SeekBar
+            android:id="@+id/slider_size"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:max="100"
+            android:min="5"
+            android:progress="5"
+            android:splitTrack="false"
+            android:progressBackgroundTint="@color/primary"
+            android:progressBackgroundTintMode="screen"
+            android:thumb="@drawable/custom_seekbar_thumb" />
+
+        <ImageView
+            android:id="@+id/filter_increase_size"
+            android:src="@drawable/add"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription"/>
+
+        <TextView
+            android:id="@+id/text_slider_size"
+            android:layout_width="wrap_content"
+            android:minWidth="35dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:paddingVertical="4dp"
+            android:gravity="center"
+            android:background="@drawable/secondary_background"
+            android:textSize="@dimen/text_size_normal"
+            android:textColor="@color/primary"
+            tools:text="@string/description_placeholder" />
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/switch_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="@string/hide_scoreboard"
+            android:gravity="center"
+            android:textColor="@color/secondary" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_visible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:minHeight="40dp"
+            android:textColor="@color/primary" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginVertical="5dp"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

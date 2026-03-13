@@ -13,6 +13,8 @@ import it.lmqv.livematchcam.databinding.ViewToggleDrawerBinding
 import kotlin.math.roundToInt
 import android.os.Handler
 import android.os.Looper
+import kotlin.math.max
+import kotlin.math.min
 
 class ToggleDrawerView @JvmOverloads constructor(
     context: Context,
@@ -67,6 +69,12 @@ class ToggleDrawerView @JvmOverloads constructor(
         }
 
         binding.iconToggle.setOnLongClickListener {
+            if (isDrawerOpen) {
+                val transition = AutoTransition().apply { duration = 200 }
+                TransitionManager.beginDelayedTransition(this, transition)
+                binding.panelDrawer.visibility = View.GONE
+                binding.iconToggle.imageTintList = null
+            }
             onEditRequested?.invoke()
             true
         }
@@ -74,6 +82,27 @@ class ToggleDrawerView @JvmOverloads constructor(
         // Switch listener
         binding.switchToggle.setOnCheckedChangeListener { _, isChecked ->
             onToggleChanged?.invoke(isChecked)
+        }
+
+        binding.increaseSize.setOnClickListener {
+            binding.sliderValue.progress = min(100, binding.sliderValue.progress + 5)
+
+            debounceRunnable?.let { sliderHandler.removeCallbacks(it) }
+            debounceRunnable = Runnable {
+                onSliderValueChanged?.invoke(binding.sliderValue.progress)
+            }
+            sliderHandler.postDelayed(debounceRunnable!!, 200)
+        }
+
+        binding.decreaseSize.setOnClickListener {
+            binding.sliderValue.progress = max(5, binding.sliderValue.progress - 5)
+            onSliderValueChanged?.invoke(binding.sliderValue.progress)
+
+            debounceRunnable?.let { sliderHandler.removeCallbacks(it) }
+            debounceRunnable = Runnable {
+                onSliderValueChanged?.invoke(binding.sliderValue.progress)
+            }
+            sliderHandler.postDelayed(debounceRunnable!!, 200)
         }
 
         // Slider listener (step di 5)
