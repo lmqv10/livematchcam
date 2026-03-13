@@ -8,12 +8,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.databinding.FragmentVolleyScoreBoardBinding
-import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.extensions.equalizeMaxWidthWith
 import it.lmqv.livematchcam.extensions.loadDrawableOffscreen
 import it.lmqv.livematchcam.extensions.setShirtByColor
-import it.lmqv.livematchcam.extensions.wrapLayout
 import it.lmqv.livematchcam.services.firebase.IScore
 import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.services.firebase.SetScore
@@ -49,7 +47,7 @@ class VolleyScoreboardViewFilterRender(applicationContext: Context)
     @Synchronized
     override fun match(match: Match) {
         try {
-            Logd("VolleyScoreboardViewFilterRender::match $match")
+            //Logd("VolleyScoreboardViewFilterRender::match $match")
             this.handleHomeTeam(match)
             this.handleAwayTeam(match)
 
@@ -65,7 +63,7 @@ class VolleyScoreboardViewFilterRender(applicationContext: Context)
     @Synchronized
     override fun score(score: IScore) {
         try {
-            Logd("VolleyScoreboardViewFilterRender::score $score")
+            //Logd("VolleyScoreboardViewFilterRender::score $score")
             val score = score as VolleyScore
             updateScore(score.sets)
             updateLeagueDescription(score.league)
@@ -205,7 +203,7 @@ class VolleyScoreboardViewFilterRender(applicationContext: Context)
     }
 
     private fun updateTeamsView() {
-        Logd("VolleyScoreboardViewFilterRender :: updateTeamsView")
+        //Logd("VolleyScoreboardViewFilterRender :: updateTeamsView")
         with(binding) {
             homeTeam.equalizeMaxWidthWith(awayTeam)
             homeTeamBar.equalizeMaxWidthWith(awayTeamBar)

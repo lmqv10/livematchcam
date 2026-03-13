@@ -3,9 +3,7 @@ package it.lmqv.livematchcam.dialogs
 import android.app.Dialog
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.ImageButton
@@ -14,8 +12,11 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import android.view.View
 import coil.load
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.drawable.CheckerboardDrawable
@@ -45,6 +46,7 @@ class EditFilterDialogFragment : DialogFragment() {
     private var selectedSize: Int = 20
     private var selectedVisible: Boolean = false
     private var filterUrls: List<String> = listOf()
+    private var imageAspectRatio: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,21 +57,21 @@ class EditFilterDialogFragment : DialogFragment() {
 
     override fun onResume() {
         super.onResume()
-        val window = dialog?.window ?: return
-        val displayMetrics = DisplayMetrics()
+//        val window = dialog?.window ?: return
+//        val displayMetrics = DisplayMetrics()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val bounds = requireActivity().windowManager.currentWindowMetrics.bounds
-            val width = (bounds.width() * 0.75).toInt()
-            val height = (bounds.height() * 0.75).toInt()
-            window.setLayout(width, height)
-        } else {
-            @Suppress("DEPRECATION")
-            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
-            val width = (displayMetrics.widthPixels * 0.75).toInt()
-            val height = (displayMetrics.heightPixels * 0.75).toInt()
-            window.setLayout(width, height)
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//            val bounds = requireActivity().windowManager.currentWindowMetrics.bounds
+//            val width = (bounds.width() * 0.6).toInt()
+//            val height = (bounds.height() * 0.9).toInt()
+//            window.setLayout(width, height)
+//        } else {
+//            @Suppress("DEPRECATION")
+//            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+//            val width = (displayMetrics.widthPixels * 0.6).toInt()
+//            val height = (displayMetrics.heightPixels * 0.9).toInt()
+//            window.setLayout(width, height)
+//        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -92,8 +94,7 @@ class EditFilterDialogFragment : DialogFragment() {
         val sliderSize = dialogView.findViewById<SeekBar>(R.id.slider_size)!!
         val textSliderSize = dialogView.findViewById<TextView>(R.id.text_slider_size)!!
         val ivFilterUrlPreview = dialogView.findViewById<ImageView>(R.id.filter_url_preview)!!
-        //val ivFilterUrlTrash = dialogView.findViewById<ImageView>(R.id.filter_url_trash)!!
-
+        val ivFilterUrlEdit = dialogView.findViewById<ImageView>(R.id.filter_url_edit)!!
 
         val btnPosTopLeft = dialogView.findViewById<ImageButton>(R.id.btn_pos_top_left)!!
         val btnPosTop = dialogView.findViewById<ImageButton>(R.id.btn_pos_top)!!
@@ -106,7 +107,8 @@ class EditFilterDialogFragment : DialogFragment() {
         val btnCancel = dialogView.findViewById<ImageView>(R.id.cancelButton)!!
         val btnSave = dialogView.findViewById<ImageView>(R.id.confirmButton)!!
 
-        ivFilterUrlPreview.background = CheckerboardDrawable()
+        val container = dialogView.findViewById<ConstraintLayout>(R.id.filter_preview_container)!!
+        container.background = CheckerboardDrawable()
 
         // Inizializza stato locale
         selectedPosition = initialPosition
@@ -122,6 +124,60 @@ class EditFilterDialogFragment : DialogFragment() {
             }
         }
 
+        fun updatePreviewLayout() {
+            ivFilterUrlPreview.visibility = if (selectedVisible && filterUrls.isNotEmpty()) View.VISIBLE else View.INVISIBLE
+
+            if (!selectedVisible || filterUrls.isEmpty()) return
+
+            val set = ConstraintSet()
+            // CLONE THE VIEWPORT container where the image is nested
+            val viewport = dialogView.findViewById<ConstraintLayout>(R.id.filter_preview_viewport)!!
+            set.clone(viewport)
+
+            // CLEAR ALL constraints for the preview image to start fresh
+            set.clear(R.id.filter_url_preview, ConstraintSet.TOP)
+            set.clear(R.id.filter_url_preview, ConstraintSet.BOTTOM)
+            set.clear(R.id.filter_url_preview, ConstraintSet.START)
+            set.clear(R.id.filter_url_preview, ConstraintSet.END)
+
+            // FORCE Robust handling - Both MATCH_CONSTRAINT for ratio to work
+            set.constrainWidth(R.id.filter_url_preview, ConstraintSet.MATCH_CONSTRAINT)
+            set.constrainHeight(R.id.filter_url_preview, ConstraintSet.MATCH_CONSTRAINT)
+            set.setDimensionRatio(R.id.filter_url_preview, imageAspectRatio ?: "1:1")
+
+            // 1. HORIZONTAL POSITIONING
+            set.connect(R.id.filter_url_preview, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            set.connect(R.id.filter_url_preview, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+
+            val hBias = when (selectedPosition) {
+                FilterPosition.TOP_LEFT, FilterPosition.BOTTOM_LEFT -> 0.0f
+                FilterPosition.TOP_RIGHT, FilterPosition.BOTTOM_RIGHT -> 1.0f
+                else -> 0.5f // TOP, BOTTOM, CENTER
+            }
+            set.setHorizontalBias(R.id.filter_url_preview, hBias)
+
+            // 2. VERTICAL POSITIONING
+            when (selectedPosition) {
+                FilterPosition.TOP_LEFT, FilterPosition.TOP, FilterPosition.TOP_RIGHT -> {
+                    set.connect(R.id.filter_url_preview, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+                }
+                FilterPosition.BOTTOM_LEFT, FilterPosition.BOTTOM, FilterPosition.BOTTOM_RIGHT -> {
+                    set.connect(R.id.filter_url_preview, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+                }
+                FilterPosition.CENTER -> {
+                    // CENTER Logic using Guideline to allow overflow without squashing
+                    set.connect(R.id.filter_url_preview, ConstraintSet.TOP, R.id.guideline_h_center, ConstraintSet.TOP)
+                    set.connect(R.id.filter_url_preview, ConstraintSet.BOTTOM, R.id.guideline_h_center, ConstraintSet.BOTTOM)
+                }
+            }
+
+            // 3. SIZE
+            val percent = max(0.01f, selectedSize / 100f)
+            set.constrainPercentWidth(R.id.filter_url_preview, percent)
+            
+            set.applyTo(viewport)
+        }
+
         switchVisible.isChecked = selectedVisible
         handleSwitchDescription()
         sliderSize.progress = selectedSize
@@ -130,6 +186,7 @@ class EditFilterDialogFragment : DialogFragment() {
         switchVisible.setOnCheckedChangeListener { _, isChecked ->
             selectedVisible = isChecked
             handleSwitchDescription()
+            updatePreviewLayout()
         }
 
         increaseSize.setOnClickListener {
@@ -151,6 +208,7 @@ class EditFilterDialogFragment : DialogFragment() {
                 if (fromUser && progress != steppedProgress) {
                     seekBar?.progress = steppedProgress
                 }
+                updatePreviewLayout()
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
@@ -192,7 +250,7 @@ class EditFilterDialogFragment : DialogFragment() {
                     btn.isEnabled = true
                     btn.alpha = 1.0f
                     if (pos == selectedPosition) {
-                        btn.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.primary_1))
+                        btn.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.secondary_dark))
                         btn.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white))
                     } else {
                         btn.setBackgroundResource(selectableBackgroundResId)
@@ -207,6 +265,7 @@ class EditFilterDialogFragment : DialogFragment() {
                 if (!occupiedPositions.contains(pos)) {
                     selectedPosition = pos
                     updateGridSelection()
+                    updatePreviewLayout()
                 }
             }
         }
@@ -214,40 +273,76 @@ class EditFilterDialogFragment : DialogFragment() {
         updateGridSelection()
 
         fun loadPreview(url: String) {
+            val placeholderRes = R.drawable.preview_missing
             if (url.isNotEmpty()) {
+                // Load into main preview
                 ivFilterUrlPreview.load(url) {
-                    placeholder(R.drawable.preview_missing)
-                    error(R.drawable.preview_missing)
-                    allowHardware(false)
+                    placeholder(placeholderRes)
+                    error(placeholderRes)
+                }
+
+                ivFilterUrlEdit.load(url) {
+                    placeholder(placeholderRes)
+                    error(placeholderRes)
                     listener(
-                        onError = { _, error ->
-                            //ivFilterUrlTrash.visibility = View.GONE
+                        onError = { _, _ ->
                             switchVisible.isChecked = false
                             switchVisible.isEnabled = false
+                            sliderSize.isEnabled = false
+                            sliderSize.alpha = 0.3f
+                            increaseSize.isEnabled = false
+                            increaseSize.alpha = 0.3f
+                            decreaseSize.isEnabled = false
+                            decreaseSize.alpha = 0.3f
+
                         },
                         onSuccess = { _, result ->
-                            //ivFilterUrlTrash.visibility = View.VISIBLE
                             switchVisible.isChecked = true
                             switchVisible.isEnabled = true
+                            sliderSize.isEnabled = true
+                            sliderSize.alpha = 1f
+                            increaseSize.isEnabled = true
+                            increaseSize.alpha = 1f
+                            decreaseSize.isEnabled = true
+                            decreaseSize.alpha = 1f
                             filterUrls = listOf(url)
+
+                            // Capture aspect ratio from the loaded bitmap
+                            val drawable = result.drawable
+                            val width = drawable.intrinsicWidth
+                            val height = drawable.intrinsicHeight
+                            if (width > 0 && height > 0) {
+                                imageAspectRatio = "$width:$height"
+                            }
+                            updatePreviewLayout()
                         }
                     )
                 }
             } else {
                 filterUrls = listOf()
-                //ivFilterUrlTrash.visibility = View.GONE
+                imageAspectRatio = "1:1"
                 switchVisible.isChecked = false
                 switchVisible.isEnabled = false
-                val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.preview_missing)
-                ivFilterUrlPreview.setImageDrawable(drawable)
+                sliderSize.isEnabled = false
+                sliderSize.alpha = 0.3f
+                increaseSize.isEnabled = false
+                increaseSize.alpha = 0.3f
+                decreaseSize.isEnabled = false
+                decreaseSize.alpha = 0.3f
+                ivFilterUrlPreview.load(placeholderRes)
+                ivFilterUrlEdit.load(placeholderRes)
+
+                updatePreviewLayout()
             }
         }
 
         if (filterUrls.isNotEmpty()) {
             loadPreview(filterUrls.first())
+        } else {
+            updatePreviewLayout()
         }
 
-        ivFilterUrlPreview.setOnClickListener {
+        ivFilterUrlEdit.setOnClickListener {
             val currentUrl = filterUrls.firstOrNull() ?: ""
             val dialog = RecentsDialog(
                 requireContext(),
@@ -262,19 +357,11 @@ class EditFilterDialogFragment : DialogFragment() {
             dialog.show()
         }
 
-//        ivFilterUrlTrash.setOnClickListener {
-//            filterUrls = listOf()
-//            loadPreview("")
-//        }
-
         btnCancel.setOnClickListener {
             dismiss()
         }
 
         btnSave.setOnClickListener {
-            // Aggiorniamo semplicemente le proprietà all'interno del filtro attuale.
-            // Il contenitore FilterOverlayEvent manterrà la sua "position" originale (che funge da ID),
-            // ma il "FilterOverlay" interno avrà la nuova position aggiornata per i vari component/listener.
             val updatedFilter = currentFilter.copy(
                 position = selectedPosition,
                 size = selectedSize,

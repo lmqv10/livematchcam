@@ -1,6 +1,7 @@
 package it.lmqv.livematchcam.services.stream.filters
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.core.graphics.createBitmap
 import androidx.viewbinding.ViewBinding
@@ -187,6 +188,29 @@ abstract class ScoreboardViewFilterRender<T>(val applicationContext: Context)
             e.printStackTrace()
             Loge("ScoreboardViewRenderer::render Exception:: ${e.message.toString()}")
         }
+    }
+
+    override fun getBitmap() : Bitmap? {
+        // make a snapshot
+        binding.root.wrapLayout(width, height)
+        minimalWidth = min(minimalWidth, binding.root.measuredWidth)
+        minimalHeight = min(minimalHeight, binding.root.measuredHeight)
+
+        match(MatchRepository.match.value)
+        score(MatchRepository.score.value)
+
+        updateLayout()
+
+        return if (streamObject.bitmaps.size > 0) { streamObject.bitmaps[0] } else { null }
+    }
+
+    override fun getOverflowRatio(): Float {
+        return if (streamObject.bitmaps.size > 0 && minimalWidth > 0) {
+            var bitmap = streamObject.bitmaps[0]
+            //Logd("ScoreboardViewRenderer::getOverflowRatio::bitmap ${bitmap.width}x${bitmap.height}")
+            //Logd("ScoreboardViewRenderer::getOverflowRatio::mimimal ${minimalWidth}x${minimalHeight}")
+            bitmap.width.toFloat() / minimalWidth.toFloat()
+        } else { 1f }
     }
 
     abstract fun match(match: Match)

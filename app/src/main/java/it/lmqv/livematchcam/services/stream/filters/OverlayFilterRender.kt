@@ -103,6 +103,12 @@ class OverlayFilterRender(
         this.initializeCollectors()
     }
 
+    override fun getBitmap(): Bitmap? {
+        return if (streamObject.bitmaps.size > 0) { streamObject.bitmaps[0] } else { null }
+    }
+
+    override fun getOverflowRatio(): Float { return 0f }
+
     private fun scaleSprite(updated: FilterOverlay) {
         updated.let { filter ->
             if (streamObject != null && streamWidth > 0 && streamHeight > 0) {

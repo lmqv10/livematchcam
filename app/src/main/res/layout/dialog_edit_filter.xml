@@ -3,38 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/dialogRoot"
-    android:layout_width="@dimen/dialog_wider"
+    android:layout_width="@dimen/dialog_width"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/score_board_primary_background"
-    android:padding="24dp">
+    android:padding="16dp">
 
-
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/filter_preview_container"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal">
-
-        <ImageView
-            android:id="@+id/filter_url_preview"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="5dp"
-            android:src="@drawable/preview_missing"
-            tools:ignore="ContentDescription" />
-
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/alpha_background"
+        android:layout_marginBottom="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:clipChildren="true"
+        android:clipToPadding="true">
 
         <GridLayout
-            android:layout_width="0dp"
+            android:id="@+id/position_grid"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:columnCount="3"
             android:rowCount="3"
             android:useDefaultMargins="true"
-            android:background="@drawable/alpha_background">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <ImageButton
                 android:id="@+id/btn_pos_top_left"
@@ -43,7 +40,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_top_left"
-                android:layout_margin="4dp" />
+                android:layout_margin="2dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_top"
@@ -52,7 +49,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_top"
-                android:layout_margin="4dp" />
+                android:layout_margin="2dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_top_right"
@@ -61,12 +58,12 @@
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_top_right"
-                android:layout_margin="4dp" />
+                android:layout_margin="2dp" />
 
             <Space
                 android:layout_width="@dimen/filter_placeholder_width"
                 android:layout_height="@dimen/filter_placeholder_height"
-                android:layout_margin="4dp" />
+                android:layout_margin="2dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_center"
@@ -75,12 +72,12 @@
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_center"
-                android:layout_margin="4dp" />
+                android:layout_margin="2dp" />
 
             <Space
                 android:layout_width="@dimen/filter_placeholder_width"
                 android:layout_height="@dimen/filter_placeholder_height"
-                android:layout_margin="4dp" />
+                android:layout_margin="2dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_bottom_left"
@@ -89,7 +86,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_bottom_left"
-                android:layout_margin="4dp" />
+                android:layout_margin="2dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_bottom"
@@ -98,7 +95,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_bottom"
-                android:layout_margin="4dp" />
+                android:layout_margin="2dp" />
 
             <ImageButton
                 android:id="@+id/btn_pos_bottom_right"
@@ -107,17 +104,49 @@
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/description_placeholder"
                 android:src="@drawable/ic_spot_bottom_right"
-                android:layout_margin="4dp" />
+                android:layout_margin="2dp" />
 
         </GridLayout>
 
-    </LinearLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/filter_preview_viewport"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clipChildren="true"
+            android:clipToPadding="true"
+            android:alpha="1"
+            app:layout_constraintDimensionRatio="16:9"
+            app:layout_constraintStart_toStartOf="@+id/position_grid"
+            app:layout_constraintEnd_toEndOf="@+id/position_grid"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
-        android:layout_marginVertical="5dp"/>
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_h_center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <ImageView
+                android:id="@+id/filter_url_preview"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:clickable="false"
+                android:src="@drawable/preview_missing"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="ContentDescription" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--    <View-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="1dp"-->
+<!--        android:background="@android:color/darker_gray"-->
+<!--        android:layout_marginVertical="5dp"/>-->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -125,11 +154,34 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
+        <LinearLayout
+            android:id="@+id/filter_url_edit_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/filter_url_edit"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/preview_missing"
+                tools:ignore="ContentDescription" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="25dp"
+                android:background="@android:color/darker_gray" />
+
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/filter_decrease_size"
             android:src="@drawable/minus"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:padding="2dp"
             android:layout_gravity="center"
             tools:ignore="ContentDescription"/>
 
@@ -138,7 +190,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:minHeight="40dp"
+            android:minHeight="30dp"
             android:max="100"
             android:min="5"
             android:progress="5"
@@ -152,6 +204,7 @@
             android:src="@drawable/add"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:padding="2dp"
             android:layout_gravity="center"
             tools:ignore="ContentDescription"/>
 
@@ -178,20 +231,25 @@
             android:gravity="center"
             android:textColor="@color/secondary" />
 
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@android:color/darker_gray"
+            android:layout_marginHorizontal="25dp"/>
+
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switch_visible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="50dp"
-            android:minHeight="40dp"
+            android:minHeight="30dp"
             android:textColor="@color/primary" />
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
-        android:layout_marginVertical="5dp"/>
+<!--    <View-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="1dp"-->
+<!--        android:background="@android:color/darker_gray"-->
+<!--        android:layout_marginVertical="5dp"/>-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

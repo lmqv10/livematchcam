@@ -10,16 +10,17 @@ TODO LIST
 - Banners rotation con lista e configurabile se possibile animati
 - Banners Video full screen per spot/pubblicità
 - News Bar bottom
+- Gestione tempi calcio più completa
 - Gestione Loghi con "nome" / git repository?
 - Gestione Ruoli (administrator/operator)
-- Visibilità delle preferences su "availability del device"
 - Autenticazione YOUTUBE (owner/ branding channel).
 - Gestione del secondo colore di maglietta
 - Verificare caratteri e risoluzione schermo device.
 - Risoluzioni camera sorgente dinamiche
+- Visibilità delle preferences su "availability del device"
 
 PRO
-- Integrazione 
+- Integrazione Social (post screenshot punteggio)
 - Speed Test e wizard di configurazione streaming.
 - Gestione delle autenticazioni, della sicurezza, dei dispositivi.
   consentire a dispositivi di trasmettere soltanto con alcuni account
