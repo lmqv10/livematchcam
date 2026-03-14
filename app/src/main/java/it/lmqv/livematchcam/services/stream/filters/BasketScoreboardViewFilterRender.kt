@@ -48,6 +48,8 @@ class BasketScoreboardViewFilterRender(applicationContext: Context)
     override fun release() {
         super.release()
         //Logd("BasketScoreboardViewRenderer::release")
+//        serviceConnector.stopCounter()
+//        serviceConnector.setCounter(0)
         serviceConnector.unbind(applicationContext)
         _binding = null
     }
@@ -58,6 +60,7 @@ class BasketScoreboardViewFilterRender(applicationContext: Context)
             //Logd("BasketScoreboardViewRenderer::match $match")
             this.handleHomeTeam(match)
             this.handleAwayTeam(match)
+
             updateContentView()
         } catch (e: Exception) {
             e.printStackTrace()

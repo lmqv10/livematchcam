@@ -44,6 +44,8 @@ class SoccerScoreboardViewFilterRender(applicationContext: Context)
     override fun release() {
         super.release()
         //Logd("SoccerScoreboardViewRenderer::release")
+//        serviceConnector.stopCounter()
+//        serviceConnector.setCounter(0)
         serviceConnector.unbind(applicationContext)
         _binding = null
     }

@@ -1,4 +1,6 @@
 WIP 
+- Replay (10sec)
+- Banners Video full screen per spot/pubblicità
 
 NEXT CANDIDATE
 - Banners temporizzabili (25 sec)
@@ -6,9 +8,7 @@ NEXT CANDIDATE
 - Battery Level warning (preference "show/hide battery level"). NOTA: il monitoring potrebbe costare.
 
 TODO LIST
-- Replay (10sec)
 - Banners rotation con lista e configurabile se possibile animati
-- Banners Video full screen per spot/pubblicità
 - News Bar bottom
 - Gestione tempi calcio più completa
 - Gestione Loghi con "nome" / git repository?

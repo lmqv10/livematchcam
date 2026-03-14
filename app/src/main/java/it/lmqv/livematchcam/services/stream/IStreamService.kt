@@ -5,6 +5,8 @@ import android.view.SurfaceView
 import com.pedro.common.ConnectChecker
 import com.pedro.library.util.FpsListener
 import it.lmqv.livematchcam.factories.sports.Sports
+import it.lmqv.livematchcam.services.replay.ReplayMetadata
+import it.lmqv.livematchcam.services.replay.ReplayState
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.flow.StateFlow
 
@@ -43,4 +45,13 @@ interface IStreamService {
     val streamingElapsedTime: StateFlow<Int>
     val videoSourceZoomHandler: StateFlow<IVideoSourceZoomHandler?>
     val videoCaptureFormats: StateFlow<List<VideoCaptureFormat>>
+
+    suspend fun prepareReplay(): Boolean
+    fun startReplay(seekMs: Long)
+    fun setReplaySpeed(speed: Float)
+    fun cancelReplay()
+    fun stopReplay()
+    
+    val replayState: StateFlow<ReplayState>
+    val replayMetadata: StateFlow<ReplayMetadata?>
 }

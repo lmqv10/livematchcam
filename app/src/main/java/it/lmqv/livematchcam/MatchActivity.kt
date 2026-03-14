@@ -38,6 +38,7 @@ import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.viewmodels.FloatingActionsViewModel
 import it.lmqv.livematchcam.viewmodels.FirebaseAccountViewModel
 import it.lmqv.livematchcam.viewmodels.GoogleAccountViewModel
+import it.lmqv.livematchcam.viewmodels.CounterViewModel
 import it.lmqv.livematchcam.views.AnimateImageVIew
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,6 +64,7 @@ class MatchActivity : BaseActivity(), INavigateDrawerActivity {
     private val googleAccountViewModel: GoogleAccountViewModel by viewModels()
     private val firebaseAccountViewModel: FirebaseAccountViewModel by viewModels()
     private val floatingActionsViewModel: FloatingActionsViewModel by viewModels()
+    //private val counterViewModel: CounterViewModel by viewModels()
 
     private lateinit var binding: ActivityMatchBinding
 
@@ -304,8 +306,6 @@ class MatchActivity : BaseActivity(), INavigateDrawerActivity {
         )
 
         requestPermissions()
-
-        startService(Intent(this, CounterService::class.java))
     }
 
     override fun onStart() {

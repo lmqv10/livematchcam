@@ -93,6 +93,7 @@
     <style name="DefaultEditTextStyle" parent="Widget.AppCompat.EditText">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">48dp</item>
+        <item name="android:fontFamily">@font/squarish_regular</item>
         <item name="android:textSize">@dimen/text_size_default</item>
         <item name="android:hint">@string/description_placeholder</item>
         <item name="android:gravity">center_horizontal</item>
@@ -105,6 +106,7 @@
     <style name="DefaultTextViewStyle" parent="Widget.AppCompat.TextView">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
+        <item name="android:fontFamily">@font/squarish_regular</item>
         <item name="android:textSize">@dimen/text_size_default</item>
         <item name="android:textColor">@color/text_color_black_selector</item>
         <item name="android:maxLines">1</item>
@@ -131,6 +133,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">start</item>
         <item name="android:textColor">@color/secondary_darker</item>
+        <item name="android:fontFamily">@font/squarish_regular</item>
         <item name="android:textSize">@dimen/text_size_big</item>
         <item name="android:text">@string/title_placeholder</item>
     </style>
@@ -159,6 +162,7 @@
 <!--        <item name="android:layout_width">0dp</item>-->
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
+        <item name="android:fontFamily">@font/squarish_regular</item>
         <item name="android:textSize">@dimen/text_size_big</item>
         <item name="android:textColor">@color/text_color_black_selector</item>
         <item name="android:maxLines">1</item>
@@ -172,6 +176,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
         <item name="android:text">@string/score_placeholder</item>
+        <item name="android:fontFamily">@font/squarish_regular</item>
         <item name="android:textSize">@dimen/text_size_big</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">none</item>

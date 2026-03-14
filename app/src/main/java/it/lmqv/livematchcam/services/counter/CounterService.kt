@@ -40,6 +40,12 @@ class CounterService : Service() {
     }
 
     fun startCounter() {
+        try {
+            startService(Intent(this, CounterService::class.java))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         if (!isRunning()) {
             if (isPaused) {
                 isPaused = false
@@ -79,6 +85,12 @@ class CounterService : Service() {
 
     fun setCounter(seconds: Int) {
         secondsCount = seconds
+
+        try {
+            startService(Intent(this, CounterService::class.java))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         if (!isRunning()) {
             _counterState.value = CounterState.Paused(secondsCount)

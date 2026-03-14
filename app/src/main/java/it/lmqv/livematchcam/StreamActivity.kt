@@ -25,6 +25,8 @@ import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.EncoderItemsFactory
 import it.lmqv.livematchcam.factories.sports.SportsFactory
 import it.lmqv.livematchcam.fragments.status.StatusContainerFragment
+import it.lmqv.livematchcam.preferences.PerformancePreferencesManager
+import it.lmqv.livematchcam.preferences.ReplayPreferencesManager
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.stream.IStreamService
 import it.lmqv.livematchcam.services.stream.StreamServiceConnector
@@ -37,6 +39,9 @@ import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
 import kotlin.getValue
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+
 
 class StreamActivity : BaseActivity(),
     ConnectChecker,
@@ -47,7 +52,7 @@ class StreamActivity : BaseActivity(),
     private val statusContainerFragment = StatusContainerFragment.getInstance()
 
     private lateinit var streamServiceConnector : StreamServiceConnector
-    private lateinit var streamService : IStreamService
+    internal lateinit var streamService : IStreamService
 
     private val streamConfigurationViewModel: StreamConfigurationViewModel by viewModels()
     private val youtubeViewModel: YoutubeViewModel by viewModels {
@@ -68,6 +73,12 @@ class StreamActivity : BaseActivity(),
 //        }
 //    }
 
+    // Replay Preview
+    private var replayDurationMs: Int = 0
+
+    private lateinit var performancePrefs: PerformancePreferencesManager
+    private lateinit var replayPrefs: ReplayPreferencesManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Logd("StreamActivity::onCreate")
@@ -76,17 +87,67 @@ class StreamActivity : BaseActivity(),
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        performancePrefs = PerformancePreferencesManager(this)
+        replayPrefs = ReplayPreferencesManager(this)
+
         //val dm = getSystemService(DisplayManager::class.java)
         //dm.registerDisplayListener(displayListener, null)
 
         binding.bStartStop.setOnClickListener {
             streamService.toggleStreaming({
                 binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
+                if (performancePrefs.isReplayEnabled()) {
+                    binding.bReplay.visibility = View.VISIBLE
+                    binding.bReplay.isClickable = true
+                    binding.bQuickReplay.visibility = View.VISIBLE
+                    binding.bQuickReplay.isClickable = true
+                }
             },
                 { shouldEnd ->
                     if (shouldEnd) { youtubeViewModel.completeLive() }
                     binding.bStartStop.setImageResource(R.drawable.stream_icon)
+                    binding.bReplay.visibility = View.GONE
+                    binding.bReplay.isClickable = false
+                    binding.bQuickReplay.visibility = View.GONE
+                    binding.bQuickReplay.isClickable = false
                 })
+        }
+
+        binding.bReplay.setOnClickListener {
+            lifecycleScope.launch {
+                binding.bReplay.isEnabled = false
+                binding.bQuickReplay.isEnabled = false
+                toast("Preparing replay...")
+                val success = streamService.prepareReplay()
+                if (!success) {
+                    toast("Replay not available")
+                }
+                binding.bReplay.isEnabled = true
+                binding.bQuickReplay.isEnabled = true
+            }
+        }
+
+        binding.bQuickReplay.setOnClickListener {
+            lifecycleScope.launch {
+                binding.bReplay.isEnabled = false
+                binding.bQuickReplay.isEnabled = false
+                toast("Starting quick replay...")
+                if (streamService.prepareReplay()) {
+                    val metadata = streamService.replayMetadata.value
+                    if (metadata != null) {
+                        val durationMs = metadata.durationMs
+                        val quickReplayMs = replayPrefs.getQuickReplayDurationSeconds() * 1000L
+                        val seekMs = if (durationMs > quickReplayMs) durationMs - quickReplayMs else 0L
+                        val replayDuration = (durationMs - seekMs) / 1000L
+                        toast("Quick Replay duration ${replayDuration}s")
+                        streamService.startReplay(seekMs)
+                    }
+                } else {
+                    toast("Replay not available")
+                }
+                binding.bReplay.isEnabled = true
+                binding.bQuickReplay.isEnabled = true
+            }
         }
 
         binding.microphone.setOnClickListener {
@@ -160,9 +221,19 @@ class StreamActivity : BaseActivity(),
 
                     if (this.streamService.isStreaming() == true) {
                         binding.bStartStop.setImageResource(R.drawable.stream_stop_icon)
+                        if (performancePrefs.isReplayEnabled()) {
+                            binding.bReplay.visibility = View.VISIBLE
+                            binding.bReplay.isClickable = true
+                            binding.bQuickReplay.visibility = View.VISIBLE
+                            binding.bQuickReplay.isClickable = true
+                        }
                         //Logd("StreamActivity :: setOnServiceConnected :: isStreaming!")
                     } else {
                         binding.bStartStop.setImageResource(R.drawable.stream_icon)
+                        binding.bReplay.visibility = View.GONE
+                        binding.bReplay.isClickable = false
+                        binding.bQuickReplay.visibility = View.GONE
+                        binding.bQuickReplay.isClickable = false
                     }
 
                     Logd("StreamActivity :: setOnServiceConnected :: initPreview?")
@@ -193,18 +264,44 @@ class StreamActivity : BaseActivity(),
                         }
                     }
 
+                    launchOnResumed {
+                        this.streamService.replayState.collect { state ->
+                            updateReplayUI(state)
+                        }
+                    }
+
+                    launchOnResumed {
+                        this.streamService.replayMetadata.collect { metadata ->
+                            if (metadata != null) {
+                                val durationMs = metadata.durationMs.toInt()
+                                replayDurationMs = durationMs
+                            }
+                        }
+                    }
+
                     //this.initCameraSettingsDialog()
                 }
 
                 var sportFragmentFactory = SportsFactory.get(sport)
-                var controlBarFragment = sportFragmentFactory.getControlBar()
-                var bannersContainerFragment = sportFragmentFactory.getFiltersSlimControl()
-
-                supportFragmentManager.beginTransaction()
+                
+                val transaction = supportFragmentManager.beginTransaction()
                     .replace(binding.statusContainer.id, this.statusContainerFragment)
-                    .replace(binding.controlBarContainer.id, controlBarFragment as Fragment, "ControlBarFragmentTag")
-                    .replace(binding.bannersContainer.id, bannersContainerFragment as Fragment, "bannersContainerFragmentTag")
-                    .commitAllowingStateLoss()
+
+                if (performancePrefs.isScoreboardEnabled()) {
+                    var controlBarFragment = sportFragmentFactory.getControlBar()
+                    transaction.replace(binding.controlBarContainer.id, controlBarFragment as Fragment, "ControlBarFragmentTag")
+                } else {
+                    binding.controlBarContainer.visibility = View.GONE
+                }
+
+                if (performancePrefs.isFiltersEnabled()) {
+                    var bannersContainerFragment = sportFragmentFactory.getFiltersSlimControl()
+                    transaction.replace(binding.bannersContainer.id, bannersContainerFragment as Fragment, "bannersContainerFragmentTag")
+                } else {
+                    binding.bannersContainer.visibility = View.GONE
+                }
+
+                transaction.commitAllowingStateLoss()
 
             }
         }
@@ -236,6 +333,60 @@ class StreamActivity : BaseActivity(),
         super.onResume()
         Logd("StreamActivity::onResume")
         this.streamServiceConnector.bindService()
+    }
+
+    private fun updateReplayUI(state: it.lmqv.livematchcam.services.replay.ReplayState) {
+        if (!performancePrefs.isReplayEnabled()) {
+            binding.replayFragmentContainer.visibility = View.GONE
+            return
+        }
+
+        // Hide trigger buttons during replay/seeking
+        val isReplayActive = state == it.lmqv.livematchcam.services.replay.ReplayState.SEEKING ||
+                state == it.lmqv.livematchcam.services.replay.ReplayState.REPLAYING
+
+        if (isReplayActive) {
+            binding.bReplay.visibility = View.GONE
+            binding.bQuickReplay.visibility = View.GONE
+            binding.controlBar.visibility = View.GONE
+            binding.controlBarContainer.visibility = View.GONE
+            binding.bannersContainer.visibility = View.GONE
+        } else {
+            if (::streamService.isInitialized && streamService.isStreaming() == true) {
+                binding.bReplay.visibility = View.VISIBLE
+                binding.bQuickReplay.visibility = View.VISIBLE
+            }
+            binding.controlBar.visibility = View.VISIBLE
+            // Restore scoreboard if enabled
+            if (performancePrefs.isScoreboardEnabled()) {
+                binding.controlBarContainer.visibility = View.VISIBLE
+            }
+            // Restore banners if enabled
+            if (performancePrefs.isFiltersEnabled()) {
+                binding.bannersContainer.visibility = View.VISIBLE
+            }
+        }
+
+        val fragment = when (state) {
+            it.lmqv.livematchcam.services.replay.ReplayState.SEEKING -> it.lmqv.livematchcam.fragments.replay.ReplaySeekingFragment()
+            it.lmqv.livematchcam.services.replay.ReplayState.REPLAYING -> it.lmqv.livematchcam.fragments.replay.ReplayPlayingFragment()
+            else -> null
+        }
+
+        if (fragment != null) {
+            binding.replayFragmentContainer.visibility = View.VISIBLE
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.replay_fragment_container, fragment)
+                .commit()
+        } else {
+            binding.replayFragmentContainer.visibility = View.GONE
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.replay_fragment_container)
+            if (currentFragment != null) {
+                supportFragmentManager.beginTransaction()
+                    .remove(currentFragment)
+                    .commit()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -465,5 +616,11 @@ class StreamActivity : BaseActivity(),
         }
 
         dialog.show()
+    }
+    
+    private fun formatTimeMmSs(totalSeconds: Int): String {
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 }

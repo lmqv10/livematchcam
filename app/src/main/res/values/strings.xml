@@ -68,6 +68,21 @@
 
     <string name="notification_text">Streaming service is running</string>
 
+    <!-- Performance Toggles -->
+    <string name="performance_header">Performance \u0026 UI Toggles</string>
+    <string name="enable_replay_key">enable_replay</string>
+    <string name="enable_replay_title">Enable Live Replay</string>
+    <string name="enable_replay_summary_on">Recording background chunks and showing UI</string>
+    <string name="enable_replay_summary_off">Replay disabled to save CPU and Disk I/O</string>
+    <string name="enable_filters_key">enable_filters</string>
+    <string name="enable_filters_title">Enable Extra Filters</string>
+    <string name="enable_filters_summary_on">Allows rendering image/video/text overlays</string>
+    <string name="enable_filters_summary_off">Extra filters disabled to save GPU</string>
+    <string name="enable_scoreboard_key">enable_scoreboard</string>
+    <string name="enable_scoreboard_title">Enable Scoreboard</string>
+    <string name="enable_scoreboard_summary_on">Rendering the live animated scoreboard</string>
+    <string name="enable_scoreboard_summary_off">Scoreboard disabled to save CPU/GPU</string>
+
     <string name="match_league">Match Description</string>
     <string name="team_name">Team Name</string>
     <string name="home_team">Team 1</string>
@@ -247,6 +262,48 @@
     <string name="camera_lock_af_title">Lock Autofocus</string>
     <string name="camera_lock_af_on">Autofocus continuous will be auto disabled on start streaming</string>
     <string name="camera_lock_af_off">No action on autofocus continuous on start streaming</string>
+
+    <!-- Replay Preferences -->
+    <string name="replay_header">Replay</string>
+    <string name="replay_duration_key">replay_duration</string>
+    <string name="replay_duration_title">Replay Buffer Duration</string>
+    <string name="replay_duration_summary">Duration of the rolling video buffer for replays</string>
+    <string name="replay_quick_duration_key">replay_quick_duration</string>
+    <string name="replay_quick_duration_title">Quick Replay Duration</string>
+    <string name="replay_quick_duration_summary">Duration to go back when doing a Quick Replay</string>
+
+    <string-array name="replay_duration_entries">
+        <item>15 Seconds</item>
+        <item>20 Seconds</item>
+        <item>25 Seconds</item>
+        <item>30 Seconds</item>
+    </string-array>
+    
+    <string-array name="replay_duration_values">
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+    </string-array>
+
+    <string name="replay_speed_key">replay_speed</string>
+    <string name="replay_speed_title">Default Replay Speed</string>
+    <string name="replay_speed_summary">Default playback speed for video replays</string>
+
+    <string-array name="replay_speed_entries">
+        <item>0.25x</item>
+        <item>0.5x</item>
+        <item>0.75x</item>
+        <item>1.0x (Normal)</item>
+    </string-array>
+
+    <string-array name="replay_speed_values">
+        <item>0.25</item>
+        <item>0.5</item>
+        <item>0.75</item>
+        <item>1.0</item>
+    </string-array>
+
 
     <!-- /Camera Preferences -->
 

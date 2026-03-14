@@ -11,7 +11,6 @@ import android.util.Range
 import android.view.SurfaceView
 import androidx.core.app.NotificationCompat
 import com.pedro.common.ConnectChecker
-import com.pedro.encoder.input.gl.render.filters.`object`.BaseObjectFilterRender
 import com.pedro.encoder.input.sources.OrientationForced
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.NoVideoSource
@@ -29,9 +28,19 @@ import it.lmqv.livematchcam.factories.FiltersFactory
 import it.lmqv.livematchcam.factories.sports.Sports
 import it.lmqv.livematchcam.factories.VideoSourceFactory
 import it.lmqv.livematchcam.preferences.CameraAPIPreferencesManager
+import it.lmqv.livematchcam.preferences.ReplayPreferencesManager
+import it.lmqv.livematchcam.preferences.PerformancePreferencesManager
 import it.lmqv.livematchcam.repositories.StreamConfigurationRepository
 import it.lmqv.livematchcam.services.firebase.Quadruple
+import it.lmqv.livematchcam.services.stream.filters.ReplayOverlayFilterRender
+import it.lmqv.livematchcam.services.stream.filters.ReplayVideoFilterRender
 import it.lmqv.livematchcam.services.stream.filters.IOverlayObjectFilterRender
+import it.lmqv.livematchcam.services.replay.ReplayService
+import it.lmqv.livematchcam.services.replay.ReplayState
+import it.lmqv.livematchcam.services.replay.ReplayMetadata
+import android.media.MediaPlayer
+import android.net.Uri
+import android.os.Build
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +53,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import com.pedro.library.base.recording.RecordController.Status
+import java.io.File
 
 class StreamService: Service(),
     IVideoSourceZoomHandler,
@@ -82,6 +93,13 @@ class StreamService: Service(),
     private var audioStreamData : IAudioStreamData = AudioStreamData()
     private var microphoneSource = MicrophoneSource()
 
+    // Replay integration
+    private lateinit var replayService: ReplayService
+    private var replayOverlayFilterRender: ReplayOverlayFilterRender? = null
+    private var replayVideoFilterRender: ReplayVideoFilterRender? = null
+    private var replayMediaPlayer: MediaPlayer? = null
+    private var currentScoreboardFilter: IOverlayObjectFilterRender? = null
+
     private lateinit var surfaceView: SurfaceView
     private lateinit var sport: Sports
 
@@ -89,6 +107,10 @@ class StreamService: Service(),
     private lateinit var streamConfigurationJob : Job
 
     private lateinit var cameraAPIPreferencesManager: CameraAPIPreferencesManager
+    private lateinit var performancePrefs: PerformancePreferencesManager
+    private lateinit var replayPreferencesManager: ReplayPreferencesManager
+
+    private var currentReplaySpeed = 0.5f
 
     private val bitrateAdapter = BitrateAdapter {
         genericStream.setVideoBitrateOnFly(it)
@@ -98,6 +120,7 @@ class StreamService: Service(),
 
     private var timeElapsedInSeconds = 0
     private var job: Job? = null
+    private var fadeJob: Job? = null
 
     fun setConnectCheckerCallback(connectChecker: ConnectChecker?) {
         this.connectCheckerCallback = connectChecker
@@ -118,6 +141,29 @@ class StreamService: Service(),
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val channel = NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH)
         notificationManager?.createNotificationChannel(channel)
+
+        val replayPreferencesManager = ReplayPreferencesManager(baseContext)
+        this.replayPreferencesManager = replayPreferencesManager
+        val bufferDuration = replayPreferencesManager.getBufferDurationSeconds()
+        this.currentReplaySpeed = replayPreferencesManager.getReplaySpeed()
+        performancePrefs = PerformancePreferencesManager(baseContext)
+        
+        replayService = ReplayService(baseContext, bufferDuration)
+        replayService.startRecordAction = { path ->
+            if (genericStream.isStreaming && !genericStream.isRecording) {
+                genericStream.startRecord(path) { status ->
+                    Logd("StreamService :: record status $status")
+                    if (status == Status.STOPPED) {
+                        replayService.onRecordStopped()
+                    }
+                }
+            }
+        }
+        replayService.stopRecordAction = {
+            if (genericStream.isRecording) {
+                genericStream.stopRecord()
+            }
+        }
 
         genericStream = GenericStream(baseContext, this, NoVideoSource(), microphoneSource).apply {
             getGlInterface().autoHandleOrientation = true
@@ -281,11 +327,15 @@ class StreamService: Service(),
     fun startStream(endpoint: String) {
         if (!genericStream.isStreaming) {
             genericStream.startStream(endpoint)
+            if (performancePrefs.isReplayEnabled()) {
+                replayService.startRollingRecording()
+            }
         }
     }
 
     fun stopStream() {
         if (genericStream.isStreaming) {
+            replayService.stopRollingRecording()
             genericStream.stopStream()
             notificationManager?.cancel(NOTIFY_ID)
         }
@@ -375,13 +425,11 @@ class StreamService: Service(),
                 this.prepare()
                 this.prepareFilters()
                 genericStream.startPreview(this.surfaceView, true)
-            } else if (genericStream.isOnPreview) {
-                //Logd("StreamService :: preparePreview - restart Preview")
+            } else {
+                // Logd("StreamService :: preparePreview - restart Preview while streaming")
                 this.stopPreview()
                 this.prepareFilters()
                 genericStream.startPreview(this.surfaceView, true)
-            //} else {
-            //    Logd("StreamService :: preparePreview - Not Handled case")
             }
             //Logd("StreamService :: preparePreview - end")
         }
@@ -440,20 +488,44 @@ class StreamService: Service(),
             setPreviewResolution(videoStreamData.width, videoStreamData.height)
             clearFilters()
 
-            var filters = FiltersFactory.getFilters(applicationContext)
-            filters.forEachIndexed { index, filter ->
-                if (filter is IOverlayObjectFilterRender) {
-                    //Logd("StreamService :: filter $filter setVideoStreamData $videoStreamData")
-                    filter.setVideoStreamData(videoStreamData)
+            if (performancePrefs.isFiltersEnabled()) {
+                val filters = FiltersFactory.getFilters(applicationContext)
+                filters.forEachIndexed { index, filter ->
+                    if (filter is IOverlayObjectFilterRender) {
+                        filter.setVideoStreamData(videoStreamData)
+                    }
+                    addFilter(filter)
                 }
-                addFilter(filter)
-                //Logd("StreamService :: add ${index} filter $filter")
+            } else {
+                Logd("StreamService :: Performance toggle: Filters disabled")
             }
 
-            var scoreboard = FiltersFactory.getScoreBoard(sport, applicationContext)
-            //Logd("StreamService :: prepareFilters.scoreboard $scoreboard")
-            scoreboard.setVideoStreamData(videoStreamData)
-            addFilter(scoreboard)
+            if (performancePrefs.isScoreboardEnabled()) {
+                val scoreboard = FiltersFactory.getScoreBoard(sport, applicationContext)
+                scoreboard.setVideoStreamData(videoStreamData)
+                addFilter(scoreboard)
+                currentScoreboardFilter = scoreboard
+            } else {
+                Logd("StreamService :: Performance toggle: Scoreboard disabled")
+            }
+
+            if (performancePrefs.isReplayEnabled()) {
+                // Add Replay Video Filter (invisible by default)
+                replayVideoFilterRender = ReplayVideoFilterRender()
+                replayVideoFilterRender?.let {
+                    it.setFullScreen()
+                    addFilter(it)
+                }
+
+                // Add Replay Overlay (invisible by default)
+                replayOverlayFilterRender = ReplayOverlayFilterRender(applicationContext)
+                replayOverlayFilterRender?.let {
+                    it.setVideoStreamData(videoStreamData)
+                    addFilter(it)
+                }
+            } else {
+                Logd("StreamService :: Performance toggle: Replay disabled")
+            }
         }
     }
 
@@ -476,5 +548,153 @@ class StreamService: Service(),
             .setOngoing(false)
             .build()
         startForeground(1, notification)
+    }
+
+    // --- REPLAY METHODS ---
+
+    val replayState: StateFlow<ReplayState> get() = replayService.replayState
+    val replayMetadata: StateFlow<ReplayMetadata?> get() = replayService.replayMetadata
+
+    suspend fun prepareReplay(): Boolean {
+        return replayService.prepareReplay()
+    }
+
+    fun startReplay(seekMs: Long) {
+        val metadata = replayMetadata.value ?: return
+        Logd("StreamService :: startReplay Overlaid at seekMs=$seekMs, file=${metadata.filePath}")
+
+        // 1. Stop recording FIRST to avoid conflicts (rolling chunks)
+        replayService.startReplay()
+
+        // 2. Hide scoreboard and show Replay Badge level
+        //currentScoreboardFilter?.hide()
+        replayOverlayFilterRender?.hide()
+
+        // 3. Initialize MediaPlayer for Overlay
+        try {
+            stopReplayMediaPlayer() // Ensure clean state
+
+            val mergedFile = File(metadata.filePath)
+            if (mergedFile.exists()) {
+                replayMediaPlayer = MediaPlayer().apply {
+                    setDataSource(applicationContext, Uri.fromFile(File(metadata.filePath)))
+                    replayVideoFilterRender?.surface?.let { setSurface(it) }
+                    isLooping = false
+                    setOnCompletionListener {
+                        Logd("StreamService :: Replay MediaPlayer finished")
+                        if (replayState.value == ReplayState.REPLAYING) {
+                            stopReplay()
+                        }
+                    }
+                    setOnInfoListener { _, what, _ ->
+                        if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+                            currentScoreboardFilter?.hide()
+
+                            animateReplayAlpha(1.0f, 250)
+                            replayOverlayFilterRender?.show()
+                            true
+                        } else false
+                    }
+
+                    prepare()
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        seekTo(seekMs, MediaPlayer.SEEK_CLOSEST)
+                    } else {
+                        seekTo(seekMs.toInt())
+                    }
+
+                    // 4. Start playback
+                    start()
+                    if (currentReplaySpeed > 0f) {
+                        playbackParams = getPlaybackParams().setSpeed(currentReplaySpeed)
+                    }
+                }
+            } else {
+                CoroutineScope(Dispatchers.Main).launch {
+                    toast("File Replay missing. Please Retry")
+                }
+            }
+
+            Logd("StreamService :: startReplay Overlay started and seeked to $seekMs ms")
+            
+        } catch (e: Exception) {
+            Loge("StreamService :: Error starting Replay MediaPlayer: ${e.message}")
+            CoroutineScope(Dispatchers.Main).launch {
+                toast("Error starting Replay! ${e.message}")
+            }
+            stopReplay()
+        }
+    }
+
+    private fun animateReplayAlpha(target: Float, durationMs: Long) {
+        fadeJob?.cancel()
+        fadeJob = streamServiceScope.launch {
+            val startAlpha = replayVideoFilterRender?.getCurrentAlpha() ?: 0f
+            val steps = 20
+            val stepDuration = durationMs / steps
+            val alphaDelta = (target - startAlpha) / steps
+
+            for (i in 1..steps) {
+                if (!isActive) break
+                val newAlpha = startAlpha + (alphaDelta * i)
+                replayVideoFilterRender?.updateAlpha(newAlpha)
+                delay(stepDuration)
+            }
+            replayVideoFilterRender?.updateAlpha(target)
+        }
+    }
+
+    private fun stopReplayMediaPlayer() {
+        replayMediaPlayer?.stop()
+        replayMediaPlayer?.release()
+        replayMediaPlayer = null
+        replayVideoFilterRender?.hide()
+    }
+
+    fun setReplaySpeed(speed: Float) {
+        currentReplaySpeed = speed
+        replayPreferencesManager.setReplaySpeed(speed)
+        replayMediaPlayer?.let {
+            if (it.isPlaying) {
+                try {
+                    if (currentReplaySpeed > 0f) {
+                        it.playbackParams = it.getPlaybackParams().setSpeed(speed)
+                    }
+                } catch (e: Exception) {
+                    Loge("StreamService :: Error updating Replay playback speed: ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun cancelReplay() {
+        Logd("StreamService :: cancelReplay")
+        replayService.stopReplay()
+    }
+
+    fun stopReplay() {
+        if (replayState.value != ReplayState.REPLAYING) return
+        Logd("StreamService :: stopReplay starting fade out and returning to live")
+
+        streamServiceScope.launch {
+            // 1. Fade Out smoothly
+            animateReplayAlpha(0.0f, 400)
+            delay(450) // Wait for fade to finish
+
+            // 2. Stop and release MediaPlayer (MUST be on main thread for release typically, but streamServiceScope is IO. 
+            // MediaPlayer is thread safe for release but let's be safe if UI thread is needed).
+            // Actually, we are in a coroutine, so we'll switch to Main for cleanup.
+            launch(Dispatchers.Main) {
+                stopReplayMediaPlayer()
+                
+                // 3. Restore scoreboard visibility and hide Replay badge
+                currentScoreboardFilter?.show()
+                replayOverlayFilterRender?.setVisible(false)
+
+                // 4. Inform service
+                replayService.stopReplay()
+            }
+        }
     }
 }

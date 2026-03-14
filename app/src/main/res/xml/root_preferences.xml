@@ -37,6 +37,66 @@
             app:summaryOff="@string/camera_optical_video_stabilization_off" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:icon="@drawable/ic_replay"
+        app:title="@string/replay_header">
+
+        <ListPreference
+            app:key="@string/replay_duration_key"
+            app:title="@string/replay_duration_title"
+            app:summary="@string/replay_duration_summary"
+            app:entries="@array/replay_duration_entries"
+            app:entryValues="@array/replay_duration_values"
+            app:defaultValue="30"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="@string/replay_quick_duration_key"
+            app:title="@string/replay_quick_duration_title"
+            app:summary="@string/replay_quick_duration_summary"
+            app:entries="@array/replay_duration_entries"
+            app:entryValues="@array/replay_duration_values"
+            app:defaultValue="20"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="@string/replay_speed_key"
+            app:title="@string/replay_speed_title"
+            app:summary="@string/replay_speed_summary"
+            app:entries="@array/replay_speed_entries"
+            app:entryValues="@array/replay_speed_values"
+            app:defaultValue="0.5"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:icon="@drawable/ic_settings"
+        app:title="@string/performance_header">
+
+        <SwitchPreferenceCompat
+            app:key="@string/enable_replay_key"
+            app:title="@string/enable_replay_title"
+            app:summaryOn="@string/enable_replay_summary_on"
+            app:summaryOff="@string/enable_replay_summary_off"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/enable_filters_key"
+            app:title="@string/enable_filters_title"
+            app:summaryOn="@string/enable_filters_summary_on"
+            app:summaryOff="@string/enable_filters_summary_off"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/enable_scoreboard_key"
+            app:title="@string/enable_scoreboard_title"
+            app:summaryOn="@string/enable_scoreboard_summary_on"
+            app:summaryOff="@string/enable_scoreboard_summary_off"
+            app:defaultValue="true" />
+
+    </PreferenceCategory>
+
 <!--    <PreferenceCategory app:title="@string/messages_header">-->
 
 <!--        <EditTextPreference-->

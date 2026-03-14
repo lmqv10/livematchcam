@@ -10,6 +10,8 @@ import it.lmqv.livematchcam.extensions.Logd
 import it.lmqv.livematchcam.extensions.hideSystemUI
 import it.lmqv.livematchcam.extensions.toast
 import it.lmqv.livematchcam.factories.sports.Sports
+import it.lmqv.livematchcam.services.replay.ReplayMetadata
+import it.lmqv.livematchcam.services.replay.ReplayState
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.flow.StateFlow
 
@@ -133,4 +135,30 @@ class StreamServiceProxy(val activityContext: Activity, val streamService: Strea
 
     override val videoCaptureFormats: StateFlow<List<VideoCaptureFormat>>
         get() = streamService.videoCaptureFormats
+
+    override suspend fun prepareReplay(): Boolean {
+        return streamService.prepareReplay()
+    }
+
+    override fun startReplay(seekMs: Long) {
+        streamService.startReplay(seekMs)
+    }
+
+    override fun setReplaySpeed(speed: Float) {
+        streamService.setReplaySpeed(speed)
+    }
+
+    override fun cancelReplay() {
+        streamService.cancelReplay()
+    }
+
+    override fun stopReplay() {
+        streamService.stopReplay()
+    }
+
+    override val replayState: StateFlow<ReplayState>
+        get() = streamService.replayState
+
+    override val replayMetadata: StateFlow<ReplayMetadata?>
+        get() = streamService.replayMetadata
 }

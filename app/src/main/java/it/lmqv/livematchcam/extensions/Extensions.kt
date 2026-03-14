@@ -261,19 +261,13 @@ fun resolutionFormat(value:Int) : String {
 
 
 fun formatTime(seconds: Int = 0): String {
-    //var formattedTime : String
-    //if (seconds > 3600) {
-    //    formattedTime = formatHourTime(seconds)
-    //}  else {
-    // formattedTime = String.format("%02d:%02d", seconds / 60, seconds % 60)
-    //}
-    //return formattedTime
-
-    return String.format(Locale.getDefault(), "%02d:%02d", seconds / 60, seconds % 60)
+    var sign= if (seconds < 0) "-" else ""
+    return String.format(Locale.getDefault(), "$sign%02d:%02d", seconds / 60, seconds % 60)
 }
 
 fun formatHourTime(seconds: Int = 0): String {
-    return String.format(Locale.getDefault(), "%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60)
+    var sign= if (seconds < 0) "-" else ""
+    return String.format(Locale.getDefault(), "$sign%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60)
 }
 
 fun formatDate(dateTime: DateTime?, format: String = "EEEE dd MMMM yyyy HH:mm"): String {

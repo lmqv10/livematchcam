@@ -38,7 +38,7 @@ interface IAudioStreamData {
 }
 
 data class AudioStreamData(
-    override val sampleRate: Int = 32000,
+    override val sampleRate: Int = 44100,
     override val bitrate: Int = 128 * 1000,
     override val isStereo: Boolean = true,
     override val echoCanceler: Boolean = true,

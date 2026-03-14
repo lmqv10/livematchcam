@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#88000000"
+    tools:context="it.lmqv.livematchcam.fragments.replay.ReplaySeekingFragment">
+
+<!--    <TextView-->
+<!--        android:id="@+id/replay_title"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Choose Replay Start Point"-->
+<!--        android:textColor="@color/white"-->
+<!--        android:textSize="24sp"-->
+<!--        android:textStyle="bold"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        android:layout_marginTop="32dp" />-->
+
+    <TextureView
+        android:id="@+id/replay_thumbnail"
+        android:layout_width="320dp"
+        android:layout_height="180dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/replay_seekbar"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="16dp"
+        android:elevation="4dp" />
+
+    <SeekBar
+        android:id="@+id/replay_seekbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/replay_cancel_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="48dp"
+        android:progressBackgroundTint="@color/primary"
+        android:progressBackgroundTintMode="screen"
+        android:thumb="@drawable/custom_seekbar_thumb" />
+
+    <TextView
+        android:id="@+id/replay_time_current"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@+id/replay_seekbar"
+        app:layout_constraintStart_toStartOf="@+id/replay_seekbar" />
+
+    <TextView
+        android:id="@+id/replay_time_total"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:30"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@+id/replay_seekbar"
+        app:layout_constraintEnd_toEndOf="@+id/replay_seekbar" />
+
+    <Button
+        android:id="@+id/replay_cancel_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        android:backgroundTint="#444444"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintEnd_toStartOf="@+id/replay_play_button"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="16dp" />
+
+    <Button
+        android:id="@+id/replay_play_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Replay"
+        android:backgroundTint="#E53935"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/replay_cancel_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="32dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
