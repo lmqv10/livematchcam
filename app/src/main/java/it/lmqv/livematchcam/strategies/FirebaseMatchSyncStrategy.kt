@@ -18,6 +18,7 @@ import it.lmqv.livematchcam.services.firebase.ScoreboardOverlay
 import it.lmqv.livematchcam.services.firebase.listeners.OverlaysValueListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -32,8 +33,8 @@ class FirebaseMatchSyncStrategy(context: Context) :
 
     private lateinit var syncDataListenerContract: SyncDataListenerContract
 
-    private val syncJob = SupervisorJob()
-    private val syncScope = CoroutineScope(syncJob + Dispatchers.IO)
+    private var syncJob : Job? = null
+    private val syncScope = CoroutineScope(Dispatchers.IO)
 
     override suspend fun initialize(
         syncDataListenerContract: SyncDataListenerContract
@@ -41,7 +42,8 @@ class FirebaseMatchSyncStrategy(context: Context) :
         //Logd("$instanceId :: FirebaseMatchSyncStrategy::initialize")
         this.syncDataListenerContract = syncDataListenerContract
 
-        syncScope.launch {
+        syncJob?.cancel()
+        syncJob = syncScope.launch {
             combine(
                 firebaseAccountRepository.accountName,
                 firebaseAccountRepository.accountKey,
@@ -115,7 +117,7 @@ class FirebaseMatchSyncStrategy(context: Context) :
 
     override fun dispose() {
         Logd("$instanceId: FirebaseMatchSyncStrategy::dispose")
-        syncJob.cancel()
+        syncJob?.cancel()
         FirebaseDataService.detachMatchValueEventListener()
         FirebaseDataService.detachEventInfoValueEventListener()
         FirebaseDataService.detachSchedulesValueEventListener()

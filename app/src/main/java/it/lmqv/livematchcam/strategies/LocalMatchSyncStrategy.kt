@@ -11,6 +11,7 @@ import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.services.firebase.ScoreboardOverlay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -23,14 +24,17 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
 
     private lateinit var syncDataListenerContract: SyncDataListenerContract
 
-    private var syncJob = SupervisorJob()
-    private val syncScope = CoroutineScope(syncJob + Dispatchers.IO)
+    private var syncJob : Job? = null
+    private val syncScope = CoroutineScope(Dispatchers.IO)
 
-    override suspend fun initialize(syncDataListenerContract: SyncDataListenerContract) {
+    override suspend fun initialize(
+        syncDataListenerContract: SyncDataListenerContract
+    ) {
         //Logd("$instanceId: LocalMatchSyncStrategy::initialize::start")
         this.syncDataListenerContract = syncDataListenerContract
 
-        syncScope.launch {
+        syncJob?.cancel()
+        syncJob = syncScope.launch {
             combine(
                 firebaseAccountRepository.accountName,
                 firebaseAccountRepository.accountKey
@@ -59,12 +63,10 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
                     }, {
                         syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
                     })
-                    //onRealtimeDatabaseAvailability(false)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     //Logd("$instanceId :: _isRealtimeDatabaseAvailable.exception")
                     syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
-                    //onRealtimeDatabaseAvailability(false)
                 }
             }
         }
@@ -73,7 +75,7 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
 
     override fun dispose() {
         Logd("$instanceId: LocalMatchSyncStrategy::dispose")
-        syncJob.cancel()
+        syncJob?.cancel()
     }
 
     override fun updateMatch(match: Match) {

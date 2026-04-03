@@ -17,7 +17,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 27
         versionCode = 1
-        versionName = "4.8.0"
+        versionName = "4.8.1"
         manifestPlaceholders["appAuthRedirectScheme"] = "it.lmqv.livematchcam"
     }
 
@@ -108,13 +108,20 @@ dependencies {
     implementation(libs.coil.kt)
     implementation(libs.com.google.zxing.core)
     implementation(libs.com.google.android.gms)
-    implementation(libs.com.google.firebase.bom)
+    implementation(platform(libs.com.google.firebase.bom))
     implementation(libs.com.google.firebase.database.ktx)
     implementation(libs.com.jiangdongguo.libausbc)
     //implementation(libs.com.jiangdongguo.libuvc)
     //implementation(libs.com.jiangdongguo.libuvccommon)
     //implementation(libs.com.jiangdongguo.libnative)
     implementation(libs.com.herohan.uvcandroid)
+
+    // Importa le dipendenze vere e proprie
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.functions)
+
+    // Importa coroutines-play-services per avere a disposizione .await()
+    implementation(libs.kotlinx.coroutines.play.services)
 
     implementation(libs.compose.ui)
     implementation(libs.compose.material)

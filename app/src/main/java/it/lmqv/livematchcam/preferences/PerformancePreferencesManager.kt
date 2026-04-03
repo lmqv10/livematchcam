@@ -23,4 +23,9 @@ class PerformancePreferencesManager(context: Context) {
         val key = ctx.getString(R.string.enable_scoreboard_key)
         return sharedPreferences.getBoolean(key, true)
     }
+
+    fun getKeyframeInterval(): Int {
+        val key = ctx.getString(R.string.keyframe_interval_key)
+        return sharedPreferences.getString(key, "1")?.toIntOrNull() ?: 1
+    }
 }

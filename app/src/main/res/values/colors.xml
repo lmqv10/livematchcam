@@ -184,4 +184,24 @@
     <color name="light_blue_600">#FF039BE5</color>
     <color name="gray_400">#FFBDBDBD</color>
     <color name="gray_600">#FF757575</color>
+
+    <!-- ===== YouTube Button Colors ===== -->
+
+    <!-- Rosso YouTube ufficiale -->
+    <color name="yt_button_red">#FF0000</color>
+    <!-- Rosso premuto (leggermente più scuro) -->
+    <color name="yt_button_red_pressed">#CC0000</color>
+    <!-- Rosso disabilitato -->
+    <color name="yt_button_red_disabled">#FFCCCC</color>
+    <!-- Sfondo container (bianco in light mode) -->
+    <color name="yt_button_container_bg">#FFFFFF</color>
+    <!-- Sfondo sezione Google G (sempre bianco, per contrasto logo) -->
+    <color name="yt_button_google_bg">#FFFFFF</color>
+    <!-- Divisore tra sezione G e sezione rossa -->
+    <color name="yt_button_divider">#1A000000</color>
+    <!-- Bordo esterno del bottone -->
+    <color name="yt_button_border">#1A000000</color>
+    <color name="yt_button_border_disabled">#0D000000</color>
+    <!-- Testo label (sempre bianco sul rosso) -->
+    <color name="yt_button_text">#FFFFFF</color>
 </resources>

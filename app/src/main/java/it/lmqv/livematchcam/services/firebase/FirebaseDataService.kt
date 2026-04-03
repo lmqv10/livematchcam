@@ -1,14 +1,23 @@
 package it.lmqv.livematchcam.services.firebase
 
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.functions.functions
+import it.lmqv.livematchcam.extensions.Logd
+import it.lmqv.livematchcam.extensions.Loge
 import it.lmqv.livematchcam.factories.sports.Sports
 import it.lmqv.livematchcam.services.firebase.listeners.OverlaysValueEventListener
 import it.lmqv.livematchcam.services.firebase.listeners.OverlaysValueListener
 import it.lmqv.livematchcam.services.firebase.listeners.SchedulesValueEventListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 object FirebaseDataService {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -25,6 +34,9 @@ object FirebaseDataService {
     private var isAuthorizedUser: Boolean = false
     private var currentAccountKey: String = ""
 
+    private var cachedAccountName: String? = null
+    private var cachedAccountKey: String? = null
+
     private val isValidAccount: Boolean get() =
         (isAdministrator || isAuthorizedUser)
         && currentAccountKey.isNotEmpty()
@@ -39,14 +51,14 @@ object FirebaseDataService {
                             successCallback: (FirebaseAccount, ) -> Unit,
                             failureCallback: () -> Unit) {
         if (accountKey.isNotEmpty()) {
-            ////Logd("authenticateAccount:: $accountKey")
+            //Logd("authenticateAccount:: $accountKey")
             database.getReference("accounts/$accountKey")
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val firebaseAccount = snapshot.getValue(FirebaseAccount::class.java)
 
                         if (firebaseAccount != null) {
-                            ////Logd("account:: $account")
+                            //Logd("account:: $account")
                             isAdministrator = firebaseAccount.admin == accountName
                             isAuthorizedUser = firebaseAccount.users.contains(accountName)
 
@@ -55,7 +67,59 @@ object FirebaseDataService {
 
                             if (isAdministrator || isAuthorizedUser) {
                                 currentAccountKey = accountKey
-                                successCallback(firebaseAccount)
+
+                                // Optimization: check if we already have an active session for the same credentials
+                                val currentUser = FirebaseAuth.getInstance().currentUser
+                                if (currentUser != null && cachedAccountKey == accountKey && cachedAccountName == accountName) {
+                                    //Logd("FirebaseDataService :: Using cached Auth session. Skipping getCustomToken.")
+                                    successCallback(firebaseAccount)
+                                } else {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        try {
+                                            val data = hashMapOf(
+                                                "accountId" to accountKey,
+                                                "userName" to accountName
+                                            )
+                                            //Logd("FirebaseDataService :: Richiesta Custom Token in corso...")
+
+                                            val result = Firebase.functions
+                                                .getHttpsCallable("getCustomToken")
+                                                .call(data).await()
+
+                                            val resultData = result.getData()
+                                            val responseMap = resultData as? Map<*, *>
+                                            val tokenStr = responseMap?.get("token") as? String
+
+                                            if (!tokenStr.isNullOrEmpty()) {
+                                                //Logd("FirebaseDataService :: Token ottenuto con successo. Autenticazione in corso...")
+
+                                                val authResult = FirebaseAuth.getInstance()
+                                                    .signInWithCustomToken(tokenStr).await()
+
+                                                if (authResult.user?.uid.isNullOrEmpty()) {
+                                                    //Loge("FirebaseDataService :: La function non ha restituito un user valido.")
+                                                    currentAccountKey = ""
+                                                    failureCallback()
+                                                } else {
+                                                    //Logd("FirebaseDataService :: Login completato! User ID: ${authResult.user?.uid}")
+                                                    cachedAccountKey = accountKey
+                                                    cachedAccountName = accountName
+                                                    successCallback(firebaseAccount)
+                                                }
+                                            } else {
+                                                //Loge("FirebaseDataService :: La function non ha restituito un campo 'token' valido. Dati ricevuti: ${resultData}")
+                                                currentAccountKey = ""
+                                                failureCallback()
+                                            }
+                                        } catch (e: Exception) {
+                                            // Cattura eventuali errori (ad es. assenza di rete, errori REST, permessi FirebaseAuth, token invalidi, ecc.)
+                                            e.printStackTrace()
+                                            Loge("FirebaseDataService :: Errore nel flusso di login Firebase: ${e.message.toString()}")
+                                            currentAccountKey = ""
+                                            failureCallback()
+                                        }
+                                    }
+                                }
                             } else {
                                 currentAccountKey = ""
                                 failureCallback()

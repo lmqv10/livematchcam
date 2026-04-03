@@ -170,6 +170,7 @@ class StreamService: Service(),
             getGlInterface().forceOrientation(OrientationForced.LANDSCAPE)
             getStreamClient().setBitrateExponentialFactor(0.5f)
             getStreamClient().setReTries(10)
+            getStreamClient().resizeCache(200)
             setFpsListener(this@StreamService)
         }
 
@@ -251,6 +252,11 @@ class StreamService: Service(),
         this.connectCheckerCallback?.onConnectionStarted(url)
         this.cameraAPIPreferencesManager.onConnectionStarted()
         this.startStreamingTimer()
+
+        if (genericStream.isStreaming) {
+            genericStream.requestKeyframe()
+            Logd("StreamService :: startStream :: forced initial keyframe")
+        }
     }
 
     override fun onConnectionSuccess() {
@@ -326,6 +332,7 @@ class StreamService: Service(),
 
     fun startStream(endpoint: String) {
         if (!genericStream.isStreaming) {
+            Logd("StreamService :: startStream :: $endpoint")
             genericStream.startStream(endpoint)
             if (performancePrefs.isReplayEnabled()) {
                 replayService.startRollingRecording()
@@ -380,7 +387,8 @@ class StreamService: Service(),
                 height = videoStreamData.height,
                 bitrate = videoStreamData.bitrate,
                 rotation = videoStreamData.rotation,
-                fps = videoStreamData.fps
+                fps = videoStreamData.fps,
+                iFrameInterval = performancePrefs.getKeyframeInterval()
             ) &&
             genericStream.prepareAudio(
                 sampleRate = audioStreamData.sampleRate,
@@ -489,13 +497,19 @@ class StreamService: Service(),
             clearFilters()
 
             if (performancePrefs.isFiltersEnabled()) {
-                val filters = FiltersFactory.getFilters(applicationContext)
-                filters.forEachIndexed { index, filter ->
-                    if (filter is IOverlayObjectFilterRender) {
-                        filter.setVideoStreamData(videoStreamData)
-                    }
-                    addFilter(filter)
-                }
+                // Composite: 1 GL layer merging all N overlay bitmaps (CPU Canvas)
+                val compositeFilter = FiltersFactory.getCompositeFilter(applicationContext)
+                compositeFilter.setVideoStreamData(videoStreamData)
+                addFilter(compositeFilter)
+
+                // Legacy: N separate GL layers (kept for internal benchmarking)
+//                val filters = FiltersFactory.getFilters(applicationContext)
+//                filters.forEachIndexed { index, filter ->
+//                    if (filter is IOverlayObjectFilterRender) {
+//                        filter.setVideoStreamData(videoStreamData)
+//                    }
+//                    addFilter(filter)
+//                }
             } else {
                 Logd("StreamService :: Performance toggle: Filters disabled")
             }

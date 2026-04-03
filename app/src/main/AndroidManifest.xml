@@ -117,14 +117,6 @@
             tools:ignore="DiscouragedApi" />
 
         <activity
-            android:name=".YouTubeActivity"
-            android:exported="false"
-            android:screenOrientation="sensorLandscape"
-            android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden"
-            tools:ignore="DiscouragedApi" />
-
-        <activity
             android:name=".UsbActivity"
             android:exported="true"
             android:launchMode="singleTask"

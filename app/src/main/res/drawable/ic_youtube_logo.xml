@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="14dp"
+    android:viewportWidth="24"
+    android:viewportHeight="17">
+
+    <!-- YouTube play button shape (white) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M23.498,2.641C23.21,1.551 22.349,0.69 21.259,0.402C19.403,0 12,0 12,0C12,0 4.597,0 2.741,0.402C1.651,0.69 0.79,1.551 0.502,2.641C0,4.497 0,8.5 0,8.5C0,8.5 0,12.503 0.502,14.359C0.79,15.449 1.651,16.31 2.741,16.598C4.597,17 12,17 12,17C12,17 19.403,17 21.259,16.598C22.349,16.31 23.21,15.449 23.498,14.359C24,12.503 24,8.5 24,8.5C24,8.5 24,4.497 23.498,2.641Z"/>
+
+    <!-- Play triangle (red, to punch out the white) -->
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M9.545,12.068L9.545,4.932L15.818,8.5L9.545,12.068Z"/>
+
+</vector>

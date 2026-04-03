@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Stato: disabilitato -->
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/yt_button_container_bg"/>
+            <stroke
+                android:width="0.5dp"
+                android:color="@color/yt_button_border_disabled"/>
+            <corners android:radius="4dp"/>
+        </shape>
+    </item>
+
+    <!-- Stato: premuto -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/yt_button_container_bg"/>
+            <stroke
+                android:width="0.5dp"
+                android:color="@color/yt_button_border"/>
+            <corners android:radius="4dp"/>
+        </shape>
+    </item>
+
+    <!-- Stato: default -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/yt_button_container_bg"/>
+            <stroke
+                android:width="0.5dp"
+                android:color="@color/yt_button_border"/>
+            <corners android:radius="4dp"/>
+        </shape>
+    </item>
+
+</selector>

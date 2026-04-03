@@ -9,9 +9,7 @@ import androidx.navigation.fragment.navArgs
 import it.lmqv.livematchcam.R
 import it.lmqv.livematchcam.utils.SyncStrategy
 import it.lmqv.livematchcam.databinding.FragmentServerConfigurationBinding
-import it.lmqv.livematchcam.extensions.launchOnResumed
 import it.lmqv.livematchcam.fragments.sports.MatchInfoFragment
-import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.repositories.MatchSyncStrategyRepository
 import kotlin.getValue
 
@@ -53,27 +51,17 @@ class ServerConfigurationFragment : Fragment() {
         val syncStrategy: SyncStrategy = args.syncStrategy
         MatchSyncStrategyRepository.initialize(requireActivity(), syncStrategy)
 
-        binding.wall.setOnClickListener { _ -> true }
-        launchOnResumed {
-            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
-                var guid = firebaseAccountData.guid
-
-                //Logd(">>>>>>>>>>>>>> $guid")
-//                var transaction = childFragmentManager.beginTransaction()
-                if (guid.isEmpty()) {
-                    binding.wall.visibility = View.VISIBLE
-//                    transaction
-//                        .hide(serverFragment)
-//                        .hide(matchInfoFragment)
-                } else {
-                    binding.wall.visibility = View.GONE
-//                    transaction
-//                        .show(serverFragment)
-//                        .show(matchInfoFragment)
-                }
-//                transaction.commit()
-            }
-        }
+//        binding.wall.setOnClickListener { _ -> true }
+//        launchOnResumed {
+//            MatchRepository.firebaseAccountData.collect { firebaseAccountData ->
+//                var guid = firebaseAccountData.guid
+//                if (guid.isEmpty()) {
+//                    binding.wall.visibility = View.VISIBLE
+//                } else {
+//                    binding.wall.visibility = View.GONE
+//                }
+//            }
+//        }
     }
     
     override fun onDestroyView() {

@@ -1,5 +1,5 @@
 [versions]
-sdk35_appcompat = "1.6.1"
+sdk35_appcompat = "1.7.1"
 coreKtx = "1.10.1"
 material = "1.10.0"
 constraintlayout = "2.1.4"
@@ -35,11 +35,12 @@ coil="2.7.0"
 zxing="3.5.2"
 nearby="19.3.0"
 firebase-bom="33.8.0"
+coroutinesPlayServices = "1.10.1"
 database-ktx="21.0.0"
 usbcamera="3.3.3"
 uvcandroid = "1.0.9"
-navigation-ktx = "2.9.3"
-navigation = "2.9.3"
+navigation-ktx = "2.9.7"
+navigation = "2.9.7"
 sdk29_appcompat = "1.3.1"
 sdk29_coreKtx = "1.3.2"
 sdk_29_material = "1.3.0"
@@ -104,7 +105,9 @@ com-herohan-uvcandroid = { module = "com.herohan:UVCAndroid", version.ref = "uvc
 androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
 navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
 navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
-appauth = { module = "net.openid:appauth", version.ref = "appauth" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-functions = { group = "com.google.firebase", name = "firebase-functions" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

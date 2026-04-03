@@ -51,12 +51,11 @@ class YoutubeAccountFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.ytSignIn.setOnClickListener { _ ->
+        binding.ytSignIn.btnYouTubeConnectSmall.setOnClickListener { _ ->
             signInLauncher.launch(googleAccountViewModel.getSignInIntent())
         }
 
-        binding.ytSignOut.setOnClickListener { _ ->
-
+        binding.ytSignOut.btnYouTubeDisconnectSmall.setOnClickListener { _ ->
             googleAccountViewModel.signOut()
         }
 
@@ -70,8 +69,8 @@ class YoutubeAccountFragment : Fragment() {
                 val accountDesc = googleAccountViewModel.accountDesc()
 
                 binding.ytAccountName.text = accountDesc
-                binding.ytSignIn.isVisible = !isLogged
-                binding.ytSignOut.isVisible = isLogged
+                binding.ytSignIn.btnYouTubeConnectSmall.isVisible = !isLogged
+                binding.ytSignOut.btnYouTubeDisconnectSmall.isVisible = isLogged
             }
         }
     }

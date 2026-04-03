@@ -82,6 +82,20 @@
     <string name="enable_scoreboard_title">Enable Scoreboard</string>
     <string name="enable_scoreboard_summary_on">Rendering the live animated scoreboard</string>
     <string name="enable_scoreboard_summary_off">Scoreboard disabled to save CPU/GPU</string>
+    <string name="keyframe_interval_key">keyframe_interval</string>
+    <string name="keyframe_interval_title">Keyframe Interval</string>
+    <string name="keyframe_interval_summary">Seconds between keyframes. Lower = better compatibility, higher = slightly sharper image</string>
+
+    <string-array name="keyframe_interval_entries">
+        <item>1 Second (recommended)</item>
+        <item>2 Seconds</item>
+    </string-array>
+
+    <string-array name="keyframe_interval_values">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
 
     <string name="match_league">Match Description</string>
     <string name="team_name">Team Name</string>
@@ -321,4 +335,15 @@
     <string name="disabled">Disabled</string>
 
     <string name="warning_schedule_start_time">Cannot schedule event in the past!\nPlease check the date and time!</string>
+
+    <!-- Testo del bottone YouTube -->
+    <string name="yt_button_label">Connetti con YouTube</string>
+    <string name="yt_button_label_disconnect">Disconnetti da YouTube</string>
+    <string name="yt_button_label_en">Connect with YouTube</string>
+    <string name="yt_button_label_disconnect_en">Disconnect from YouTube</string>
+    <string name="yt_button_connecting">Connessione in corso…</string>
+
+    <!-- Accessibility -->
+    <string name="google_logo_desc">Google</string>
+    <string name="yt_button_content_desc">Accedi con il tuo account Google per connettere YouTube</string>
 </resources>

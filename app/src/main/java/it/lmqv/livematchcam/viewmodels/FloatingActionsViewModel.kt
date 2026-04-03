@@ -77,7 +77,7 @@ class FloatingActionsViewModel : ViewModel() {
                     navigator?.navigateAsStartActivity(StreamActivity::class.java)
                 }
             ))
-            .filter { x -> this.firebaseAccountData.guid.isNotEmpty() }
+            //.filter { x -> this.firebaseAccountData.guid.isNotEmpty() }
             .filter { x -> this.remoteScoreAvailability || x.id != R.id.action_remote_control }
             .filter { x -> this.currentMenuItemId != R.id.firebaseConfigurationFragment ||
                         (this.currentMenuItemId == R.id.firebaseConfigurationFragment &&
