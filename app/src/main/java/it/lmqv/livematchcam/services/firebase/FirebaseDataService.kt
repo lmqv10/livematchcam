@@ -70,8 +70,13 @@ object FirebaseDataService {
 
                                 // Optimization: check if we already have an active session for the same credentials
                                 val currentUser = FirebaseAuth.getInstance().currentUser
-                                if (currentUser != null && cachedAccountKey == accountKey && cachedAccountName == accountName) {
-                                    //Logd("FirebaseDataService :: Using cached Auth session. Skipping getCustomToken.")
+                                val isColdStartCacheResume = currentUser != null && cachedAccountKey == null
+                                val isSameSession = currentUser != null && cachedAccountKey == accountKey && cachedAccountName == accountName
+
+                                if (isColdStartCacheResume || isSameSession) {
+                                    Logd("FirebaseDataService :: Using cached Auth session. Skipping getCustomToken.")
+                                    cachedAccountKey = accountKey
+                                    cachedAccountName = accountName
                                     successCallback(firebaseAccount)
                                 } else {
                                     CoroutineScope(Dispatchers.IO).launch {
@@ -80,8 +85,7 @@ object FirebaseDataService {
                                                 "accountId" to accountKey,
                                                 "userName" to accountName
                                             )
-                                            //Logd("FirebaseDataService :: Richiesta Custom Token in corso...")
-
+                                            Logd("FirebaseDataService :: Request Token in progress...")
                                             val result = Firebase.functions
                                                 .getHttpsCallable("getCustomToken")
                                                 .call(data).await()
@@ -97,11 +101,11 @@ object FirebaseDataService {
                                                     .signInWithCustomToken(tokenStr).await()
 
                                                 if (authResult.user?.uid.isNullOrEmpty()) {
-                                                    //Loge("FirebaseDataService :: La function non ha restituito un user valido.")
+                                                    Loge("FirebaseDataService :: Auth With token Failed.")
                                                     currentAccountKey = ""
                                                     failureCallback()
                                                 } else {
-                                                    //Logd("FirebaseDataService :: Login completato! User ID: ${authResult.user?.uid}")
+                                                    Logd("FirebaseDataService :: Auth With token Succeeded! User ID: ${authResult.user?.uid}")
                                                     cachedAccountKey = accountKey
                                                     cachedAccountName = accountName
                                                     successCallback(firebaseAccount)
