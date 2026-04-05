@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.services.firebase
 
+import com.google.firebase.database.IgnoreExtraProperties
 import it.lmqv.livematchcam.factories.FilterPosition
 import it.lmqv.livematchcam.factories.sports.Sports
 
@@ -7,6 +8,7 @@ import it.lmqv.livematchcam.factories.sports.Sports
     val accounts: Map<String, FirebaseAccount>
 )*/
 
+@IgnoreExtraProperties
 data class FirebaseAccount(
     val guid: String = "",
     val name: String = "",
@@ -20,6 +22,7 @@ data class FirebaseAccount(
 )
 
 data class Stream(
+    val streamId: String = "",
     val description: String = "",
     val logo: String = "",
     val server: String = "",
@@ -37,8 +40,11 @@ data class FirebaseAccountDataContract(
 )
 
 data class Settings(
+    val maxStreams: Int = 0,
+    val uvcEnabled: Boolean = false,
     val youTubeEnabled: Boolean = false,
-    val uvcEnabled: Boolean = false
+    val youtubeChannelName: String = "",
+    val youtubeLinked: Boolean = false,
 )
 
 data class Match(

@@ -21,22 +21,22 @@ fun Logd(message: String) {
 }
 
 fun Fragment.launchOnStarted(delegate: suspend () -> Unit) {
-    this.lifecycleScope.launch {
-        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+    this.viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             delegate()
         }
     }
 }
 fun Fragment.launchOnCreated(delegate: suspend () -> Unit) {
-    this.lifecycleScope.launch {
-        lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
+    this.viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
             delegate()
         }
     }
 }
 fun Fragment.launchOnResumed(delegate: suspend () -> Unit) {
-    this.lifecycleScope.launch {
-        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+    this.viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             delegate()
         }
     }

@@ -44,46 +44,90 @@ class FirebaseAccountFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.accountName.setOnClickListener {
-            val accountName = binding.accountName.text.toString()
-            DialogHandler.editText(DialogContext(this, binding.accountName,  R.string.account, accountName)) {
+            val currentName = binding.accountName.text.toString()
+            DialogHandler.editText(DialogContext(this, binding.accountName, R.string.account, currentName)) {
                 binding.accountName.text = it
-                if (it.isNotEmpty()) {
-                    firebaseAccountViewModel.signIn(it)
-                    toast(getString(R.string.logged_in, it))
-                } else {
-                    firebaseAccountViewModel.signOut {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            toast(getString(R.string.logged_out))
-                        }
-                    }
-                }
             }
         }
 
         binding.accountKey.setOnClickListener {
-            val accountKey = binding.accountKey.text.toString()
-            DialogHandler.editText(DialogContext(this, binding.accountName,  R.string.account_key, accountKey)) {
+            val currentKey = binding.accountKey.text.toString()
+            DialogHandler.editText(DialogContext(this, binding.accountName, R.string.account_key, currentKey)) {
                 binding.accountKey.text = it
-                firebaseAccountViewModel.setAccountKey(it)
+            }
+        }
+
+        binding.btnLogin.setOnClickListener {
+            val accountName = binding.accountName.text.toString().trim()
+            val accountKey = binding.accountKey.text.toString().trim()
+
+            if (accountName.isEmpty() || accountKey.isEmpty()) {
+                binding.errorMessage.visibility = View.VISIBLE
+                binding.errorMessage.text = "Inserisci nome e chiave per connetterti."
+                return@setOnClickListener
+            }
+
+            // Show Loader and hide error
+            binding.loaderOverlay.visibility = View.VISIBLE
+            binding.errorMessage.visibility = View.GONE
+
+            firebaseAccountViewModel.validateAndApplyCredentials(accountName, accountKey,
+                onSuccess = {
+                    binding.loaderOverlay.visibility = View.GONE
+                    toast(getString(R.string.logged_in, accountName))
+                },
+                onError = {
+                    binding.loaderOverlay.visibility = View.GONE
+                    binding.errorMessage.visibility = View.VISIBLE
+                    binding.errorMessage.text = "Autenticazione fallita. Controlla le credenziali."
+                }
+            )
+        }
+
+        binding.btnLogout.setOnClickListener {
+            firebaseAccountViewModel.signOut {
+                toast(getString(R.string.logged_out))
             }
         }
 
         launchOnCreated {
             combine(
                 firebaseAccountViewModel.authState,
-                firebaseAccountViewModel.firebaseAccountKey
-            ) { state, accountKey -> Pair(state, accountKey) }
-                .collect { (state, accountKey) ->
-                    val accountName = firebaseAccountViewModel.accountName()
+                firebaseAccountViewModel.firebaseAccountKey,
+                firebaseAccountViewModel.savedAccountName
+            ) { state, accountKey, savedName -> Triple(state, accountKey, savedName) }
+                .collect { (state, accountKey, savedName) ->
+                    val isConnected = state is it.lmqv.livematchcam.services.auth.AuthResult.Authenticated
 
-                    binding.accountName.text = accountName ?: ""
-                    binding.accountKey.text = accountKey ?: ""
+                    // Update UI from ViewModel only if we are connected (loading saved data)
+                    // or if it's completely empty (startup) to not overwrite user typing
+                    if (isConnected || (binding.accountName.text.isEmpty() && !savedName.isNullOrEmpty())) {
+                        binding.accountName.text = savedName ?: ""
+                    }
+                    if (isConnected || (binding.accountKey.text.isEmpty() && !accountKey.isNullOrEmpty())) {
+                        binding.accountKey.text = accountKey ?: ""
+                    }
 
-                    val isConnected =
-                        !accountName.isNullOrEmpty() && !accountKey.isNullOrEmpty()
+                    if (isConnected) {
+                        // Logged in UI state
+                        binding.accountName.isEnabled = false
+                        binding.accountKey.isEnabled = false
+                        binding.btnLogin.visibility = View.GONE
+                        binding.errorMessage.visibility = View.GONE
+                        binding.btnLogout.visibility = View.VISIBLE
 
-                    val resIcon = if (isConnected) R.drawable.cloud_check else R.drawable.cloud_cross
-                    TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.accountKey, resIcon, 0, 0, 0)
+                        val resIcon = R.drawable.cloud_check
+                        TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.accountKey, resIcon, 0, 0, 0)
+                    } else {
+                        // Unauthenticated UI state
+                        binding.accountName.isEnabled = true
+                        binding.accountKey.isEnabled = true
+                        binding.btnLogin.visibility = View.VISIBLE
+                        binding.btnLogout.visibility = View.GONE
+
+                        val resIcon = R.drawable.cloud_cross
+                        TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.accountKey, resIcon, 0, 0, 0)
+                    }
                 }
         }
     }

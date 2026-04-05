@@ -1,8 +1,8 @@
 WIP 
-- Replay (10sec)
-- Banners Video full screen per spot/pubblicità
+- Firebase Auth with Token
 
 NEXT CANDIDATE
+- Banners Video full screen per spot/pubblicità
 - Banners temporizzabili (25 sec)
 - Notifica al dispositivo in app per contattare streamer. (popup in app).
 - Battery Level warning (preference "show/hide battery level"). NOTA: il monitoring potrebbe costare.

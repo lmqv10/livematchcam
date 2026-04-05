@@ -155,11 +155,15 @@ class MatchActivity : BaseActivity(), INavigateDrawerActivity {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(
                     MatchRepository.firebaseAccountData,
-                    firebaseAccountViewModel.authState
-                ) { firebaseAccountData, authState -> Pair(firebaseAccountData, authState) }
-                    .collectLatest { (firebaseAccountData, authState) ->
-
-                    if (firebaseAccountViewModel.isLogged()) {
+                    firebaseAccountViewModel.authState,
+                    googleAccountViewModel.authState
+                ) { firebaseAccountData, fbState, googleState -> Triple(firebaseAccountData, fbState, googleState) }
+                    .collectLatest { (firebaseAccountData, fbState, googleState) ->
+                    
+                    val isLoggedFirebase = firebaseAccountViewModel.isLogged()
+                    val isLoggedGoogle = googleAccountViewModel.isLogged()
+                    
+                    if (isLoggedFirebase) {
                         binding.matchNavView.getHeaderView(0)
                             .findViewById<TextView>(R.id.textFirebaseAccountEmail).text = firebaseAccountViewModel.accountName()
                     } else {
@@ -197,16 +201,28 @@ class MatchActivity : BaseActivity(), INavigateDrawerActivity {
                     }
 
                     var settings = firebaseAccountData.settings
-                    val isLogged = googleAccountViewModel.isLogged()
-                    binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = settings.youTubeEnabled && isLogged
-                    binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = settings.youTubeEnabled && isLogged
-                    binding.matchNavView.getHeaderView(0).findViewById<TextView>(R.id.textAccountEmail).isVisible = settings.youTubeEnabled && isLogged
-
+                    
                     var hasStreams = firebaseAccountData.streams.isNotEmpty()
-                    //binding.matchNavView.menu.findItem(R.id.serverConfigurationFragment).isVisible = firebaseAccountViewModel.hasAccountKey()
-                    binding.matchNavView.menu.findItem(R.id.firebaseConfigurationFragment).isVisible = firebaseAccountViewModel.hasAccountKey() && hasStreams
+                    val showFirebase = isLoggedFirebase && hasStreams
+                    firebaseMenuItem.isVisible = showFirebase
+                    
+                    val showYouTube = settings.youTubeEnabled && isLoggedGoogle && isLoggedFirebase
+                    binding.matchNavView.menu.findItem(R.id.youtubeConfigurationFragment).isVisible = showYouTube
+                    binding.matchNavView.menu.findItem(R.id.youtubeStreamFragment).isVisible = showYouTube
+                    binding.matchNavView.getHeaderView(0).findViewById<TextView>(R.id.textAccountEmail).isVisible = showYouTube
 
                     floatingActionsViewModel.setFirebaseAccountData(firebaseAccountData)
+                    
+                    val currentDest = navController.currentDestination?.id
+                    if (currentDest == R.id.firebaseConfigurationFragment && !showFirebase) {
+                        navController.navigate(R.id.serverConfigurationFragment)
+                    } else if ((currentDest == R.id.youtubeConfigurationFragment || currentDest == R.id.youtubeStreamFragment) && !showYouTube) {
+                        if (showFirebase) {
+                            navController.navigate(R.id.firebaseConfigurationFragment)
+                        } else {
+                            navController.navigate(R.id.serverConfigurationFragment)
+                        }
+                    }
                 }
             }
         }

@@ -6,6 +6,7 @@ import it.lmqv.livematchcam.repositories.AccountRepository
 import it.lmqv.livematchcam.services.firebase.EventInfo
 import it.lmqv.livematchcam.services.firebase.FilterOverlayEvent
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
+import it.lmqv.livematchcam.services.firebase.FirebaseAuthService
 import it.lmqv.livematchcam.services.firebase.FirebaseDataService
 import it.lmqv.livematchcam.services.firebase.Match
 import it.lmqv.livematchcam.services.firebase.ScoreboardOverlay
@@ -43,7 +44,9 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
             }.collect { (accountName, accountKey) ->
                 Logd("$instanceId :: LocalMatchSyncStrategy::collect:: $accountKey")
                 try {
-                    FirebaseDataService.authenticateAccount(accountName, accountKey, { firebaseAccount ->
+                    val result = FirebaseAuthService.authenticateAccount(accountName, accountKey)
+
+                    result.onSuccess { firebaseAccount ->
                         Logd("$instanceId :: LocalMatchSyncStrategy :: $accountName - $accountKey")
                         //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = true")
 
@@ -60,9 +63,11 @@ class LocalMatchSyncStrategy(context: Context) : IMatchSyncStrategy {
                             ownedStreams,
                             firebaseAccount.settings)
                         syncDataListenerContract.onChangeFirebaseAccount(firebaseAccountDataContract)
-                    }, {
+                    }
+
+                    result.onFailure {
                         syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
-                    })
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     //Logd("$instanceId :: _isRealtimeDatabaseAvailable.exception")

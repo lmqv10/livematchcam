@@ -13,6 +13,7 @@ import it.lmqv.livematchcam.repositories.FirebaseDataRepository
 import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.firebase.FilterOverlayEvent
 import it.lmqv.livematchcam.services.firebase.FirebaseAccountDataContract
+import it.lmqv.livematchcam.services.firebase.FirebaseAuthService
 import it.lmqv.livematchcam.services.firebase.Schedule
 import it.lmqv.livematchcam.services.firebase.ScoreboardOverlay
 import it.lmqv.livematchcam.services.firebase.listeners.OverlaysValueListener
@@ -54,10 +55,11 @@ class FirebaseMatchSyncStrategy(context: Context) :
             }.collect { (accountName, accountKey, streamName, sport) ->
                 Logd("$instanceId :: FirebaseMatchSyncStrategy::collect:: $accountKey")
                 try {
-                    FirebaseDataService.authenticateAccount(accountName, accountKey, { firebaseAccount ->
+                    val result = FirebaseAuthService.authenticateAccount(accountName, accountKey)
+                    
+                    result.onSuccess { firebaseAccount ->
                         Logd("$instanceId :: FirebaseMatchSyncStrategy :: $accountName - $accountKey")
-                        //Logd("$instanceId :: _isRealtimeDatabaseAvailable.value = true")
-
+                        
                         var ownedStreams =
                             firebaseAccount.streams
                             .filter { x ->
@@ -74,12 +76,10 @@ class FirebaseMatchSyncStrategy(context: Context) :
                         syncDataListenerContract.onChangeFirebaseAccount(firebaseAccountDataContract)
 
                         FirebaseDataService.attachMatchValueEventListener(streamName) { match ->
-                            //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify Match Update")
                             syncDataListenerContract.onChangeMatch(match)
                         }
 
                         FirebaseDataService.attachEventInfoValueEventListener(streamName, sport) { eventInfo ->
-                            //Logd("$instanceId :: FirebaseMatchSyncStrategy:: Notify EventInfo Update")
                             syncDataListenerContract.onChangeEventInfo(eventInfo)
                         }
 
@@ -88,11 +88,6 @@ class FirebaseMatchSyncStrategy(context: Context) :
                         }
 
                         FirebaseDataService.attachOverlaysValueEventListener(streamName, object : OverlaysValueListener {
-//                            override fun onChangeFilter(filter: FilterOverlayEvent) {
-//                                Logd("$instanceId :: FirebaseMatchSyncStrategy:: onChangeFilter $filter")
-//                                syncDataListenerContract.onChangeFilter(filter)
-//                            }
-
                             override fun onChangeScoreboard(scoreboard: ScoreboardOverlay) {
                                 Logd("$instanceId :: FirebaseMatchSyncStrategy:: scoreboard $scoreboard")
                                 syncDataListenerContract.onChangeScoreboard(scoreboard)
@@ -103,9 +98,11 @@ class FirebaseMatchSyncStrategy(context: Context) :
                                 syncDataListenerContract.onChangeFilters(filters)
                             }
                         })
-                    }, {
+                    }
+
+                    result.onFailure {
                         syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())
-                    })
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     syncDataListenerContract.onChangeFirebaseAccount(FirebaseAccountDataContract())

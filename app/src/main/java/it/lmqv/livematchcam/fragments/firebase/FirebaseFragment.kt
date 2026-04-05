@@ -127,12 +127,22 @@ class FirebaseFragment : Fragment() {
 
         binding.accountName.setOnClickListener {
             val accountName = binding.accountName.text.toString()
-            DialogHandler.editText(DialogContext(this, binding.accountName, R.string.account, accountName)) {
-                binding.accountName.text = it
-
-                if (it.isNotEmpty()) {
-                    firebaseAccountViewModel.signIn(it)
-                    toast(getString(R.string.logged_in, it))
+            DialogHandler.editText(DialogContext(this, binding.accountName, R.string.account, accountName)) { newName ->
+                if (newName.isNotEmpty()) {
+                    val currentKey = firebaseAccountViewModel.firebaseAccountKey.value ?: ""
+                    
+                    binding.loaderOverlay.visibility = View.VISIBLE
+                    firebaseAccountViewModel.validateAndApplyCredentials(newName, currentKey,
+                        onSuccess = {
+                            binding.loaderOverlay.visibility = View.GONE
+                            binding.accountName.text = newName
+                            toast(getString(R.string.logged_in, newName))
+                        },
+                        onError = {
+                            binding.loaderOverlay.visibility = View.GONE
+                            toast("Autenticazione fallita. Cambio annullato.")
+                        }
+                    )
                 } else {
                     firebaseAccountViewModel.signOut {
                         CoroutineScope(Dispatchers.Main).launch {
