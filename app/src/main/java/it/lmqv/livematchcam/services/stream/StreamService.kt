@@ -16,6 +16,7 @@ import com.pedro.encoder.input.sources.audio.MicrophoneSource
 import com.pedro.encoder.input.sources.video.NoVideoSource
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.pedro.library.generic.GenericStream
+import com.pedro.encoder.utils.CodecUtil
 import com.pedro.library.util.BitrateAdapter
 import com.pedro.library.util.FpsListener
 import it.lmqv.livematchcam.R
@@ -331,6 +332,13 @@ class StreamService: Service(),
     }
 
     fun startStream(endpoint: String) {
+        if (!prepared) {
+            CoroutineScope(Dispatchers.Main).launch {
+                toast("Impossibile avviare: parametri Audio/Video non validi. (Non pronti)")
+            }
+            Loge("StreamService :: startStream :: failed because encoders not prepared")
+            return
+        }
         if (!genericStream.isStreaming) {
             Logd("StreamService :: startStream :: $endpoint")
             genericStream.startStream(endpoint)
