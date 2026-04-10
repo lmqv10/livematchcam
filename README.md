@@ -1,5 +1,29 @@
+========
+App
+========
+Preview Banner in Controllo remoto.
+Audio Spia (girare audio su cuffie)
+Login Youtube attivo SOLO per admin.
+
+
+========
+Backend
+========
+Matches in Backend con nome squadra (team vs Stream)
+Ordinamento matches.
+Metrica della connessione delle partite live (su app) , segnala al backend. "nodo Metrics".
+Golive da backend
+Lettura API youtube per stato live matches (e, link di riferimento)
+Timestamp di ultima modifica del punteggio
+Monitoring di stato live e punteggio da "teams"
+Ordinamento dinamico (last modified desc)
+Loghi con repository e storage in Firestore
+Programmazionc con Bind Scollegato da "pianificazione".
+Import Visuale (con pannello di modifica)
+Polisportiva (utenti con diverso ruolo amministrativo / sportivo) per gestione partite.
+
+
 WIP 
-- Firebase Auth with Token
 
 NEXT CANDIDATE
 - Banners Video full screen per spot/pubblicità

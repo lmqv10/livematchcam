@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam
 
+import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.KeyEvent
@@ -31,6 +32,7 @@ import it.lmqv.livematchcam.repositories.MatchRepository
 import it.lmqv.livematchcam.services.stream.IStreamService
 import it.lmqv.livematchcam.services.stream.StreamServiceConnector
 import it.lmqv.livematchcam.services.stream.VideoCaptureFormat
+import it.lmqv.livematchcam.services.stream.audio.AudioDeviceManager
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.utils.OptionItem
 import it.lmqv.livematchcam.viewmodels.StreamConfigurationViewModel
@@ -158,6 +160,16 @@ class StreamActivity : BaseActivity(),
             }
         }
 
+        // Audio Monitor toggle (mic -> headphones)
+        binding.audioMonitorToggle.setOnClickListener {
+            onAudioMonitorToggleClicked()
+        }
+
+        // USB Audio source selector (visible only with UVC)
+        binding.usbAudioSource.setOnClickListener {
+            onUsbAudioSourceClicked()
+        }
+
 //        binding.changeFiltersStrategy.setOnClickListener {
 //            val dialog = PreferencesDialogFragment
 //                .newInstance(R.xml.filters_preferences)//, getString(R.string.video_settings_screen_key))
@@ -279,7 +291,33 @@ class StreamActivity : BaseActivity(),
                         }
                     }
 
+                    // Observe audio monitor state for icon updates
+                    launchOnResumed {
+                        streamService.audioMonitorEnabled.collectLatest { enabled ->
+                            if (enabled) {
+                                binding.audioMonitorToggle.setImageResource(R.drawable.ic_headphones_on)
+                            } else {
+                                binding.audioMonitorToggle.setImageResource(R.drawable.ic_headphones_off)
+                            }
+                        }
+                    }
                     //this.initCameraSettingsDialog()
+                }
+
+                // Observe VideoSourceKind to show/hide USB audio button
+                launchOnResumed {
+                    streamConfigurationViewModel.videoSourceKind.collectLatest { kind ->
+                        if (kind == VideoSourceKind.UVC_SONY) {
+                            binding.usbAudioSource.visibility = View.VISIBLE
+                        } else {
+                            binding.usbAudioSource.visibility = View.GONE
+                            // Reset to default mic when switching away from UVC
+                            if (::streamService.isInitialized) {
+                                streamService.setAudioInputDevice(null)
+                                binding.usbAudioSource.setImageResource(R.drawable.ic_usb_audio)
+                            }
+                        }
+                    }
                 }
 
                 var sportFragmentFactory = SportsFactory.get(sport)
@@ -622,5 +660,110 @@ class StreamActivity : BaseActivity(),
         val minutes = (totalSeconds % 3600) / 60
         val seconds = totalSeconds % 60
         return String.format("%02d:%02d", minutes, seconds)
+    }
+
+    // --- AUDIO MONITOR ---
+
+    private fun onAudioMonitorToggleClicked() {
+        if (!::streamService.isInitialized) return
+
+        // If already enabled, just toggle off
+        if (streamService.audioMonitorEnabled.value) {
+            streamService.toggleAudioMonitor()
+            return
+        }
+
+        // Check available headphone devices
+        val headphones = streamService.getAvailableOutputDevices()
+
+        when {
+            headphones.isEmpty() -> {
+                toast("Nessuna cuffia connessa")
+            }
+            headphones.size == 1 -> {
+                // Single device: auto-select and enable
+                streamService.setMonitorOutputDevice(headphones[0])
+                streamService.toggleAudioMonitor()
+            }
+            else -> {
+                // Multiple devices: show selection dialog
+                showHeadphoneSelectionDialog(headphones)
+            }
+        }
+    }
+
+    private fun showHeadphoneSelectionDialog(devices: List<AudioDeviceInfo>) {
+        val names = devices.map { AudioDeviceManager.getDeviceDisplayName(it) }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Seleziona dispositivo audio")
+            .setItems(names) { dialog, which ->
+                streamService.setMonitorOutputDevice(devices[which])
+                streamService.toggleAudioMonitor()
+                dialog.dismiss()
+                hideSystemUI()
+            }
+            .setNegativeButton("Annulla") { dialog, _ ->
+                dialog.dismiss()
+                hideSystemUI()
+            }
+            .create()
+            .also { dlg ->
+                dlg.setOnShowListener { hideSystemUI() }
+                dlg.show()
+            }
+    }
+
+    // --- USB AUDIO SOURCE ---
+
+    private fun onUsbAudioSourceClicked() {
+        if (!::streamService.isInitialized) return
+
+        val currentDevice = streamService.getSelectedAudioInputDevice()
+
+        // If already using a USB device, toggle it off (reset to default mic)
+        if (currentDevice != null) {
+            streamService.setAudioInputDevice(null)
+            binding.usbAudioSource.setImageResource(R.drawable.ic_usb_audio)
+            return
+        }
+
+        // Check available USB audio input devices
+        val usbInputDevices = streamService.getAvailableInputDevices()
+
+        when {
+            usbInputDevices.isEmpty() -> {
+                toast("Nessun dispositivo audio USB trovato")
+            }
+            usbInputDevices.size == 1 -> {
+                streamService.setAudioInputDevice(usbInputDevices[0])
+                binding.usbAudioSource.setImageResource(R.drawable.ic_usb_audio_active)
+            }
+            else -> {
+                showUsbAudioSelectionDialog(usbInputDevices)
+            }
+        }
+    }
+
+    private fun showUsbAudioSelectionDialog(devices: List<AudioDeviceInfo>) {
+        val names = devices.map { AudioDeviceManager.getDeviceDisplayName(it) }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Seleziona sorgente audio USB")
+            .setItems(names) { dialog, which ->
+                streamService.setAudioInputDevice(devices[which])
+                binding.usbAudioSource.setImageResource(R.drawable.ic_usb_audio_active)
+                dialog.dismiss()
+                hideSystemUI()
+            }
+            .setNegativeButton("Annulla") { dialog, _ ->
+                dialog.dismiss()
+                hideSystemUI()
+            }
+            .create()
+            .also { dlg ->
+                dlg.setOnShowListener { hideSystemUI() }
+                dlg.show()
+            }
     }
 }

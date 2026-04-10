@@ -1,6 +1,7 @@
 package it.lmqv.livematchcam.services.stream
 
 import android.app.Activity
+import android.media.AudioDeviceInfo
 import android.view.SurfaceView
 import com.pedro.common.ConnectChecker
 import com.pedro.library.util.FpsListener
@@ -109,6 +110,33 @@ class StreamServiceProxy(val activityContext: Activity, val streamService: Strea
 
     override fun toggleMicrophoneAudio() : Boolean {
         return streamService.toggleMicrophoneAudio() == true
+    }
+
+    override fun toggleAudioMonitor(): Boolean {
+        return streamService.toggleAudioMonitor()
+    }
+
+    override fun setMonitorOutputDevice(device: AudioDeviceInfo?) {
+        streamService.setMonitorOutputDevice(device)
+    }
+
+    override fun getAvailableOutputDevices(): List<AudioDeviceInfo> {
+        return streamService.getAvailableOutputDevices()
+    }
+
+    override val audioMonitorEnabled
+        get() = streamService.audioMonitorEnabled
+
+    override fun getAvailableInputDevices(): List<AudioDeviceInfo> {
+        return streamService.getAvailableInputDevices()
+    }
+
+    override fun setAudioInputDevice(device: AudioDeviceInfo?) {
+        streamService.setAudioInputDevice(device)
+    }
+
+    override fun getSelectedAudioInputDevice(): AudioDeviceInfo? {
+        return streamService.getSelectedAudioInputDevice()
     }
 
     override fun setConnectCheckerCallback(connectChecker: ConnectChecker?) {

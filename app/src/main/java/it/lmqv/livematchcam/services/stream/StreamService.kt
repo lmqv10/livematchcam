@@ -5,8 +5,14 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import android.os.Binder
+import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Range
 import android.view.SurfaceView
 import androidx.core.app.NotificationCompat
@@ -33,6 +39,8 @@ import it.lmqv.livematchcam.preferences.ReplayPreferencesManager
 import it.lmqv.livematchcam.preferences.PerformancePreferencesManager
 import it.lmqv.livematchcam.repositories.StreamConfigurationRepository
 import it.lmqv.livematchcam.services.firebase.Quadruple
+import it.lmqv.livematchcam.services.stream.audio.AudioDeviceManager
+import it.lmqv.livematchcam.services.stream.audio.AudioMonitorEffect
 import it.lmqv.livematchcam.services.stream.filters.ReplayOverlayFilterRender
 import it.lmqv.livematchcam.services.stream.filters.ReplayVideoFilterRender
 import it.lmqv.livematchcam.services.stream.filters.IOverlayObjectFilterRender
@@ -41,7 +49,6 @@ import it.lmqv.livematchcam.services.replay.ReplayState
 import it.lmqv.livematchcam.services.replay.ReplayMetadata
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -93,6 +100,13 @@ class StreamService: Service(),
     private var videoStreamData : IVideoStreamData = CameraVideoStreamData()
     private var audioStreamData : IAudioStreamData = AudioStreamData()
     private var microphoneSource = MicrophoneSource()
+
+    // Audio monitoring (mic -> headphones)
+    private val audioMonitorEffect = AudioMonitorEffect()
+    private val _audioMonitorEnabled = MutableStateFlow(false)
+    val audioMonitorEnabled: StateFlow<Boolean> = _audioMonitorEnabled
+    private var selectedAudioInputDevice: AudioDeviceInfo? = null
+    private var audioDeviceCallback: AudioDeviceCallback? = null
 
     // Replay integration
     private lateinit var replayService: ReplayService
@@ -163,6 +177,8 @@ class StreamService: Service(),
         replayService.stopRecordAction = {
             if (genericStream.isRecording) {
                 genericStream.stopRecord()
+                // Library might stop audioSource. Restore it if needed.
+                ensureMicrophoneStartedForMonitor()
             }
         }
 
@@ -174,6 +190,12 @@ class StreamService: Service(),
             getStreamClient().resizeCache(200)
             setFpsListener(this@StreamService)
         }
+
+        // Attach the monitoring effect to the microphone pipeline
+        microphoneSource.setAudioEffect(audioMonitorEffect)
+
+        // Register audio device callback for disconnect handling
+        registerAudioDeviceCallback()
 
         this.streamConfigurationJob = streamServiceScope.launch {
             combine(
@@ -239,6 +261,9 @@ class StreamService: Service(),
         Logd("StreamService :: onDestroy")
 
         this.streamConfigurationJob.cancel()
+
+        audioMonitorEffect.release()
+        unregisterAudioDeviceCallback()
 
         this.stopStream()
         genericStream.release()
@@ -323,6 +348,122 @@ class StreamService: Service(),
         }
     }
 
+    // --- AUDIO MONITORING ---
+
+    fun toggleAudioMonitor(): Boolean {
+        val newState = !audioMonitorEffect.isEnabled()
+        if (newState) {
+            audioMonitorEffect.start(
+                sampleRate = audioStreamData.sampleRate,
+                isStereo = audioStreamData.isStereo
+            )
+        } else {
+            audioMonitorEffect.stop()
+        }
+        _audioMonitorEnabled.value = newState
+        Logd("StreamService :: toggleAudioMonitor -> $newState")
+
+        // In preview mode, the library doesn't start the microphone automatically.
+        // We need to manage the microphone lifecycle if the stream/record is not active.
+        if (newState) {
+            ensureMicrophoneStartedForMonitor()
+        } else {
+            ensureMicrophoneStoppedForMonitor()
+        }
+
+        return newState
+    }
+
+    private fun ensureMicrophoneStartedForMonitor() {
+        if (audioMonitorEnabled.value && !genericStream.isStreaming && !genericStream.isRecording && !microphoneSource.isRunning()) {
+            try {
+                val field = com.pedro.library.base.StreamBase::class.java.getDeclaredField("getMicrophoneData")
+                field.isAccessible = true
+                val realData = field.get(genericStream) as com.pedro.encoder.input.audio.GetMicrophoneData
+                microphoneSource.start(realData)
+                Logd("StreamService :: ensureMicrophoneStartedForMonitor -> Started manually")
+            } catch (e: Exception) {
+                Loge("StreamService :: Failed to start microphone manually for monitor: ${e.message}")
+            }
+        }
+    }
+
+    private fun ensureMicrophoneStoppedForMonitor() {
+        if (!audioMonitorEnabled.value && !genericStream.isStreaming && !genericStream.isRecording && microphoneSource.isRunning()) {
+            microphoneSource.stop()
+            Logd("StreamService :: ensureMicrophoneStoppedForMonitor -> Stopped manually")
+        }
+    }
+
+    fun setMonitorOutputDevice(device: AudioDeviceInfo?) {
+        audioMonitorEffect.setOutputDevice(device)
+    }
+
+    fun getAvailableOutputDevices(): List<AudioDeviceInfo> {
+        return AudioDeviceManager.getOutputHeadphones(baseContext)
+    }
+
+    // --- AUDIO INPUT DEVICE (USB/HDMI) ---
+
+    fun getAvailableInputDevices(): List<AudioDeviceInfo> {
+        return AudioDeviceManager.getUsbAudioInputDevices(baseContext)
+    }
+
+    fun setAudioInputDevice(device: AudioDeviceInfo?) {
+        selectedAudioInputDevice = device
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            microphoneSource.setPreferredDevice(device)
+        }
+        val name = if (device != null) AudioDeviceManager.getDeviceDisplayName(device) else "Default Mic"
+        Logd("StreamService :: setAudioInputDevice -> $name")
+        CoroutineScope(Dispatchers.Main).launch {
+            toast("Audio Input: $name")
+        }
+    }
+
+    fun getSelectedAudioInputDevice(): AudioDeviceInfo? {
+        return selectedAudioInputDevice
+    }
+
+    // --- AUDIO DEVICE CALLBACK ---
+
+    private fun registerAudioDeviceCallback() {
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        audioDeviceCallback = object : AudioDeviceCallback() {
+            override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo>) {
+                // If monitoring headphones were disconnected, stop monitoring
+                if (audioMonitorEffect.isEnabled()) {
+                    val headphones = AudioDeviceManager.getOutputHeadphones(baseContext)
+                    if (headphones.isEmpty()) {
+                        audioMonitorEffect.stop()
+                        _audioMonitorEnabled.value = false
+                        CoroutineScope(Dispatchers.Main).launch {
+                            toast("Cuffie disconnesse - Monitor disattivato")
+                        }
+                    }
+                }
+                // If selected USB audio input was removed, reset to default
+                if (selectedAudioInputDevice != null) {
+                    val stillConnected = AudioDeviceManager.getUsbAudioInputDevices(baseContext)
+                        .any { it.id == selectedAudioInputDevice?.id }
+                    if (!stillConnected) {
+                        setAudioInputDevice(null)
+                        CoroutineScope(Dispatchers.Main).launch {
+                            toast("Dispositivo USB audio disconnesso")
+                        }
+                    }
+                }
+            }
+        }
+        audioManager.registerAudioDeviceCallback(audioDeviceCallback, Handler(Looper.getMainLooper()))
+    }
+
+    private fun unregisterAudioDeviceCallback() {
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        audioDeviceCallback?.let { audioManager.unregisterAudioDeviceCallback(it) }
+        audioDeviceCallback = null
+    }
+
     fun isOnPreview(): Boolean {
         return genericStream.isOnPreview
     }
@@ -353,6 +494,9 @@ class StreamService: Service(),
             replayService.stopRollingRecording()
             genericStream.stopStream()
             notificationManager?.cancel(NOTIFY_ID)
+            
+            // Library eagerly stops audioSource. Restore it if needed.
+            ensureMicrophoneStartedForMonitor()
         }
     }
 
@@ -441,11 +585,13 @@ class StreamService: Service(),
                 this.prepare()
                 this.prepareFilters()
                 genericStream.startPreview(this.surfaceView, true)
+                ensureMicrophoneStartedForMonitor()
             } else {
                 // Logd("StreamService :: preparePreview - restart Preview while streaming")
                 this.stopPreview()
                 this.prepareFilters()
                 genericStream.startPreview(this.surfaceView, true)
+                ensureMicrophoneStartedForMonitor()
             }
             //Logd("StreamService :: preparePreview - end")
         }

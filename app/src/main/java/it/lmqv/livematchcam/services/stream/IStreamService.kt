@@ -1,5 +1,6 @@
 package it.lmqv.livematchcam.services.stream
 
+import android.media.AudioDeviceInfo
 import android.util.Range
 import android.view.SurfaceView
 import com.pedro.common.ConnectChecker
@@ -34,6 +35,17 @@ interface IStreamService {
     fun stopStreamWithConfirm(onConfirm: () -> Unit)
 
     fun toggleMicrophoneAudio(): Boolean
+
+    // Audio Monitor (mic -> headphones)
+    fun toggleAudioMonitor(): Boolean
+    fun setMonitorOutputDevice(device: AudioDeviceInfo?)
+    fun getAvailableOutputDevices(): List<AudioDeviceInfo>
+    val audioMonitorEnabled: StateFlow<Boolean>
+
+    // Audio Input Device (USB/HDMI source)
+    fun getAvailableInputDevices(): List<AudioDeviceInfo>
+    fun setAudioInputDevice(device: AudioDeviceInfo?)
+    fun getSelectedAudioInputDevice(): AudioDeviceInfo?
 
     fun setConnectCheckerCallback(connectChecker: ConnectChecker?)
     fun setFpsListenerCallback(fpsListenerCallback: FpsListener.Callback?)
