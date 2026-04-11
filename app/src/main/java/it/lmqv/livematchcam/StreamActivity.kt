@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlin.getValue
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import it.lmqv.livematchcam.dialogs.SelectionDialog
 
 
 class StreamActivity : BaseActivity(),
@@ -295,9 +296,9 @@ class StreamActivity : BaseActivity(),
                     launchOnResumed {
                         streamService.audioMonitorEnabled.collectLatest { enabled ->
                             if (enabled) {
-                                binding.audioMonitorToggle.setImageResource(R.drawable.ic_headphones_on)
+                                binding.audioMonitorToggle.setImageResource(R.drawable.ic_volume_on)
                             } else {
-                                binding.audioMonitorToggle.setImageResource(R.drawable.ic_headphones_off)
+                                binding.audioMonitorToggle.setImageResource(R.drawable.ic_volume_off)
                             }
                         }
                     }
@@ -678,7 +679,7 @@ class StreamActivity : BaseActivity(),
 
         when {
             headphones.isEmpty() -> {
-                toast("Nessuna cuffia connessa")
+                toast(getString(R.string.no_headphones_connected))
             }
             headphones.size == 1 -> {
                 // Single device: auto-select and enable
@@ -693,25 +694,18 @@ class StreamActivity : BaseActivity(),
     }
 
     private fun showHeadphoneSelectionDialog(devices: List<AudioDeviceInfo>) {
-        val names = devices.map { AudioDeviceManager.getDeviceDisplayName(it) }.toTypedArray()
-
-        AlertDialog.Builder(this)
-            .setTitle("Seleziona dispositivo audio")
-            .setItems(names) { dialog, which ->
-                streamService.setMonitorOutputDevice(devices[which])
+        SelectionDialog<AudioDeviceInfo>(
+            context = this,
+            titleResId = R.string.audio_monitor_selection_title,
+            items = devices,
+            labelProvider = { device: AudioDeviceInfo -> AudioDeviceManager.getDeviceDisplayName(device) },
+            onSelected = { selectedDevice: AudioDeviceInfo ->
+                streamService.setMonitorOutputDevice(selectedDevice)
                 streamService.toggleAudioMonitor()
-                dialog.dismiss()
                 hideSystemUI()
-            }
-            .setNegativeButton("Annulla") { dialog, _ ->
-                dialog.dismiss()
-                hideSystemUI()
-            }
-            .create()
-            .also { dlg ->
-                dlg.setOnShowListener { hideSystemUI() }
-                dlg.show()
-            }
+            },
+            onCancel = { hideSystemUI() }
+        ).show()
     }
 
     // --- USB AUDIO SOURCE ---
@@ -733,7 +727,7 @@ class StreamActivity : BaseActivity(),
 
         when {
             usbInputDevices.isEmpty() -> {
-                toast("Nessun dispositivo audio USB trovato")
+                toast(getString(R.string.no_usb_audio_found))
             }
             usbInputDevices.size == 1 -> {
                 streamService.setAudioInputDevice(usbInputDevices[0])
@@ -746,24 +740,17 @@ class StreamActivity : BaseActivity(),
     }
 
     private fun showUsbAudioSelectionDialog(devices: List<AudioDeviceInfo>) {
-        val names = devices.map { AudioDeviceManager.getDeviceDisplayName(it) }.toTypedArray()
-
-        AlertDialog.Builder(this)
-            .setTitle("Seleziona sorgente audio USB")
-            .setItems(names) { dialog, which ->
-                streamService.setAudioInputDevice(devices[which])
+        SelectionDialog<AudioDeviceInfo>(
+            context = this,
+            titleResId = R.string.usb_audio_selection_title,
+            items = devices,
+            labelProvider = { device: AudioDeviceInfo -> AudioDeviceManager.getDeviceDisplayName(device) },
+            onSelected = { selectedDevice: AudioDeviceInfo ->
+                streamService.setAudioInputDevice(selectedDevice)
                 binding.usbAudioSource.setImageResource(R.drawable.ic_usb_audio_active)
-                dialog.dismiss()
                 hideSystemUI()
-            }
-            .setNegativeButton("Annulla") { dialog, _ ->
-                dialog.dismiss()
-                hideSystemUI()
-            }
-            .create()
-            .also { dlg ->
-                dlg.setOnShowListener { hideSystemUI() }
-                dlg.show()
-            }
+            },
+            onCancel = { hideSystemUI() }
+        ).show()
     }
 }

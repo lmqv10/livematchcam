@@ -9,11 +9,11 @@
     <string name="display">Screen</string>
     <string name="live_stream">Choose Stream Key</string>
     <string name="tv_select">Select your streamer</string>
-    <string name="hint_match_league">Serie C - Girone A</string>
-    <string name="hint_home_team">AAA</string>
-    <string name="hint_title">ddddd - dd mmmm yyyy - Ore: hh:mm</string>
-    <string name="hint_match_date">dd mmmm yyyy - hh:mm</string>
-    <string name="hint_away_team">BBB</string>
+    <string name="hint_match_league">League - Group</string>
+    <string name="hint_home_team">Team A</string>
+    <string name="hint_title">Title - Date - Time</string>
+    <string name="hint_match_date">Date - Time</string>
+    <string name="hint_away_team">Team B</string>
     <string name="hint_protocol">rtmp://yourendpoint/…</string>
     <string name="hint_live">https://youtube.com/live/xxxxxxxxxxx</string>
     <string name="hint_key">xxxx-xxxx-xxxx-xxxx-xxxx</string>
@@ -30,7 +30,7 @@
     <string name="rtmp_server">RTMP</string>
     <string name="firebase_match">Stream</string>
     <string name="schedule_match">Schedule Match</string>
-    <string name="no_schedule_match">No Schedules Match Available</string>
+    <string name="no_schedule_match">No Scheduled Matches Available</string>
     <string name="update_match_succeeded">Match data updated</string>
     <string name="server">Server</string>
     <string name="firebase_custom">Firebase</string>
@@ -69,7 +69,7 @@
     <string name="notification_text">Streaming service is running</string>
 
     <!-- Performance Toggles -->
-    <string name="performance_header">Performance \u0026 UI Toggles</string>
+    <string name="performance_header">Performance \amp; UI Toggles</string>
     <string name="enable_replay_key">enable_replay</string>
     <string name="enable_replay_title">Enable Live Replay</string>
     <string name="enable_replay_summary_on">Recording background chunks and showing UI</string>
@@ -104,14 +104,14 @@
     <string name="streamin_time">00:00:00</string>
 
     <string name="sport_soccer">Soccer</string>
-    <string name="sport_basket">Basket</string>
-    <string name="sport_volley">Volley</string>
+    <string name="sport_basket">Basketball</string>
+    <string name="sport_volley">Volleyball</string>
     <!--filters-->
-    <string name="grey_scale">Grey scale</string>
+    <string name="grey_scale">Grayscale</string>
     <string name="negative">Negative</string>
     <string name="noise">Noise</string>
     <string name="sepia">Sepia</string>
-    <string name="no_filter">No filter</string>
+    <string name="no_filter">No Filter</string>
     <string name="analog_tv">Analog TV</string>
     <string name="android_view">Android view</string>
     <string name="basic_deformation">Basic deformation</string>
@@ -177,7 +177,7 @@
     <string name="label_datetime">Date</string>
     <string name="date_placeholder">01/01/2025 10:00</string>
     <string name="time_placeholder">00:00</string>
-    <string name="period_placeholder">1T</string>
+    <string name="period_placeholder">1P</string>
     <string name="quarter_placeholder">1Q</string>
     <string name="score_placeholder">0</string>
     <string name="long_score_placeholder">100</string>
@@ -225,8 +225,6 @@
     <string name="logged_in">Authenticated as %1s</string>
     <string name="logged_out">User not authenticated</string>
 
-
-    <string name="permission_tip" translatable="false">You have already denied permission access. Go to the Settings page to turn on permissions</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles -->
@@ -236,53 +234,33 @@
     <string name="notifications_header">Camera Preferences</string>
 
     <!-- Messages Preferences -->
-<!--    <string name="signature_title">Your signature</string>-->
-    <string name="video_settings_screen_key">video_settings_screen</string>
     <string name="video_settings_screen_title">Camera Preferences</string>
     <string name="video_settings_screen_summary">Configure notifications and Camera Preferences</string>
 
-    <string name="video_overlay_screen_key">video_ovelray_screen</string>
     <string name="video_overlay_screen_title">Filters</string>
     <string name="video_overlay_screen_summary">Configure scoreboard and banners sizes</string>
 
-    <!-- Sync Preferences -->
-<!--    <string name="sync_title">Sync email periodically</string>-->
-<!--    <string name="attachment_title">Download incoming attachments</string>-->
-<!--    <string name="attachment_summary_on">Automatically download attachments for incoming emails</string>-->
-<!--    <string name="attachment_summary_off">Only download attachments when manually requested</string>-->
-
     <!-- Camera Preferences -->
-    <string name="camera_status_notifications_key">camera_status_notifications</string>
     <string name="camera_status_notifications_title">Status notifications</string>
     <string name="camera_status_notifications_on">Show toast notifications on camera status</string>
     <string name="camera_status_notifications_off">Hide toast notifications on camera status</string>
 
-<!--    <string name="camera_auto_focus_key">auto_focus</string>-->
-<!--    <string name="camera_auto_focus_title">Autofocus Continuous</string>-->
-<!--    <string name="camera_auto_focus_on">Enabled</string>-->
-<!--    <string name="camera_auto_focus_off">Disabled</string>-->
-
-    <string name="camera_video_stabilization_key">video_stabilization</string>
     <string name="camera_video_stabilization_title">Video Stabilization</string>
     <string name="camera_video_stabilization_on">Enabled</string>
     <string name="camera_video_stabilization_off">Disabled</string>
 
-    <string name="camera_optical_video_stabilization_key">optical_video_stabilization</string>
     <string name="camera_optical_video_stabilization_title">Optical Video Stabilization</string>
     <string name="camera_optical_video_stabilization_on">Enabled</string>
     <string name="camera_optical_video_stabilization_off">Disabled</string>
 
-    <string name="camera_lock_af_key">lock_auto_focus</string>
     <string name="camera_lock_af_title">Lock Autofocus</string>
     <string name="camera_lock_af_on">Autofocus continuous will be auto disabled on start streaming</string>
     <string name="camera_lock_af_off">No action on autofocus continuous on start streaming</string>
 
     <!-- Replay Preferences -->
     <string name="replay_header">Replay</string>
-    <string name="replay_duration_key">replay_duration</string>
     <string name="replay_duration_title">Replay Buffer Duration</string>
     <string name="replay_duration_summary">Duration of the rolling video buffer for replays</string>
-    <string name="replay_quick_duration_key">replay_quick_duration</string>
     <string name="replay_quick_duration_title">Quick Replay Duration</string>
     <string name="replay_quick_duration_summary">Duration to go back when doing a Quick Replay</string>
 
@@ -293,14 +271,6 @@
         <item>30 Seconds</item>
     </string-array>
     
-    <string-array name="replay_duration_values">
-        <item>15</item>
-        <item>20</item>
-        <item>25</item>
-        <item>30</item>
-    </string-array>
-
-    <string name="replay_speed_key">replay_speed</string>
     <string name="replay_speed_title">Default Replay Speed</string>
     <string name="replay_speed_summary">Default playback speed for video replays</string>
 
@@ -310,16 +280,6 @@
         <item>0.75x</item>
         <item>1.0x (Normal)</item>
     </string-array>
-
-    <string-array name="replay_speed_values">
-        <item>0.25</item>
-        <item>0.5</item>
-        <item>0.75</item>
-        <item>1.0</item>
-    </string-array>
-
-
-    <!-- /Camera Preferences -->
 
     <string name="youtube">YouTube</string>
     <string name="youtube_stream">Next Matches</string>
@@ -336,24 +296,22 @@
 
     <string name="warning_schedule_start_time">Cannot schedule event in the past!\nPlease check the date and time!</string>
 
-    <!-- Testo del bottone YouTube -->
-    <string name="yt_button_label">Connetti con YouTube</string>
-    <string name="yt_button_label_disconnect">Disconnetti da YouTube</string>
-    <string name="yt_button_label_en">Connect with YouTube</string>
-    <string name="yt_button_label_disconnect_en">Disconnect from YouTube</string>
-    <string name="yt_button_connecting">Connessione in corso…</string>
+    <!-- YouTube Button Text -->
+    <string name="yt_button_label">Connect with YouTube</string>
+    <string name="yt_button_label_disconnect">Disconnect from YouTube</string>
+    <string name="yt_button_connecting">Connecting…</string>
 
     <!-- Accessibility -->
     <string name="google_logo_desc">Google</string>
-    <string name="yt_button_content_desc">Accedi con il tuo account Google per connettere YouTube</string>
+    <string name="yt_button_content_desc">Sign in with your Google account to connect YouTube</string>
 
     <!-- Audio Monitoring & USB Audio -->
-    <string name="audio_monitor_selection_title">Seleziona dispositivo audio</string>
-    <string name="usb_audio_selection_title">Seleziona sorgente audio USB</string>
-    <string name="no_headphones_connected">Nessuna cuffia connessa</string>
-    <string name="no_usb_audio_found">Nessun dispositivo audio USB trovato</string>
-    <string name="headphones_disconnected_monitor_off">Cuffie disconnesse - Monitor disattivato</string>
+    <string name="audio_monitor_selection_title">Select Audio Device</string>
+    <string name="usb_audio_selection_title">Select USB Audio Source</string>
+    <string name="no_headphones_connected">No headphones connected</string>
+    <string name="no_usb_audio_found">No USB audio device found</string>
+    <string name="headphones_disconnected_monitor_off">Headphones disconnected - Monitor disabled</string>
     <string name="audio_input_selected">Audio Input: %1$s</string>
-    <string name="usb_audio_disconnected">Dispositivo USB audio disconnesso</string>
-    <string name="cancel_action">Annulla</string>
+    <string name="usb_audio_disconnected">USB audio device disconnected</string>
+    <string name="cancel_action">Cancel</string>
 </resources>

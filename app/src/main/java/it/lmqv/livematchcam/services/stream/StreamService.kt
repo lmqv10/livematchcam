@@ -417,7 +417,7 @@ class StreamService: Service(),
         val name = if (device != null) AudioDeviceManager.getDeviceDisplayName(device) else "Default Mic"
         Logd("StreamService :: setAudioInputDevice -> $name")
         CoroutineScope(Dispatchers.Main).launch {
-            toast("Audio Input: $name")
+            toast(baseContext.getString(R.string.audio_input_selected, name))
         }
     }
 
@@ -438,7 +438,7 @@ class StreamService: Service(),
                         audioMonitorEffect.stop()
                         _audioMonitorEnabled.value = false
                         CoroutineScope(Dispatchers.Main).launch {
-                            toast("Cuffie disconnesse - Monitor disattivato")
+                            toast(baseContext.getString(R.string.headphones_disconnected_monitor_off))
                         }
                     }
                 }
@@ -449,7 +449,7 @@ class StreamService: Service(),
                     if (!stillConnected) {
                         setAudioInputDevice(null)
                         CoroutineScope(Dispatchers.Main).launch {
-                            toast("Dispositivo USB audio disconnesso")
+                            toast(baseContext.getString(R.string.usb_audio_disconnected))
                         }
                     }
                 }
