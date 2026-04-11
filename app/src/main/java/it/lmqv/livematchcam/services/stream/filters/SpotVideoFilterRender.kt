@@ -11,12 +11,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-/**
- * A specialized SurfaceFilterRender for displaying replay video (or any other video content)
- * as an overlay on top of the live stream.
- */
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-class ReplayVideoFilterRender(
+class SpotVideoFilterRender(
     surfaceReadyCallback: SurfaceReadyCallback? = null
 ) : SurfaceFilterRender(surfaceReadyCallback) {
 
@@ -33,13 +29,13 @@ class ReplayVideoFilterRender(
             try {
                 GLES20.glClearColor(0f, 0f, 0f, 1f)
                 GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-                Loge("ReplayVideoFilterRender :: clear surface DONE")
+                Loge("SpotVideoFilterRender :: clear surface DONE")
 //                val canvas = s.lockCanvas(null)
 //                canvas.drawColor(Color.BLACK)
 //                s.unlockCanvasAndPost(canvas)
             } catch (e: Exception) {
                 e.printStackTrace()
-                Loge("ReplayVideoFilterRender :: Failed to clear surface: ${e.message}")
+                Loge("SpotVideoFilterRender :: Failed to clear surface: ${e.message}")
             }
         //}
 

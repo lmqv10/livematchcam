@@ -41,8 +41,7 @@ import it.lmqv.livematchcam.repositories.StreamConfigurationRepository
 import it.lmqv.livematchcam.services.firebase.Quadruple
 import it.lmqv.livematchcam.services.stream.audio.AudioDeviceManager
 import it.lmqv.livematchcam.services.stream.audio.AudioMonitorEffect
-import it.lmqv.livematchcam.services.stream.filters.ReplayOverlayFilterRender
-import it.lmqv.livematchcam.services.stream.filters.ReplayVideoFilterRender
+import it.lmqv.livematchcam.services.stream.filters.ReplayUnifiedFilterRender
 import it.lmqv.livematchcam.services.stream.filters.IOverlayObjectFilterRender
 import it.lmqv.livematchcam.services.replay.ReplayService
 import it.lmqv.livematchcam.services.replay.ReplayState
@@ -110,8 +109,7 @@ class StreamService: Service(),
 
     // Replay integration
     private lateinit var replayService: ReplayService
-    private var replayOverlayFilterRender: ReplayOverlayFilterRender? = null
-    private var replayVideoFilterRender: ReplayVideoFilterRender? = null
+    private var replayUnifiedFilterRender: ReplayUnifiedFilterRender? = null
     private var replayMediaPlayer: MediaPlayer? = null
     private var currentScoreboardFilter: IOverlayObjectFilterRender? = null
 
@@ -679,16 +677,11 @@ class StreamService: Service(),
 
             if (performancePrefs.isReplayEnabled()) {
                 // Add Replay Video Filter (invisible by default)
-                replayVideoFilterRender = ReplayVideoFilterRender()
-                replayVideoFilterRender?.let {
-                    it.setFullScreen()
-                    addFilter(it)
-                }
-
-                // Add Replay Overlay (invisible by default)
-                replayOverlayFilterRender = ReplayOverlayFilterRender(applicationContext)
-                replayOverlayFilterRender?.let {
+                // Add Unified Replay Filter (includes video surface and label)
+                replayUnifiedFilterRender = ReplayUnifiedFilterRender()
+                replayUnifiedFilterRender?.let {
                     it.setVideoStreamData(videoStreamData)
+                    it.setFullScreen()
                     addFilter(it)
                 }
             } else {
@@ -734,9 +727,9 @@ class StreamService: Service(),
         // 1. Stop recording FIRST to avoid conflicts (rolling chunks)
         replayService.startReplay()
 
-        // 2. Hide scoreboard and show Replay Badge level
+        // 2. Hide scoreboard and ensure replay filter is ready
         //currentScoreboardFilter?.hide()
-        replayOverlayFilterRender?.hide()
+        replayUnifiedFilterRender?.hide()
 
         // 3. Initialize MediaPlayer for Overlay
         try {
@@ -746,7 +739,7 @@ class StreamService: Service(),
             if (mergedFile.exists()) {
                 replayMediaPlayer = MediaPlayer().apply {
                     setDataSource(applicationContext, Uri.fromFile(File(metadata.filePath)))
-                    replayVideoFilterRender?.surface?.let { setSurface(it) }
+                    replayUnifiedFilterRender?.surface?.let { setSurface(it) }
                     isLooping = false
                     setOnCompletionListener {
                         Logd("StreamService :: Replay MediaPlayer finished")
@@ -759,7 +752,6 @@ class StreamService: Service(),
                             currentScoreboardFilter?.hide()
 
                             animateReplayAlpha(1.0f, 250)
-                            replayOverlayFilterRender?.show()
                             true
                         } else false
                     }
@@ -799,7 +791,7 @@ class StreamService: Service(),
     private fun animateReplayAlpha(target: Float, durationMs: Long) {
         fadeJob?.cancel()
         fadeJob = streamServiceScope.launch {
-            val startAlpha = replayVideoFilterRender?.getCurrentAlpha() ?: 0f
+            val startAlpha = replayUnifiedFilterRender?.getCurrentAlpha() ?: 0f
             val steps = 20
             val stepDuration = durationMs / steps
             val alphaDelta = (target - startAlpha) / steps
@@ -807,10 +799,10 @@ class StreamService: Service(),
             for (i in 1..steps) {
                 if (!isActive) break
                 val newAlpha = startAlpha + (alphaDelta * i)
-                replayVideoFilterRender?.updateAlpha(newAlpha)
+                replayUnifiedFilterRender?.updateAlpha(newAlpha)
                 delay(stepDuration)
             }
-            replayVideoFilterRender?.updateAlpha(target)
+            replayUnifiedFilterRender?.updateAlpha(target)
         }
     }
 
@@ -818,7 +810,7 @@ class StreamService: Service(),
         replayMediaPlayer?.stop()
         replayMediaPlayer?.release()
         replayMediaPlayer = null
-        replayVideoFilterRender?.hide()
+        replayUnifiedFilterRender?.hide()
     }
 
     fun setReplaySpeed(speed: Float) {
@@ -859,7 +851,7 @@ class StreamService: Service(),
                 
                 // 3. Restore scoreboard visibility and hide Replay badge
                 currentScoreboardFilter?.show()
-                replayOverlayFilterRender?.setVisible(false)
+                replayUnifiedFilterRender?.hide()
 
                 // 4. Inform service
                 replayService.stopReplay()
