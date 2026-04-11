@@ -774,6 +774,7 @@ class StreamService: Service(),
 
                     // 4. Start playback
                     start()
+                    setVolume(0f, 0f)
                     if (currentReplaySpeed > 0f) {
                         playbackParams = getPlaybackParams().setSpeed(currentReplaySpeed)
                     }
