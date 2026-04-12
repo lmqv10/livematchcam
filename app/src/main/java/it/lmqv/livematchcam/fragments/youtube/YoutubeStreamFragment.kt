@@ -123,7 +123,8 @@ class YoutubeStreamFragment : Fragment() {
             schedulesPrefs.currentKeyScheduleData.collect { currentSchedule ->
                 try {
                     val schedule = currentSchedule.value
-                    dateTimePickerDialog.setDate(schedule.scheduleStartTime)
+                    //dateTimePickerDialog.setDate(schedule.scheduleStartTime)
+                    dateTimePickerDialog.setDate(minOf(ZonedDateTime.now(schedule.scheduleStartTime.zone), schedule.scheduleStartTime))
 
                     var thumbnailAssets = schedule.toThumbnailAsset(requireContext())
                     val thumbnail = requireContext().createThumbnail(thumbnailAssets)
