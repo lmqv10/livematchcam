@@ -2,7 +2,6 @@
 App
 ========
 Preview Banner in Controllo remoto.
-Audio Spia (girare audio su cuffie)
 Login Youtube attivo SOLO per admin.
 
 

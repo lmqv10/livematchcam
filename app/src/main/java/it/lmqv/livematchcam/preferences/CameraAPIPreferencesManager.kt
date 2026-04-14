@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.os.SystemClock;
+import android.view.SurfaceView
 
 class CameraAPIPreferencesManager(
     private val context : Context)
@@ -28,6 +29,7 @@ class CameraAPIPreferencesManager(
     private var hasNotifications: Boolean = false
 
     private var videoSource: VideoSource? = null
+    private var surfaceView: SurfaceView? = null
     private var sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     private val preferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
@@ -50,6 +52,10 @@ class CameraAPIPreferencesManager(
                 }
             }
         }
+    }
+
+    fun setSurfaceView(surfaceView: SurfaceView) {
+        this.surfaceView = surfaceView
     }
 
     private fun handlePreferenceKey(key: String) {
@@ -106,11 +112,12 @@ class CameraAPIPreferencesManager(
                     KEY_LOCK_AUTO_FOCUS -> {
                         keyTitle = context.getString(R.string.camera_lock_af_title)
                         var isEnabled = sharedPreferences.getBoolean(key, false)
-                        if (isEnabled) {
+
+                        if (isEnabled && this.surfaceView != null) {
                             val motionEvent = MotionEvent.obtain(
                                 SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
                                 MotionEvent.ACTION_DOWN, it.width / 2f, it.height / 2f, 0)
-                            it.tapToFocus(motionEvent)
+                            it.tapToFocus(this.surfaceView!!, motionEvent)
                             motionEvent.recycle()
                         }
                         status = isEnabled

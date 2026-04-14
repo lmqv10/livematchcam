@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.safeargs.kotlin)
     id("kotlin-parcelize")
@@ -17,7 +16,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 27
         versionCode = 1
-        versionName = "4.9.2"
+        versionName = "4.9.3"
         manifestPlaceholders["appAuthRedirectScheme"] = "it.lmqv.livematchcam"
     }
 
@@ -31,19 +30,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
         buildConfig = true
         viewBinding = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
     packaging {
         resources {
@@ -65,6 +58,7 @@ android {
                 "lib/arm64-v8a/libUVCCamera.so",
                 "lib/arm64-v8a/libuvc.so"
             )
+            keepDebugSymbols += setOf("**/*.so")
         }
     }
     viewBinding {
@@ -77,7 +71,6 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.multidex)
     implementation(libs.androidx.core.ktx)
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
@@ -122,10 +115,9 @@ dependencies {
 
     // Importa coroutines-play-services per avere a disposizione .await()
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
-    implementation(libs.compose.ui)
-    implementation(libs.compose.material)
-    implementation(libs.compose.ui.tooling.preview)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.androidx.preference)
     //implementation(libs.compose.compiler)

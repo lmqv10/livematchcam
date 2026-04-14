@@ -5,6 +5,7 @@ import android.hardware.usb.UsbDevice
 import android.view.Surface
 import com.herohan.uvcapp.CameraHelper
 import com.herohan.uvcapp.ICameraHelper
+import com.pedro.encoder.input.sources.OrientationConfig
 import com.pedro.encoder.input.sources.OrientationForced
 import com.pedro.encoder.input.sources.video.VideoSource
 import com.serenegiant.usb.Size
@@ -44,7 +45,7 @@ class UvcSonyCameraSource: VideoSource() {
 
     override fun isRunning(): Boolean = running
 
-    override fun getOrientationConfig(): OrientationForced = OrientationForced.LANDSCAPE
+    override fun getOrientationConfig(): OrientationConfig = OrientationConfig(isPortrait = false, forced = OrientationForced.LANDSCAPE)
 
     fun getCameraResolutions() : List<Size>{
         return cameraHelper?.supportedSizeList?.toMutableList() ?: listOf()

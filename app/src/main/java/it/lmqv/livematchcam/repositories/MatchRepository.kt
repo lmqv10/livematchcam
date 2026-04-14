@@ -350,9 +350,9 @@ object MatchRepository : SyncDataListenerContract {
             Loge("$instanceId :: MatchRepository::Exception::notifyScoreboardUpdated:: ${e.message.toString()}")
         }
     }
-    override fun onChangeFilters(updatedfilters: List<FilterOverlayEvent>) {
-        //Logd("$instanceId :: MatchRepository::onChangeFilters:: $updatedfilters")
-        this.notifyFilterEventsUpdated(updatedfilters)
+    override fun onChangeFilters(filters: List<FilterOverlayEvent>) {
+        //Logd("$instanceId :: MatchRepository::onChangeFilters:: $filters")
+        this.notifyFilterEventsUpdated(filters)
     }
     @Synchronized
     private fun notifyFilterEventsUpdated(updatedfilters: List<FilterOverlayEvent>) {

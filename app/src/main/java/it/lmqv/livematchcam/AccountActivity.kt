@@ -43,8 +43,8 @@ class AccountActivity : BaseActivity() {
          lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 MatchRepository.firebaseAccountData.collectLatest { firebaseAccountData ->
-                    var settings = firebaseAccountData.settings
-                    var transaction =  supportFragmentManager.beginTransaction()
+                    val settings = firebaseAccountData.settings
+                    val transaction =  supportFragmentManager.beginTransaction()
                     if (settings.youTubeEnabled && firebaseAccountData.guid.isNotEmpty()) {
                         transaction.show(youtubeAccountFragment)
                     } else {

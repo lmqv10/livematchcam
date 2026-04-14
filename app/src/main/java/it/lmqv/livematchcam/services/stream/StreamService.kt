@@ -566,6 +566,8 @@ class StreamService: Service(),
     fun initPreview(surfaceView: SurfaceView, sport: Sports)
     {
         this.surfaceView = surfaceView
+        this.cameraAPIPreferencesManager.setSurfaceView(this.surfaceView)
+
         this.sport = sport
         preparePreview()
     }

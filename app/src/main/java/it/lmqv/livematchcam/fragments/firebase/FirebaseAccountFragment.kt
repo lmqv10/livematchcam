@@ -117,7 +117,7 @@ class FirebaseAccountFragment : Fragment() {
                         binding.btnLogout.visibility = View.VISIBLE
 
                         val resIcon = R.drawable.cloud_check
-                        TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.accountKey, resIcon, 0, 0, 0)
+                        binding.accountKey.setCompoundDrawablesRelativeWithIntrinsicBounds(resIcon, 0, 0, 0)
                     } else {
                         // Unauthenticated UI state
                         binding.accountName.isEnabled = true
@@ -126,7 +126,7 @@ class FirebaseAccountFragment : Fragment() {
                         binding.btnLogout.visibility = View.GONE
 
                         val resIcon = R.drawable.cloud_cross
-                        TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.accountKey, resIcon, 0, 0, 0)
+                        binding.accountKey.setCompoundDrawablesRelativeWithIntrinsicBounds(resIcon, 0, 0, 0)
                     }
                 }
         }
