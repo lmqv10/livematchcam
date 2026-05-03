@@ -68,10 +68,7 @@ class StreamService: Service(),
     ConnectChecker,
     FpsListener.Callback {
 
-    companion object {
-        private const val CHANNEL_ID = "StreamServiceChannel"
-        const val NOTIFY_ID = 230175
-    }
+    // companion object merged into SafeModeConfig above
 
     inner class LocalBinder : Binder() {
         val service: StreamService get() = this@StreamService
@@ -86,6 +83,31 @@ class StreamService: Service(),
 
     private val _videoCaptureFormats = MutableStateFlow<List<VideoCaptureFormat>>(listOf())
     val videoCaptureFormats: StateFlow<List<VideoCaptureFormat>> = _videoCaptureFormats
+
+    private val _streamPerformance = MutableStateFlow(StreamPerformanceData())
+    val streamPerformance: StateFlow<StreamPerformanceData> = _streamPerformance
+    private var lastKnownBitrate: Long = 0
+    private var previousDroppedFrames: Long = 0
+    private var consecutiveRedSeconds: Int = 0
+    private var consecutiveGreenSeconds: Int = 0
+    private var autoRestoreCount: Int = 0
+
+    // Safe Mode
+    companion object {
+        private const val CHANNEL_ID = "StreamServiceChannel"
+        const val NOTIFY_ID = 230175
+        const val SAFE_WIDTH = 854
+        const val SAFE_HEIGHT = 480
+        const val SAFE_FPS = 30
+        const val SAFE_BITRATE = 1_000_000 // 1 Mbps
+        const val SAFE_KEYFRAME = 2
+    }
+    private var safeModeActive = false
+    private var savedWidth: Int = 0
+    private var savedHeight: Int = 0
+    private var savedFps: Int = 0
+    private var savedBitrate: Int = 0
+    private var currentEndpoint: String? = null
 
     private lateinit var genericStream: GenericStream
     private lateinit var streamConfigurationRepository: StreamConfigurationRepository
@@ -289,6 +311,7 @@ class StreamService: Service(),
 
     override fun onNewBitrate(bitrate: Long) {
         bitrateAdapter.adaptBitrate(bitrate, genericStream.getStreamClient().hasCongestion())
+        lastKnownBitrate = bitrate
         this.connectCheckerCallback?.onNewBitrate(bitrate)
     }
 
@@ -479,6 +502,7 @@ class StreamService: Service(),
             return
         }
         if (!genericStream.isStreaming) {
+            currentEndpoint = endpoint
             Logd("StreamService :: startStream :: $endpoint")
             genericStream.startStream(endpoint)
             if (performancePrefs.isReplayEnabled()) {
@@ -492,9 +516,108 @@ class StreamService: Service(),
             replayService.stopRollingRecording()
             genericStream.stopStream()
             notificationManager?.cancel(NOTIFY_ID)
-            
+
             // Library eagerly stops audioSource. Restore it if needed.
             ensureMicrophoneStartedForMonitor()
+        }
+        // Reset safe mode on full stop
+        if (safeModeActive) {
+            restoreOriginalParams()
+            safeModeActive = false
+        }
+        currentEndpoint = null
+    }
+
+    // --- SAFE MODE ---
+
+    fun isSafeModeActive(): Boolean = safeModeActive
+
+    fun enableSafeMode() {
+        if (safeModeActive) return
+        val endpoint = currentEndpoint ?: return
+        if (!genericStream.isStreaming) return
+
+        Logd("StreamService :: enableSafeMode :: switching to ${SAFE_WIDTH}x${SAFE_HEIGHT}@${SAFE_FPS}fps ${SAFE_BITRATE/1000}kbps")
+        safeModeActive = true
+
+        CoroutineScope(Dispatchers.Main).launch {
+            // Save current params
+            savedWidth = videoStreamData.width
+            savedHeight = videoStreamData.height
+            savedFps = videoStreamData.fps
+            savedBitrate = videoStreamData.bitrate
+
+            // Stop stream and preview
+            replayService.stopRollingRecording()
+            genericStream.stopStream()
+            this@StreamService.stopPreview()
+
+            // Wait for resources to be released
+            delay(500)
+
+            // Reconfigure with safe params
+            videoStreamData.width = SAFE_WIDTH
+            videoStreamData.height = SAFE_HEIGHT
+            videoStreamData.fps = SAFE_FPS
+            videoStreamData.bitrate = SAFE_BITRATE
+            bitrateAdapter.setMaxBitrate(SAFE_BITRATE + audioStreamData.bitrate)
+
+            // Re-prepare and restart
+            this@StreamService.prepare()
+            this@StreamService.prepareFilters()
+            genericStream.startPreview(this@StreamService.surfaceView, true)
+            this@StreamService.startStream(endpoint)
+
+            consecutiveRedSeconds = 0
+            consecutiveGreenSeconds = 0
+            _streamPerformance.value = _streamPerformance.value.copy(isSafeModeActive = true)
+
+            toast(getString(R.string.safe_mode_toast_enabled, SAFE_HEIGHT, SAFE_FPS))
+        }
+    }
+
+    fun disableSafeMode() {
+        if (!safeModeActive) return
+        val endpoint = currentEndpoint ?: return
+
+        Logd("StreamService :: disableSafeMode :: restoring ${savedWidth}x${savedHeight}@${savedFps}fps")
+        safeModeActive = false
+
+        CoroutineScope(Dispatchers.Main).launch {
+            // Stop stream and preview
+            replayService.stopRollingRecording()
+            if (genericStream.isStreaming) {
+                genericStream.stopStream()
+            }
+            this@StreamService.stopPreview()
+
+            // Wait for resources to be released
+            delay(500)
+
+            // Restore original params
+            restoreOriginalParams()
+
+            // Re-prepare and restart
+            this@StreamService.prepare()
+            this@StreamService.prepareFilters()
+            genericStream.startPreview(this@StreamService.surfaceView, true)
+            this@StreamService.startStream(endpoint)
+
+            consecutiveRedSeconds = 0
+            consecutiveGreenSeconds = 0
+            _streamPerformance.value = _streamPerformance.value.copy(isSafeModeActive = false)
+
+            toast(getString(R.string.safe_mode_toast_disabled))
+        }
+    }
+
+    private fun restoreOriginalParams() {
+        if (savedWidth > 0) {
+            videoStreamData.width = savedWidth
+            videoStreamData.height = savedHeight
+            videoStreamData.fps = savedFps
+            videoStreamData.bitrate = savedBitrate
+            bitrateAdapter.setMaxBitrate(savedBitrate + audioStreamData.bitrate)
         }
     }
 
@@ -627,9 +750,83 @@ class StreamService: Service(),
 
     private fun startStreamingTimer() {
         if (job == null || job?.isActive == false) {
+            previousDroppedFrames = 0
+            consecutiveRedSeconds = 0
             job = CoroutineScope(Dispatchers.Main).launch {
                 while (isActive) {
                     _streamingElapsedTime.value = timeElapsedInSeconds
+
+                    if (genericStream.isStreaming) {
+                        val client = genericStream.getStreamClient()
+                        val itemsInCache = client.getItemsInCache()
+                        val cacheCapacity = client.getCacheSize()
+                        val droppedVideo = client.getDroppedVideoFrames()
+                        val hasCongestion = client.hasCongestion()
+
+                        // Calculate dropped frame rate (new drops per second)
+                        val droppedDelta = droppedVideo - previousDroppedFrames
+                        previousDroppedFrames = droppedVideo
+
+                        // Cache fill percentage (0-100)
+                        val cacheFillPercent = if (cacheCapacity > 0) {
+                            (itemsInCache * 100) / cacheCapacity
+                        } else 0
+
+                        val health = when {
+                            // RED: cache fill > 50% or rapidly dropping frames
+                            cacheFillPercent > 50 || droppedDelta > 5 -> NetworkHealth.RED
+                            // YELLOW: congestion detected or cache fill > 20%
+                            hasCongestion || cacheFillPercent > 20 -> NetworkHealth.YELLOW
+                            // GREEN: all good
+                            else -> NetworkHealth.GREEN
+                        }
+
+                        if (health == NetworkHealth.RED) {
+                            consecutiveRedSeconds++
+                            consecutiveGreenSeconds = 0
+                        } else if (health == NetworkHealth.GREEN) {
+                            consecutiveGreenSeconds++
+                            consecutiveRedSeconds = 0
+                        } else {
+                            // YELLOW
+                            consecutiveGreenSeconds = 0
+                            consecutiveRedSeconds = 0
+                        }
+
+                        _streamPerformance.value = StreamPerformanceData(
+                            currentBitrate = lastKnownBitrate,
+                            droppedFrames = droppedVideo.toInt(),
+                            cacheSize = itemsInCache,
+                            health = health,
+                            isSafeModeActive = safeModeActive
+                        )
+
+                        // Auto-trigger Safe Mode after sustained RED
+                        val threshold = performancePrefs.getSafeModeThreshold()
+                        if (!safeModeActive && threshold > 0 && consecutiveRedSeconds >= threshold) {
+                            Logd("StreamService :: Auto-triggering Safe Mode after ${threshold}s RED")
+                            enableSafeMode()
+                        }
+
+                        // Auto-disable Safe Mode after sustained GREEN (Anti-Ping-Pong strategy)
+                        if (safeModeActive && threshold > 0 && consecutiveGreenSeconds >= 60) {
+                            if (autoRestoreCount < 2) {
+                                Logd("StreamService :: Auto-restoring Quality after 60s GREEN (Attempt ${autoRestoreCount + 1}/2)")
+                                autoRestoreCount++
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    toast(getString(R.string.safe_mode_auto_restore))
+                                }
+                                disableSafeMode()
+                            } else if (consecutiveGreenSeconds == 60) {
+                                // Inform user once that we won't auto-restore anymore
+                                Logd("StreamService :: Auto-restore limit reached. Staying in Safe Mode.")
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    toast(getString(R.string.safe_mode_unstable_stay))
+                                }
+                            }
+                        }
+                    }
+
                     delay(1000)
                     timeElapsedInSeconds++
                 }
@@ -642,6 +839,11 @@ class StreamService: Service(),
         job = null
         timeElapsedInSeconds = 0
         _streamingElapsedTime.value = timeElapsedInSeconds
+        lastKnownBitrate = 0
+        previousDroppedFrames = 0
+        consecutiveRedSeconds = 0
+        consecutiveGreenSeconds = 0
+        _streamPerformance.value = StreamPerformanceData()
     }
 
     private fun prepareFilters() {

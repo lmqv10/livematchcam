@@ -8,18 +8,19 @@ object EncoderItemsFactory {
             OptionItem(20, "20fps"),
             OptionItem(25, "25fps"),
             OptionItem(30, "30fps"),
-            OptionItem(60, "60fps")
+            //OptionItem(60, "60fps")
         )
     }
 
     fun getBitrate() : List<OptionItem<Int>> {
         return listOf(
+            OptionItem(1000 * 1000, "1000 kpps"),
+            OptionItem(2000 * 1000, "2000 kpps"),
             OptionItem(4000 * 1000, "4000 kpps"),
             OptionItem(5000 * 1000, "5000 kpps"),
             OptionItem(6000 * 1000, "6000 kpps"),
             OptionItem(7000 * 1000, "7000 kpps"),
             OptionItem(8000 * 1000, "8000 kpps"),
-
         )
     }
 

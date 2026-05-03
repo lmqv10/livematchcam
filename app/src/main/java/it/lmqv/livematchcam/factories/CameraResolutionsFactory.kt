@@ -28,6 +28,7 @@ object CameraResolutionsFactory {
         return listOf(
             VideoCaptureFormat(1920, 1080),
             VideoCaptureFormat(1280, 720),
+            VideoCaptureFormat(854, 480),
         )
     }
 }

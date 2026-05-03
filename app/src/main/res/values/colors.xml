@@ -204,4 +204,9 @@
     <color name="yt_button_border_disabled">#0D000000</color>
     <!-- Testo label (sempre bianco sul rosso) -->
     <color name="yt_button_text">#FFFFFF</color>
+
+    <!-- Network Health Indicator -->
+    <color name="health_green">#FF4CAF50</color>
+    <color name="health_yellow">#FFFFC107</color>
+    <color name="health_red">#FFF44336</color>
 </resources>

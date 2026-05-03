@@ -28,4 +28,9 @@ class PerformancePreferencesManager(context: Context) {
         val key = ctx.getString(R.string.keyframe_interval_key)
         return sharedPreferences.getString(key, "1")?.toIntOrNull() ?: 1
     }
+
+    fun getSafeModeThreshold(): Int {
+        val key = ctx.getString(R.string.safe_mode_threshold_key)
+        return sharedPreferences.getString(key, "10")?.toIntOrNull() ?: 10
+    }
 }

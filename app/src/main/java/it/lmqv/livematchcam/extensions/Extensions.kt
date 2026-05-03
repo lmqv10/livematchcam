@@ -249,6 +249,14 @@ fun fpsFormat(value:Int) : String {
     return formatter //.format(value)
 }
 
+fun droppedFramesFormat(value: Long): String {
+    return when {
+        value < 1000 -> value.toString()
+        value < 1000000 -> String.format(java.util.Locale.getDefault(), "%.1fk", value / 1000f)
+        else -> String.format(java.util.Locale.getDefault(), "%.1fm", value / 1000000f)
+    }
+}
+
 fun sourceBitrateFormat(value:Int) : String {
     //Logd("sourceBitrateFormat :: ${value}")
     return String.format(Locale.getDefault(), "%.1f mb/s", value / 1000_000f)

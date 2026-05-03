@@ -55,6 +55,55 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Network Health Indicator -->
+    <LinearLayout
+        android:id="@+id/network_health_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="3dp"
+        android:background="@drawable/secondary_background"
+        android:visibility="gone"
+        android:gravity="center_vertical">
+
+        <View
+            android:id="@+id/health_dot"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_margin="6dp"
+            android:background="@color/health_green" />
+
+        <TextView
+            android:id="@+id/network_bitrate"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary"
+            android:textSize="11sp"
+            android:padding="2dp"
+            android:gravity="center" />
+
+<!--        <TextView-->
+<!--            android:id="@+id/network_dropped"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_weight="1"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:textColor="@color/primary"-->
+<!--            android:textSize="11sp"-->
+<!--            android:visibility="gone"-->
+<!--            android:padding="2dp"-->
+<!--            android:gravity="center" />-->
+
+        <ImageView
+            android:id="@+id/safe_mode_toggle"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="3dp"
+            android:src="@drawable/ic_health"
+            android:contentDescription="@string/description_placeholder"
+            app:tint="@color/primary" />
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

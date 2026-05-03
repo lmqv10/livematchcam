@@ -19,5 +19,8 @@
         android:textColor="@color/primary_negative"
         android:layout_gravity="center_vertical|start"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:maxLines="3" />
 </LinearLayout>

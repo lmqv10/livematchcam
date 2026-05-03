@@ -57,6 +57,11 @@ interface IStreamService {
     val streamingElapsedTime: StateFlow<Int>
     val videoSourceZoomHandler: StateFlow<IVideoSourceZoomHandler?>
     val videoCaptureFormats: StateFlow<List<VideoCaptureFormat>>
+    val streamPerformance: StateFlow<StreamPerformanceData>
+
+    fun isSafeModeActive(): Boolean
+    fun enableSafeMode()
+    fun disableSafeMode()
 
     suspend fun prepareReplay(): Boolean
     fun startReplay(seekMs: Long)

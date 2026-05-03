@@ -96,6 +96,16 @@
         <item>2</item>
     </string-array>
 
+    <string name="safe_mode_threshold_title">Auto Safe Mode</string>
+    <string name="safe_mode_threshold_summary">Seconds of critical connection before triggering Safe Mode</string>
+
+    <string-array name="safe_mode_threshold_entries">
+        <item>Manual Only (0s)</item>
+        <item>5 Seconds</item>
+        <item>10 Seconds (Recommended)</item>
+        <item>15 Seconds</item>
+    </string-array>
+
 
     <string name="match_league">Match Description</string>
     <string name="team_name">Team Name</string>
@@ -314,4 +324,20 @@
     <string name="audio_input_selected">Audio Input: %1$s</string>
     <string name="usb_audio_disconnected">USB audio device disconnected</string>
     <string name="cancel_action">Cancel</string>
+
+    <!-- Network Performance -->
+    <string name="network_health_good">STABLE</string>
+    <string name="network_health_warning">UNSTABLE</string>
+    <string name="network_health_critical">CRITICAL</string>
+    <string name="network_bitrate_label">Network: %1$s</string>
+    <string name="network_dropped_label">Lost Frames: %1$s</string>
+    <string name="network_cache_label">Cache: %1$d</string>
+
+    <!-- Safe Mode Toasts -->
+    <string name="safe_mode_toast_enabled">Safe Mode active: %1$dp@%2$dfps</string>
+    <string name="safe_mode_toast_disabled">Original quality restored</string>
+    <string name="safe_mode_auto_restore">Stable connection: Restoring Quality...</string>
+    <string name="safe_mode_unstable_stay">Unstable network: Safe Mode will stay active.</string>
+    <string name="safe_mode_manual_enabling">Activating Safe Mode...</string>
+    <string name="safe_mode_manual_disabling">Restoring Original Quality...</string>
 </resources>
