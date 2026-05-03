@@ -101,7 +101,7 @@
             app:summary="@string/keyframe_interval_summary"
             app:entries="@array/keyframe_interval_entries"
             app:entryValues="@array/keyframe_interval_values"
-            app:defaultValue="1"
+            app:defaultValue="2"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>

@@ -87,8 +87,8 @@
     <string name="keyframe_interval_summary">Seconds between keyframes. Lower = better compatibility, higher = slightly sharper image</string>
 
     <string-array name="keyframe_interval_entries">
-        <item>1 Second (recommended)</item>
-        <item>2 Seconds</item>
+        <item>1 Second</item>
+        <item>2 Seconds (default)</item>
     </string-array>
 
     <string-array name="keyframe_interval_values">
