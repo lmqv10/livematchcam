@@ -164,6 +164,13 @@ class StreamServiceProxy(val activityContext: Activity, val streamService: Strea
     override val videoCaptureFormats: StateFlow<List<VideoCaptureFormat>>
         get() = streamService.videoCaptureFormats
 
+    override val streamPerformance: StateFlow<StreamPerformanceData>
+        get() = streamService.streamPerformance
+
+    override fun isSafeModeActive(): Boolean = streamService.isSafeModeActive()
+    override fun enableSafeMode() = streamService.enableSafeMode()
+    override fun disableSafeMode() = streamService.disableSafeMode()
+
     override suspend fun prepareReplay(): Boolean {
         return streamService.prepareReplay()
     }

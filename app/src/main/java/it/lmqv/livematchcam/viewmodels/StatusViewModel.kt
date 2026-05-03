@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import it.lmqv.livematchcam.services.stream.NetworkHealth
+import it.lmqv.livematchcam.services.stream.StreamPerformanceData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -53,4 +55,21 @@ class StatusViewModel : ViewModel() {
             _sourceBitrate.value = updatedBitrate
         }
     }
+
+    // --- Network Performance ---
+    private val _streamPerformance = MutableLiveData(StreamPerformanceData())
+    val streamPerformance: LiveData<StreamPerformanceData> = _streamPerformance
+    fun setStreamPerformance(data: StreamPerformanceData) {
+        viewModelScope.launch(Dispatchers.Main) {
+            _streamPerformance.value = data
+        }
+    }
+
+//    private val _networkHealth = MutableLiveData(NetworkHealth.GREEN)
+//    val networkHealth: LiveData<NetworkHealth> = _networkHealth
+//    fun setNetworkHealth(health: NetworkHealth) {
+//        viewModelScope.launch(Dispatchers.Main) {
+//            _networkHealth.value = health
+//        }
+//    }
 }

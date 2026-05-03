@@ -36,6 +36,7 @@ import it.lmqv.livematchcam.services.stream.audio.AudioDeviceManager
 import it.lmqv.livematchcam.services.youtube.YouTubeClientProvider
 import it.lmqv.livematchcam.utils.OptionItem
 import it.lmqv.livematchcam.viewmodels.StreamConfigurationViewModel
+import it.lmqv.livematchcam.viewmodels.StatusViewModel
 import it.lmqv.livematchcam.viewmodels.VideoSourceKind
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModel
 import it.lmqv.livematchcam.viewmodels.YoutubeViewModelFactory
@@ -58,6 +59,7 @@ class StreamActivity : BaseActivity(),
     internal lateinit var streamService : IStreamService
 
     private val streamConfigurationViewModel: StreamConfigurationViewModel by viewModels()
+    private val statusViewModel: StatusViewModel by viewModels()
     private val youtubeViewModel: YoutubeViewModel by viewModels {
         YoutubeViewModelFactory(application, YouTubeClientProvider.get())
     }
@@ -300,6 +302,14 @@ class StreamActivity : BaseActivity(),
                             } else {
                                 binding.audioMonitorToggle.setImageResource(R.drawable.ic_volume_off)
                             }
+                        }
+                    }
+
+                    // Observe stream performance and push to StatusViewModel
+                    launchOnResumed {
+                        streamService.streamPerformance.collectLatest { perf ->
+                            statusViewModel.setStreamPerformance(perf)
+                            //statusViewModel.setNetworkHealth(perf.health)
                         }
                     }
                     //this.initCameraSettingsDialog()

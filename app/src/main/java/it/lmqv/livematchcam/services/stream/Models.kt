@@ -8,6 +8,18 @@ interface IVideoStreamData {
     val rotation: Int
 }
 
+enum class NetworkHealth {
+    GREEN, YELLOW, RED
+}
+
+data class StreamPerformanceData(
+    val currentBitrate: Long = 0,
+    val droppedFrames: Int = 0,
+    val cacheSize: Int = 0,
+    val health: NetworkHealth = NetworkHealth.GREEN,
+    val isSafeModeActive: Boolean = false
+)
+
 data class VideoCaptureFormat(
     val width: Int = 1920,
     val height: Int = 1080,

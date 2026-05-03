@@ -104,6 +104,15 @@
             app:defaultValue="2"
             app:useSimpleSummaryProvider="true" />
 
+        <ListPreference
+            app:key="@string/safe_mode_threshold_key"
+            app:title="@string/safe_mode_threshold_title"
+            app:summary="@string/safe_mode_threshold_summary"
+            app:entries="@array/safe_mode_threshold_entries"
+            app:entryValues="@array/safe_mode_threshold_values"
+            app:defaultValue="10"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
 <!--    <PreferenceCategory app:title="@string/messages_header">-->
